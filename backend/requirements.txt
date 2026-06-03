@@ -1,0 +1,93 @@
+  # =============================================================================
+# IshTop - Python Dependencies
+# =============================================================================
+# Install with: pip install -r requirements.txt
+
+# -----------------------------------------------------------------------------
+# FastAPI Framework & Server
+# -----------------------------------------------------------------------------
+fastapi==0.104.1          # Modern Python web framework for building APIs
+uvicorn[standard]==0.24.0  # ASGI server to run FastAPI
+python-multipart==0.0.6    # Required for file uploads
+
+# -----------------------------------------------------------------------------
+# Database
+# -----------------------------------------------------------------------------
+sqlalchemy==2.0.23        # ORM (Object Relational Mapper) for database operations
+psycopg2-binary==2.9.9    # PostgreSQL adapter for Python
+alembic==1.12.1           # Database migration tool
+
+# -----------------------------------------------------------------------------
+# Build Tools (Render.com uchun)
+# -----------------------------------------------------------------------------
+setuptools>=68.0.0
+wheel>=0.41.0
+
+# -----------------------------------------------------------------------------
+# Authentication & Security
+# -----------------------------------------------------------------------------
+cryptography>=41.0.0              # Pre-built wheel (Rust muammosini hal qiladi)
+python-jose[cryptography]==3.3.0  # JWT token handling
+passlib[bcrypt]==1.7.4            # Password hashing
+bcrypt==4.1.1                     # Bcrypt algorithm
+authlib==1.3.0                    # OAuth2 integration (Google, LinkedIn)
+httpx==0.25.2                     # Async HTTP client for OAuth
+
+# -----------------------------------------------------------------------------
+# OpenAI Integration
+# -----------------------------------------------------------------------------
+openai==1.3.7             # Official OpenAI Python client for GPT-4
+# tiktoken==0.5.2         # Token counting for OpenAI models (optional - requires Rust compiler)
+tenacity==8.2.3           # Retry logic for API calls
+
+# -----------------------------------------------------------------------------
+# File Processing
+# -----------------------------------------------------------------------------
+python-docx==1.1.0        # Read/write Word documents
+PyPDF2==3.0.1             # Read PDF files
+reportlab>=4.2.0          # Professional resume PDF rendering
+aiofiles==23.2.1          # Async file operations
+aiosmtplib>=3.0.0         # Async SMTP email sending (REQUIRED!)
+jinja2==3.1.6             # HTML email templates
+
+# -----------------------------------------------------------------------------
+# Validation & Utilities
+# -----------------------------------------------------------------------------
+pydantic==2.5.2           # Data validation using Python type hints
+pydantic-settings==2.1.0  # Settings management with Pydantic
+email-validator==2.1.0.post1  # Email validation
+
+# -----------------------------------------------------------------------------
+# Redis (Rate limiting, token blacklist, OAuth state)
+# -----------------------------------------------------------------------------
+redis==5.0.1               # Redis client for production features
+
+# -----------------------------------------------------------------------------
+# Payments (Stripe)
+# -----------------------------------------------------------------------------
+stripe==12.5.1             # Stripe payment integration
+
+# -----------------------------------------------------------------------------
+# Testing
+# -----------------------------------------------------------------------------
+pytest==7.4.3             # Testing framework
+pytest-asyncio==0.21.1    # Async test support
+pytest-cov==4.1.0         # Coverage reporting for tests
+httpx==0.25.2             # HTTP client for testing
+
+# -----------------------------------------------------------------------------
+# Production Server & Deployment
+# -----------------------------------------------------------------------------
+gunicorn==21.2.0          # Production WSGI server for FastAPI
+google-genai>=1.0.0       # Google Gemini AI SDK (new, replaces google-generativeai)
+requests>=2.31.0          # HTTP client (used in health check)
+
+# -----------------------------------------------------------------------------
+# Error Monitoring & Observability
+# -----------------------------------------------------------------------------
+sentry-sdk[fastapi]==1.40.0  # Error tracking and performance monitoring
+
+# -----------------------------------------------------------------------------
+# Logging & Monitoring
+# -----------------------------------------------------------------------------
+python-json-logger==2.0.7  # Structured JSON logging for production

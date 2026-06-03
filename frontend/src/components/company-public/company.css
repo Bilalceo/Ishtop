@@ -1,0 +1,170 @@
+/* =============================================================================
+   Bento Maximal — /company B2B landing
+   Apple AirPods page style: modular bento grid, mixed media, large numbers
+   Scoped: every selector starts with .bn-* so global styles aren't affected.
+   ============================================================================= */
+
+.bn-root {
+  --bn-bg: #F2F2F4;
+  --bn-card: #FFFFFF;
+  --bn-ink: #0A0A0F;
+  --bn-ink-soft: #3A3A45;
+  --bn-mute: #767680;
+  --bn-rule: #E1E1E6;
+  --bn-accent: #5E5AF7;
+  --bn-accent-soft: #ECEBFE;
+  --bn-success: #00A86B;
+  --bn-warm: #FF6B35;
+
+  background: var(--bn-bg);
+  color: var(--bn-ink);
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  min-height: 100vh;
+  letter-spacing: -0.005em;
+}
+
+.dark .bn-root {
+  --bn-bg: #0E0F12;
+  --bn-card: #18191D;
+  --bn-ink: #F2F2F4;
+  --bn-ink-soft: #C4C4CC;
+  --bn-mute: #7A7A85;
+  --bn-rule: #2A2B2F;
+  --bn-accent: #8B89FF;
+  --bn-accent-soft: #1A1A28;
+  --bn-warm: #FF8A5C;
+}
+
+/* ---------- Layout ---------- */
+.bn-shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+@media (min-width: 768px) {
+  .bn-shell { padding-left: 32px; padding-right: 32px; }
+}
+
+/* ---------- Typography ---------- */
+.bn-display {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+  color: var(--bn-ink);
+}
+
+.bn-eyebrow {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--bn-mute);
+}
+
+.bn-num {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 0.92;
+}
+
+/* ---------- Bento card ---------- */
+.bn-tile {
+  background: var(--bn-card);
+  border-radius: 28px;
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 280ms cubic-bezier(0.19, 1, 0.22, 1),
+              box-shadow 280ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+.bn-tile:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 30px 60px -30px rgba(10, 10, 15, 0.15);
+}
+.dark .bn-tile:hover {
+  box-shadow: 0 30px 60px -30px rgba(94, 90, 247, 0.4);
+}
+
+.bn-tile-accent {
+  background: linear-gradient(140deg, var(--bn-accent), #8B89FF 80%);
+  color: #FFF;
+}
+.bn-tile-accent .bn-eyebrow {
+  color: rgba(255,255,255,0.7);
+}
+
+.bn-tile-warm {
+  background: linear-gradient(140deg, var(--bn-warm), #FFB088 80%);
+  color: #FFF;
+}
+.bn-tile-warm .bn-eyebrow {
+  color: rgba(255,255,255,0.75);
+}
+
+.bn-tile-dark {
+  background: linear-gradient(140deg, #0E0F12 0%, #1A1B22 100%);
+  color: #FFF;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.bn-tile-dark .bn-eyebrow {
+  color: rgba(255,255,255,0.55);
+}
+
+/* ---------- Button ---------- */
+.bn-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: var(--bn-ink);
+  color: var(--bn-bg);
+  border-radius: 999px;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  transition: transform 200ms cubic-bezier(0.19, 1, 0.22, 1),
+              background 200ms;
+}
+.bn-btn:hover {
+  transform: translateY(-1px);
+  background: var(--bn-accent);
+}
+
+.bn-btn-light {
+  background: rgba(255,255,255,0.95);
+  color: #0A0A0F;
+}
+.bn-btn-light:hover {
+  background: #FFF;
+}
+
+/* ---------- Decorative blobs ---------- */
+.bn-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* ---------- Mock grid lines ---------- */
+.bn-grid-lines {
+  background-image:
+    linear-gradient(rgba(94, 90, 247, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(94, 90, 247, 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.dark .bn-grid-lines {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+}
+
+/* Reduce-motion */
+@media (prefers-reduced-motion: reduce) {
+  .bn-tile { transition: none; }
+}

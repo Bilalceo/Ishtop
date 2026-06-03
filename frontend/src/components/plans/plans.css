@@ -1,0 +1,161 @@
+/* =============================================================================
+   Brutalist Mono — /plans pricing styles
+   Terminal-feel, sharp grid, single electric accent
+   Scoped: every selector starts with .br-* so global styles aren't affected.
+   ============================================================================= */
+
+.br-root {
+  --br-bg: #FAFAFA;
+  --br-ink: #0A0A0A;
+  --br-ink-soft: #444;
+  --br-mute: #888;
+  --br-rule: #DDD;
+  --br-rule-strong: #0A0A0A;
+  --br-accent: #0066FF;
+  --br-success: #00B864;
+  --br-warn: #FF8400;
+  --br-card: #FFFFFF;
+
+  background: var(--br-bg);
+  color: var(--br-ink);
+  font-family: var(--font-fira-code), "Fira Code", Consolas, Monaco, monospace;
+  min-height: 100vh;
+  letter-spacing: 0;
+}
+
+.dark .br-root {
+  --br-bg: #0A0A0A;
+  --br-ink: #F2F2F2;
+  --br-ink-soft: #BBB;
+  --br-mute: #777;
+  --br-rule: #2A2A2A;
+  --br-rule-strong: #F2F2F2;
+  --br-accent: #4D8DFF;
+  --br-card: #141414;
+}
+
+/* ---------- Layout ---------- */
+.br-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+@media (min-width: 768px) {
+  .br-shell { padding-left: 40px; padding-right: 40px; }
+}
+
+/* ---------- Heading scale ---------- */
+.br-display {
+  font-family: var(--font-fira-code), "Fira Code", monospace;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+  color: var(--br-ink);
+}
+
+.br-eyebrow {
+  font-family: var(--font-fira-code), monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--br-mute);
+}
+
+.br-meta {
+  font-family: var(--font-fira-code), monospace;
+  font-size: 12px;
+  color: var(--br-mute);
+}
+
+.br-prompt {
+  font-family: var(--font-fira-code), monospace;
+  color: var(--br-accent);
+}
+
+/* ---------- Sharp grid rules ---------- */
+.br-rule {
+  border: 0;
+  border-top: 1px solid var(--br-rule);
+  margin: 0;
+}
+.br-rule-strong {
+  border: 0;
+  border-top: 1px solid var(--br-rule-strong);
+  margin: 0;
+}
+
+/* ---------- Card ---------- */
+.br-card {
+  background: var(--br-card);
+  border: 1px solid var(--br-rule);
+  position: relative;
+}
+.br-card-accent {
+  border: 1px solid var(--br-accent);
+  box-shadow: 4px 4px 0 0 var(--br-accent);
+}
+
+/* ---------- Cursor blink ---------- */
+.br-cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1em;
+  background: var(--br-accent);
+  margin-left: 4px;
+  vertical-align: middle;
+  animation: br-blink 1s steps(2) infinite;
+}
+@keyframes br-blink {
+  50% { opacity: 0; }
+}
+
+/* ---------- Pixel button ---------- */
+.br-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  background: var(--br-ink);
+  color: var(--br-bg);
+  font-family: var(--font-fira-code), monospace;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--br-ink);
+  cursor: pointer;
+  transition: transform 80ms ease, box-shadow 80ms ease;
+  box-shadow: 4px 4px 0 0 var(--br-ink);
+}
+.br-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 0 var(--br-ink);
+}
+.br-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 0 var(--br-ink);
+}
+.br-btn-accent {
+  background: var(--br-accent);
+  border-color: var(--br-accent);
+  color: #FFF;
+  box-shadow: 4px 4px 0 0 var(--br-accent);
+}
+.br-btn-accent:hover {
+  box-shadow: 5px 5px 0 0 var(--br-accent);
+}
+.br-btn-ghost {
+  background: transparent;
+  color: var(--br-ink);
+  box-shadow: 4px 4px 0 0 var(--br-ink);
+}
+.br-btn-ghost:hover {
+  background: var(--br-ink);
+  color: var(--br-bg);
+}
+
+.dark .br-btn { box-shadow: 4px 4px 0 0 var(--br-ink-soft); }
+.dark .br-btn:hover { box-shadow: 5px 5px 0 0 var(--br-ink-soft); }

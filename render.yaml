@@ -1,0 +1,182 @@
+# Render.com Configuration
+# Docs: https://render.com/docs/yaml-spec
+
+services:
+  # ===========================================================================
+  # BACKEND (FastAPI + Gunicorn)
+  # ===========================================================================
+  - type: web
+    name: ishtop-backend
+    runtime: python
+    region: frankfurt
+    plan: free
+    rootDir: backend
+
+    # healthCheckPath must return 200 quickly (no auth required).
+    healthCheckPath: /health
+
+    # Build: install deps only — no DB access here.
+    buildCommand: ./render-build.sh
+
+    # Start: run migrations, then launch gunicorn with uvicorn workers.
+    # Gunicorn handles graceful restarts; 2 workers fit the free-tier RAM.
+    startCommand: >
+      alembic upgrade head &&
+      gunicorn app.main:app
+      --workers 2
+      --worker-class uvicorn.workers.UvicornWorker
+      --bind 0.0.0.0:$PORT
+      --timeout 120
+      --keep-alive 5
+      --access-logfile -
+      --error-logfile -
+
+    envVars:
+      - key: APP_NAME
+        value: IshTop
+      - key: APP_VERSION
+        value: 1.0.0
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DEBUG
+        value: false
+
+      # Render auto-generates a secure value on first deploy.
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+
+      # Linked to the PostgreSQL database service below.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ishtop-db
+          property: connectionString
+
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: 7
+
+      # AI provider — set GEMINI_API_KEY in Render dashboard (Environment tab).
+      - key: AI_PROVIDER
+        value: gemini
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: GEMINI_API_KEY
+        sync: false
+
+      # Google OAuth — fill in Render dashboard after creating OAuth credentials.
+      - key: OAUTH_ENABLED
+        value: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+
+      # Admin bootstrap — first-time setup only.
+      # After the admin account is created, remove these env vars from the dashboard.
+      - key: BOOTSTRAP_ADMIN_EMAIL
+        sync: false
+      - key: BOOTSTRAP_ADMIN_PASSWORD
+        sync: false
+      - key: BOOTSTRAP_ADMIN_FULL_NAME
+        sync: false
+      - key: BOOTSTRAP_ADMIN_FORCE_SUPER_ADMIN
+        value: true
+
+      # Fill in after the frontend service is deployed.
+      - key: FRONTEND_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+
+      # Email — disabled on free tier; switch to "smtp" and set credentials when ready.
+      - key: EMAIL_TRANSPORT
+        value: disabled
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_FROM_EMAIL
+        value: noreply@ishtop.uz
+      - key: SMTP_FROM_NAME
+        value: IshTop
+      - key: SMTP_USE_TLS
+        value: true
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+
+      # Stripe — fill in Render dashboard.
+      - key: PAYMENTS_REQUIRE_WEBHOOK_SECRET
+        value: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+
+      # Redis — set REDIS_ENABLED=true and REDIS_URL when a Redis service is attached.
+      # NOTE: backend production validator refuses to boot when REDIS_ENABLED=false
+      # AND any of (RATE_LIMIT_USE_REDIS, TOKEN_BLACKLIST_USE_REDIS) is true.
+      # Defaults below let a Redis-less deployment start; flip all three to true
+      # once Redis is provisioned.
+      - key: REDIS_ENABLED
+        value: false
+      - key: REDIS_URL
+        sync: false
+      - key: RATE_LIMIT_USE_REDIS
+        value: false
+      - key: TOKEN_BLACKLIST_USE_REDIS
+        value: false
+
+      # Rate limiting (in-process when Redis is disabled — single-instance only)
+      - key: RATE_LIMIT_ENABLED
+        value: true
+
+  # ===========================================================================
+  # FRONTEND (Next.js standalone)
+  # ===========================================================================
+  - type: web
+    name: ishtop-frontend
+    runtime: node
+    region: frankfurt
+    plan: free
+    rootDir: frontend
+
+    # NODE_ENV=production is set by Render automatically.
+    # render-build.sh passes --production=false so devDeps are installed.
+    buildCommand: ./render-build.sh
+
+    # Standalone server reads PORT and HOSTNAME from env — no CLI flags needed.
+    startCommand: node .next/standalone/server.js
+
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: HOSTNAME
+        value: "0.0.0.0"
+
+      # Set to the deployed backend URL, e.g. https://ishtop-backend.onrender.com/api/v1
+      # This is baked into the JS bundle at build time — update and redeploy if URL changes.
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_FRONTEND_URL
+        sync: false
+
+      # Stripe public key (safe to expose in browser).
+      - key: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+        sync: false
+
+databases:
+  # ===========================================================================
+  # PostgreSQL
+  # ===========================================================================
+  - name: ishtop-db
+    region: frankfurt
+    plan: free
+    databaseName: ishtop
+    user: ishtop_user

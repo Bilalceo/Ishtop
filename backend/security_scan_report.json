@@ -1,0 +1,244 @@
+{
+  "timestamp": "2026-01-19T18:14:36.727542",
+  "summary": {
+    "passed": 3,
+    "high_severity": 2,
+    "medium_severity": 31,
+    "verdict": "NEEDS IMPROVEMENT"
+  },
+  "vulnerabilities": [
+    {
+      "severity": "HIGH",
+      "title": "Hardcoded Password",
+      "description": "Found potential hardcoded secret: reset_password...",
+      "file": "app\\core\\security.py",
+      "line": 138
+    },
+    {
+      "severity": "HIGH",
+      "title": ".env file exists",
+      "description": ".env should not be committed to version control!",
+      "file": ".env",
+      "line": 0
+    }
+  ],
+  "warnings": [
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 281
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 326
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 327
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 328
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 330
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 331
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 332
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 333
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 334
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 336
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 344
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 346
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 347
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 348
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 349
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 351
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 353
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\config.py",
+      "line": 355
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\main.py",
+      "line": 75
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\main.py",
+      "line": 77
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\main.py",
+      "line": 79
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\models\\base.py",
+      "line": 411
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\models\\user.py",
+      "line": 182
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\models\\user.py",
+      "line": 186
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\models\\user.py",
+      "line": 471
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\models\\user.py",
+      "line": 626
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Debug Statement",
+      "description": "Debug code found: print(",
+      "file": "app\\models\\__init__.py",
+      "line": 86
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Safety not installed",
+      "description": "Install 'safety' to scan for vulnerable dependencies: pip install safety",
+      "file": "",
+      "line": 0
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Insecure File Permissions",
+      "description": "app/config.py is world-readable/writable",
+      "file": "app/config.py",
+      "line": 0
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Insecure File Permissions",
+      "description": ".env is world-readable/writable",
+      "file": ".env",
+      "line": 0
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Insecure File Permissions",
+      "description": "alembic.ini is world-readable/writable",
+      "file": "alembic.ini",
+      "line": 0
+    }
+  ]
+}

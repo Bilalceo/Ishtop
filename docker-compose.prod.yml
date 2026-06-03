@@ -1,0 +1,188 @@
+# =============================================================================
+# IshTop - Production Docker Compose
+# =============================================================================
+# Usage:
+#   docker-compose -f docker-compose.prod.yml up -d --build
+#
+# Required environment files:
+#   - backend/.env (copy from backend/env.production.example and fill values)
+#   - frontend/.env.local (copy from frontend/env.production.template and fill)
+#
+# Services:
+#   - postgres   : PostgreSQL 15 database
+#   - redis      : Redis 7 (token blacklist + rate limiting)
+#   - backend    : FastAPI + Gunicorn (4 workers)
+#   - frontend   : Next.js standalone
+#   - nginx      : Reverse proxy (optional, comment out if using Railway/Render)
+# =============================================================================
+
+version: "3.9"
+
+# =============================================================================
+# NAMED VOLUMES (data persistence across restarts)
+# =============================================================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  app_network:
+    driver: bridge
+
+# =============================================================================
+# SERVICES
+# =============================================================================
+services:
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: ishtop_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ishtop}
+      POSTGRES_USER: ${POSTGRES_USER:-ishtop}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      TZ: Asia/Tashkent
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ishtop} -d ${POSTGRES_DB:-ishtop}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Only expose internally (not to host) for security
+    expose:
+      - "5432"
+
+  # ---------------------------------------------------------------------------
+  # Redis Cache (token blacklist + rate limiting)
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: ishtop_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-changeme_redis_password}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-changeme_redis_password}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    expose:
+      - "6379"
+
+  # ---------------------------------------------------------------------------
+  # FastAPI Backend
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ishtop_backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      # Override with production database URL
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ishtop}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ishtop}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme_redis_password}@redis:6379/0
+      DEBUG: "False"
+      # Workers (override in .env if needed)
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-4}
+    volumes:
+      - uploads_data:/app/uploads
+    networks:
+      - app_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+    expose:
+      - "8000"
+    # Run DB migrations before starting
+    command: >
+      sh -c "
+        echo 'Running database migrations...' &&
+        alembic upgrade head &&
+        echo 'Starting application...' &&
+        gunicorn app.main:app
+          --worker-class uvicorn.workers.UvicornWorker
+          --workers ${WEB_CONCURRENCY:-4}
+          --bind 0.0.0.0:8000
+          --timeout 120
+          --keep-alive 5
+          --access-logfile -
+          --error-logfile -
+          --log-level info
+      "
+
+  # ---------------------------------------------------------------------------
+  # Next.js Frontend
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ishtop_frontend
+    restart: unless-stopped
+    env_file:
+      - ./frontend/.env.local
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://backend:8000/api/v1}
+      NODE_ENV: production
+    networks:
+      - app_network
+    depends_on:
+      backend:
+        condition: service_healthy
+    expose:
+      - "3000"
+
+  # ---------------------------------------------------------------------------
+  # Nginx Reverse Proxy (HTTP → HTTPS, load balancing)
+  # Comment this out if deploying on Railway/Render/Fly.io
+  # ---------------------------------------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: ishtop_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    networks:
+      - app_network
+    depends_on:
+      - backend
+      - frontend
+    profiles:
+      # Only start nginx with: docker-compose --profile nginx up
+      - nginx

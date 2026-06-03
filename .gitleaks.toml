@@ -1,0 +1,32 @@
+# gitleaks configuration for IshTop.
+#
+# Inherits all default rules from gitleaks 8.x and adds project-specific
+# allowlists. The intent is: catch real secrets in app code, but don't
+# false-positive on obvious test fixtures.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow obvious test fixtures and example placeholders"
+paths = [
+    # Test files use high-entropy literals (≥32 chars) so the production
+    # validator runs against representative shapes. These never reach prod.
+    '''backend/tests/.*''',
+    # Example envs are deliberately full-length-shaped placeholders.
+    '''.*\.env\.example$''',
+    '''backend/env\.example$''',
+    '''backend/env\.template$''',
+    '''backend/env\.production\.template$''',
+    '''backend/env\.production\.example$''',
+]
+# Belt-and-braces: also allowlist the specific test-fixture strings by
+# regex in case a future test outside backend/tests/ references them.
+regexes = [
+    '''prod-strong-secret-0123456789abcdef0123456789''',
+    '''test-strong-secret-key-0123456789abcdef0123456789''',
+    '''ci-app-secret-key-0123456789abcdef0123456789''',
+    '''ci-jwt-secret-key-0123456789abcdef0123456789''',
+    '''ci-e2e-app-secret-0123456789abcdef0123456789''',
+    '''ci-e2e-jwt-secret-0123456789abcdef0123456789''',
+]

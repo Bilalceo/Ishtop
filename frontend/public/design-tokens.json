@@ -1,0 +1,148 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "$description": "IshTop — Aurora design system tokens (W3C Design Tokens Community Group format). Import into Figma via the 'Tokens Studio' plugin.",
+  "color": {
+    "ink": {
+      "900": { "$value": "#0B1020", "$type": "color", "$description": "Background midnight — hero, dark surfaces" },
+      "800": { "$value": "#111733", "$type": "color" },
+      "700": { "$value": "#1B2447", "$type": "color" }
+    },
+    "aurora": {
+      "violet": { "$value": "#7C5CFF", "$type": "color", "$description": "Primary brand — CTAs, gradients" },
+      "cyan":   { "$value": "#22D3EE", "$type": "color", "$description": "Secondary brand — accents, gradients" },
+      "pink":   { "$value": "#F472B6", "$type": "color", "$description": "Tertiary accent — sparingly" }
+    },
+    "gold": {
+      "500": { "$value": "#F5B544", "$type": "color", "$description": "Warm signal — ratings, eyebrow highlights" }
+    },
+    "mint": {
+      "trust": { "$value": "#3CCB7F", "$type": "color", "$description": "Trust score, success states" }
+    },
+    "mist": {
+      "50":  { "$value": "#FAFBFE", "$type": "color" },
+      "100": { "$value": "#F6F7FB", "$type": "color" }
+    },
+    "surface": {
+      "50":  { "$value": "#F9FAFB", "$type": "color" },
+      "100": { "$value": "#F3F4F6", "$type": "color" },
+      "200": { "$value": "#E5E7EB", "$type": "color" },
+      "300": { "$value": "#D1D5DB", "$type": "color" },
+      "400": { "$value": "#9CA3AF", "$type": "color" },
+      "500": { "$value": "#6B7280", "$type": "color" },
+      "600": { "$value": "#4B5563", "$type": "color" },
+      "700": { "$value": "#374151", "$type": "color" },
+      "800": { "$value": "#1F2937", "$type": "color" },
+      "900": { "$value": "#111827", "$type": "color" }
+    },
+    "semantic": {
+      "success": { "$value": "{color.mint.trust}", "$type": "color" },
+      "warning": { "$value": "#F59E0B", "$type": "color" },
+      "error":   { "$value": "#EF4444", "$type": "color" },
+      "info":    { "$value": "{color.aurora.cyan}", "$type": "color" }
+    },
+    "gradient": {
+      "aurora-primary":   { "$value": "linear-gradient(120deg, #7C5CFF 0%, #5B8CFF 60%, #22D3EE 110%)", "$type": "gradient" },
+      "aurora-conic":     { "$value": "conic-gradient(from 120deg at 50% 50%, #7C5CFF, #22D3EE, #F5B544, #7C5CFF)", "$type": "gradient" },
+      "trust-score":      { "$value": "linear-gradient(90deg, #7C5CFF 0%, #22D3EE 60%, #3CCB7F 100%)", "$type": "gradient" }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "display": { "$value": "Inter, system-ui, -apple-system, sans-serif", "$type": "fontFamily" },
+      "body":    { "$value": "Inter, system-ui, -apple-system, sans-serif", "$type": "fontFamily" },
+      "mono":    { "$value": "Fira Code, Consolas, Monaco, monospace", "$type": "fontFamily" }
+    },
+    "fontWeight": {
+      "regular":  { "$value": 400, "$type": "fontWeight" },
+      "medium":   { "$value": 500, "$type": "fontWeight" },
+      "semibold": { "$value": 600, "$type": "fontWeight" },
+      "bold":     { "$value": 700, "$type": "fontWeight" }
+    },
+    "fontSize": {
+      "xs":  { "$value": "12px", "$type": "dimension" },
+      "sm":  { "$value": "14px", "$type": "dimension" },
+      "base":{ "$value": "16px", "$type": "dimension" },
+      "lg":  { "$value": "18px", "$type": "dimension" },
+      "xl":  { "$value": "20px", "$type": "dimension" },
+      "2xl": { "$value": "24px", "$type": "dimension" },
+      "3xl": { "$value": "30px", "$type": "dimension" },
+      "4xl": { "$value": "36px", "$type": "dimension" },
+      "5xl": { "$value": "48px", "$type": "dimension" },
+      "6xl": { "$value": "64px", "$type": "dimension", "$description": "Hero display" }
+    },
+    "lineHeight": {
+      "display": { "$value": 1.12, "$type": "number", "$description": "Safe leading for headings — avoids descender clip" },
+      "body":    { "$value": 1.5, "$type": "number" },
+      "tight":   { "$value": 1.25, "$type": "number" }
+    },
+    "letterSpacing": {
+      "tight":   { "$value": "-0.02em", "$type": "dimension" },
+      "normal":  { "$value": "0", "$type": "dimension" },
+      "eyebrow": { "$value": "0.18em", "$type": "dimension" }
+    }
+  },
+  "space": {
+    "0":   { "$value": "0px", "$type": "dimension" },
+    "1":   { "$value": "4px", "$type": "dimension" },
+    "2":   { "$value": "8px", "$type": "dimension" },
+    "3":   { "$value": "12px", "$type": "dimension" },
+    "4":   { "$value": "16px", "$type": "dimension" },
+    "5":   { "$value": "20px", "$type": "dimension" },
+    "6":   { "$value": "24px", "$type": "dimension" },
+    "8":   { "$value": "32px", "$type": "dimension" },
+    "10":  { "$value": "40px", "$type": "dimension" },
+    "12":  { "$value": "48px", "$type": "dimension" },
+    "16":  { "$value": "64px", "$type": "dimension" },
+    "20":  { "$value": "80px", "$type": "dimension" },
+    "24":  { "$value": "96px", "$type": "dimension", "$description": "Section padding mobile" },
+    "32":  { "$value": "128px", "$type": "dimension", "$description": "Section padding desktop" }
+  },
+  "radius": {
+    "sm":   { "$value": "8px", "$type": "dimension" },
+    "md":   { "$value": "12px", "$type": "dimension" },
+    "lg":   { "$value": "16px", "$type": "dimension" },
+    "xl":   { "$value": "20px", "$type": "dimension" },
+    "2xl":  { "$value": "24px", "$type": "dimension" },
+    "3xl":  { "$value": "28px", "$type": "dimension", "$description": "Default card radius" },
+    "full": { "$value": "9999px", "$type": "dimension", "$description": "Pills, buttons" }
+  },
+  "shadow": {
+    "card":     { "$value": "0 1px 3px 0 rgba(0,0,0,0.05), 0 1px 2px -1px rgba(0,0,0,0.05)", "$type": "shadow" },
+    "lift":     { "$value": "0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)", "$type": "shadow" },
+    "soft":     { "$value": "0 2px 15px -3px rgba(0,0,0,0.07), 0 10px 20px -2px rgba(0,0,0,0.04)", "$type": "shadow" },
+    "aurora":   { "$value": "0 18px 40px -16px rgba(124,92,255,0.55), 0 8px 18px -8px rgba(34,211,238,0.45)", "$type": "shadow", "$description": "Primary CTA glow" },
+    "depth":    { "$value": "0 1px 0 0 rgba(255,255,255,0.18) inset, 0 30px 80px -30px rgba(124,92,255,0.5), 0 12px 30px -12px rgba(34,211,238,0.25)", "$type": "shadow", "$description": "Depth card with inset highlight" }
+  },
+  "motion": {
+    "duration": {
+      "instant": { "$value": "0ms",   "$type": "duration" },
+      "fast":    { "$value": "150ms", "$type": "duration" },
+      "base":    { "$value": "250ms", "$type": "duration" },
+      "moderate":{ "$value": "400ms", "$type": "duration" },
+      "slow":    { "$value": "600ms", "$type": "duration" },
+      "scene":   { "$value": "900ms", "$type": "duration" }
+    },
+    "easing": {
+      "out-expo": { "$value": "cubic-bezier(0.19, 1, 0.22, 1)", "$type": "cubicBezier", "$description": "Signature ease for reveals" },
+      "out-back": { "$value": "cubic-bezier(0.34, 1.56, 0.64, 1)", "$type": "cubicBezier" },
+      "in-out":   { "$value": "cubic-bezier(0.45, 0, 0.55, 1)", "$type": "cubicBezier" },
+      "standard": { "$value": "cubic-bezier(0.4, 0, 0.2, 1)", "$type": "cubicBezier" }
+    }
+  },
+  "z": {
+    "base":     { "$value": 0,   "$type": "number" },
+    "raised":   { "$value": 10,  "$type": "number" },
+    "dropdown": { "$value": 30,  "$type": "number" },
+    "sticky":   { "$value": 50,  "$type": "number" },
+    "overlay":  { "$value": 60,  "$type": "number" },
+    "modal":    { "$value": 70,  "$type": "number" },
+    "toast":    { "$value": 90,  "$type": "number" }
+  },
+  "breakpoint": {
+    "sm": { "$value": "640px",  "$type": "dimension" },
+    "md": { "$value": "768px",  "$type": "dimension" },
+    "lg": { "$value": "1024px", "$type": "dimension" },
+    "xl": { "$value": "1280px", "$type": "dimension" },
+    "2xl":{ "$value": "1536px", "$type": "dimension" }
+  }
+}

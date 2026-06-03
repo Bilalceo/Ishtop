@@ -1,0 +1,179 @@
+/* =============================================================================
+   Claude / Anthropic brand styling — /ai page
+   Official palette: warm cream + coral + Poppins/Lora typography
+   Scoped: every selector starts with .cl-* so global styles aren't affected.
+   ============================================================================= */
+
+.cl-root {
+  --cl-dark: #141413;
+  --cl-light: #faf9f5;
+  --cl-mid: #b0aea5;
+  --cl-rule: #e8e6dc;
+  --cl-coral: #d97757;
+  --cl-blue: #6a9bcc;
+  --cl-green: #788c5d;
+  --cl-coral-soft: #fbe9df;
+
+  background: var(--cl-light);
+  color: var(--cl-dark);
+  font-family: var(--font-lora), Georgia, "Times New Roman", serif;
+  min-height: 100vh;
+  letter-spacing: 0;
+}
+
+.dark .cl-root {
+  --cl-dark: #faf9f5;
+  --cl-light: #141413;
+  --cl-mid: #6c6a62;
+  --cl-rule: #2a2926;
+  --cl-coral: #e2906f;
+  --cl-coral-soft: #2a1a14;
+}
+
+/* ---------- Layout ---------- */
+.cl-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+@media (min-width: 768px) {
+  .cl-shell { padding-left: 48px; padding-right: 48px; }
+}
+.cl-prose {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* ---------- Typography ---------- */
+.cl-display {
+  font-family: var(--font-poppins), "Poppins", Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.06;
+  color: var(--cl-dark);
+}
+
+.cl-h-small {
+  font-family: var(--font-poppins), "Poppins", Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--cl-dark);
+}
+
+.cl-body {
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 19px;
+  line-height: 1.65;
+  color: var(--cl-dark);
+}
+
+.cl-lead {
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 22px;
+  line-height: 1.55;
+  font-style: italic;
+  color: var(--cl-dark);
+  opacity: 0.85;
+}
+
+.cl-eyebrow {
+  font-family: var(--font-poppins), "Poppins", Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cl-coral);
+}
+
+.cl-meta {
+  font-family: var(--font-poppins), "Poppins", Arial, sans-serif;
+  font-size: 13px;
+  color: var(--cl-mid);
+  letter-spacing: 0;
+}
+
+/* ---------- Pull quote ---------- */
+.cl-quote {
+  font-family: var(--font-lora), Georgia, serif;
+  font-style: italic;
+  font-size: 28px;
+  line-height: 1.4;
+  color: var(--cl-dark);
+}
+@media (min-width: 768px) {
+  .cl-quote { font-size: 36px; }
+}
+
+/* ---------- Button — coral pill, soft Anthropic look ---------- */
+.cl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-family: var(--font-poppins), "Poppins", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--cl-light);
+  background: var(--cl-coral);
+  border: 1px solid var(--cl-coral);
+  transition: transform 200ms cubic-bezier(0.19, 1, 0.22, 1),
+              background 200ms;
+}
+.cl-btn:hover {
+  transform: translateY(-1px);
+  background: #c66848;
+  border-color: #c66848;
+}
+
+.cl-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-family: var(--font-poppins), "Poppins", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cl-dark);
+  background: transparent;
+  border: 1px solid var(--cl-dark);
+  transition: background 200ms;
+}
+.cl-btn-ghost:hover {
+  background: var(--cl-rule);
+}
+
+/* ---------- Card ---------- */
+.cl-card {
+  background: var(--cl-light);
+  border: 1px solid var(--cl-rule);
+  border-radius: 20px;
+  padding: 28px;
+  transition: border-color 240ms ease;
+}
+.cl-card:hover {
+  border-color: var(--cl-coral);
+}
+
+.cl-card-coral {
+  background: var(--cl-coral-soft);
+  border-color: var(--cl-coral);
+}
+
+/* ---------- Rule ---------- */
+.cl-rule {
+  border: 0;
+  border-top: 1px solid var(--cl-rule);
+  margin: 0;
+}
+
+/* ---------- Sparkle accent (subtle ✦) ---------- */
+.cl-sparkle {
+  display: inline-block;
+  color: var(--cl-coral);
+  font-size: 0.85em;
+  vertical-align: middle;
+}

@@ -1,0 +1,557 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================================================
+   IshTop — Aurora Design System (premium redesign)
+   - tokens layered on top of shadcn vars (do not remove existing keys)
+   ============================================================================= */
+
+
+@layer base {
+  :root {
+    --background: 228 33% 99%;
+    --foreground: 225 26% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 225 26% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 247 86% 63%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 224 24% 95%;
+    --muted-foreground: 224 13% 37%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 224 20% 88%;
+    --input: 224 20% 88%;
+    --ring: 247 86% 63%;
+    --radius: 0.9rem;
+
+    /* ===== Aurora tokens ===== */
+    --ink-900: 230 50% 8%;
+    --ink-800: 230 36% 14%;
+    --ink-700: 230 26% 22%;
+    --aurora-violet: 252 100% 68%;
+    --aurora-cyan: 188 95% 53%;
+    --aurora-pink: 318 88% 70%;
+    --gold-500: 38 90% 56%;
+    --mint-trust: 152 60% 52%;
+    --mist-50: 220 30% 98%;
+    --mist-100: 220 24% 96%;
+  }
+
+  .dark {
+    --background: 231 41% 8%;
+    --foreground: 220 28% 96%;
+    --card: 231 38% 11%;
+    --card-foreground: 220 28% 96%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 187 94% 43%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 231 27% 18%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 230 26% 16%;
+    --muted-foreground: 225 17% 74%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 230 24% 22%;
+    --input: 230 24% 22%;
+    --ring: 251 91% 72%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Prevent any rogue absolute element from triggering page-level horizontal scroll. */
+    overflow-x: clip;
+    /* framer-motion useScroll measures offsets against the scrolling root — needs non-static. */
+    position: relative;
+  }
+
+  body {
+    overflow-x: clip;
+    position: relative;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-100 dark:bg-surface-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-300 dark:bg-surface-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-400 dark:bg-surface-500;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-brand-500/20 text-brand-800;
+  }
+}
+
+@layer components {
+  /* Glass effect */
+  .glass {
+    @apply border border-white/30 bg-white/70 backdrop-blur-xl;
+  }
+
+  .glass-dark {
+    @apply border border-surface-700/70 bg-surface-900/70 backdrop-blur-xl;
+  }
+
+  .surface-panel {
+    @apply rounded-3xl border border-surface-200/80 bg-white/90 shadow-xl shadow-surface-900/5 backdrop-blur-sm dark:border-surface-700 dark:bg-surface-900/70;
+  }
+
+  .surface-panel-strong {
+    @apply rounded-3xl border border-surface-200 bg-white shadow-2xl shadow-surface-900/10 dark:border-surface-700 dark:bg-surface-900;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent;
+  }
+
+  /* Hero gradient background */
+  .hero-gradient {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+  }
+
+  /* Animated gradient border */
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(var(--background), var(--background)) padding-box,
+                linear-gradient(135deg, #06b6d4, #f59e0b) border-box;
+    border: 2px solid transparent;
+  }
+
+  /* Glow effect */
+  .glow {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.3),
+                0 0 40px rgba(6, 182, 212, 0.1);
+  }
+
+  /* Card hover animation */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1;
+  }
+
+  /* Text shimmer effect */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  /* Page transition */
+  .page-enter {
+    @apply opacity-0 translate-y-4;
+  }
+
+  .page-enter-active {
+    @apply opacity-100 translate-y-0 transition-all duration-300 ease-out;
+  }
+
+  /* Stagger animation delays */
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+  .stagger-6 { animation-delay: 0.6s; }
+}
+
+@layer utilities {
+  /* Hide scrollbar but keep functionality */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Safe area padding for mobile */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Text balance */
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(6, 182, 212, 0.6);
+  }
+}
+
+/* =============================================================================
+   Aurora system — components, utilities, motion
+   ============================================================================= */
+
+@layer components {
+  /* Section container with consistent rhythm */
+  .section-shell {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12;
+  }
+  .section-y {
+    @apply py-20 sm:py-24 lg:py-32;
+    /* Anchor jumps land below the fixed nav, not under it */
+    scroll-margin-top: 80px;
+  }
+
+  /* Display typography — safe leading prevents descender clipping (q, g, y, p) */
+  .h-display {
+    @apply font-display font-semibold tracking-[-0.02em] text-balance;
+    font-feature-settings: "ss01", "cv11";
+    line-height: 1.12;
+    padding-bottom: 0.06em;
+  }
+  .h-eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-700 backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-white/80;
+  }
+
+  /* Aurora gradient text */
+  .aurora-text {
+    background: linear-gradient(120deg, #7C5CFF 0%, #22D3EE 60%, #F5B544 110%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Premium card surfaces */
+  .card-aurora {
+    @apply relative overflow-hidden rounded-3xl border border-surface-200/80 bg-white/85 shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset,0_30px_60px_-30px_rgba(15,23,42,0.18)] backdrop-blur-sm transition-all duration-300 dark:border-white/[0.06] dark:bg-white/[0.03];
+  }
+  .card-aurora-hover {
+    @apply hover:-translate-y-1 hover:border-surface-300 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset,0_40px_80px_-30px_rgba(124,92,255,0.35)] dark:hover:border-white/[0.12];
+  }
+
+  /* Premium button — primary */
+  .btn-aurora {
+    @apply relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-all duration-300;
+    background: linear-gradient(120deg, #7C5CFF 0%, #5B8CFF 60%, #22D3EE 110%);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.25) inset,
+      0 18px 40px -16px rgba(124, 92, 255, 0.55),
+      0 8px 18px -8px rgba(34, 211, 238, 0.45);
+  }
+  .btn-aurora:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.3) inset,
+      0 26px 50px -18px rgba(124, 92, 255, 0.7),
+      0 10px 24px -8px rgba(34, 211, 238, 0.55);
+  }
+  .btn-aurora:focus-visible {
+    outline: 2px solid #7C5CFF;
+    outline-offset: 3px;
+  }
+
+  /* Ghost button on dark surfaces */
+  .btn-ghost-dark {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-6 py-3 text-sm font-semibold text-white/90 backdrop-blur-md transition hover:border-white/25 hover:bg-white/[0.08];
+  }
+
+  /* Aurora background mesh */
+  .aurora-bg {
+    position: relative;
+    isolation: isolate;
+    background-color: #0B1020;
+  }
+  .aurora-bg::before {
+    content: "";
+    position: absolute;
+    inset: -10% -10% auto -10%;
+    height: 70%;
+    background:
+      radial-gradient(60% 60% at 18% 10%, rgba(124, 92, 255, 0.55) 0%, transparent 60%),
+      radial-gradient(50% 50% at 82% 0%, rgba(34, 211, 238, 0.45) 0%, transparent 60%),
+      radial-gradient(70% 60% at 50% 90%, rgba(245, 181, 68, 0.18) 0%, transparent 65%);
+    filter: blur(40px);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .aurora-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(80% 60% at 50% 30%, #000 0%, transparent 80%);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .aurora-bg > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Soft mist surface for light sections */
+  .mist-bg {
+    background:
+      radial-gradient(70% 50% at 50% 0%, rgba(124, 92, 255, 0.10) 0%, transparent 60%),
+      radial-gradient(50% 40% at 90% 10%, rgba(34, 211, 238, 0.10) 0%, transparent 60%),
+      linear-gradient(180deg, #FAFBFE 0%, #F6F7FB 100%);
+  }
+  .dark .mist-bg {
+    background:
+      radial-gradient(70% 50% at 50% 0%, rgba(124, 92, 255, 0.16) 0%, transparent 60%),
+      radial-gradient(50% 40% at 90% 10%, rgba(34, 211, 238, 0.10) 0%, transparent 60%),
+      linear-gradient(180deg, #0B1020 0%, #070A16 100%);
+  }
+
+  /* Ring focus for keyboard a11y */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  /* Pill chip */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-surface-200 bg-white px-3 py-1 text-xs font-medium text-surface-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/80;
+  }
+
+  /* Divider gradient */
+  .hr-aurora {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(124, 92, 255, 0.45), transparent);
+    border: 0;
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+
+  /* Premium-feeling underline link */
+  .link-underline {
+    background-image: linear-gradient(transparent calc(100% - 1px), currentColor 1px);
+    background-size: 0% 100%;
+    background-repeat: no-repeat;
+    transition: background-size 320ms cubic-bezier(0.19, 1, 0.22, 1);
+  }
+  .link-underline:hover { background-size: 100% 100%; }
+
+  /* Marquee for logo strip */
+  .marquee {
+    mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  }
+
+  /* Reduce-motion respect */
+  @media (prefers-reduced-motion: reduce) {
+    .motion-safe-only { animation: none !important; transition: none !important; }
+  }
+}
+
+@keyframes auroraDrift {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50%  { transform: translate3d(2%, -1%, 0) rotate(0.6deg); }
+  100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+}
+
+@keyframes marqueeX {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* =============================================================================
+   3D depth system — perspective, tilt, parallax, grain
+   ============================================================================= */
+
+@layer utilities {
+  .perspective-1200 { perspective: 1200px; }
+  .perspective-1600 { perspective: 1600px; }
+  .preserve-3d { transform-style: preserve-3d; }
+  .backface-hidden { backface-visibility: hidden; }
+  .will-transform { will-change: transform; }
+}
+
+@layer components {
+  /* Glass card with depth ring + inset highlight */
+  .depth-card {
+    position: relative;
+    border-radius: 28px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)) padding-box,
+      linear-gradient(140deg, rgba(124,92,255,0.6), rgba(34,211,238,0.4) 50%, rgba(245,181,68,0.35)) border-box;
+    border: 1px solid transparent;
+    box-shadow:
+      0 1px 0 0 rgba(255,255,255,0.18) inset,
+      0 -1px 0 0 rgba(0,0,0,0.4) inset,
+      0 30px 80px -30px rgba(124,92,255,0.5),
+      0 12px 30px -12px rgba(34,211,238,0.25);
+    backdrop-filter: blur(18px);
+  }
+  .depth-card-light {
+    position: relative;
+    border-radius: 28px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.7)) padding-box,
+      linear-gradient(140deg, rgba(124,92,255,0.35), rgba(34,211,238,0.25) 50%, rgba(245,181,68,0.25)) border-box;
+    border: 1px solid transparent;
+    box-shadow:
+      0 1px 0 0 rgba(255,255,255,0.8) inset,
+      0 30px 80px -30px rgba(15,23,42,0.18),
+      0 12px 30px -12px rgba(124,92,255,0.18);
+  }
+
+  /* Dark mode: override the FULL `background` shorthand (not just background-color)
+     so the light gradient can't bleed through behind white text. The component's
+     `dark:bg-transparent` only resets background-color, leaving the white
+     background-image — which made the score card unreadable in dark mode. */
+  .dark .depth-card-light {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)) padding-box,
+      linear-gradient(140deg, rgba(124,92,255,0.45), rgba(34,211,238,0.30) 50%, rgba(245,181,68,0.22)) border-box;
+    box-shadow:
+      0 1px 0 0 rgba(255,255,255,0.08) inset,
+      0 30px 80px -30px rgba(0,0,0,0.65),
+      0 12px 30px -12px rgba(124,92,255,0.35);
+  }
+
+  /* Cursor spotlight on dark — applied with --x, --y vars */
+  .spotlight {
+    position: relative;
+    isolation: isolate;
+  }
+  .spotlight::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      600px 600px at var(--mx, 50%) var(--my, 30%),
+      rgba(124,92,255,0.28),
+      rgba(34,211,238,0.10) 35%,
+      transparent 65%
+    );
+    transition: background 220ms ease;
+  }
+  .spotlight > * { position: relative; z-index: 1; }
+
+  /* Grain overlay (subtle film grain) */
+  .grain {
+    position: relative;
+  }
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    background-size: 200px 200px;
+  }
+
+  /* Glowing edge animation */
+  .edge-glow {
+    position: relative;
+  }
+  .edge-glow::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(from var(--angle, 0deg), #7C5CFF, #22D3EE, #F5B544, #7C5CFF);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    animation: edgeSpin 8s linear infinite;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+}
+
+@property --angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes edgeSpin {
+  to { --angle: 360deg; }
+}
+
+@keyframes float3d {
+  0%, 100% { transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg); }
+  50%      { transform: translate3d(0, -8px, 0) rotateX(2deg) rotateY(-2deg); }
+}
+
+/* Respect reduce-motion globally for 3D primitives */
+@media (prefers-reduced-motion: reduce) {
+  .depth-card, .depth-card-light { box-shadow: none; }
+  .edge-glow::before { animation: none; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

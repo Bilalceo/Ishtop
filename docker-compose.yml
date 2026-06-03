@@ -1,0 +1,162 @@
+version: '3.8'
+
+services:
+  # =============================================================================
+  # PostgreSQL Database
+  # =============================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: ishtop_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ishtop
+      POSTGRES_USER: ishtop
+      POSTGRES_PASSWORD: ishtop_password_change_in_production
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ishtop"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ishtop_network
+
+  # =============================================================================
+  # Redis (for caching, sessions, and task queue)
+  # =============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: ishtop_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ishtop_redis_password
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ishtop_network
+
+  # =============================================================================
+  # Backend (FastAPI)
+  # =============================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ishtop_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # App
+      APP_NAME: "IshTop"
+      DEBUG: "false"
+      
+      # Database
+      DATABASE_URL: postgresql://ishtop:ishtop_password_change_in_production@postgres:5432/ishtop
+      
+      # Redis
+      REDIS_URL: redis://:ishtop_redis_password@redis:6379/0
+      
+      # JWT (use secrets from .env in production)
+      # Defaults are intentionally long enough to satisfy backend production
+      # secret validation when DEBUG=false. Override via `.env` in real deploys.
+      SECRET_KEY: ${SECRET_KEY:-ishtop-dev-secret-key-0123456789abcdef0123456789abcdef}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-ishtop-dev-jwt-secret-0123456789abcdef0123456789abcdef}
+      
+      # AI
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      AI_PROVIDER: ${AI_PROVIDER:-gemini}
+      
+      # Email
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-noreply@ishtop.uz}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      
+      # Frontend URL
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      
+      # CORS
+      CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000,http://frontend:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - backend_uploads:/app/uploads
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        sleep 5 &&
+        echo 'Running migrations...' &&
+        alembic upgrade head &&
+        echo 'Starting server...' &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+    networks:
+      - ishtop_network
+
+  # =============================================================================
+  # Frontend (Next.js)
+  # =============================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Frontend code expects API base to include "/api/v1".
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
+    container_name: ishtop_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Frontend code expects API base to include "/api/v1".
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
+      NODE_ENV: production
+    depends_on:
+      - backend
+    networks:
+      - ishtop_network
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  ishtop_network:
+    driver: bridge
+
+
+
+
+
+
+
+
+

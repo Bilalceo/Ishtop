@@ -1,0 +1,46 @@
+{
+  "name": "IshTop · AI Career Platform",
+  "short_name": "IshTop",
+  "description": "AI bilan birinchi ishingizni toping — talabalar va juniorlar uchun.",
+  "start_url": "/student",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf9f5",
+  "theme_color": "#d97757",
+  "lang": "uz",
+  "dir": "ltr",
+  "categories": ["business", "education", "productivity"],
+  "icons": [
+    { "src": "/favicon-16x16.png", "sizes": "16x16", "type": "image/png" },
+    { "src": "/favicon-32x32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/logo-mark.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/logo-mark.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Ishlar",
+      "short_name": "Jobs",
+      "description": "Mos vakansiyalar",
+      "url": "/student/jobs",
+      "icons": [{ "src": "/logo-mark.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Arizalarim",
+      "short_name": "Apps",
+      "description": "Yuborilgan arizalar",
+      "url": "/student/applications",
+      "icons": [{ "src": "/logo-mark.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "AI Demo",
+      "short_name": "Demo",
+      "description": "AI matchni sinab ko'rish",
+      "url": "/demo",
+      "icons": [{ "src": "/logo-mark.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
+}

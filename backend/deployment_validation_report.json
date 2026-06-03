@@ -1,0 +1,200 @@
+{
+  "timestamp": "2026-01-19T18:14:20.769335",
+  "total_checks": 27,
+  "passed": 7,
+  "failed": 14,
+  "warnings": 6,
+  "score": 25.925925925925924,
+  "verdict": "FAIL",
+  "results": [
+    {
+      "name": "SECRET_KEY",
+      "passed": false,
+      "message": "Missing or too short (need 64+ chars)",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:19.922439"
+    },
+    {
+      "name": "DATABASE_URL",
+      "passed": false,
+      "message": "Missing or too short (need 20+ chars)",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:19.922446"
+    },
+    {
+      "name": "GEMINI_API_KEY",
+      "passed": false,
+      "message": "Missing or too short (need 20+ chars)",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:19.922450"
+    },
+    {
+      "name": "CORS_ORIGINS",
+      "passed": false,
+      "message": "Missing or too short (need 5+ chars)",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:19.922452"
+    },
+    {
+      "name": "FRONTEND_URL",
+      "passed": false,
+      "message": "Missing or too short (need 5+ chars)",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:19.922455"
+    },
+    {
+      "name": "SENTRY_DSN",
+      "passed": false,
+      "message": "Not set - Error tracking disabled",
+      "critical": false,
+      "timestamp": "2026-01-19T18:14:19.922458"
+    },
+    {
+      "name": "SENDGRID_API_KEY",
+      "passed": false,
+      "message": "Not set - Email service disabled",
+      "critical": false,
+      "timestamp": "2026-01-19T18:14:19.922461"
+    },
+    {
+      "name": "STRIPE_SECRET_KEY",
+      "passed": false,
+      "message": "Not set - Payment processing disabled",
+      "critical": false,
+      "timestamp": "2026-01-19T18:14:19.922464"
+    },
+    {
+      "name": "REDIS_URL",
+      "passed": false,
+      "message": "Not set - Caching disabled",
+      "critical": false,
+      "timestamp": "2026-01-19T18:14:19.922466"
+    },
+    {
+      "name": "DEBUG=False",
+      "passed": true,
+      "message": "DEBUG= (must be False in production!)",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:19.922470"
+    },
+    {
+      "name": "Database URL",
+      "passed": false,
+      "message": "DATABASE_URL not set",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:20.131793"
+    },
+    {
+      "name": "Gemini API Key",
+      "passed": false,
+      "message": "Invalid or missing",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:20.131805"
+    },
+    {
+      "name": "Stripe API Key",
+      "passed": false,
+      "message": "Not set - payments disabled",
+      "critical": false,
+      "timestamp": "2026-01-19T18:14:20.131809"
+    },
+    {
+      "name": "SECRET_KEY Strength",
+      "passed": false,
+      "message": "0 characters (very weak!)",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:20.131816"
+    },
+    {
+      "name": "CORS Configuration",
+      "passed": false,
+      "message": "Not configured",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:20.131819"
+    },
+    {
+      "name": "HTTPS Frontend",
+      "passed": true,
+      "message": "Not configured",
+      "critical": false,
+      "timestamp": "2026-01-19T18:14:20.131823"
+    },
+    {
+      "name": "Main application",
+      "passed": false,
+      "message": "backend/app/main.py missing",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:20.131855"
+    },
+    {
+      "name": "Configuration",
+      "passed": false,
+      "message": "backend/app/config.py missing",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:20.131866"
+    },
+    {
+      "name": "Database migrations",
+      "passed": false,
+      "message": "backend/alembic.ini missing",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:20.131875"
+    },
+    {
+      "name": "Dependencies",
+      "passed": false,
+      "message": "backend/requirements.txt missing",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:20.131883"
+    },
+    {
+      "name": "Deployment config",
+      "passed": false,
+      "message": "backend/Procfile missing",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:20.131892"
+    },
+    {
+      "name": "FastAPI",
+      "passed": true,
+      "message": "v0.104.1",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:20.310228"
+    },
+    {
+      "name": "SQLAlchemy",
+      "passed": true,
+      "message": "v2.0.45",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:20.310236"
+    },
+    {
+      "name": "Pydantic",
+      "passed": true,
+      "message": "v2.12.5",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:20.310239"
+    },
+    {
+      "name": "Uvicorn",
+      "passed": true,
+      "message": "v0.24.0",
+      "critical": true,
+      "timestamp": "2026-01-19T18:14:20.344080"
+    },
+    {
+      "name": "Sentry SDK",
+      "passed": false,
+      "message": "Not installed (monitoring disabled)",
+      "critical": false,
+      "timestamp": "2026-01-19T18:14:20.344192"
+    },
+    {
+      "name": "Redis",
+      "passed": true,
+      "message": "v5.0.1",
+      "critical": false,
+      "timestamp": "2026-01-19T18:14:20.769310"
+    }
+  ]
+}
