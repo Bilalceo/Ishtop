@@ -190,7 +190,7 @@ export default function LoginPageClient() {
             />
           </div>
           {errors.email && (
-            <motion.p {...fadeIn} className="text-sm text-red-600">
+            <motion.p {...fadeIn} className="text-sm text-red-600 dark:text-red-400">
               {errors.email.message}
             </motion.p>
           )}
@@ -239,7 +239,7 @@ export default function LoginPageClient() {
             </button>
           </div>
           {errors.password && (
-            <motion.p {...fadeIn} className="text-sm text-red-600">
+            <motion.p {...fadeIn} className="text-sm text-red-600 dark:text-red-400">
               {errors.password.message}
             </motion.p>
           )}

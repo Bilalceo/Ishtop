@@ -74,14 +74,14 @@ export default function ForgotPasswordPage() {
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
           <CheckCircle className="h-8 w-8 text-green-600" />
         </div>
-        <h1 className="font-display text-2xl font-bold text-surface-900">
+        <h1 className="font-display text-2xl font-bold text-surface-900 dark:text-white">
           {locale === "ru" ? "Проверьте почту" : "Emailingizni tekshiring"}
         </h1>
-        <p className="mt-3 text-surface-500">
+        <p className="mt-3 text-surface-500 dark:text-surface-300">
           {locale === "ru"
             ? "Мы отправили ссылку для сброса пароля на"
             : "Parolni tiklash havolasini quyidagi emailga yubordik"}{" "}
-          <strong className="text-surface-700">{getValues("email")}</strong>
+          <strong className="text-surface-700 dark:text-surface-100">{getValues("email")}</strong>
         </p>
         <p className="mt-4 text-sm text-surface-400">
           {locale === "ru"
@@ -157,7 +157,7 @@ export default function ForgotPasswordPage() {
       {/* Back to login */}
       <Link
         href="/login"
-        className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-surface-500 hover:text-surface-700"
+        className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
       >
         <ArrowLeft className="h-4 w-4" />
         {locale === "ru" ? "Назад ко входу" : "Kirishga qaytish"}

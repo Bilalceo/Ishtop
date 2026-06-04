@@ -111,6 +111,24 @@
   ::selection {
     @apply bg-brand-500/20 text-brand-800;
   }
+
+  /*
+   * Browser autofill: keep typed text readable in both themes.
+   * --foreground is dark in light mode and light in dark mode, so the
+   * filled text always contrasts its input. The huge transition delay
+   * freezes Chrome's yellow autofill background, letting the input keep
+   * its own bg (white in light, dark in dark mode).
+   */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-text-fill-color: hsl(var(--foreground));
+    caret-color: hsl(var(--foreground));
+    transition: background-color 600000s 0s, color 600000s 0s;
+  }
 }
 
 @layer components {

@@ -203,7 +203,7 @@ function PasswordStrength({ password }: { password: string }) {
       </div>
       {/* Strength label */}
       {password && (
-        <p className="text-xs text-surface-500">
+        <p className="text-xs text-surface-500 dark:text-surface-400">
           {t("auth.register.passwordStrength.label")}: <span className="font-medium">{strengthLabels[strength - 1] || t("auth.register.passwordStrength.tooWeak")}</span>
         </p>
       )}
@@ -375,7 +375,7 @@ export default function RegisterPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="font-display text-3xl font-bold text-surface-900"
+          className="font-display text-3xl font-bold text-surface-900 dark:text-white"
         >
           {t("auth.register.success.title")}
         </motion.h1>
@@ -383,7 +383,7 @@ export default function RegisterPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="mt-3 text-surface-500"
+          className="mt-3 text-surface-500 dark:text-surface-300"
         >
           {t("auth.register.success.message")}
           <br />
@@ -422,10 +422,10 @@ export default function RegisterPage() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8 text-center"
       >
-        <h1 className="font-display text-3xl font-bold text-surface-900">
+        <h1 className="font-display text-3xl font-bold text-surface-900 dark:text-white">
           {t("auth.register.title")}
         </h1>
-        <p className="mt-2 text-surface-500">
+        <p className="mt-2 text-surface-500 dark:text-surface-300">
           {t("auth.register.subtitle")}
         </p>
       </motion.div>
@@ -528,7 +528,7 @@ export default function RegisterPage() {
                       placeholder={t("auth.register.placeholders.email")}
                       autoComplete="email"
                       className={cn(
-                        "flex h-12 w-full rounded-xl border bg-white pl-10 pr-4 text-sm transition-all",
+                        "flex h-12 w-full rounded-xl border bg-white text-surface-900 pl-10 pr-4 text-sm transition-all dark:bg-surface-900 dark:text-surface-100",
                         "placeholder:text-surface-400",
                         "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-0",
                         errors.email
@@ -539,7 +539,7 @@ export default function RegisterPage() {
                     />
                   </div>
                   {errors.email && (
-                    <p className="text-sm text-red-600">{errors.email.message}</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
                   )}
                 </div>
 
@@ -554,7 +554,7 @@ export default function RegisterPage() {
                       placeholder={t("auth.register.placeholders.password")}
                       autoComplete="new-password"
                       className={cn(
-                        "flex h-12 w-full rounded-xl border bg-white pl-10 pr-12 text-sm transition-all",
+                        "flex h-12 w-full rounded-xl border bg-white text-surface-900 pl-10 pr-12 text-sm transition-all dark:bg-surface-900 dark:text-surface-100",
                         "placeholder:text-surface-400",
                         "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-0",
                         errors.password
@@ -573,7 +573,7 @@ export default function RegisterPage() {
                   </div>
                   <PasswordStrength password={password || ""} />
                   {errors.password && (
-                    <p className="text-sm text-red-600">{errors.password.message}</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
                   )}
                 </div>
 
@@ -588,7 +588,7 @@ export default function RegisterPage() {
                       placeholder={t("auth.register.placeholders.confirmPassword")}
                       autoComplete="new-password"
                       className={cn(
-                        "flex h-12 w-full rounded-xl border bg-white pl-10 pr-12 text-sm transition-all",
+                        "flex h-12 w-full rounded-xl border bg-white text-surface-900 pl-10 pr-12 text-sm transition-all dark:bg-surface-900 dark:text-surface-100",
                         "placeholder:text-surface-400",
                         "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-0",
                         errors.confirmPassword
@@ -606,7 +606,7 @@ export default function RegisterPage() {
                     </button>
                   </div>
                   {errors.confirmPassword && (
-                    <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">{errors.confirmPassword.message}</p>
                   )}
                 </div>
 
@@ -656,7 +656,7 @@ export default function RegisterPage() {
                       placeholder={t("auth.register.placeholders.fullName")}
                       autoComplete="name"
                       className={cn(
-                        "flex h-12 w-full rounded-xl border bg-white pl-10 pr-4 text-sm transition-all",
+                        "flex h-12 w-full rounded-xl border bg-white text-surface-900 pl-10 pr-4 text-sm transition-all dark:bg-surface-900 dark:text-surface-100",
                         "placeholder:text-surface-400",
                         "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-0",
                         errors.fullName
@@ -667,7 +667,7 @@ export default function RegisterPage() {
                     />
                   </div>
                   {errors.fullName && (
-                    <p className="text-sm text-red-600">{errors.fullName.message}</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">{errors.fullName.message}</p>
                   )}
                 </div>
 
@@ -682,7 +682,7 @@ export default function RegisterPage() {
                       placeholder={t("auth.register.placeholders.phone")}
                       autoComplete="tel"
                       className={cn(
-                        "flex h-12 w-full rounded-xl border bg-white pl-10 pr-4 text-sm transition-all",
+                        "flex h-12 w-full rounded-xl border bg-white text-surface-900 pl-10 pr-4 text-sm transition-all dark:bg-surface-900 dark:text-surface-100",
                         "placeholder:text-surface-400",
                         "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-0",
                         errors.phone
@@ -693,9 +693,9 @@ export default function RegisterPage() {
                     />
                   </div>
                   {errors.phone && (
-                    <p className="text-sm text-red-600">{errors.phone.message}</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">{errors.phone.message}</p>
                   )}
-                  <p className="text-xs text-surface-500">
+                  <p className="text-xs text-surface-500 dark:text-surface-400">
                     {t("auth.register.phoneHelper")}
                   </p>
                 </div>
@@ -831,7 +831,7 @@ export default function RegisterPage() {
                   </motion.button>
 
                   {errors.role && (
-                    <p className="text-sm text-red-600">{errors.role.message}</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">{errors.role.message}</p>
                   )}
                 </div>
 
@@ -851,7 +851,7 @@ export default function RegisterPage() {
                           id="companyName"
                           type="text"
                           placeholder={t("auth.register.placeholders.companyName")}
-                          className="flex h-12 w-full rounded-xl border border-surface-300 bg-white pl-10 pr-4 text-sm transition-all placeholder:text-surface-400 hover:border-surface-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-0"
+                          className="flex h-12 w-full rounded-xl border border-surface-300 bg-white text-surface-900 pl-10 pr-4 text-sm transition-all dark:bg-surface-900 dark:text-surface-100 placeholder:text-surface-400 hover:border-surface-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-0"
                           {...register("companyName")}
                         />
                       </div>
@@ -860,7 +860,7 @@ export default function RegisterPage() {
                 </AnimatePresence>
 
                 {/* Terms */}
-                <p className="text-xs text-surface-500">
+                <p className="text-xs text-surface-500 dark:text-surface-400">
                   {t("auth.register.terms.text")}{" "}
                   <Link href="/terms" className="text-purple-600 hover:underline">
                     {t("auth.register.terms.termsLink")}
@@ -932,7 +932,7 @@ export default function RegisterPage() {
             <div className="w-full border-t border-surface-200" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-white px-4 text-surface-500">{t("auth.register.oauth.quickAccess")}</span>
+            <span className="bg-white px-4 text-surface-500 dark:bg-surface-950 dark:text-surface-300">{t("auth.register.oauth.quickAccess")}</span>
           </div>
         </div>
         {oauthError && (
@@ -962,7 +962,7 @@ export default function RegisterPage() {
         initial={false}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
-        className="mt-6 text-center text-sm text-surface-500"
+        className="mt-6 text-center text-sm text-surface-500 dark:text-surface-300"
       >
         {t("auth.register.haveAccount")}{" "}
         <Link

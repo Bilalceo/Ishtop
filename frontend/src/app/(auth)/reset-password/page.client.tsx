@@ -135,10 +135,10 @@ export default function ResetPasswordPageClient({
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
           <CheckCircle className="h-8 w-8 text-green-600" />
         </div>
-        <h1 className="font-display text-2xl font-bold text-surface-900">
+        <h1 className="font-display text-2xl font-bold text-surface-900 dark:text-white">
           {locale === "ru" ? "Пароль обновлен" : "Parol yangilandi"}
         </h1>
-        <p className="mt-3 text-surface-500">
+        <p className="mt-3 text-surface-500 dark:text-surface-300">
           {locale === "ru"
             ? "Ваш пароль успешно сброшен. Перенаправляем на страницу входа..."
             : "Parolingiz muvaffaqiyatli tiklandi. Kirish sahifasiga yo'naltirilmoqda..."}
@@ -259,8 +259,8 @@ export default function ResetPasswordPageClient({
           />
         </div>
 
-        <div className="rounded-xl border border-surface-200 bg-surface-50 p-4 text-sm text-surface-600">
-          <p className="font-medium text-surface-800">
+        <div className="rounded-xl border border-surface-200 bg-surface-50 p-4 text-sm text-surface-600 dark:border-surface-700 dark:bg-surface-800/60 dark:text-surface-300">
+          <p className="font-medium text-surface-800 dark:text-surface-100">
             {locale === "ru" ? "Требования к паролю" : "Parol talablari"}
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-5">
@@ -295,7 +295,7 @@ export default function ResetPasswordPageClient({
         <Link href="/forgot-password" className="font-medium text-brand-600 hover:text-brand-500">
           {locale === "ru" ? "Нужна новая ссылка?" : "Yangi tiklash havolasi kerakmi?"}
         </Link>
-        <Link href="/login" className="inline-flex items-center gap-2 text-surface-500 hover:text-surface-700">
+        <Link href="/login" className="inline-flex items-center gap-2 text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200">
           <ArrowLeft className="h-4 w-4" />
           {locale === "ru" ? "Назад ко входу" : "Kirishga qaytish"}
         </Link>
