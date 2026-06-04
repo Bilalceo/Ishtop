@@ -33,10 +33,10 @@ export function Nav() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-700 transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "border-b border-white/10 shadow-lg backdrop-blur-md"
-          : ""
+          ? "border-b border-white/10 bg-[#0B1020]/80 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.7)] backdrop-blur-xl"
+          : "bg-gradient-to-b from-[#0B1020]/60 to-transparent backdrop-blur-[2px]"
       }`}
       aria-label="Primary"
     >
