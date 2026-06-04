@@ -47,7 +47,7 @@ export function Nav() {
           aria-label="IshTop home"
         >
           <Image
-            src="/logo-ishtop-ondark.png"
+            src="/logo-ishtop-nav.png"
             alt="IshTop"
             width={1025}
             height={292}
