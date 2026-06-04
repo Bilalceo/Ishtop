@@ -53,11 +53,11 @@ export function Nav() {
             height={292}
             priority
             sizes="(max-width: 640px) 112px, 128px"
-            className="block h-7 w-auto shrink-0 sm:h-8"
+            className="block h-7 w-auto shrink-0 object-contain sm:h-8"
           />
         </Link>
 
-        <ul className="hidden items-center gap-1 md:flex">
+        <ul className="hidden items-center gap-1 lg:flex">
           {NAV_ITEMS.map((item) => (
             <li key={item.href}>
               <a
@@ -70,7 +70,7 @@ export function Nav() {
           ))}
         </ul>
 
-        <div className="hidden items-center gap-1.5 md:flex">
+        <div className="hidden items-center gap-1.5 lg:flex">
           {/* Language + theme toggles are utility controls — tone them down so
               the primary "Bepul boshlash" CTA is the dominant visual target.
               No bordered chip, no background pill — same compact size, less weight. */}
@@ -96,7 +96,7 @@ export function Nav() {
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="focus-ring grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-white md:hidden"
+          className="focus-ring grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-white lg:hidden"
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -105,7 +105,7 @@ export function Nav() {
       {open && (
         <div
           id="mobile-menu"
-          className="border-t border-white/10 bg-[#0B1020]/95 backdrop-blur-xl md:hidden"
+          className="border-t border-white/10 bg-[#0B1020]/95 backdrop-blur-xl lg:hidden"
         >
           <ul className="section-shell flex flex-col gap-1 py-4">
             {NAV_ITEMS.map((item) => (
