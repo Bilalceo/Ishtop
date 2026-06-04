@@ -12,15 +12,15 @@ const COL: Record<
 > = {
   uz: {
     product: [
-      { label: "AI Resume", href: "/student/resumes/create-ai" },
-      { label: "Smart Match", href: "/student/jobs" },
-      { label: "Auto-apply", href: "/student/applications" },
-      { label: "Interview Coach", href: "/student" },
+      { label: "AI rezyume", href: "/student/resumes/create-ai" },
+      { label: "Aqlli moslik", href: "/student/jobs" },
+      { label: "Avtomatik ariza", href: "/student/applications" },
+      { label: "Suhbat murabbiyi", href: "/student" },
     ],
     company: [
       { label: "Biz haqimizda", href: "/about" },
       { label: "Kompaniyalar uchun", href: "/company" },
-      { label: "Pricing", href: "/pricing" },
+      { label: "Narxlar", href: "/pricing" },
       { label: "Bog'lanish", href: "/contact" },
     ],
     legal: [
@@ -30,10 +30,10 @@ const COL: Record<
   },
   ru: {
     product: [
-      { label: "AI Resume", href: "/student/resumes/create-ai" },
-      { label: "Smart Match", href: "/student/jobs" },
-      { label: "Auto-apply", href: "/student/applications" },
-      { label: "Interview Coach", href: "/student" },
+      { label: "AI-резюме", href: "/student/resumes/create-ai" },
+      { label: "Умный подбор", href: "/student/jobs" },
+      { label: "Автоотклик", href: "/student/applications" },
+      { label: "Тренер интервью", href: "/student" },
     ],
     company: [
       { label: "О нас", href: "/about" },

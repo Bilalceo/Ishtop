@@ -69,8 +69,8 @@ const getPricingPlans = (isRu: boolean): PricingPlan[] => [
     id: "premium",
     name: "Premium",
     price: {
-      monthly: 4,
-      yearly: 40,
+      monthly: 25000,
+      yearly: 250000,
     },
     description: isRu ? "Для активных соискателей и студентов" : "Faol ish izlovchilar va talabalar uchun",
     features: [
@@ -238,14 +238,14 @@ export default function PricingPage() {
                     ) : (
                       <div>
                         <span className="text-5xl font-bold text-surface-900 dark:text-white">
-                          ${price}
+                          {price.toLocaleString("ru-RU")}
                         </span>
                         <span className="text-surface-600 dark:text-surface-400 ml-2">
-                          /{billingCycle === "monthly" ? (isRu ? "мес" : "oy") : (isRu ? "год" : "yil")}
+                          {isRu ? "сум" : "so'm"}/{billingCycle === "monthly" ? (isRu ? "мес" : "oy") : (isRu ? "год" : "yil")}
                         </span>
                         {billingCycle === "yearly" && plan.id !== "free" && (
                           <div className="text-sm text-green-600 dark:text-green-400 mt-1">
-                            {isRu ? "Экономия" : "Tejaladi"} ${plan.price.monthly * 12 - plan.price.yearly}/{isRu ? "год" : "yil"}
+                            {isRu ? "Экономия" : "Tejaladi"} {(plan.price.monthly * 12 - plan.price.yearly).toLocaleString("ru-RU")} {isRu ? "сум" : "so'm"}/{isRu ? "год" : "yil"}
                           </div>
                         )}
                       </div>

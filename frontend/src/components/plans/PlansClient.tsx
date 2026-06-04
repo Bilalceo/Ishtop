@@ -33,7 +33,7 @@ const PLANS: Plan[] = [
   {
     id: "free",
     name: "Free",
-    price: "$0",
+    price: "0 so'm",
     priceNote: "/ oy",
     tagline: "Birinchi ish uchun yetarli",
     features: [
@@ -52,7 +52,7 @@ const PLANS: Plan[] = [
   {
     id: "pro",
     name: "Pro",
-    price: "$9",
+    price: "25 000 so'm",
     priceNote: "/ oy",
     tagline: "Tezlik + AI Coach",
     features: [
@@ -71,8 +71,8 @@ const PLANS: Plan[] = [
   {
     id: "team",
     name: "Team",
-    price: "$29",
-    priceNote: "/ oy / a&apos;zo",
+    price: "Maxsus",
+    priceNote: "kelishiladi",
     tagline: "5+ talaba uchun · Bootcamp",
     features: [
       { text: "Pro'ning hamma narsasi", ok: true },
@@ -100,7 +100,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Talabalar uchun chegirma bormi?",
-    a: "Pro plan barcha .edu va talaba ID'lar uchun 50% chegirma — yiliga $54 → $27.",
+    a: "Pro plan barcha .edu va talaba ID'lar uchun 50% chegirma — yiliga 250 000 so'm → 125 000 so'm.",
   },
   {
     q: "Auto-apply qanday ishlaydi?",
