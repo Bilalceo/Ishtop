@@ -7,6 +7,9 @@ import { AnimatePresence, motion } from "framer-motion";
 const DISMISS_KEY = "ishtop_pwa_install_dismissed_v1";
 const DISMISS_DAYS = 14;
 
+// Disabled for now per product decision. Flip to true to re-enable the install prompt.
+const PWA_INSTALL_ENABLED = false;
+
 type BIPEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
@@ -59,6 +62,7 @@ export default function InstallPrompt() {
   }, []);
 
   if (installed) return null;
+  if (!PWA_INSTALL_ENABLED) return null;
 
   const install = async () => {
     if (!deferred) return;
