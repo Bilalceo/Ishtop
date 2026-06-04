@@ -43,7 +43,7 @@ export function Nav() {
       <nav className="section-shell flex h-16 items-center justify-between sm:h-20">
         <Link
           href="/"
-          className="focus-ring flex items-center rounded-xl"
+          className="focus-ring flex shrink-0 items-center rounded-xl"
           aria-label="IshTop home"
         >
           <Image
@@ -52,7 +52,8 @@ export function Nav() {
             width={1025}
             height={292}
             priority
-            className="h-7 w-auto sm:h-8"
+            sizes="(max-width: 640px) 112px, 128px"
+            className="block h-7 w-auto shrink-0 sm:h-8"
           />
         </Link>
 
