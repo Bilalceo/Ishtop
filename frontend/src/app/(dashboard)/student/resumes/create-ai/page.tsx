@@ -78,15 +78,27 @@ import { useTranslation } from "@/contexts/TranslationContext";
 // TYPES & SCHEMAS
 // =============================================================================
 
-const personalInfoSchema = z.object({
-  fullName: z.string().min(2, "Ism majburiy"),
-  email: z.string().email("To'g'ri email kiriting"),
-  phone: z.string().min(9, "Telefon raqam majburiy"),
-  location: z.string().optional(),
-  professionalTitle: z.string().min(2, "Lavozim nomi majburiy"),
-  linkedinUrl: z.string().url().optional().or(z.literal("")),
-  portfolioUrl: z.string().url().optional().or(z.literal("")),
-});
+// Validation messages follow the selected language (uz/ru) — no English leaks.
+const makePersonalInfoSchema = (isRu: boolean) =>
+  z.object({
+    fullName: z.string().min(2, isRu ? "Имя обязательно" : "Ism majburiy"),
+    email: z.string().email(isRu ? "Введите корректный email" : "To'g'ri email kiriting"),
+    phone: z.string().min(9, isRu ? "Номер телефона обязателен" : "Telefon raqami majburiy"),
+    location: z.string().optional(),
+    professionalTitle: z
+      .string()
+      .min(2, isRu ? "Должность обязательна" : "Lavozim nomi majburiy"),
+    linkedinUrl: z
+      .string()
+      .url(isRu ? "Некорректная ссылка" : "Noto'g'ri havola")
+      .optional()
+      .or(z.literal("")),
+    portfolioUrl: z
+      .string()
+      .url(isRu ? "Некорректная ссылка" : "Noto'g'ri havola")
+      .optional()
+      .or(z.literal("")),
+  });
 
 // Experience is OPTIONAL: students and fresh graduates with no work history
 // must be able to finish a resume. Fields are not forced; empty entries are
@@ -146,14 +158,15 @@ const additionalSchema = z.object({
   ),
 });
 
-// Combined schema
-const resumeSchema = personalInfoSchema
-  .merge(experienceSchema)
-  .merge(educationSchema)
-  .merge(skillsSchema)
-  .merge(additionalSchema);
+// Combined schema (locale-aware via the personal-info factory).
+const makeResumeSchema = (isRu: boolean) =>
+  makePersonalInfoSchema(isRu)
+    .merge(experienceSchema)
+    .merge(educationSchema)
+    .merge(skillsSchema)
+    .merge(additionalSchema);
 
-type ResumeFormData = z.infer<typeof resumeSchema>;
+type ResumeFormData = z.infer<ReturnType<typeof makeResumeSchema>>;
 
 // =============================================================================
 // STEP CONFIGURATION
@@ -262,6 +275,10 @@ export default function AIResumeBuilderPage() {
   const setSkillStatus = (skill: string, status: VerificationStatus) =>
     setSkillStatuses((prev) => ({ ...prev, [skill]: status }));
 
+  // Rebuild the resolver when the language changes so validation messages
+  // follow the selected locale (uz/ru).
+  const resumeResolver = useMemo(() => zodResolver(makeResumeSchema(isRu)), [isRu]);
+
   const {
     register,
     handleSubmit,
@@ -271,7 +288,7 @@ export default function AIResumeBuilderPage() {
     trigger,
     formState: { errors, isValid },
   } = useForm<ResumeFormData>({
-    resolver: zodResolver(resumeSchema),
+    resolver: resumeResolver,
     mode: "onChange",
     defaultValues: {
       fullName: "",
