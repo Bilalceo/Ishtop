@@ -88,26 +88,32 @@ const personalInfoSchema = z.object({
   portfolioUrl: z.string().url().optional().or(z.literal("")),
 });
 
+// Experience is OPTIONAL: students and fresh graduates with no work history
+// must be able to finish a resume. Fields are not forced; empty entries are
+// filtered out before save/generate.
 const experienceSchema = z.object({
   experiences: z.array(
     z.object({
-      company: z.string().min(1, "Kompaniya nomi majburiy"),
-      position: z.string().min(1, "Lavozim majburiy"),
-      startDate: z.string().min(1, "Boshlanish sanasi majburiy"),
+      company: z.string().optional(),
+      position: z.string().optional(),
+      startDate: z.string().optional(),
       endDate: z.string().optional(),
       isCurrent: z.boolean().optional(),
-      description: z.string().min(10, "Tavsif majburiy"),
+      description: z.string().optional(),
     }),
   ),
 });
 
+// Education is optional too, and supports currently-studying students
+// (isCurrent → no graduation year required).
 const educationSchema = z.object({
   education: z.array(
     z.object({
-      institution: z.string().min(1, "O'quv yurti majburiy"),
-      degree: z.string().min(1, "Daraja majburiy"),
-      field: z.string().min(1, "Yo'nalish majburiy"),
-      year: z.string().min(1, "Yil majburiy"),
+      institution: z.string().optional(),
+      degree: z.string().optional(),
+      field: z.string().optional(),
+      year: z.string().optional(),
+      isCurrent: z.boolean().optional(),
     }),
   ),
 });
@@ -285,7 +291,7 @@ export default function AIResumeBuilderPage() {
           description: "",
         },
       ],
-      education: [{ institution: "", degree: "", field: "", year: "" }],
+      education: [{ institution: "", degree: "", field: "", year: "", isCurrent: false }],
       technicalSkills: [],
       softSkills: [],
       languages: [{ name: "", proficiency: "" }],
@@ -326,6 +332,7 @@ export default function AIResumeBuilderPage() {
     fields: experienceFields,
     append: appendExperience,
     remove: removeExperience,
+    replace: replaceExperiences,
   } = useFieldArray({ control, name: "experiences" });
 
   const {
@@ -455,20 +462,26 @@ export default function AIResumeBuilderPage() {
           skills: [...formData.technicalSkills, ...formData.softSkills].filter(
             Boolean,
           ),
-          experience: formData.experiences.map((exp) => ({
-            company: exp.company,
-            position: exp.position,
-            duration: exp.isCurrent
-              ? `${exp.startDate} - Present`
-              : `${exp.startDate}${exp.endDate ? ` - ${exp.endDate}` : ""}`,
-            description: exp.description,
-          })),
-          education: formData.education.map((edu) => ({
-            institution: edu.institution,
-            degree: edu.degree,
-            field: edu.field,
-            year: edu.year,
-          })),
+          experience: formData.experiences
+            .filter((exp) => exp.company || exp.position || exp.description)
+            .map((exp) => ({
+              company: exp.company ?? "",
+              position: exp.position ?? "",
+              duration: exp.isCurrent
+                ? `${exp.startDate ?? ""} - Present`
+                : `${exp.startDate ?? ""}${exp.endDate ? ` - ${exp.endDate}` : ""}`,
+              description: exp.description ?? "",
+            })),
+          education: formData.education
+            .filter((edu) => edu.institution || edu.degree || edu.field)
+            .map((edu) => ({
+              institution: edu.institution ?? "",
+              degree: edu.degree ?? "",
+              field: edu.field ?? "",
+              year: edu.isCurrent
+                ? (isRu ? "По настоящее время" : "Hozirgi vaqt")
+                : (edu.year ?? ""),
+            })),
         },
         template: selectedTemplate as GenerateResumePayload["template"],
         tone: selectedTone as GenerateResumePayload["tone"],
@@ -535,20 +548,21 @@ export default function AIResumeBuilderPage() {
     experience: formData.experiences
       .filter((exp) => exp.company || exp.position || exp.description)
       .map((exp) => ({
-        company: exp.company,
-        position: exp.position,
-        start_date: exp.startDate,
-        end_date: exp.endDate,
+        company: exp.company ?? "",
+        position: exp.position ?? "",
+        start_date: exp.startDate ?? "",
+        end_date: exp.endDate ?? "",
         is_current: exp.isCurrent,
-        description: exp.description,
+        description: exp.description ?? "",
       })),
     education: formData.education
       .filter((edu) => edu.institution || edu.degree || edu.field)
       .map((edu) => ({
-        institution: edu.institution,
-        degree: edu.degree,
-        field: edu.field,
-        year: edu.year,
+        institution: edu.institution ?? "",
+        degree: edu.degree ?? "",
+        field: edu.field ?? "",
+        // Currently-studying students have no graduation year — show "present".
+        year: edu.isCurrent ? (isRu ? "По настоящее время" : "Hozirgi vaqt") : (edu.year ?? ""),
       })),
     skills: {
       technical: formData.technicalSkills,
@@ -729,6 +743,27 @@ export default function AIResumeBuilderPage() {
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-6"
               >
+                {/* Experience is optional — students with no work history can skip. */}
+                <div className="flex flex-col gap-2 rounded-xl border border-dashed border-surface-300 bg-surface-50 p-3 text-sm dark:border-surface-700 dark:bg-surface-800/60 sm:flex-row sm:items-center sm:justify-between">
+                  <span className="text-surface-600 dark:text-surface-300">
+                    {isRu
+                      ? "Опыт работы необязателен. Нет опыта? Можно пропустить."
+                      : "Ish tajribasi ixtiyoriy. Tajribangiz yo'qmi? O'tkazib yuborsangiz bo'ladi."}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="shrink-0 text-purple-700 hover:bg-purple-50 dark:text-purple-300"
+                    onClick={() => {
+                      replaceExperiences([]);
+                      setCurrentStep(3);
+                    }}
+                  >
+                    {isRu ? "Нет опыта — пропустить" : "Tajribam yo'q — o'tkazish"}
+                  </Button>
+                </div>
+
                 {experienceFields.map((field, index) => (
                   <div
                     key={field.id}
@@ -868,8 +903,17 @@ export default function AIResumeBuilderPage() {
                         <Label>{t("aiResumeBuilder.graduationYear")}</Label>
                         <Input
                           placeholder="2024"
+                          disabled={formData.education?.[index]?.isCurrent}
                           {...register(`education.${index}.year`)}
                         />
+                        <label className="mt-2 flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            {...register(`education.${index}.isCurrent`)}
+                            className="rounded border-surface-300"
+                          />
+                          {isRu ? "Сейчас учусь" : "Hozir o'qiyapman"}
+                        </label>
                       </div>
                     </div>
                   </div>
@@ -885,6 +929,7 @@ export default function AIResumeBuilderPage() {
                       degree: "",
                       field: "",
                       year: "",
+                      isCurrent: false,
                     })
                   }
                 >
