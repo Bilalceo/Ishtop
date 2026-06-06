@@ -245,6 +245,8 @@ RESUME_I18N: Dict[str, Dict[str, str]] = {
         "tools_and_technologies": "Tools and technologies",
         "languages": "Languages",
         "technical_skills": "Technical skills",
+        "verified_skills": "Verified skills",
+        "learning_skills": "Skills in progress",
         "projects": "Projects",
         "project": "Project",
         "certifications": "Certifications",
@@ -276,6 +278,8 @@ RESUME_I18N: Dict[str, Dict[str, str]] = {
         "tools_and_technologies": "Vositalar va texnologiyalar",
         "languages": "Tillar",
         "technical_skills": "Texnik ko'nikmalar",
+        "verified_skills": "Tasdiqlangan ko'nikmalar",
+        "learning_skills": "O'rganilayotgan ko'nikmalar",
         "projects": "Loyihalar",
         "project": "Loyiha",
         "certifications": "Sertifikatlar",
@@ -307,6 +311,8 @@ RESUME_I18N: Dict[str, Dict[str, str]] = {
         "tools_and_technologies": "Инструменты и технологии",
         "languages": "Языки",
         "technical_skills": "Технические навыки",
+        "verified_skills": "Подтверждённые навыки",
+        "learning_skills": "Навыки в процессе изучения",
         "projects": "Проекты",
         "project": "Проект",
         "certifications": "Сертификаты",
@@ -1077,13 +1083,22 @@ def _generate_pdf(resume: Resume) -> bytes:
         else:
             technical = _as_text_list(skills)
             soft = []
-        if technical or soft:
+        # Skill verification statuses (MVP) — shown as clean labelled rows.
+        verifications = _sanitize_skill_verifications(content.get("skillVerifications"))
+        verified_list = [s for s, st in verifications.items() if st == "verified"]
+        learning_list = [s for s, st in verifications.items() if st == "learning"]
+        if technical or soft or verified_list or learning_list:
             story.extend([paragraph(_label(locale, "skills"), "section"), HRFlowable(width="100%", thickness=0.8, color=colors.HexColor("#10b981"), spaceAfter=5)])
             skill_rows = []
             if technical:
                 skill_rows.append([paragraph(_label(locale, "technical_skills"), "item_title"), paragraph(", ".join(technical), "body")])
             if soft:
                 skill_rows.append([paragraph(_label(locale, "soft_skills"), "item_title"), paragraph(", ".join(soft), "body")])
+            if verified_list:
+                # Clean check mark (U+2713) prefix — professional, not emoji.
+                skill_rows.append([paragraph(_label(locale, "verified_skills"), "item_title"), paragraph(", ".join("✓ " + s for s in verified_list), "body")])
+            if learning_list:
+                skill_rows.append([paragraph(_label(locale, "learning_skills"), "item_title"), paragraph(", ".join(learning_list), "body")])
             story.append(Table(
                 skill_rows,
                 colWidths=[34 * mm, 136 * mm],
@@ -1251,6 +1266,33 @@ class AIResumeGenerateRequest(BaseModel):
         max_length=5,
         description="Language code (en, uz, ru)"
     )
+
+    skill_verifications: Optional[Dict[str, str]] = Field(
+        default=None,
+        description=(
+            "Optional skill verification statuses "
+            "({ skill: 'verified' | 'learning' | 'unverified' }). "
+            "Persisted into resume.content.skillVerifications."
+        ),
+    )
+
+
+# Allowed skill verification statuses (kept in sync with the frontend MVP).
+_VALID_SKILL_VERIFICATION_STATUSES = {"verified", "learning", "unverified"}
+
+
+def _sanitize_skill_verifications(raw: Any) -> Dict[str, str]:
+    """Keep only well-formed { skill: status } pairs with known statuses."""
+    if not isinstance(raw, dict):
+        return {}
+    cleaned: Dict[str, str] = {}
+    for skill, status in raw.items():
+        if not isinstance(skill, str) or not isinstance(status, str):
+            continue
+        skill_name = skill.strip()
+        if skill_name and status in _VALID_SKILL_VERIFICATION_STATUSES:
+            cleaned[skill_name] = status
+    return cleaned
 
 
 class AIResumeGenerateResponse(BaseModel):
@@ -1717,6 +1759,12 @@ async def generate_ai_resume(
                 "provider": provider_used,
                 "model": model_used,
             }
+
+            # Persist skill verification statuses (frontend MVP) into the
+            # resume content so the preview/PDF/detail page can display them.
+            verifications = _sanitize_skill_verifications(request.skill_verifications)
+            if verifications:
+                content["skillVerifications"] = verifications
         
         # Calculate ATS score (simple implementation)
         ats_score = _calculate_ats_score(content, request.job_description)

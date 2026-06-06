@@ -259,6 +259,52 @@ def test_generate_pdf_renders_cyrillic_and_uzbek_unicode():
     assert len(pdf_bytes) > 2000
 
 
+def test_sanitize_skill_verifications_filters_invalid_entries():
+    from app.api.v1.routes.resumes import _sanitize_skill_verifications
+
+    cleaned = _sanitize_skill_verifications(
+        {
+            "Python": "verified",
+            "Excel": "learning",
+            "CRM": "unverified",
+            "Bogus": "totally-wrong-status",  # dropped: unknown status
+            "  ": "verified",                  # dropped: blank skill
+            "React": 123,                       # dropped: non-string status
+        }
+    )
+
+    assert cleaned == {"Python": "verified", "Excel": "learning", "CRM": "unverified"}
+    # Non-dict input is tolerated (old resumes / bad payloads).
+    assert _sanitize_skill_verifications(None) == {}
+    assert _sanitize_skill_verifications("nope") == {}
+
+
+def test_generate_pdf_renders_with_skill_verifications():
+    """A resume carrying skillVerifications must still produce a valid PDF
+    (the verified/learning rows are rendered with the Unicode font)."""
+    resume = SimpleNamespace(
+        id=uuid4(),
+        title="Rezyume",
+        status="draft",
+        content={
+            "_metadata": {"language": "uz"},
+            "personal_info": {"name": "Aziz Karimov", "email": "aziz@example.com"},
+            "skills": {"technical": ["Python", "Excel", "CRM"], "soft": []},
+            "skillVerifications": {
+                "Python": "verified",
+                "Excel": "learning",
+                "CRM": "unverified",
+            },
+        },
+    )
+
+    pdf_bytes = _generate_pdf(resume)
+
+    assert pdf_bytes.startswith(b"%PDF")
+    assert b"DejaVu" in pdf_bytes
+    assert len(pdf_bytes) > 2000
+
+
 def test_download_resume_pdf_points_to_real_endpoint():
     """The download response should point to the real streaming PDF endpoint."""
     resume = SimpleNamespace(

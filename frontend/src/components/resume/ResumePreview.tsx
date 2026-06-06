@@ -70,6 +70,8 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
           soft: "Мягкие",
           languages: "Языки",
           certifications: "Сертификаты",
+          verifiedSkills: "Подтверждённые навыки",
+          learningSkills: "Навыки в процессе изучения",
         }
       : {
           yourName: "Ismingiz",
@@ -89,6 +91,8 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
           soft: "Ijtimoiy",
           languages: "Tillar",
           certifications: "Sertifikatlar",
+          verifiedSkills: "Tasdiqlangan ko'nikmalar",
+          learningSkills: "O'rganilayotgan ko'nikmalar",
         };
 
   const rawContent = asRecord(content);
@@ -133,6 +137,15 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
     skills.technical || skills.technical_skills || skills.tools_technologies,
   );
   const softSkills = flattenSkillList(skills.soft || skills.soft_skills);
+
+  // Skill verification statuses (MVP). Absent on older resumes → empty map.
+  const skillVerifications = asRecord(rawContent.skillVerifications) as Record<string, string>;
+  const verificationFor = (skill: string): "verified" | "learning" | undefined => {
+    const status = skillVerifications[skill] ?? skillVerifications[skill.trim()];
+    return status === "verified" || status === "learning" ? status : undefined;
+  };
+  const hasVerified = Object.values(skillVerifications).some((v) => v === "verified");
+  const hasLearning = Object.values(skillVerifications).some((v) => v === "learning");
 
   return (
     <article className={cn("relative min-h-[297mm] overflow-hidden bg-[#f8fafc] text-slate-900", className)}>
@@ -270,8 +283,28 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
           {(technicalSkills.length > 0 || softSkills.length > 0) && (
             <div className="mt-8 space-y-4">
               <SidebarTitle icon={<Code2 className="h-4 w-4" />} title={copy.skills} />
-              {technicalSkills.length > 0 && <SkillGroup label={copy.technical} skills={technicalSkills} />}
-              {softSkills.length > 0 && <SkillGroup label={copy.soft} skills={softSkills} muted />}
+              {technicalSkills.length > 0 && (
+                <SkillGroup label={copy.technical} skills={technicalSkills} verificationFor={verificationFor} />
+              )}
+              {softSkills.length > 0 && (
+                <SkillGroup label={copy.soft} skills={softSkills} muted verificationFor={verificationFor} />
+              )}
+              {(hasVerified || hasLearning) && (
+                <div className="space-y-1 border-t border-white/10 pt-3 text-[10px] leading-4 text-slate-400">
+                  {hasVerified && (
+                    <p className="flex items-center gap-1.5">
+                      <CheckCircle2 className="h-3 w-3 text-emerald-300" aria-hidden />
+                      {copy.verifiedSkills}
+                    </p>
+                  )}
+                  {hasLearning && (
+                    <p className="flex items-center gap-1.5">
+                      <span className="h-2 w-2 rounded-full border border-slate-400" aria-hidden />
+                      {copy.learningSkills}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -360,22 +393,41 @@ function SidebarText({ text, subtext }: { text: string; subtext?: string }) {
   );
 }
 
-function SkillGroup({ label, skills, muted }: { label: string; skills: string[]; muted?: boolean }) {
+function SkillGroup({
+  label,
+  skills,
+  muted,
+  verificationFor,
+}: {
+  label: string;
+  skills: string[];
+  muted?: boolean;
+  verificationFor?: (skill: string) => "verified" | "learning" | undefined;
+}) {
   return (
     <div>
       <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">{label}</p>
       <div className="flex flex-wrap gap-2">
-        {skills.map((skill) => (
-          <span
-            key={skill}
-            className={cn(
-              "rounded-full px-3 py-1 text-[11px] font-bold",
-              muted ? "bg-white/10 text-slate-200" : "bg-emerald-300 text-slate-950"
-            )}
-          >
-            {skill}
-          </span>
-        ))}
+        {skills.map((skill) => {
+          const status = verificationFor?.(skill);
+          return (
+            <span
+              key={skill}
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-bold",
+                muted ? "bg-white/10 text-slate-200" : "bg-emerald-300 text-slate-950",
+                // Verified: solid ring highlight. Learning: subtle dashed outline.
+                status === "verified" && "ring-1 ring-emerald-400",
+                status === "learning" && "bg-transparent text-slate-300 ring-1 ring-dashed ring-slate-500",
+              )}
+            >
+              {status === "verified" && (
+                <CheckCircle2 className={cn("h-3 w-3", muted ? "text-emerald-300" : "text-emerald-700")} aria-hidden />
+              )}
+              {skill}
+            </span>
+          );
+        })}
       </div>
     </div>
   );

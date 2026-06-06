@@ -220,6 +220,7 @@ export const resumeApi = {
     template?: string;
     tone?: string;
     language?: "uz" | "ru" | "en";
+    skill_verifications?: Record<string, "verified" | "learning" | "unverified">;
   }) => api.post("/resumes/generate-ai", data),
   
   update: (id: string, data: Partial<{ title: string; content: object; status: string }>) =>

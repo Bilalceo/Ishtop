@@ -58,6 +58,9 @@ interface GenerateResumeData {
   template?: "modern" | "classic" | "minimal" | "creative";
   tone?: "professional" | "confident" | "friendly" | "technical";
   language?: "uz" | "ru" | "en";
+  // Optional skill verification statuses (frontend MVP), persisted into
+  // resume.content.skillVerifications so the preview/PDF can show them.
+  skill_verifications?: Record<string, "verified" | "learning" | "unverified">;
 }
 
 const TRANSIENT_AI_ERROR_REGEX =

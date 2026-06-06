@@ -486,6 +486,8 @@ export default function AIResumeBuilderPage() {
         template: selectedTemplate as GenerateResumePayload["template"],
         tone: selectedTone as GenerateResumePayload["tone"],
         language: getPreferredLocale(),
+        // Persist skill verification statuses into the generated resume content.
+        skill_verifications: skillStatuses,
       };
 
       const result = await generateResume(payload);
