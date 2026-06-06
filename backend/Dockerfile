@@ -24,10 +24,15 @@ FROM python:3.11-slim AS runtime
 
 WORKDIR /app
 
-# Install only runtime system dependencies
+# Install only runtime system dependencies.
+# fonts-dejavu-* provide Cyrillic + Uzbek Latin glyphs for resume PDF export.
+# (The app also bundles DejaVuSans in app/assets/fonts as the primary source,
+#  so PDFs render correctly even if these system packages are unavailable.)
 RUN apt-get update && apt-get install -y \
     postgresql-client \
     curl \
+    fonts-dejavu-core \
+    fonts-dejavu-extra \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy installed packages from builder

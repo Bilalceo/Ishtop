@@ -693,6 +693,70 @@ def _normalize_ai_resume_content(
     return normalized
 
 
+# ---------------------------------------------------------------------------
+# PDF fonts — Unicode (Cyrillic + Uzbek Latin) support
+# ---------------------------------------------------------------------------
+# IshTop is bilingual (UZ/RU). ReportLab's built-in Helvetica is a Latin-only
+# Type1 font: Russian Cyrillic and Uzbek special letters (oʻ, gʻ, ʻ, ʼ) render
+# as missing glyphs. We bundle DejaVuSans in-repo so exported resumes always
+# render correctly regardless of the host OS, and also probe common system
+# paths (e.g. the Docker `fonts-dejavu-core` install) as a fallback.
+
+_BUNDLED_FONT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "fonts")
+
+# (regular_path, bold_path) candidates, tried in order. Bundled first.
+_UNICODE_FONT_CANDIDATES = (
+    (
+        os.path.normpath(os.path.join(_BUNDLED_FONT_DIR, "DejaVuSans.ttf")),
+        os.path.normpath(os.path.join(_BUNDLED_FONT_DIR, "DejaVuSans-Bold.ttf")),
+    ),
+    ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+    ("/usr/share/fonts/dejavu/DejaVuSans.ttf", "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf"),
+    ("/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf", "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf"),
+    (r"C:\Windows\Fonts\arial.ttf", r"C:\Windows\Fonts\arialbd.ttf"),
+)
+
+# Process-wide cache so we register the TTFs with ReportLab at most once.
+_UNICODE_FONTS_RESOLVED: Optional[tuple] = None
+
+
+def _resolve_pdf_fonts() -> tuple:
+    """Return (regular_font_name, bold_font_name) for the resume PDF.
+
+    Prefers a bundled/system Unicode font (full Cyrillic + Uzbek Latin coverage).
+    Falls back to Helvetica only as a last resort, logging a clear error so the
+    Latin-only degradation is diagnosable in production instead of silent.
+    """
+    global _UNICODE_FONTS_RESOLVED
+    if _UNICODE_FONTS_RESOLVED is not None:
+        return _UNICODE_FONTS_RESOLVED
+
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    for regular_path, bold_path in _UNICODE_FONT_CANDIDATES:
+        if not (os.path.isfile(regular_path) and os.path.isfile(bold_path)):
+            continue
+        try:
+            pdfmetrics.registerFont(TTFont("IshTop-Regular", regular_path))
+            pdfmetrics.registerFont(TTFont("IshTop-Bold", bold_path))
+            logger.info("Resume PDF using Unicode font: %s", regular_path)
+            _UNICODE_FONTS_RESOLVED = ("IshTop-Regular", "IshTop-Bold")
+            return _UNICODE_FONTS_RESOLVED
+        except Exception as exc:  # pragma: no cover - depends on host fonts
+            logger.warning("Failed to register font %s: %s", regular_path, exc)
+            continue
+
+    logger.error(
+        "No Unicode TTF font found for resume PDF (looked in %s). "
+        "Falling back to Helvetica — Russian Cyrillic and Uzbek special "
+        "characters will NOT render correctly.",
+        ", ".join(c[0] for c in _UNICODE_FONT_CANDIDATES),
+    )
+    _UNICODE_FONTS_RESOLVED = ("Helvetica", "Helvetica-Bold")
+    return _UNICODE_FONTS_RESOLVED
+
+
 def _escape_pdf_text(text: str) -> str:
     """Escape text for inclusion in a PDF content stream."""
     return text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
@@ -810,8 +874,6 @@ def _generate_pdf(resume: Resume) -> bytes:
         from reportlab.lib.pagesizes import A4
         from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
         from reportlab.lib.units import mm
-        from reportlab.pdfbase import pdfmetrics
-        from reportlab.pdfbase.ttfonts import TTFont
         from reportlab.platypus import (
             HRFlowable,
             KeepTogether,
@@ -829,21 +891,8 @@ def _generate_pdf(resume: Resume) -> bytes:
         locale = _resolve_resume_locale(content)
         personal_info = content.get("personal_info") if isinstance(content.get("personal_info"), dict) else {}
 
-        # Prefer a Unicode-capable font locally; fall back to Helvetica in deploy.
-        regular_font = "Helvetica"
-        bold_font = "Helvetica-Bold"
-        for regular_path, bold_path in (
-            (r"C:\Windows\Fonts\arial.ttf", r"C:\Windows\Fonts\arialbd.ttf"),
-            ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
-        ):
-            try:
-                pdfmetrics.registerFont(TTFont("IshTop-Regular", regular_path))
-                pdfmetrics.registerFont(TTFont("IshTop-Bold", bold_path))
-                regular_font = "IshTop-Regular"
-                bold_font = "IshTop-Bold"
-                break
-            except Exception:
-                continue
+        # Unicode-capable font (Cyrillic + Uzbek Latin); Helvetica only as last resort.
+        regular_font, bold_font = _resolve_pdf_fonts()
 
         doc = SimpleDocTemplate(
             buffer,

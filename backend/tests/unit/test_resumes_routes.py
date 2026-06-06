@@ -215,6 +215,50 @@ def test_generate_pdf_returns_real_pdf_bytes():
     assert b"Senior Backend Engineer" in pdf_bytes
 
 
+def test_resolve_pdf_fonts_prefers_bundled_unicode_font():
+    """A bundled DejaVu font ships in-repo, so we must never silently fall back
+    to Latin-only Helvetica (which would break Cyrillic / Uzbek output)."""
+    from app.api.v1.routes import resumes as resumes_module
+
+    # Reset the process-wide cache so the resolver actually probes the fonts.
+    resumes_module._UNICODE_FONTS_RESOLVED = None
+    regular, bold = resumes_module._resolve_pdf_fonts()
+
+    assert regular == "IshTop-Regular"
+    assert bold == "IshTop-Bold"
+    assert "Helvetica" not in (regular, bold)
+
+
+def test_generate_pdf_renders_cyrillic_and_uzbek_unicode():
+    """Russian Cyrillic and Uzbek special letters must embed a Unicode font
+    (DejaVu) rather than the Latin-only built-in Helvetica."""
+    resume = SimpleNamespace(
+        id=uuid4(),
+        title="Rezyume",
+        status="draft",
+        content={
+            "_metadata": {"language": "ru"},
+            "personal_info": {
+                "name": "Жасур Каримов",
+                "professional_title": "Дизайнер",
+                "email": "jasur@example.com",
+                "location": "Toshkent, Oʻzbekiston",
+            },
+            "summary": "Тажрибали дизайнер. Oʻzbek tili: oʻqish, gʻalaba, shahar, choy.",
+            "skills": {"technical": ["Photoshop", "Дизайн"], "soft": ["Jamoaviy ish"]},
+        },
+    )
+
+    pdf_bytes = _generate_pdf(resume)
+
+    assert pdf_bytes.startswith(b"%PDF")
+    # ReportLab embeds (a subset of) the DejaVu font when Unicode text is used;
+    # its presence proves we did not degrade to Latin-only Helvetica.
+    assert b"DejaVu" in pdf_bytes
+    # Sanity: this is the real ReportLab document, not the tiny text fallback.
+    assert len(pdf_bytes) > 2000
+
+
 def test_download_resume_pdf_points_to_real_endpoint():
     """The download response should point to the real streaming PDF endpoint."""
     resume = SimpleNamespace(
