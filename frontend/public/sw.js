@@ -2,10 +2,17 @@
    IshTop Service Worker — offline-first cache for shell + jobs API
    Strategy:
      - App shell: cache-first (static assets, /offline)
-     - Jobs API GETs: stale-while-revalidate (instant load + background refresh)
+     - Jobs API GETs: network-first with cache fallback (always fresh online,
+       offline-resilient). NOTE: stale-while-revalidate was removed — it served
+       the cached (stale) response to the page and only refreshed Cache Storage
+       in the background, so the already-rendered job list never updated. That
+       caused jobs to show as empty/stale until a hard refresh (Cmd+Shift+R)
+       bypassed the SW.
      - Everything else: network-first with cache fallback
    ============================================================================= */
 
+// Bump on any caching-behavior change so `activate` purges stale caches
+// (e.g. a previously cached empty jobs response).
 const VERSION = "v1.0.1";
 const SHELL_CACHE = `ishtop-shell-${VERSION}`;
 const API_CACHE = `ishtop-api-${VERSION}`;
@@ -51,22 +58,6 @@ function isNextStatic(url) {
 }
 function isImage(req) {
   return req.destination === "image";
-}
-
-// stale-while-revalidate
-async function swrFetch(request, cacheName) {
-  const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
-  const network = fetch(request)
-    .then((res) => {
-      if (res && res.ok) cache.put(request, res.clone()).catch(() => null);
-      return res;
-    })
-    .catch(() => null);
-  return cached || network || new Response(JSON.stringify({ offline: true }), {
-    status: 503,
-    headers: { "Content-Type": "application/json" },
-  });
 }
 
 // network-first with cache fallback
@@ -121,7 +112,8 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Jobs API — stale-while-revalidate
+  // Jobs API — network-first (always fresh online, cached only as an offline
+  // fallback). Avoids serving a stale/empty job list to the rendered page.
   if (isJobsApi(url)) {
     event.respondWith(networkFirst(request, API_CACHE));
     return;
