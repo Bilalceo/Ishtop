@@ -6,7 +6,7 @@
      - Everything else: network-first with cache fallback
    ============================================================================= */
 
-const VERSION = "v1.0.0";
+const VERSION = "v1.0.1";
 const SHELL_CACHE = `ishtop-shell-${VERSION}`;
 const API_CACHE = `ishtop-api-${VERSION}`;
 const RUNTIME_CACHE = `ishtop-runtime-${VERSION}`;
@@ -123,7 +123,7 @@ self.addEventListener("fetch", (event) => {
 
   // Jobs API — stale-while-revalidate
   if (isJobsApi(url)) {
-    event.respondWith(swrFetch(request, API_CACHE));
+    event.respondWith(networkFirst(request, API_CACHE));
     return;
   }
 
