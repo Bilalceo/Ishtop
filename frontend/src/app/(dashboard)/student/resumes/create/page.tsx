@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -17,6 +17,7 @@ import {
   Loader2,
   Plus,
   Save,
+  Sparkles,
   Trash2,
   User,
 } from "lucide-react";
@@ -26,6 +27,7 @@ import { Label } from "@/components/ui/label";
 import { resumeApi } from "@/lib/api";
 import type { ResumeContent } from "@/types/api";
 import { ResumePreview } from "@/components/resume/ResumePreview";
+import { MonthYearPicker } from "@/components/resume/MonthYearPicker";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -55,6 +57,7 @@ export default function CreateResumePage() {
   const [step, setStep] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [title, setTitle] = useState("Mening Resume");
   const [content, setContent] = useState<ResumeContent>({
     personal_info: {},
@@ -71,6 +74,44 @@ export default function CreateResumePage() {
       ...previous,
       personal_info: { ...previous.personal_info, [field]: value },
     }));
+  };
+
+  // Minimal AI assist: draft a professional summary from what's already entered.
+  const handleGenerateSummary = async () => {
+    const role = content.personal_info?.professional_title || "";
+    const skills = Array.isArray(content.skills?.technical)
+      ? (content.skills!.technical as string[])
+      : [];
+    const experience = (content.experience || []).map((item) => ({
+      position: item.position,
+      company: item.company,
+    }));
+    if (!role && skills.length === 0 && experience.length === 0) {
+      toast.error(
+        isRu
+          ? "Сначала заполните должность, навыки или опыт."
+          : "Avval kasbiy unvon, ko'nikma yoki tajribani to'ldiring.",
+      );
+      return;
+    }
+    setIsGeneratingSummary(true);
+    try {
+      const response = await resumeApi.generateSummary({
+        role,
+        skills,
+        experience,
+        locale: isRu ? "ru" : "uz",
+      });
+      const summary = (response.data as { summary?: string } | undefined)?.summary;
+      if (summary) {
+        setContent((previous) => ({ ...previous, summary }));
+        toast.success(isRu ? "Профиль сгенерирован" : "Profil yaratildi");
+      }
+    } catch {
+      toast.error(isRu ? "Не удалось сгенерировать" : "Yaratib bo'lmadi");
+    } finally {
+      setIsGeneratingSummary(false);
+    }
   };
 
   const addExperience = () => {
@@ -214,7 +255,7 @@ export default function CreateResumePage() {
             <div>
               <p className="text-xs font-black uppercase tracking-[0.26em] text-emerald-700">{isRu ? "КОНСТРУКТОР РЕЗЮМЕ" : "REZYUME KONSTRUKTORI"}</p>
               <h1 className="font-display text-2xl font-black text-slate-950">{isRu ? "Создание нового резюме" : "Yangi rezyume yaratish"}</h1>
-              <p className="text-sm text-slate-500">{isRu ? "Заполните форму, справа будет предпросмотр резюме в реальном времени." : "Formani to&apos;ldiring, o&apos;ng tomonda rezyume real vaqtda ko&apos;rinadi."}</p>
+              <p className="text-sm text-slate-500">{isRu ? "Заполните форму, справа будет предпросмотр резюме в реальном времени." : "Formani to'ldiring, o'ng tomonda rezyume real vaqtda ko'rinadi."}</p>
             </div>
           </div>
 
@@ -277,7 +318,7 @@ export default function CreateResumePage() {
                 </div>
                 <div>
                   <h2 className="font-display text-xl font-black text-slate-950">{currentStep.label}</h2>
-                  <p className="text-sm text-slate-500">{isRu ? "Пишите кратко и конкретно. Так резюме будет сильнее." : "Ma&apos;lumotni aniq va qisqa yozing. Rezyume professional chiqadi."}</p>
+                  <p className="text-sm text-slate-500">{isRu ? "Пишите кратко и конкретно. Так резюме будет сильнее." : "Ma'lumotni aniq va qisqa yozing. Rezyume professional chiqadi."}</p>
                 </div>
               </div>
 
@@ -299,6 +340,21 @@ export default function CreateResumePage() {
                     value={content.summary || ""}
                     onChange={(value) => setContent((previous) => ({ ...previous, summary: value }))}
                     placeholder="2-3 gapda tajribangiz, kuchli tomonlaringiz va qaysi rolga mos ekaningizni yozing."
+                    action={
+                      <button
+                        type="button"
+                        onClick={handleGenerateSummary}
+                        disabled={isGeneratingSummary}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-500 to-fuchsia-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
+                      >
+                        {isGeneratingSummary ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-3.5 w-3.5" />
+                        )}
+                        {isRu ? "AI с помощью" : "AI bilan yozish"}
+                      </button>
+                    }
                   />
                 </div>
               )}
@@ -313,9 +369,13 @@ export default function CreateResumePage() {
                       <div className="grid gap-3 sm:grid-cols-2">
                         <Field label="Kompaniya" value={experience.company} onChange={(value) => updateExperience(index, "company", value)} placeholder="Kompaniya nomi" />
                         <Field label="Lavozim" value={experience.position} onChange={(value) => updateExperience(index, "position", value)} placeholder={isRu ? "Менеджер" : "Menejer"} />
-                        <Field label="Boshlanish" type="month" value={experience.start_date} onChange={(value) => updateExperience(index, "start_date", value)} />
                         <div>
-                          <Field label="Tugash" type="month" value={experience.end_date || ""} onChange={(value) => updateExperience(index, "end_date", value)} disabled={experience.is_current} />
+                          <Label>{isRu ? "Начало" : "Boshlanish"}</Label>
+                          <MonthYearPicker value={experience.start_date} onChange={(value) => updateExperience(index, "start_date", value)} />
+                        </div>
+                        <div>
+                          <Label>{isRu ? "Окончание" : "Tugash"}</Label>
+                          <MonthYearPicker value={experience.end_date || ""} onChange={(value) => updateExperience(index, "end_date", value)} disabled={experience.is_current} />
                           <label className="mt-2 flex items-center gap-2 text-sm text-slate-600">
                             <input type="checkbox" checked={!!experience.is_current} onChange={(event) => updateExperience(index, "is_current", event.target.checked)} />
                             Hozirda ishlayapman
@@ -454,7 +514,7 @@ export default function CreateResumePage() {
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
                 <Eye className="h-4 w-4 text-emerald-700" />
-                {isRu ? "Предпросмотр в реальном времени" : "Jonli ko&apos;rinish"}
+                {isRu ? "Предпросмотр в реальном времени" : "Jonli ko'rinish"}
               </div>
               <Button variant="outline" size="sm" onClick={() => void handleSaveAndDownload()} disabled={isSaving || isDownloading}>
                 {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
@@ -508,15 +568,20 @@ function TextArea({
   value,
   onChange,
   placeholder,
+  action,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  action?: ReactNode;
 }) {
   return (
     <div>
-      <Label>{label}</Label>
+      <div className="flex items-center justify-between gap-2">
+        <Label>{label}</Label>
+        {action}
+      </div>
       <textarea
         value={value}
         onChange={(event) => onChange(event.target.value)}

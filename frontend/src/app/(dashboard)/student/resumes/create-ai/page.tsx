@@ -62,6 +62,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { MonthYearPicker } from "@/components/resume/MonthYearPicker";
 import { useResume } from "@/hooks/useResume";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -815,18 +816,21 @@ export default function AIResumeBuilderPage() {
                       </div>
                       <div>
                         <Label>{t("aiResumeBuilder.startDate")}</Label>
-                        <Input
-                          type="month"
-                          {...register(`experiences.${index}.startDate`)}
+                        <MonthYearPicker
+                          value={formData.experiences?.[index]?.startDate ?? ""}
+                          onChange={(v) =>
+                            setValue(`experiences.${index}.startDate`, v, { shouldDirty: true })
+                          }
                         />
                       </div>
                       <div>
                         <Label>{t("aiResumeBuilder.endDate")}</Label>
-                        <Input
-                          type="month"
-                          placeholder="Hozirgi vaqtgacha"
+                        <MonthYearPicker
+                          value={formData.experiences?.[index]?.endDate ?? ""}
+                          onChange={(v) =>
+                            setValue(`experiences.${index}.endDate`, v, { shouldDirty: true })
+                          }
                           disabled={formData.experiences?.[index]?.isCurrent}
-                          {...register(`experiences.${index}.endDate`)}
                         />
                         <label className="mt-2 flex items-center gap-2 text-sm">
                           <input
@@ -1480,7 +1484,7 @@ export default function AIResumeBuilderPage() {
                     }
                     disabled={!generatedResume}
                   >
-                    {isRu ? "Открыть" : "Ko&apos;rish"}
+                    {isRu ? "Открыть" : "Ko'rish"}
                   </Button>
                   <Button
                     className="bg-gradient-to-r from-emerald-500 to-cyan-600"

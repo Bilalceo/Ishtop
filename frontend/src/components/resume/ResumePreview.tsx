@@ -4,7 +4,6 @@ import {
   Award,
   Briefcase,
   CheckCircle2,
-  Code2,
   ExternalLink,
   GraduationCap,
   Languages,
@@ -44,7 +43,7 @@ const firstText = (...values: unknown[]) => {
 
 const initialsFrom = (name: string) => {
   const parts = name.split(/\s+/).filter(Boolean);
-  return (parts[0]?.[0] || "S") + (parts[1]?.[0] || "C");
+  return ((parts[0]?.[0] || "S") + (parts[1]?.[0] || "C")).toUpperCase();
 };
 
 export function ResumePreview({ content, title, className, isPlaceholder, locale }: ResumePreviewProps) {
@@ -63,11 +62,10 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
           current: "По настоящее время",
           position: "Должность",
           fillForm: "Заполните данные, чтобы увидеть предпросмотр резюме.",
-          links: "Ссылки",
           portfolio: "Портфолио",
           skills: "Навыки",
           technical: "Технические",
-          soft: "Мягкие",
+          soft: "Личные качества",
           languages: "Языки",
           certifications: "Сертификаты",
           verifiedSkills: "Подтверждённые навыки",
@@ -84,11 +82,10 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
           current: "Hozirgi vaqt",
           position: "Lavozim",
           fillForm: "Rezyume ko'rinishini ko'rish uchun ma'lumotlarni to'ldiring.",
-          links: "Havolalar",
           portfolio: "Portfolio",
           skills: "Ko'nikmalar",
           technical: "Texnik",
-          soft: "Ijtimoiy",
+          soft: "Shaxsiy fazilatlar",
           languages: "Tillar",
           certifications: "Sertifikatlar",
           verifiedSkills: "Tasdiqlangan ko'nikmalar",
@@ -147,38 +144,55 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
   const hasVerified = Object.values(skillVerifications).some((v) => v === "verified");
   const hasLearning = Object.values(skillVerifications).some((v) => v === "learning");
 
-  return (
-    <article className={cn("relative min-h-[297mm] overflow-hidden bg-[#f8fafc] text-slate-900", className)}>
-      <div className="absolute -right-28 -top-28 h-72 w-72 rounded-full bg-cyan-200/40 blur-3xl" />
-      <div className="absolute -bottom-28 -left-24 h-72 w-72 rounded-full bg-emerald-200/50 blur-3xl" />
+  const hasSkills = technicalSkills.length > 0 || softSkills.length > 0;
 
-      <div className="relative grid min-h-[297mm] grid-cols-[1fr_250px]">
-        <main className="space-y-8 bg-white px-10 py-10">
-          <header className="border-b border-slate-200 pb-8">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-700">
-              <Sparkles className="h-3.5 w-3.5" />
-              {copy.badge}
-            </div>
-            {/* h2: ResumePreview is always embedded inside a page that already owns the h1. */}
-            <h2 className="text-[34px] font-black leading-tight tracking-tight text-slate-950">
+  return (
+    <article
+      className={cn(
+        "relative mx-auto min-h-[297mm] w-full max-w-[820px] bg-white text-slate-800",
+        "shadow-[0_1px_3px_rgba(15,23,42,0.06)]",
+        className,
+      )}
+    >
+      {/* Slim accent rail anchors the page without a heavy ink-hungry sidebar. */}
+      <span className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-emerald-500 to-teal-600" aria-hidden />
+
+      <div className="px-12 py-12">
+        {/* ---------------- Header ---------------- */}
+        <header className="flex items-start justify-between gap-6">
+          <div className="min-w-0">
+            <h2 className="text-[33px] font-bold leading-[1.1] tracking-tight text-slate-900">
               {name}
             </h2>
-            <p className="mt-2 text-lg font-medium text-emerald-700">{role}</p>
-            <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 text-[13px] text-slate-600">
-              {email && <ContactItem icon={<Mail className="h-4 w-4" />} text={email} />}
-              {phone && <ContactItem icon={<Phone className="h-4 w-4" />} text={phone} />}
-              {location && <ContactItem icon={<MapPin className="h-4 w-4" />} text={location} />}
-            </div>
-          </header>
+            <p className="mt-1.5 text-[14px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
+              {role}
+            </p>
+          </div>
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-xl font-bold text-white">
+            {initialsFrom(name)}
+          </div>
+        </header>
 
+        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12.5px] text-slate-500">
+          {email && <ContactItem icon={<Mail className="h-3.5 w-3.5" />} text={email} />}
+          {phone && <ContactItem icon={<Phone className="h-3.5 w-3.5" />} text={phone} />}
+          {location && <ContactItem icon={<MapPin className="h-3.5 w-3.5" />} text={location} />}
+          {linkedin && <ContactItem icon={<ExternalLink className="h-3.5 w-3.5" />} text={linkedin} />}
+          {portfolio && <ContactItem icon={<ExternalLink className="h-3.5 w-3.5" />} text={portfolio} />}
+        </div>
+
+        <div className="mt-6 h-px w-full bg-slate-200" />
+
+        {/* ---------------- Body ---------------- */}
+        <div className="mt-7 space-y-7">
           {summary && (
-            <Section title={copy.summary} kicker="01">
-              <p className="text-[14px] leading-7 text-slate-600">{summary}</p>
+            <Section title={copy.summary}>
+              <p className="text-[13.5px] leading-7 text-slate-600">{summary}</p>
             </Section>
           )}
 
           {experience.length > 0 && (
-            <Section title={copy.experience} kicker="02" icon={<Briefcase className="h-4 w-4" />}>
+            <Section title={copy.experience} icon={<Briefcase className="h-3.5 w-3.5" />}>
               <div className="space-y-5">
                 {experience.map((item, index) => {
                   const position = firstText(item.position, item.title, item.job_title);
@@ -186,27 +200,26 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
                   const period = [
                     firstText(item.start_date),
                     item.is_current ? copy.current : firstText(item.end_date),
-                  ].filter(Boolean).join(" - ");
+                  ].filter(Boolean).join(" — ");
                   const description = firstText(item.description);
                   const achievements = asArray<string>(item.achievements);
 
                   return (
-                    <div key={`${company}-${position}-${index}`} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <h3 className="font-bold text-slate-950">{position || copy.position}</h3>
-                          <p className="text-sm font-semibold text-emerald-700">{company}</p>
-                        </div>
-                        {period && <p className="whitespace-nowrap text-xs font-medium text-slate-500">{period}</p>}
+                    <div key={`${company}-${position}-${index}`} className="relative border-l-2 border-slate-100 pl-4">
+                      <span className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
+                      <div className="flex items-baseline justify-between gap-4">
+                        <h3 className="text-[15px] font-semibold text-slate-900">{position || copy.position}</h3>
+                        {period && <span className="shrink-0 text-[12px] font-medium text-slate-400">{period}</span>}
                       </div>
+                      {company && <p className="text-[13px] font-medium text-emerald-700">{company}</p>}
                       {description && (
-                        <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
+                        <p className="mt-2 text-[13px] leading-6 text-slate-600">{description}</p>
                       )}
                       {achievements.length > 0 && (
-                        <ul className="mt-3 space-y-1.5">
+                        <ul className="mt-2 space-y-1.5">
                           {achievements.map((achievement, achievementIndex) => (
-                            <li key={`${achievement}-${achievementIndex}`} className="flex gap-2 text-sm text-slate-600">
-                              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                            <li key={`${achievement}-${achievementIndex}`} className="flex gap-2 text-[13px] leading-6 text-slate-600">
+                              <CheckCircle2 className="mt-1 h-3.5 w-3.5 shrink-0 text-emerald-600" />
                               <span>{achievement}</span>
                             </li>
                           ))}
@@ -220,15 +233,18 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
           )}
 
           {education.length > 0 && (
-            <Section title={copy.education} kicker="03" icon={<GraduationCap className="h-4 w-4" />}>
-              <div className="grid gap-3">
+            <Section title={copy.education} icon={<GraduationCap className="h-3.5 w-3.5" />}>
+              <div className="space-y-4">
                 {education.map((item, index) => (
-                  <div key={`${item.institution}-${index}`} className="rounded-2xl border border-slate-200 p-4">
-                    <h3 className="font-bold text-slate-950">
-                      {[firstText(item.degree, item.degree_type), firstText(item.field, item.field_of_study, item.major)].filter(Boolean).join(" - ")}
-                    </h3>
-                    <p className="mt-1 text-sm font-semibold text-emerald-700">{firstText(item.institution, item.institution_name)}</p>
-                    <p className="mt-1 text-xs text-slate-500">{firstText(item.year, item.graduation_date)}</p>
+                  <div key={`${item.institution}-${index}`} className="relative border-l-2 border-slate-100 pl-4">
+                    <span className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
+                    <div className="flex items-baseline justify-between gap-4">
+                      <h3 className="text-[15px] font-semibold text-slate-900">
+                        {[firstText(item.degree, item.degree_type), firstText(item.field, item.field_of_study, item.major)].filter(Boolean).join(", ")}
+                      </h3>
+                      <span className="shrink-0 text-[12px] font-medium text-slate-400">{firstText(item.year, item.graduation_date)}</span>
+                    </div>
+                    <p className="text-[13px] font-medium text-emerald-700">{firstText(item.institution, item.institution_name)}</p>
                   </div>
                 ))}
               </div>
@@ -236,20 +252,21 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
           )}
 
           {projects.length > 0 && (
-            <Section title={copy.projects} kicker="04">
-              <div className="grid gap-3">
+            <Section title={copy.projects}>
+              <div className="space-y-4">
                 {projects.map((project, index) => {
                   const projectName = firstText(project.name, project.project_name);
                   const projectDescription = firstText(project.description);
                   const projectUrl = firstText(project.url);
 
                   return (
-                    <div key={`${projectName}-${index}`} className="rounded-2xl border border-slate-200 p-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <h3 className="font-bold text-slate-950">{projectName}</h3>
-                        {projectUrl && <ExternalLink className="h-4 w-4 text-emerald-700" />}
+                    <div key={`${projectName}-${index}`} className="relative border-l-2 border-slate-100 pl-4">
+                      <span className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-[15px] font-semibold text-slate-900">{projectName}</h3>
+                        {projectUrl && <ExternalLink className="h-3.5 w-3.5 text-emerald-600" />}
                       </div>
-                      {projectDescription && <p className="mt-2 text-sm leading-6 text-slate-600">{projectDescription}</p>}
+                      {projectDescription && <p className="mt-1.5 text-[13px] leading-6 text-slate-600">{projectDescription}</p>}
                     </div>
                   );
                 })}
@@ -257,83 +274,74 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
             </Section>
           )}
 
+          {hasSkills && (
+            <Section title={copy.skills}>
+              <div className="space-y-3">
+                {technicalSkills.length > 0 && (
+                  <SkillGroup label={copy.technical} skills={technicalSkills} verificationFor={verificationFor} />
+                )}
+                {softSkills.length > 0 && (
+                  <SkillGroup label={copy.soft} skills={softSkills} verificationFor={verificationFor} />
+                )}
+                {(hasVerified || hasLearning) && (
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1 text-[10.5px] text-slate-400">
+                    {hasVerified && (
+                      <span className="flex items-center gap-1.5">
+                        <CheckCircle2 className="h-3 w-3 text-emerald-600" aria-hidden />
+                        {copy.verifiedSkills}
+                      </span>
+                    )}
+                    {hasLearning && (
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-full border border-dashed border-slate-400" aria-hidden />
+                        {copy.learningSkills}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </Section>
+          )}
+
+          {languages.length > 0 && (
+            <Section title={copy.languages} icon={<Languages className="h-3.5 w-3.5" />}>
+              <div className="flex flex-wrap gap-x-6 gap-y-2">
+                {languages.map((language, index) => (
+                  <div key={`${language.name}-${index}`} className="text-[13px]">
+                    <span className="font-semibold text-slate-800">{firstText(language.name)}</span>
+                    {firstText(language.proficiency, language.level) && (
+                      <span className="text-slate-500"> — {firstText(language.proficiency, language.level)}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Section>
+          )}
+
+          {certifications.length > 0 && (
+            <Section title={copy.certifications} icon={<Award className="h-3.5 w-3.5" />}>
+              <div className="space-y-2">
+                {certifications.map((cert, index) => (
+                  <div key={`${cert.name}-${index}`} className="flex items-baseline justify-between gap-4 text-[13px]">
+                    <span className="font-semibold text-slate-800">{firstText(cert.name)}</span>
+                    <span className="shrink-0 text-[12px] text-slate-500">
+                      {[firstText(cert.issuer, cert.issuing_organization), firstText(cert.year, cert.date)].filter(Boolean).join(" — ")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Section>
+          )}
+
           {isPlaceholder && (
-            <div className="flex min-h-64 flex-col items-center justify-center rounded-[28px] border border-dashed border-slate-300 bg-slate-50 text-center">
-              <Sparkles className="h-12 w-12 text-emerald-500" />
+            <div className="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 text-center">
+              <Sparkles className="h-10 w-10 text-emerald-500" />
               <p className="mt-4 max-w-sm text-sm font-medium text-slate-500">
                 {copy.fillForm}
               </p>
             </div>
           )}
-        </main>
-
-        <aside className="bg-slate-950 px-7 py-10 text-white">
-          <div className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-gradient-to-br from-emerald-400 to-cyan-300 text-2xl font-black text-slate-950 shadow-lg shadow-emerald-900/30">
-            {initialsFrom(name)}
-          </div>
-
-          {(linkedin || portfolio) && (
-            <div className="mt-8 space-y-3">
-              <SidebarTitle title={copy.links} />
-              {linkedin && <SidebarText text="LinkedIn" subtext={linkedin} />}
-              {portfolio && <SidebarText text={copy.portfolio} subtext={portfolio} />}
-            </div>
-          )}
-
-          {(technicalSkills.length > 0 || softSkills.length > 0) && (
-            <div className="mt-8 space-y-4">
-              <SidebarTitle icon={<Code2 className="h-4 w-4" />} title={copy.skills} />
-              {technicalSkills.length > 0 && (
-                <SkillGroup label={copy.technical} skills={technicalSkills} verificationFor={verificationFor} />
-              )}
-              {softSkills.length > 0 && (
-                <SkillGroup label={copy.soft} skills={softSkills} muted verificationFor={verificationFor} />
-              )}
-              {(hasVerified || hasLearning) && (
-                <div className="space-y-1 border-t border-white/10 pt-3 text-[10px] leading-4 text-slate-400">
-                  {hasVerified && (
-                    <p className="flex items-center gap-1.5">
-                      <CheckCircle2 className="h-3 w-3 text-emerald-300" aria-hidden />
-                      {copy.verifiedSkills}
-                    </p>
-                  )}
-                  {hasLearning && (
-                    <p className="flex items-center gap-1.5">
-                      <span className="h-2 w-2 rounded-full border border-slate-400" aria-hidden />
-                      {copy.learningSkills}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {languages.length > 0 && (
-            <div className="mt-8 space-y-3">
-              <SidebarTitle icon={<Languages className="h-4 w-4" />} title={copy.languages} />
-              {languages.map((language, index) => (
-                <SidebarText
-                  key={`${language.name}-${index}`}
-                  text={firstText(language.name)}
-                  subtext={firstText(language.proficiency, language.level)}
-                />
-              ))}
-            </div>
-          )}
-
-          {certifications.length > 0 && (
-            <div className="mt-8 space-y-3">
-              <SidebarTitle icon={<Award className="h-4 w-4" />} title={copy.certifications} />
-              {certifications.map((cert, index) => (
-                <SidebarText
-                  key={`${cert.name}-${index}`}
-                  text={firstText(cert.name)}
-                  subtext={[firstText(cert.issuer, cert.issuing_organization), firstText(cert.year, cert.date)].filter(Boolean).join(" - ")}
-                />
-              ))}
-            </div>
-          )}
-        </aside>
+        </div>
       </div>
     </article>
   );
@@ -342,7 +350,7 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
 function ContactItem({ icon, text }: { icon: ReactNode; text: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span className="text-emerald-700">{icon}</span>
+      <span className="text-emerald-600">{icon}</span>
       {text}
     </span>
   );
@@ -350,21 +358,19 @@ function ContactItem({ icon, text }: { icon: ReactNode; text: string }) {
 
 function Section({
   title,
-  kicker,
   icon,
   children,
 }: {
   title: string;
-  kicker: string;
   icon?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <section>
-      <div className="mb-4 flex items-center gap-3">
-        <span className="rounded-full bg-slate-950 px-2.5 py-1 text-[11px] font-black text-white">{kicker}</span>
-        <h2 className="flex items-center gap-2 text-[17px] font-black uppercase tracking-[0.18em] text-slate-950">
-          {icon && <span className="text-emerald-700">{icon}</span>}
+      <div className="mb-3 flex items-center gap-2">
+        <span className="h-3.5 w-1 rounded-full bg-emerald-500" aria-hidden />
+        <h2 className="flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.2em] text-slate-700">
+          {icon && <span className="text-emerald-600">{icon}</span>}
           {title}
         </h2>
       </div>
@@ -373,56 +379,35 @@ function Section({
   );
 }
 
-function SidebarTitle({ icon, title }: { icon?: ReactNode; title: string }) {
-  return (
-    <h3 className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-cyan-200">
-      {icon}
-      {title}
-    </h3>
-  );
-}
-
-function SidebarText({ text, subtext }: { text: string; subtext?: string }) {
-  if (!text && !subtext) return null;
-
-  return (
-    <div className="rounded-2xl bg-white/[0.07] p-3">
-      {text && <p className="text-sm font-bold text-white">{text}</p>}
-      {subtext && <p className="mt-1 break-words text-[11px] leading-4 text-slate-300">{subtext}</p>}
-    </div>
-  );
-}
-
 function SkillGroup({
   label,
   skills,
-  muted,
   verificationFor,
 }: {
   label: string;
   skills: string[];
-  muted?: boolean;
   verificationFor?: (skill: string) => "verified" | "learning" | undefined;
 }) {
   return (
     <div>
-      <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">{label}</p>
-      <div className="flex flex-wrap gap-2">
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</p>
+      <div className="flex flex-wrap gap-1.5">
         {skills.map((skill) => {
           const status = verificationFor?.(skill);
           return (
             <span
               key={skill}
               className={cn(
-                "inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-bold",
-                muted ? "bg-white/10 text-slate-200" : "bg-emerald-300 text-slate-950",
-                // Verified: solid ring highlight. Learning: subtle dashed outline.
-                status === "verified" && "ring-1 ring-emerald-400",
-                status === "learning" && "bg-transparent text-slate-300 ring-1 ring-dashed ring-slate-500",
+                "inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-[12px] font-medium",
+                status === "verified"
+                  ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                  : status === "learning"
+                    ? "border-dashed border-slate-300 bg-white text-slate-500"
+                    : "border-slate-200 bg-slate-50 text-slate-700",
               )}
             >
               {status === "verified" && (
-                <CheckCircle2 className={cn("h-3 w-3", muted ? "text-emerald-300" : "text-emerald-700")} aria-hidden />
+                <CheckCircle2 className="h-3 w-3 text-emerald-600" aria-hidden />
               )}
               {skill}
             </span>

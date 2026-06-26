@@ -222,6 +222,14 @@ export const resumeApi = {
     language?: "uz" | "ru" | "en";
     skill_verifications?: Record<string, "verified" | "learning" | "unverified">;
   }) => api.post("/resumes/generate-ai", data),
+
+  // Lightweight AI helper for the manual builder — generates a short summary.
+  generateSummary: (data: {
+    role?: string;
+    skills?: string[];
+    experience?: { position?: string; company?: string }[];
+    locale?: "uz" | "ru";
+  }) => api.post("/resumes/ai/summary", data),
   
   update: (id: string, data: Partial<{ title: string; content: object; status: string }>) =>
     api.put(`/resumes/${id}`, data),

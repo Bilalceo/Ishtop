@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ResumePreview } from "@/components/resume/ResumePreview";
+import { MonthYearPicker } from "@/components/resume/MonthYearPicker";
 import { resumeApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { Resume, ResumeContent } from "@/types/api";
@@ -268,7 +269,7 @@ export default function ResumeEditPage() {
             <div>
               <p className="text-xs font-black uppercase tracking-[0.26em] text-emerald-700">{isRu ? "РЕДАКТОР РЕЗЮМЕ" : "REZYUME TAHRIRLASH"}</p>
               <h1 className="font-display text-2xl font-black text-slate-950">{isRu ? "Редактирование резюме" : "Rezyume tahrirlash"}</h1>
-              <p className="text-sm text-slate-500">{isRu ? "Изменения сразу видны в предпросмотре, затем можно скачать PDF." : "O&apos;zgarishlarni real vaqtda ko&apos;ring va tayyor PDF yuklab oling."}</p>
+              <p className="text-sm text-slate-500">{isRu ? "Изменения сразу видны в предпросмотре, затем можно скачать PDF." : "O'zgarishlarni real vaqtda ko'ring va tayyor PDF yuklab oling."}</p>
             </div>
           </div>
 
@@ -331,7 +332,7 @@ export default function ResumeEditPage() {
                 </div>
                 <div>
                   <h2 className="font-display text-xl font-black text-slate-950">{currentStep.label}</h2>
-                  <p className="text-sm text-slate-500">{isRu ? "Обновляйте данные и сразу проверяйте качество резюме." : "Ma&apos;lumotlarni yangilang va sifatni real vaqtda ko&apos;ring."}</p>
+                  <p className="text-sm text-slate-500">{isRu ? "Обновляйте данные и сразу проверяйте качество резюме." : "Ma'lumotlarni yangilang va sifatni real vaqtda ko'ring."}</p>
                 </div>
               </div>
 
@@ -367,9 +368,13 @@ export default function ResumeEditPage() {
                       <div className="grid gap-3 sm:grid-cols-2">
                         <Field label="Kompaniya" value={experience.company} onChange={(value) => updateExperience(index, "company", value)} placeholder="Kompaniya nomi" />
                         <Field label="Lavozim" value={experience.position} onChange={(value) => updateExperience(index, "position", value)} placeholder={isRu ? "Менеджер" : "Menejer"} />
-                        <Field label="Boshlanish" type="month" value={experience.start_date} onChange={(value) => updateExperience(index, "start_date", value)} />
                         <div>
-                          <Field label="Tugash" type="month" value={experience.end_date || ""} onChange={(value) => updateExperience(index, "end_date", value)} disabled={experience.is_current} />
+                          <Label>{isRu ? "Начало" : "Boshlanish"}</Label>
+                          <MonthYearPicker value={experience.start_date} onChange={(value) => updateExperience(index, "start_date", value)} />
+                        </div>
+                        <div>
+                          <Label>{isRu ? "Окончание" : "Tugash"}</Label>
+                          <MonthYearPicker value={experience.end_date || ""} onChange={(value) => updateExperience(index, "end_date", value)} disabled={experience.is_current} />
                           <label className="mt-2 flex items-center gap-2 text-sm text-slate-600">
                             <input type="checkbox" checked={!!experience.is_current} onChange={(event) => updateExperience(index, "is_current", event.target.checked)} />
                             Hozirda ishlayapman
@@ -508,7 +513,7 @@ export default function ResumeEditPage() {
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
                 <Eye className="h-4 w-4 text-emerald-700" />
-                {isRu ? "Предпросмотр в реальном времени" : "Jonli ko&apos;rinish"}
+                {isRu ? "Предпросмотр в реальном времени" : "Jonli ko'rinish"}
               </div>
               <Button variant="outline" size="sm" onClick={() => void handleSaveAndDownload()} disabled={isSaving || isDownloading}>
                 {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
