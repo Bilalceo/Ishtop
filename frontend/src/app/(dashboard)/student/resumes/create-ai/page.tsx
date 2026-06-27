@@ -62,6 +62,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { MonthYearPicker } from "@/components/resume/MonthYearPicker";
 import { useResume } from "@/hooks/useResume";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -250,6 +251,18 @@ const tones = [
     descriptionKey: "aiResumeBuilder.technicalDesc",
   },
 ];
+
+const skillInputClassName =
+  "h-12 rounded-2xl border-surface-200 bg-white/95 text-surface-950 shadow-sm shadow-slate-200/60 placeholder:text-surface-400 focus-visible:ring-2 focus-visible:ring-purple-500/80 dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:shadow-none dark:placeholder:text-surface-400";
+
+const skillAddButtonClassName =
+  "h-12 rounded-2xl border-2 border-purple-500/70 bg-purple-50 text-purple-700 shadow-sm shadow-purple-500/10 hover:border-purple-400 hover:bg-purple-100 hover:text-purple-800 dark:border-violet-400/70 dark:bg-violet-400/10 dark:text-violet-100 dark:hover:border-violet-300 dark:hover:bg-violet-400/20";
+
+const selectedSkillBadgeClassName =
+  "group cursor-pointer border border-surface-200 bg-white px-3 py-1.5 text-sm font-semibold text-surface-700 shadow-sm shadow-slate-200/60 hover:border-red-300 hover:bg-red-50 hover:text-red-700 dark:border-white/10 dark:bg-white/[0.07] dark:text-surface-100 dark:shadow-none dark:hover:border-red-400/50 dark:hover:bg-red-500/12 dark:hover:text-red-100";
+
+const suggestedSkillChipClassName =
+  "rounded-full border border-surface-300 bg-white/90 px-3 py-1.5 text-sm font-semibold text-surface-700 shadow-sm shadow-slate-200/50 transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-300 hover:bg-purple-50 hover:text-purple-800 hover:shadow-md hover:shadow-purple-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/70 dark:border-white/15 dark:bg-white/[0.07] dark:text-surface-100 dark:shadow-none dark:hover:border-violet-300/70 dark:hover:bg-violet-400/16 dark:hover:text-white dark:focus-visible:ring-violet-300/70";
 
 // =============================================================================
 // MAIN COMPONENT
@@ -815,18 +828,21 @@ export default function AIResumeBuilderPage() {
                       </div>
                       <div>
                         <Label>{t("aiResumeBuilder.startDate")}</Label>
-                        <Input
-                          type="month"
-                          {...register(`experiences.${index}.startDate`)}
+                        <MonthYearPicker
+                          value={formData.experiences?.[index]?.startDate ?? ""}
+                          onChange={(v) =>
+                            setValue(`experiences.${index}.startDate`, v, { shouldDirty: true })
+                          }
                         />
                       </div>
                       <div>
                         <Label>{t("aiResumeBuilder.endDate")}</Label>
-                        <Input
-                          type="month"
-                          placeholder="Hozirgi vaqtgacha"
+                        <MonthYearPicker
+                          value={formData.experiences?.[index]?.endDate ?? ""}
+                          onChange={(v) =>
+                            setValue(`experiences.${index}.endDate`, v, { shouldDirty: true })
+                          }
                           disabled={formData.experiences?.[index]?.isCurrent}
-                          {...register(`experiences.${index}.endDate`)}
                         />
                         <label className="mt-2 flex items-center gap-2 text-sm">
                           <input
@@ -968,10 +984,12 @@ export default function AIResumeBuilderPage() {
                 className="space-y-6"
               >
                 {/* Technical Skills */}
-                <div>
-                  <Label>{t("aiResumeBuilder.technicalSkills")}</Label>
+                <div className="rounded-[24px] border border-surface-200/70 bg-white/70 p-4 shadow-sm shadow-slate-200/60 dark:border-white/10 dark:bg-white/[0.035] dark:shadow-none">
+                  <Label className="text-base font-bold text-surface-800 dark:text-white">
+                    {t("aiResumeBuilder.technicalSkills")}
+                  </Label>
                   {activeSkillProfile && (
-                    <p className="mt-1 text-xs text-emerald-700">
+                    <p className="mt-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
                       {t("aiResumeBuilder.roleMatchedSuggestions")}:{" "}
                       {activeSkillProfile.label}
                     </p>
@@ -980,6 +998,7 @@ export default function AIResumeBuilderPage() {
                     <Input
                       placeholder={t("aiResumeBuilder.addSkillPlaceholder")}
                       value={skillInput.technical}
+                      className={skillInputClassName}
                       onChange={(e) =>
                         setSkillInput((prev) => ({
                           ...prev,
@@ -994,6 +1013,7 @@ export default function AIResumeBuilderPage() {
                     <Button
                       type="button"
                       variant="outline"
+                      className={skillAddButtonClassName}
                       onClick={() => addSkill("technical")}
                     >
                       <Plus className="h-4 w-4" />
@@ -1006,27 +1026,31 @@ export default function AIResumeBuilderPage() {
                         <Badge
                           key={skill}
                           variant="secondary"
-                          className={`cursor-pointer hover:bg-red-100 hover:text-red-700 ${
+                          className={cn(
+                            selectedSkillBadgeClassName,
                             status === "verified"
-                              ? "border border-emerald-300 bg-emerald-50 text-emerald-700"
+                              ? "border-emerald-300 bg-emerald-50 text-emerald-700 hover:border-red-300 hover:bg-red-50 hover:text-red-700 dark:border-emerald-400/40 dark:bg-emerald-400/12 dark:text-emerald-100 dark:hover:border-red-400/50 dark:hover:bg-red-500/12 dark:hover:text-red-100"
                               : status === "learning"
-                                ? "border border-amber-300 bg-amber-50 text-amber-700"
-                                : ""
-                          }`}
+                                ? "border-amber-300 bg-amber-50 text-amber-700 hover:border-red-300 hover:bg-red-50 hover:text-red-700 dark:border-amber-300/40 dark:bg-amber-300/12 dark:text-amber-100 dark:hover:border-red-400/50 dark:hover:bg-red-500/12 dark:hover:text-red-100"
+                                : "",
+                          )}
                           onClick={() => removeSkill("technical", skill)}
                         >
                           {status === "verified" && "✓ "}
                           {status === "learning" && "📘 "}
-                          {skill} x
+                          {skill}
+                          <span className="ml-1.5 text-surface-400 transition-colors group-hover:text-red-500 dark:text-surface-500 dark:group-hover:text-red-200">
+                            ×
+                          </span>
                         </Badge>
                       );
                     })}
                   </div>
                   <div className="mt-2">
-                    <p className="text-xs text-surface-500 mb-2">
+                    <p className="mb-2 text-xs font-semibold text-surface-500 dark:text-surface-300">
                       {t("aiResumeBuilder.suggestedSkills")}
                     </p>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-2">
                       {technicalSkillSuggestions.map((skill) => (
                         <button
                           key={skill}
@@ -1037,7 +1061,7 @@ export default function AIResumeBuilderPage() {
                               skill,
                             ])
                           }
-                          className="rounded-full border border-surface-200 px-2 py-0.5 text-xs text-surface-600 hover:border-purple-300 hover:bg-purple-50"
+                          className={suggestedSkillChipClassName}
                         >
                           + {skill}
                         </button>
@@ -1055,12 +1079,15 @@ export default function AIResumeBuilderPage() {
                 </div>
 
                 {/* Soft Skills */}
-                <div>
-                  <Label>{t("aiResumeBuilder.softSkills")}</Label>
+                <div className="rounded-[24px] border border-surface-200/70 bg-white/70 p-4 shadow-sm shadow-slate-200/60 dark:border-white/10 dark:bg-white/[0.035] dark:shadow-none">
+                  <Label className="text-base font-bold text-surface-800 dark:text-white">
+                    {t("aiResumeBuilder.softSkills")}
+                  </Label>
                   <div className="mt-2 flex gap-2">
                     <Input
                       placeholder={t("aiResumeBuilder.addSkillPlaceholder")}
                       value={skillInput.soft}
+                      className={skillInputClassName}
                       onChange={(e) =>
                         setSkillInput((prev) => ({
                           ...prev,
@@ -1075,6 +1102,7 @@ export default function AIResumeBuilderPage() {
                     <Button
                       type="button"
                       variant="outline"
+                      className={skillAddButtonClassName}
                       onClick={() => addSkill("soft")}
                     >
                       <Plus className="h-4 w-4" />
@@ -1085,18 +1113,21 @@ export default function AIResumeBuilderPage() {
                       <Badge
                         key={skill}
                         variant="secondary"
-                        className="cursor-pointer hover:bg-red-100 hover:text-red-700"
+                        className={selectedSkillBadgeClassName}
                         onClick={() => removeSkill("soft", skill)}
                       >
-                        {skill} x
+                        {skill}
+                        <span className="ml-1.5 text-surface-400 transition-colors group-hover:text-red-500 dark:text-surface-500 dark:group-hover:text-red-200">
+                          ×
+                        </span>
                       </Badge>
                     ))}
                   </div>
                   <div className="mt-2">
-                    <p className="text-xs text-surface-500 mb-2">
+                    <p className="mb-2 text-xs font-semibold text-surface-500 dark:text-surface-300">
                       {t("aiResumeBuilder.suggestedSkills")}
                     </p>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-2">
                       {softSkillSuggestions.map((skill) => (
                         <button
                           key={skill}
@@ -1107,7 +1138,7 @@ export default function AIResumeBuilderPage() {
                               skill,
                             ])
                           }
-                          className="rounded-full border border-surface-200 px-2 py-0.5 text-xs text-surface-600 hover:border-purple-300 hover:bg-purple-50"
+                          className={suggestedSkillChipClassName}
                         >
                           + {skill}
                         </button>
@@ -1480,7 +1511,7 @@ export default function AIResumeBuilderPage() {
                     }
                     disabled={!generatedResume}
                   >
-                    {isRu ? "Открыть" : "Ko&apos;rish"}
+                    {isRu ? "Открыть" : "Ko'rish"}
                   </Button>
                   <Button
                     className="bg-gradient-to-r from-emerald-500 to-cyan-600"

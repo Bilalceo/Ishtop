@@ -82,6 +82,9 @@ const copy = {
     confirmBlock: "Bloklash",
     confirmActivate: "Faollashtirish",
     cannotBlockSelf: "O'zingizni bloklay olmaysiz",
+    selectAll: "Hammasini tanlash",
+    selectedCount: (n: number) => `${n} tanlandi`,
+    selectOnlyLoaded: "Faqat yuklangan yozuvlarni tanlaydi",
   },
   ru: {
     title: "Управление пользователями",
@@ -123,6 +126,9 @@ const copy = {
     confirmBlock: "Заблокировать",
     confirmActivate: "Активировать",
     cannotBlockSelf: "Нельзя заблокировать себя",
+    selectAll: "Выбрать все",
+    selectedCount: (n: number) => `Выбрано ${n}`,
+    selectOnlyLoaded: "Выбирает только загруженные записи",
   },
 } as const;
 
@@ -396,13 +402,13 @@ export default function AdminUsersPage() {
             <div className="mb-2 flex items-center gap-2 pb-2 border-b border-surface-100 dark:border-surface-800">
               <input
                 type="checkbox"
-                title="Faqat yuklangan yozuvlarni tanlaydi"
+                title={c.selectOnlyLoaded}
                 checked={selected.size === users.length && users.length > 0}
                 onChange={toggleAll}
                 className="h-4 w-4 rounded border-surface-300 accent-brand-500"
               />
               <span className="text-xs text-surface-500">
-                {selected.size > 0 ? `${selected.size} tanlandi` : "Hammasini tanlash"}
+                {selected.size > 0 ? c.selectedCount(selected.size) : c.selectAll}
               </span>
             </div>
           )}

@@ -876,7 +876,7 @@ def _generate_pdf(resume: Resume) -> bytes:
     try:
         import html
         from reportlab.lib import colors
-        from reportlab.lib.enums import TA_RIGHT
+        from reportlab.lib.enums import TA_LEFT
         from reportlab.lib.pagesizes import A4
         from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
         from reportlab.lib.units import mm
@@ -919,33 +919,33 @@ def _generate_pdf(resume: Resume) -> bytes:
                 fontName=bold_font,
                 fontSize=24,
                 leading=28,
-                textColor=colors.white,
+                alignment=TA_LEFT,
+                textColor=colors.HexColor("#0f172a"),
                 spaceAfter=4,
             ),
             "role": ParagraphStyle(
                 "Role",
                 parent=base_styles["Normal"],
-                fontName=regular_font,
-                fontSize=11,
-                leading=15,
-                textColor=colors.HexColor("#a7f3d0"),
+                fontName=bold_font,
+                fontSize=10.5,
+                leading=14,
+                textColor=colors.HexColor("#047857"),
             ),
             "contact": ParagraphStyle(
                 "Contact",
                 parent=base_styles["Normal"],
                 fontName=regular_font,
                 fontSize=8.5,
-                leading=12,
-                alignment=TA_RIGHT,
-                textColor=colors.HexColor("#e2e8f0"),
+                leading=13,
+                textColor=colors.HexColor("#64748b"),
             ),
             "section": ParagraphStyle(
                 "Section",
                 parent=base_styles["Heading2"],
                 fontName=bold_font,
-                fontSize=11,
+                fontSize=10.5,
                 leading=14,
-                textColor=colors.HexColor("#0f172a"),
+                textColor=colors.HexColor("#334155"),
                 spaceBefore=10,
                 spaceAfter=5,
                 uppercase=True,
@@ -1003,39 +1003,31 @@ def _generate_pdf(resume: Resume) -> bytes:
             _first_text(personal_info.get("linkedin_url"), personal_info.get("linkedin")),
             _first_text(personal_info.get("portfolio_url"), personal_info.get("website")),
         ]
-        contact_text = "<br/>".join(html.escape(item) for item in contacts if item)
+        # Clean, print-friendly header — matches the on-screen ResumePreview:
+        # dark name, emerald uppercase role, a single muted contact line, and a
+        # thin divider. No ink-hungry dark block.
+        contact_text = "   ·   ".join(html.escape(item) for item in contacts if item)
 
-        header = Table(
-            [
-                [
-                    [Paragraph(html.escape(name), styles["name"]), Paragraph(html.escape(role), styles["role"])],
-                    Paragraph(contact_text or _label(locale, "generated_by"), styles["contact"]),
-                ]
-            ],
-            colWidths=[118 * mm, 52 * mm],
-            style=TableStyle([
-                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#0f172a")),
-                ("BOX", (0, 0), (-1, -1), 0, colors.HexColor("#0f172a")),
-                ("LEFTPADDING", (0, 0), (-1, -1), 12),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 12),
-                ("TOPPADDING", (0, 0), (-1, -1), 12),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ]),
-        )
-        story.extend([header, Spacer(1, 8)])
+        story.append(Paragraph(html.escape(name), styles["name"]))
+        story.append(Paragraph(html.escape(role.upper()), styles["role"]))
+        if contact_text:
+            story.append(Spacer(1, 5))
+            story.append(Paragraph(contact_text, styles["contact"]))
+        story.append(Spacer(1, 7))
+        story.append(HRFlowable(width="100%", thickness=0.6, color=colors.HexColor("#e2e8f0")))
+        story.append(Spacer(1, 5))
 
         summary = _first_text(content.get("summary"), (content.get("professional_summary") or {}).get("text") if isinstance(content.get("professional_summary"), dict) else content.get("professional_summary"))
         if summary:
             story.extend([
                 paragraph(_label(locale, "summary"), "section"),
-                HRFlowable(width="100%", thickness=0.8, color=colors.HexColor("#10b981"), spaceAfter=5),
+                HRFlowable(width="100%", thickness=0.6, color=colors.HexColor("#10b981"), spaceAfter=5),
                 paragraph(summary),
             ])
 
         experience = content.get("experience") or content.get("work_experience") or []
         if isinstance(experience, list) and experience:
-            story.extend([paragraph(_label(locale, "experience"), "section"), HRFlowable(width="100%", thickness=0.8, color=colors.HexColor("#10b981"), spaceAfter=5)])
+            story.extend([paragraph(_label(locale, "experience"), "section"), HRFlowable(width="100%", thickness=0.6, color=colors.HexColor("#10b981"), spaceAfter=5)])
             for item in experience:
                 if not isinstance(item, dict):
                     continue
@@ -1062,7 +1054,7 @@ def _generate_pdf(resume: Resume) -> bytes:
 
         education = content.get("education") or []
         if isinstance(education, list) and education:
-            story.extend([paragraph(_label(locale, "education"), "section"), HRFlowable(width="100%", thickness=0.8, color=colors.HexColor("#10b981"), spaceAfter=5)])
+            story.extend([paragraph(_label(locale, "education"), "section"), HRFlowable(width="100%", thickness=0.6, color=colors.HexColor("#10b981"), spaceAfter=5)])
             for item in education:
                 if not isinstance(item, dict):
                     continue
@@ -1088,7 +1080,7 @@ def _generate_pdf(resume: Resume) -> bytes:
         verified_list = [s for s, st in verifications.items() if st == "verified"]
         learning_list = [s for s, st in verifications.items() if st == "learning"]
         if technical or soft or verified_list or learning_list:
-            story.extend([paragraph(_label(locale, "skills"), "section"), HRFlowable(width="100%", thickness=0.8, color=colors.HexColor("#10b981"), spaceAfter=5)])
+            story.extend([paragraph(_label(locale, "skills"), "section"), HRFlowable(width="100%", thickness=0.6, color=colors.HexColor("#10b981"), spaceAfter=5)])
             skill_rows = []
             if technical:
                 skill_rows.append([paragraph(_label(locale, "technical_skills"), "item_title"), paragraph(", ".join(technical), "body")])
@@ -1116,7 +1108,7 @@ def _generate_pdf(resume: Resume) -> bytes:
 
         projects = content.get("projects") or []
         if isinstance(projects, list) and projects:
-            story.extend([paragraph(_label(locale, "projects"), "section"), HRFlowable(width="100%", thickness=0.8, color=colors.HexColor("#10b981"), spaceAfter=5)])
+            story.extend([paragraph(_label(locale, "projects"), "section"), HRFlowable(width="100%", thickness=0.6, color=colors.HexColor("#10b981"), spaceAfter=5)])
             for item in projects:
                 if not isinstance(item, dict):
                     continue
@@ -1138,7 +1130,7 @@ def _generate_pdf(resume: Resume) -> bytes:
                 if isinstance(language, dict):
                     extras.append(" - ".join(part for part in [_first_text(language.get("name")), _first_text(language.get("proficiency"), language.get("level"))] if part))
         if extras:
-            story.extend([paragraph(_label(locale, "additional"), "section"), HRFlowable(width="100%", thickness=0.8, color=colors.HexColor("#10b981"), spaceAfter=5)])
+            story.extend([paragraph(_label(locale, "additional"), "section"), HRFlowable(width="100%", thickness=0.6, color=colors.HexColor("#10b981"), spaceAfter=5)])
             story.append(ListFlowable(
                 [ListItem(paragraph(item, "bullet"), leftIndent=10) for item in extras if item],
                 bulletType="bullet",
@@ -1516,8 +1508,96 @@ async def create_resume(
     db.refresh(resume)
     
     logger.info(f"Resume created: {resume.id} for user: {current_user.id}")
-    
+
     return resume_to_response(resume)
+
+
+class AISummaryRequest(BaseModel):
+    """Minimal payload for the AI professional-summary helper."""
+    role: Optional[str] = ""
+    skills: List[str] = Field(default_factory=list)
+    experience: List[Dict[str, Any]] = Field(default_factory=list)
+    locale: Optional[str] = "uz"
+
+
+@router.post(
+    "/ai/summary",
+    summary="Generate a short professional summary with AI",
+    description=(
+        "Lightweight AI helper for the manual resume builder. Generates a "
+        "2-3 sentence professional summary from the role, skills and experience "
+        "the user already entered. Falls back to a deterministic template when "
+        "no AI provider is available, so the button always returns content."
+    ),
+)
+async def generate_ai_summary(
+    request: AISummaryRequest,
+    current_user: User = Depends(get_current_active_user),
+):
+    locale = (request.locale or "uz").lower()
+    lang = "Russian" if locale == "ru" else "Uzbek (latin script)"
+    role = (request.role or "").strip()
+    skills = [s.strip() for s in (request.skills or []) if isinstance(s, str) and s.strip()][:12]
+    exp_lines: List[str] = []
+    for item in (request.experience or [])[:3]:
+        if not isinstance(item, dict):
+            continue
+        position = _first_text(item.get("position"), item.get("title"), item.get("job_title"))
+        company = _first_text(item.get("company"), item.get("company_name"))
+        line = " - ".join(part for part in [position, company] if part)
+        if line:
+            exp_lines.append(line)
+
+    prompt = (
+        f"Write a concise professional resume summary in {lang}. "
+        "Exactly 2-3 sentences, confident and specific, no first-person pronouns, "
+        "no preface and no quotation marks. "
+        f"Target role: {role or 'professional'}. "
+        f"Key skills: {', '.join(skills) or 'n/a'}. "
+        f"Experience: {'; '.join(exp_lines) or 'entry-level / no prior experience'}. "
+        "Return ONLY the summary text."
+    )
+
+    provider = (getattr(settings, "AI_PROVIDER", "gemini") or "gemini").lower()
+    summary_text = ""
+    try:
+        if provider == "gemini":
+            from app.services.gemini_service import gemini_service
+            if getattr(gemini_service, "is_available", False):
+                summary_text = await gemini_service.generate(prompt, response_format="text")
+        if not summary_text:
+            from app.services.ai_service import AIService
+            ai = AIService()
+            summary_text = await ai._call_openai_api(
+                system_message="You are an expert resume writer.",
+                prompt=prompt,
+                operation="generate_summary",
+                temperature=0.6,
+                max_tokens=220,
+                response_format_json=False,
+            )
+    except Exception as exc:  # AI unavailable / quota / network — degrade gracefully.
+        logger.warning("AI summary generation failed, using template fallback: %s", exc)
+
+    summary_text = (summary_text or "").strip().strip('"').strip()
+    ai_used = bool(summary_text)
+    if not summary_text:
+        # Deterministic fallback so the helper always returns usable content.
+        top_skills = ", ".join(skills[:5])
+        if locale == "ru":
+            summary_text = (
+                f"{role or 'Специалист'} с практическими навыками"
+                + (f": {top_skills}" if top_skills else "")
+                + ". Нацелен(а) на результат, быстро обучается и стремится к профессиональному росту."
+            )
+        else:
+            summary_text = (
+                f"{role or 'Mutaxassis'}"
+                + (f", {top_skills} yo'nalishlarida ko'nikmalarga ega" if top_skills else "")
+                + ". Natijaga yo'naltirilgan, tez o'rganadigan va kasbiy o'sishga intiluvchi."
+            )
+
+    return {"success": True, "summary": summary_text, "ai_generated": ai_used}
 
 
 @router.post(
