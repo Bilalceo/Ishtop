@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -28,6 +28,7 @@ import { resumeApi } from "@/lib/api";
 import type { ResumeContent } from "@/types/api";
 import { ResumePreview } from "@/components/resume/ResumePreview";
 import { MonthYearPicker } from "@/components/resume/MonthYearPicker";
+import { getSkillSuggestions } from "@/lib/resume/skillProfiles";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -74,6 +75,26 @@ export default function CreateResumePage() {
       ...previous,
       personal_info: { ...previous.personal_info, [field]: value },
     }));
+  };
+
+  // Profession-aware skill suggestions: keyed off the entered job title so the
+  // proposed skills actually match the chosen career.
+  const roleSignal = content.personal_info?.professional_title || "";
+  const {
+    profile: skillProfile,
+    technical: technicalSuggestions,
+    soft: softSuggestions,
+  } = useMemo(
+    () => getSkillSuggestions(roleSignal, content.skills?.technical || [], content.skills?.soft || [], isRu ? "ru" : "uz"),
+    [roleSignal, content.skills?.technical, content.skills?.soft, isRu],
+  );
+
+  const addSkill = (kind: "technical" | "soft", skill: string) => {
+    setContent((previous) => {
+      const current = previous.skills?.[kind] || [];
+      if (current.some((s) => s.toLowerCase() === skill.toLowerCase())) return previous;
+      return { ...previous, skills: { ...previous.skills, [kind]: [...current, skill] } };
+    });
   };
 
   // Minimal AI assist: draft a professional summary from what's already entered.
@@ -427,18 +448,40 @@ export default function CreateResumePage() {
 
               {step === 3 && (
                 <div className="space-y-4">
-                  <TextArea
-                    label="Texnik ko'nikmalar (vergul bilan)"
-                    value={(content.skills?.technical || []).join(", ")}
-                    onChange={(value) => setContent((previous) => ({ ...previous, skills: { ...previous.skills, technical: value.split(",").map((item) => item.trim()).filter(Boolean) } }))}
-                    placeholder="JavaScript, TypeScript, React, Node.js"
-                  />
-                  <TextArea
-                    label="Soft skills (vergul bilan)"
-                    value={(content.skills?.soft || []).join(", ")}
-                    onChange={(value) => setContent((previous) => ({ ...previous, skills: { ...previous.skills, soft: value.split(",").map((item) => item.trim()).filter(Boolean) } }))}
-                    placeholder={isRu ? "Коммуникация, работа в команде, критическое мышление" : "Muloqot, jamoaviy ish, tanqidiy fikrlash"}
-                  />
+                  {!roleSignal && (
+                    <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                      {isRu
+                        ? "Совет: укажите «Профессиональный заголовок» в первом шаге — мы предложим навыки под вашу профессию."
+                        : "Maslahat: birinchi qadamda «Kasbiy unvon»ni kiriting — kasbingizga mos ko'nikmalarni tavsiya qilamiz."}
+                    </p>
+                  )}
+                  <div>
+                    <TextArea
+                      label="Texnik ko'nikmalar (vergul bilan)"
+                      value={(content.skills?.technical || []).join(", ")}
+                      onChange={(value) => setContent((previous) => ({ ...previous, skills: { ...previous.skills, technical: value.split(",").map((item) => item.trim()).filter(Boolean) } }))}
+                      placeholder="JavaScript, TypeScript, React, Node.js"
+                    />
+                    <SkillSuggestions
+                      profileLabel={skillProfile?.label}
+                      suggestions={technicalSuggestions}
+                      onAdd={(s) => addSkill("technical", s)}
+                      isRu={isRu}
+                    />
+                  </div>
+                  <div>
+                    <TextArea
+                      label="Soft skills (vergul bilan)"
+                      value={(content.skills?.soft || []).join(", ")}
+                      onChange={(value) => setContent((previous) => ({ ...previous, skills: { ...previous.skills, soft: value.split(",").map((item) => item.trim()).filter(Boolean) } }))}
+                      placeholder={isRu ? "Коммуникация, работа в команде, критическое мышление" : "Muloqot, jamoaviy ish, tanqidiy fikrlash"}
+                    />
+                    <SkillSuggestions
+                      suggestions={softSuggestions}
+                      onAdd={(s) => addSkill("soft", s)}
+                      isRu={isRu}
+                    />
+                  </div>
                 </div>
               )}
 
@@ -559,6 +602,46 @@ function Field({
         disabled={disabled}
         className="mt-1"
       />
+    </div>
+  );
+}
+
+function SkillSuggestions({
+  suggestions,
+  onAdd,
+  isRu,
+  profileLabel,
+}: {
+  suggestions: string[];
+  onAdd: (skill: string) => void;
+  isRu: boolean;
+  profileLabel?: string;
+}) {
+  if (suggestions.length === 0) return null;
+  return (
+    <div className="mt-2">
+      <p className="mb-1.5 text-xs text-slate-500">
+        {profileLabel
+          ? isRu
+            ? `Рекомендуем для «${profileLabel}» (нажмите, чтобы добавить):`
+            : `«${profileLabel}» uchun tavsiya (qo'shish uchun bosing):`
+          : isRu
+            ? "Рекомендуемые навыки:"
+            : "Tavsiya etilgan ko'nikmalar:"}
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        {suggestions.map((skill) => (
+          <button
+            key={skill}
+            type="button"
+            onClick={() => onAdd(skill)}
+            className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-800/60 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50"
+          >
+            <Plus className="h-3 w-3" />
+            {skill}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
