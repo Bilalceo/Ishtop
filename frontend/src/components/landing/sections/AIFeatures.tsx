@@ -162,13 +162,13 @@ export function AIFeatures() {
                       {/* Top accent */}
                       <span
                         aria-hidden
-                        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/80 to-transparent"
+                        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/80 to-transparent"
                       />
                       <div
                         className="flex items-start justify-between gap-4"
                         style={{ transform: "translateZ(30px)" }}
                       >
-                        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-violet-500/30 to-cyan-400/30 text-white ring-1 ring-inset ring-white/15 shadow-lg shadow-violet-500/20">
+                        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500/30 to-teal-400/30 text-white ring-1 ring-inset ring-white/15 shadow-lg shadow-emerald-500/20">
                           <Icon className="h-5 w-5" />
                         </div>
                         <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/85 ring-1 ring-inset ring-white/10">
@@ -202,7 +202,7 @@ export function AIFeatures() {
                       {/* Hover sheen */}
                       <span
                         aria-hidden
-                        className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-gradient-to-br from-violet-500/30 to-cyan-400/30 opacity-0 blur-3xl transition group-hover:opacity-100"
+                        className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-gradient-to-br from-emerald-500/30 to-teal-400/30 opacity-0 blur-3xl transition group-hover:opacity-100"
                       />
 
                       {/* Reduce-motion fallback note */}

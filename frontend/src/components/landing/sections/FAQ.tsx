@@ -123,7 +123,7 @@ export function FAQ() {
                     <ChevronDown
                       aria-hidden
                       className={`h-5 w-5 shrink-0 text-surface-500 transition-transform duration-300 ${
-                        isOpen ? "rotate-180 text-violet-500" : ""
+                        isOpen ? "rotate-180 text-emerald-500" : ""
                       }`}
                     />
                   </button>

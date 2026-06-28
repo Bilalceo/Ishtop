@@ -197,7 +197,7 @@ export function ScrollProgressBar() {
     <motion.div
       aria-hidden
       style={{ scaleX, transformOrigin: "0% 50%" }}
-      className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[2px] bg-gradient-to-r from-violet-500 via-cyan-400 to-amber-400"
+      className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[2px] bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400"
     />
   );
 }

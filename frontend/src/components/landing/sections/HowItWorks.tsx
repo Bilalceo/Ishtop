@@ -93,7 +93,7 @@ export function HowItWorks() {
               style={{
                 width: lineLen,
                 background:
-                  "linear-gradient(90deg, #7C5CFF 0%, #22D3EE 60%, #F5B544 100%)",
+                  "linear-gradient(90deg, #10b981 0%, #14b8a6 60%, #F5B544 100%)",
                 boxShadow: "0 0 24px rgba(124,92,255,0.5)",
               }}
             />
@@ -111,7 +111,7 @@ export function HowItWorks() {
                 >
                   <div className="relative z-10" style={{ transform: "translateZ(20px)" }}>
                     <div className="flex items-center justify-between">
-                      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-400 text-white shadow-lg shadow-violet-500/30">
+                      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-400 text-white shadow-lg shadow-emerald-500/30">
                         <Icon className="h-5 w-5" />
                       </span>
                       <span className="font-display text-5xl font-bold text-surface-200 dark:text-white/10">

@@ -280,40 +280,33 @@
     @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-700 backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-white/80;
   }
 
-  /* Aurora gradient text */
+  /* Accent text — single emerald, no rainbow gradient */
   .aurora-text {
-    background: linear-gradient(120deg, #7C5CFF 0%, #22D3EE 60%, #F5B544 110%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: #34d399;
   }
 
-  /* Premium card surfaces */
+  /* Minimal glass card surfaces */
   .card-aurora {
-    @apply relative overflow-hidden rounded-3xl border border-surface-200/80 bg-white/85 shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset,0_30px_60px_-30px_rgba(15,23,42,0.18)] backdrop-blur-sm transition-all duration-300 dark:border-white/[0.06] dark:bg-white/[0.03];
+    @apply relative overflow-hidden rounded-3xl border border-surface-200/70 bg-white/70 shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset,0_30px_60px_-30px_rgba(15,23,42,0.14)] backdrop-blur-md transition-all duration-300 dark:border-white/[0.08] dark:bg-white/[0.04];
   }
   .card-aurora-hover {
-    @apply hover:-translate-y-1 hover:border-surface-300 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset,0_40px_80px_-30px_rgba(124,92,255,0.35)] dark:hover:border-white/[0.12];
+    @apply hover:-translate-y-1 hover:border-emerald-300/60 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset,0_40px_80px_-30px_rgba(16,185,129,0.28)] dark:hover:border-emerald-400/25;
   }
 
-  /* Premium button — primary */
+  /* Premium button — primary (emerald) */
   .btn-aurora {
-    @apply relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-all duration-300;
-    background: linear-gradient(120deg, #7C5CFF 0%, #5B8CFF 60%, #22D3EE 110%);
-    box-shadow:
-      0 1px 0 0 rgba(255, 255, 255, 0.25) inset,
-      0 18px 40px -16px rgba(124, 92, 255, 0.55),
-      0 8px 18px -8px rgba(34, 211, 238, 0.45);
+    @apply relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-300;
+    background: #10b981;
+    color: #0a0a0b;
+    box-shadow: 0 12px 30px -14px rgba(16, 185, 129, 0.55);
   }
   .btn-aurora:hover {
     transform: translateY(-1px);
-    box-shadow:
-      0 1px 0 0 rgba(255, 255, 255, 0.3) inset,
-      0 26px 50px -18px rgba(124, 92, 255, 0.7),
-      0 10px 24px -8px rgba(34, 211, 238, 0.55);
+    background: #34d399;
+    box-shadow: 0 18px 40px -16px rgba(16, 185, 129, 0.7);
   }
   .btn-aurora:focus-visible {
-    outline: 2px solid #7C5CFF;
+    outline: 2px solid #10b981;
     outline-offset: 3px;
   }
 
@@ -326,18 +319,16 @@
   .aurora-bg {
     position: relative;
     isolation: isolate;
-    background-color: #0B1020;
+    background-color: #0a0a0b;
   }
   .aurora-bg::before {
     content: "";
     position: absolute;
     inset: -10% -10% auto -10%;
-    height: 70%;
+    height: 60%;
     background:
-      radial-gradient(60% 60% at 18% 10%, rgba(124, 92, 255, 0.55) 0%, transparent 60%),
-      radial-gradient(50% 50% at 82% 0%, rgba(34, 211, 238, 0.45) 0%, transparent 60%),
-      radial-gradient(70% 60% at 50% 90%, rgba(245, 181, 68, 0.18) 0%, transparent 65%);
-    filter: blur(40px);
+      radial-gradient(55% 55% at 50% 0%, rgba(16, 185, 129, 0.14) 0%, transparent 70%);
+    filter: blur(60px);
     z-index: 0;
     pointer-events: none;
   }

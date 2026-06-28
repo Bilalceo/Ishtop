@@ -23,7 +23,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Sevinch Q.",
       role: "Junior Frontend Developer",
       company: "EPAM",
-      avatarBg: "linear-gradient(135deg,#7C5CFF,#22D3EE)",
+      avatarBg: "linear-gradient(135deg,#10b981,#14b8a6)",
       initials: "SQ",
       quote:
         "12 ta ariza yubordim, 4 ta suhbat oldim, 2 ta oferta. IshTop tushuntirib bergan match score sababli qaysi ishga e'tibor qaratishni bildim.",
@@ -33,7 +33,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Nodirbek A.",
       role: "Data Analyst",
       company: "Uzum",
-      avatarBg: "linear-gradient(135deg,#F5B544,#7C5CFF)",
+      avatarBg: "linear-gradient(135deg,#F5B544,#10b981)",
       initials: "NA",
       quote:
         "Resume AI portfeligimni o'zgartirdi. ATS-friendly bullet pointlar va explainable match — bularsiz hech ham birinchi ishni topa olmagan bo'lar edim.",
@@ -43,7 +43,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Aziza T.",
       role: "QA Engineer",
       company: "TBC Bank",
-      avatarBg: "linear-gradient(135deg,#22D3EE,#3CCB7F)",
+      avatarBg: "linear-gradient(135deg,#14b8a6,#3CCB7F)",
       initials: "AT",
       quote:
         "Interview Coach realistik mock interviewlar bilan o'ziga ishonch berdi. Birinchi suhbatdayoq oferta oldim.",
@@ -55,7 +55,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Севинч К.",
       role: "Junior Frontend Developer",
       company: "EPAM",
-      avatarBg: "linear-gradient(135deg,#7C5CFF,#22D3EE)",
+      avatarBg: "linear-gradient(135deg,#10b981,#14b8a6)",
       initials: "СК",
       quote:
         "12 откликов, 4 интервью, 2 оффера. Объяснимый match score помог сфокусироваться на правильных вакансиях.",
@@ -65,7 +65,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Нодирбек А.",
       role: "Data Analyst",
       company: "Uzum",
-      avatarBg: "linear-gradient(135deg,#F5B544,#7C5CFF)",
+      avatarBg: "linear-gradient(135deg,#F5B544,#10b981)",
       initials: "НА",
       quote:
         "Resume AI переписал портфолио. ATS-friendly буллеты и понятный match — без этого первая работа точно бы не случилась.",
@@ -75,7 +75,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Азиза Т.",
       role: "QA Engineer",
       company: "TBC Bank",
-      avatarBg: "linear-gradient(135deg,#22D3EE,#3CCB7F)",
+      avatarBg: "linear-gradient(135deg,#14b8a6,#3CCB7F)",
       initials: "АТ",
       quote:
         "Interview Coach с реалистичными mock-интервью дал уверенность. На первом же реальном интервью — оффер.",
@@ -87,7 +87,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Sevinch Q.",
       role: "Junior Frontend Developer",
       company: "EPAM",
-      avatarBg: "linear-gradient(135deg,#7C5CFF,#22D3EE)",
+      avatarBg: "linear-gradient(135deg,#10b981,#14b8a6)",
       initials: "SQ",
       quote:
         "12 applications, 4 interviews, 2 offers. The explainable match score helped me focus on the right roles.",
@@ -97,7 +97,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Nodirbek A.",
       role: "Data Analyst",
       company: "Uzum",
-      avatarBg: "linear-gradient(135deg,#F5B544,#7C5CFF)",
+      avatarBg: "linear-gradient(135deg,#F5B544,#10b981)",
       initials: "NA",
       quote:
         "Resume AI rewrote my portfolio. ATS-friendly bullets and explainable matches — without them I wouldn't have landed a job.",
@@ -107,7 +107,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Aziza T.",
       role: "QA Engineer",
       company: "TBC Bank",
-      avatarBg: "linear-gradient(135deg,#22D3EE,#3CCB7F)",
+      avatarBg: "linear-gradient(135deg,#14b8a6,#3CCB7F)",
       initials: "AT",
       quote:
         "Interview Coach gave me realistic mock interviews and confidence. First real interview was an offer.",
@@ -177,7 +177,7 @@ function TestimonialCard({ item: t }: { item: TestimonialItem }) {
       className="card-aurora card-aurora-hover relative flex h-full flex-col p-7"
       style={{ transformStyle: "preserve-3d" }}
     >
-      <Quote className="absolute right-6 top-6 h-8 w-8 text-violet-500/20" aria-hidden />
+      <Quote className="absolute right-6 top-6 h-8 w-8 text-emerald-500/20" aria-hidden />
       <div className="flex items-center gap-1 text-amber-400" aria-label="5 out of 5 stars">
         {Array.from({ length: 5 }).map((_, i) => (
           <Star key={i} className="h-4 w-4 fill-current" aria-hidden />

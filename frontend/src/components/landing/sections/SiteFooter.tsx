@@ -80,7 +80,7 @@ export function SiteFooter() {
         <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <Link href="/" className="focus-ring inline-flex items-center gap-2">
-              <span className="grid h-9 w-9 place-items-center rounded-2xl bg-gradient-to-br from-violet-500 via-indigo-500 to-cyan-400">
+              <span className="grid h-9 w-9 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-500 to-teal-400">
                 <Sparkles className="h-4 w-4 text-white" />
               </span>
               <span className="font-display text-lg font-semibold tracking-tight text-white">

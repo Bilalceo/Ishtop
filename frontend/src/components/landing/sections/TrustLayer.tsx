@@ -1,29 +1,30 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { Users, TrendingUp, Briefcase, ShieldCheck } from "lucide-react";
+import { Clock, Briefcase, Globe, Sparkles } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 
 type Locale = "uz" | "ru" | "en";
 
-const STATS: Record<Locale, { value: string; label: string; icon: typeof Users }[]> = {
+// Honest, product-true highlights (no fabricated user/scale metrics).
+const STATS: Record<Locale, { value: string; label: string; icon: typeof Clock }[]> = {
   uz: [
-    { value: "10 000+", label: "Faol talabalar", icon: Users },
-    { value: "500+", label: "Tekshirilgan kompaniya", icon: Briefcase },
-    { value: "95%", label: "Suhbatga chaqiruv darajasi", icon: TrendingUp },
-    { value: "<24s", label: "O'rtacha javob vaqti", icon: ShieldCheck },
+    { value: "2 daqiqa", label: "AI bilan rezyume", icon: Clock },
+    { value: "50+", label: "Kasb bo'yicha ko'nikma bazasi", icon: Briefcase },
+    { value: "UZ · RU", label: "Ikki tilda", icon: Globe },
+    { value: "Bepul", label: "Boshlash uchun", icon: Sparkles },
   ],
   ru: [
-    { value: "10 000+", label: "Активных студентов", icon: Users },
-    { value: "500+", label: "Проверенных компаний", icon: Briefcase },
-    { value: "95%", label: "Процент приглашений", icon: TrendingUp },
-    { value: "<24ч", label: "Среднее время ответа", icon: ShieldCheck },
+    { value: "2 мин", label: "AI-резюме", icon: Clock },
+    { value: "50+", label: "Профессий с навыками", icon: Briefcase },
+    { value: "UZ · RU", label: "На двух языках", icon: Globe },
+    { value: "Бесплатно", label: "Для старта", icon: Sparkles },
   ],
   en: [
-    { value: "10,000+", label: "Active students", icon: Users },
-    { value: "500+", label: "Verified companies", icon: Briefcase },
-    { value: "95%", label: "Interview invite rate", icon: TrendingUp },
-    { value: "<24h", label: "Avg. response time", icon: ShieldCheck },
+    { value: "2 min", label: "AI resume builder", icon: Clock },
+    { value: "50+", label: "Profession skill sets", icon: Briefcase },
+    { value: "UZ · RU", label: "Bilingual", icon: Globe },
+    { value: "Free", label: "To get started", icon: Sparkles },
   ],
 };
 
@@ -46,14 +47,14 @@ export function TrustLayer() {
       <div className="section-shell">
         <div className="flex flex-col items-center text-center">
           <span className="h-eyebrow">
-            {L === "ru" ? "Доверие" : L === "en" ? "Trust" : "Ishonch"}
+            {L === "ru" ? "Возможности" : L === "en" ? "Features" : "Imkoniyatlar"}
           </span>
           <h2 id="trust-heading" className="h-display mt-4 text-3xl text-surface-900 dark:text-white sm:text-4xl">
             {L === "ru"
-              ? "Цифры, которым доверяют"
+              ? "Почему IshTop?"
               : L === "en"
-              ? "Numbers students trust"
-              : "Talabalar ishonadigan raqamlar"}
+              ? "Why IshTop?"
+              : "Nega IshTop?"}
           </h2>
         </div>
 
@@ -68,7 +69,7 @@ export function TrustLayer() {
               className="card-aurora card-aurora-hover p-6"
             >
               <div className="flex items-center gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-violet-500/15 to-cyan-400/15 text-violet-600 dark:text-violet-300">
+                <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500/15 to-teal-400/15 text-emerald-600 dark:text-emerald-300">
                   <s.icon className="h-5 w-5" />
                 </div>
                 <p className="text-3xl font-semibold tracking-tight text-surface-900 dark:text-white">

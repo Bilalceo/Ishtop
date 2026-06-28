@@ -169,7 +169,7 @@ export function LiveDemoSection() {
                       aria-pressed={isOn}
                       className={`focus-ring rounded-full border px-3.5 py-2 text-sm font-medium transition-all ${
                         isOn
-                          ? "border-transparent bg-gradient-to-r from-violet-500 to-cyan-400 text-white shadow-lg shadow-violet-500/30"
+                          ? "border-transparent bg-gradient-to-r from-emerald-500 to-teal-400 text-white shadow-lg shadow-emerald-500/30"
                           : "border-white/10 bg-white/[0.04] text-white/80 hover:border-white/25 hover:bg-white/[0.08]"
                       }`}
                     >
@@ -190,14 +190,14 @@ export function LiveDemoSection() {
             </div>
 
             {/* Thinking trace */}
-            <div className="rounded-3xl border border-white/10 bg-black/40 p-5 font-mono text-sm shadow-2xl shadow-violet-500/10 backdrop-blur-md sm:p-6">
+            <div className="rounded-3xl border border-white/10 bg-black/40 p-5 font-mono text-sm shadow-2xl shadow-emerald-500/10 backdrop-blur-md sm:p-6">
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
                   2 · AI o&apos;ylab ko&apos;ryapti
                 </p>
                 {phase === "thinking" && (
-                  <span className="flex items-center gap-1 text-xs text-violet-300">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet-300 shadow-[0_0_8px_rgba(124,92,255,0.9)]" />
+                  <span className="flex items-center gap-1 text-xs text-emerald-300">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-300 shadow-[0_0_8px_rgba(124,92,255,0.9)]" />
                     thinking…
                   </span>
                 )}
@@ -225,7 +225,7 @@ export function LiveDemoSection() {
                       >
                         {line}
                         {phase === "thinking" && i === arr.length - 1 && !isDone && (
-                          <span className="ml-1 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-violet-300" />
+                          <span className="ml-1 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-emerald-300" />
                         )}
                       </motion.p>
                     );
@@ -272,7 +272,7 @@ export function LiveDemoSection() {
                   : { opacity: 0.65, y: 0 }
               }
               transition={{ delay: 0.4, duration: 0.5 }}
-              className="mt-4 rounded-3xl border border-white/10 bg-gradient-to-br from-violet-500/10 via-transparent to-cyan-400/10 p-5 backdrop-blur-md"
+              className="mt-4 rounded-3xl border border-white/10 bg-gradient-to-br from-emerald-500/10 via-transparent to-teal-400/10 p-5 backdrop-blur-md"
             >
               <p className="text-sm text-white/80">
                 Bu faqat ko&apos;rsatuv. Haqiqiy IshTop&apos;da:{" "}
@@ -337,7 +337,7 @@ function CompactMatchCard({
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
             <span className="text-emerald-300">{m.job.salary}</span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/15 px-2 py-0.5 text-cyan-300">
+            <span className="inline-flex items-center gap-1 rounded-full bg-teal-500/15 px-2 py-0.5 text-teal-300">
               <ShieldCheck className="h-3 w-3" aria-hidden /> Trust {m.job.trustScore}
             </span>
           </div>
@@ -355,7 +355,7 @@ function CompactMatchCard({
           initial={reduce ? false : { width: 0 }}
           animate={{ width: `${m.score}%` }}
           transition={{ duration: 1.1, ease: [0.19, 1, 0.22, 1], delay: 0.2 + index * 0.12 }}
-          className="h-full rounded-full bg-gradient-to-r from-violet-500 via-cyan-400 to-emerald-400"
+          className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400"
         />
       </div>
 
@@ -363,7 +363,7 @@ function CompactMatchCard({
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
-        className="focus-ring mt-3 inline-flex items-center gap-1 rounded-full text-xs font-semibold text-violet-300 hover:text-violet-200"
+        className="focus-ring mt-3 inline-flex items-center gap-1 rounded-full text-xs font-semibold text-emerald-300 hover:text-emerald-200"
       >
         Nega?
         <ChevronRight
@@ -387,7 +387,7 @@ function CompactMatchCard({
                   r.type === "match"
                     ? "text-emerald-300"
                     : r.type === "trust"
-                    ? "text-cyan-300"
+                    ? "text-teal-300"
                     : "text-amber-300";
                 return (
                   <li key={i} className="flex items-start gap-2">
@@ -451,9 +451,9 @@ function EmptyState({
         <div>
           <span
             aria-hidden
-            className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-cyan-400/20"
+            className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-400/20"
           >
-            <Wand2 className="h-6 w-6 text-violet-300" aria-hidden />
+            <Wand2 className="h-6 w-6 text-emerald-300" aria-hidden />
           </span>
           <p className="mt-4 text-sm font-medium text-white/80">
             Chap tomondan ko&apos;nikma tanlang
@@ -466,7 +466,7 @@ function EmptyState({
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                className="h-2 w-2 animate-pulse rounded-full bg-violet-400"
+                className="h-2 w-2 animate-pulse rounded-full bg-emerald-400"
                 style={{ animationDelay: `${i * 150}ms` }}
               />
             ))}

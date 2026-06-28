@@ -202,7 +202,7 @@ function ScoreDial({
             style={{ transform: "translateZ(20px)" }}
           >
             <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-400 text-white font-bold">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-400 text-white font-bold">
                 U
               </div>
               <div>
@@ -226,8 +226,8 @@ function ScoreDial({
             >
               <defs>
                 <linearGradient id="scoreGrad" x1="0" x2="1">
-                  <stop offset="0%" stopColor="#7C5CFF" />
-                  <stop offset="60%" stopColor="#22D3EE" />
+                  <stop offset="0%" stopColor="#10b981" />
+                  <stop offset="60%" stopColor="#14b8a6" />
                   <stop offset="100%" stopColor="#3CCB7F" />
                 </linearGradient>
                 <filter id="scoreGlow" x="-20%" y="-20%" width="140%" height="140%">
@@ -278,10 +278,10 @@ function ScoreDial({
             <div className="rounded-2xl bg-emerald-500/10 px-2 py-2 text-emerald-700 dark:text-emerald-300">
               {pills.reviews}
             </div>
-            <div className="rounded-2xl bg-violet-500/10 px-2 py-2 text-violet-700 dark:text-violet-300">
+            <div className="rounded-2xl bg-emerald-500/10 px-2 py-2 text-emerald-700 dark:text-emerald-300">
               {pills.reply}
             </div>
-            <div className="rounded-2xl bg-cyan-500/10 px-2 py-2 text-cyan-700 dark:text-cyan-300">
+            <div className="rounded-2xl bg-teal-500/10 px-2 py-2 text-teal-700 dark:text-teal-300">
               {pills.verified}
             </div>
           </div>
