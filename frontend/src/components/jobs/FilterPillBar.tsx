@@ -44,7 +44,7 @@ const companyOptions = [
 ];
 
 const pillActive =
-  "bg-purple-100 border-purple-300 text-purple-700 dark:bg-purple-500/20 dark:border-purple-400 dark:text-purple-300";
+  "bg-emerald-100 border-emerald-300 text-emerald-700 dark:bg-emerald-500/20 dark:border-emerald-400 dark:text-emerald-300";
 const pillBase =
   "bg-white border-surface-200 text-surface-700 dark:bg-surface-800 dark:border-surface-600 dark:text-surface-300";
 
@@ -210,7 +210,7 @@ export function FilterPillBar({ filters, onChange, isRu }: FilterPillBarProps) {
         <SlidersHorizontal className="mr-1 h-3 w-3" />
         {isRu ? "Больше фильтров" : "Ko'proq filtrlar"}
         {companiesActive && (
-          <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-purple-500 text-[10px] text-white">
+          <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] text-white">
             {filters.companies.length}
           </span>
         )}
@@ -251,7 +251,7 @@ export function FilterPillBar({ filters, onChange, isRu }: FilterPillBarProps) {
             />
           </div>
           <Button
-            className="mt-4 w-full bg-gradient-to-r from-purple-500 to-indigo-600"
+            className="mt-4 w-full bg-gradient-to-r from-emerald-500 to-teal-600"
             onClick={() => setSalaryOpen(false)}
           >
             {isRu ? "Применить" : "Qo'llash"}
@@ -281,7 +281,7 @@ export function FilterPillBar({ filters, onChange, isRu }: FilterPillBarProps) {
                       : [...current, company];
                     onChange({ ...filters, companies: next });
                   }}
-                  className="h-4 w-4 rounded border-surface-300 text-purple-600 focus:ring-purple-500"
+                  className="h-4 w-4 rounded border-surface-300 text-emerald-600 focus:ring-emerald-500"
                 />
                 <span className="text-sm text-surface-700 dark:text-surface-300">
                   {company}
@@ -290,7 +290,7 @@ export function FilterPillBar({ filters, onChange, isRu }: FilterPillBarProps) {
             ))}
           </div>
           <Button
-            className="mt-4 w-full bg-gradient-to-r from-purple-500 to-indigo-600"
+            className="mt-4 w-full bg-gradient-to-r from-emerald-500 to-teal-600"
             onClick={() => setMoreOpen(false)}
           >
             {isRu ? "Готово" : "Tayyor"}

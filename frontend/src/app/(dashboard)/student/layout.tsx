@@ -101,7 +101,7 @@ const getQuickActions = (t: (key: string) => string) => [
     name: t("dashboard.sidebar.createAIResume"),
     href: "/student/resumes/create-ai",
     icon: Sparkles,
-    color: "from-purple-500 to-indigo-600",
+    color: "from-emerald-500 to-teal-600",
   },
 ];
 
@@ -306,7 +306,7 @@ export default function StudentDashboardLayout({
             <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 p-3 text-white shadow-lg shadow-purple-500/25"
+              className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 p-3 text-white shadow-lg shadow-emerald-500/25"
             >
               <Sparkles className="h-5 w-5" />
               <span className="font-medium">
@@ -325,7 +325,7 @@ export default function StudentDashboardLayout({
                   className={cn(
                     "flex items-center justify-between rounded-xl px-3 py-2.5 transition-colors",
                     active
-                      ? "bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400"
+                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400"
                       : "text-surface-600 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700",
                   )}
                 >
@@ -355,8 +355,8 @@ export default function StudentDashboardLayout({
 
         {/* Sidebar Footer */}
         <div className="border-t border-surface-200 p-4 dark:border-surface-700">
-          <div className="rounded-xl bg-gradient-to-br from-purple-50 to-indigo-50 p-4 dark:from-purple-900/20 dark:to-indigo-900/20">
-            <div className="flex items-center gap-2 text-purple-700 dark:text-purple-400">
+          <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 p-4 dark:from-emerald-900/20 dark:to-teal-900/20">
+            <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
               <HelpCircle className="h-5 w-5" />
               <span className="font-medium">
                 {t("dashboard.sidebar.needHelp")}
@@ -374,13 +374,13 @@ export default function StudentDashboardLayout({
                     ? "Спросите, например: как быстро откликнуться?"
                     : "Masalan: tezkor ariza qanday yuboriladi?"
                 }
-                className="h-9 border-purple-200 bg-white/80 text-xs dark:border-purple-700 dark:bg-surface-800/70"
+                className="h-9 border-emerald-200 bg-white/80 text-xs dark:border-emerald-700 dark:bg-surface-800/70"
               />
               <Button
                 size="sm"
                 onClick={() => void askHelpAssistant()}
                 disabled={helpLoading || !helpQuestion.trim()}
-                className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-xs"
+                className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-xs"
               >
                 {helpLoading ? (
                   <>
@@ -395,7 +395,7 @@ export default function StudentDashboardLayout({
               </Button>
               {helpAnswer && (
                 <>
-                  <div className="relative rounded-lg border border-purple-200 bg-white/90 p-2 pr-9 text-xs leading-relaxed text-surface-700 dark:border-purple-700 dark:bg-surface-800/80 dark:text-surface-300">
+                  <div className="relative rounded-lg border border-emerald-200 bg-white/90 p-2 pr-9 text-xs leading-relaxed text-surface-700 dark:border-emerald-700 dark:bg-surface-800/80 dark:text-surface-300">
                     <button
                       type="button"
                       onClick={() => setHelpAnswer("")}
@@ -411,7 +411,7 @@ export default function StudentDashboardLayout({
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="w-full border-purple-200 text-xs text-purple-700 hover:bg-purple-50 dark:border-purple-700 dark:text-purple-300"
+                    className="w-full border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-300"
                     onClick={() => setHelpAnswer("")}
                   >
                     <X className="mr-1.5 h-3.5 w-3.5" />
@@ -450,7 +450,7 @@ export default function StudentDashboardLayout({
                 placeholder={`${t("common.search")} ${t("dashboard.jobs.title").toLowerCase()}, ${t("dashboard.resumes.title").toLowerCase()}...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-64 rounded-xl border border-surface-200 bg-surface-50 py-2 pl-10 pr-4 text-sm placeholder-surface-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 lg:w-80"
+                className="w-64 rounded-xl border border-surface-200 bg-surface-50 py-2 pl-10 pr-4 text-sm placeholder-surface-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 lg:w-80"
               />
               <kbd className="absolute right-3 top-1/2 -translate-y-1/2 rounded bg-surface-200 px-1.5 py-0.5 text-xs text-surface-500">
                 {shortcutHint}
@@ -501,7 +501,7 @@ export default function StudentDashboardLayout({
                         {unreadCount > 0 && (
                           <button
                             onClick={markAllRead}
-                            className="text-sm text-purple-600 hover:underline"
+                            className="text-sm text-emerald-600 hover:underline"
                           >
                             {t("notificationsPage.markAllRead")}
                           </button>
@@ -522,7 +522,7 @@ export default function StudentDashboardLayout({
                               className={cn(
                                 "flex gap-3 border-b border-surface-100 p-4 last:border-0 dark:border-surface-700",
                                 !n.is_read &&
-                                  "bg-purple-50/50 dark:bg-purple-900/10",
+                                  "bg-emerald-50/50 dark:bg-emerald-900/10",
                               )}
                             >
                               <div className="flex-1">
@@ -540,7 +540,7 @@ export default function StudentDashboardLayout({
                                 </p>
                               </div>
                               {!n.is_read && (
-                                <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-purple-500" />
+                                <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-emerald-500" />
                               )}
                             </div>
                           ))

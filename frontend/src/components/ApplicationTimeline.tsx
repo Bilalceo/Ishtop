@@ -42,7 +42,7 @@ export function ApplicationTimeline({ events }: ApplicationTimelineProps) {
     }
     
     if (type === 'document_upload') {
-      return <FileText className="h-5 w-5 text-purple-600" />;
+      return <FileText className="h-5 w-5 text-emerald-600" />;
     }
     
     if (type === 'deadline') {
@@ -67,7 +67,7 @@ export function ApplicationTimeline({ events }: ApplicationTimelineProps) {
     }
     
     if (type === 'document_upload') {
-      return 'border-purple-500 bg-purple-50 dark:bg-purple-950';
+      return 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950';
     }
     
     if (type === 'deadline') {

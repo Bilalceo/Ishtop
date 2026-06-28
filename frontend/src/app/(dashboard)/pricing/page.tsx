@@ -106,7 +106,7 @@ const getPricingPlans = (isRu: boolean): PricingPlan[] => [
       isRu ? "Кастомные интеграции" : "Maxsus integratsiyalar",
     ],
     icon: Crown,
-    color: "bg-purple-500",
+    color: "bg-emerald-500",
   },
 ];
 

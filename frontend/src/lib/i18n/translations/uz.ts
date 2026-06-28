@@ -217,7 +217,7 @@ export const uz = {
     sidebar: {
       title: "AI vositalar bilan orzuingizdagi karyerani",
       titleHighlight: "quring",
-      subtitle: "O'zbekistondagi 10,000+ mutaxassis IshTop bilan karyerasini tezlashtirdi.",
+      subtitle: "AI rezyumengizni tahlil qiladi, kasbingizga mos vakansiyalarni topadi va arizani daqiqalar ichida tayyorlaydi.",
       features: [
         "AI-quvvatli rezyume yaratish",
         "Aqlli ish mosligi",

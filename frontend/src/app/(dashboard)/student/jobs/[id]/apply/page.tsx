@@ -289,7 +289,7 @@ function StepIndicator({
               disabled={!isCompleted}
               className={cn(
                 "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all",
-                isCurrent && "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
+                isCurrent && "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300",
                 isCompleted && "cursor-pointer bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/50 dark:text-green-300",
                 !isCurrent && !isCompleted && "bg-surface-100 text-surface-400 dark:bg-surface-800"
               )}
@@ -360,7 +360,7 @@ function ResumeSelector({
               className={cn(
                 "cursor-pointer rounded-xl border-2 p-4 transition-all",
                 isSelected
-                  ? "border-purple-500 bg-purple-50/50 shadow-lg dark:bg-purple-900/10"
+                  ? "border-emerald-500 bg-emerald-50/50 shadow-lg dark:bg-emerald-900/10"
                   : "border-surface-200 hover:border-surface-300 dark:border-surface-700"
               )}
             >
@@ -370,7 +370,7 @@ function ResumeSelector({
                   className={cn(
                     "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-all",
                     isSelected
-                      ? "border-purple-500 bg-purple-500"
+                      ? "border-emerald-500 bg-emerald-500"
                       : "border-surface-300 dark:border-surface-600"
                   )}
                 >
@@ -466,7 +466,7 @@ function ResumeSelector({
             {isRu ? "Для отклика сначала создайте резюме" : "Bu ishga ariza berish uchun avval rezyume yarating"}
           </p>
           <Link href="/student/resumes/create-ai">
-            <Button className="mt-4 bg-gradient-to-r from-purple-500 to-indigo-600">
+            <Button className="mt-4 bg-gradient-to-r from-emerald-500 to-teal-600">
               <Sparkles className="mr-2 h-4 w-4" />
               {isRu ? "Создать AI-резюме" : "AI rezyume yaratish"}
             </Button>
@@ -520,12 +520,12 @@ function CoverLetterEditor({
       </div>
 
       {/* AI Generation Card */}
-      <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
+      <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
         <CardContent className="p-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900/50">
-                <Sparkles className="h-5 w-5 text-purple-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
+                <Sparkles className="h-5 w-5 text-emerald-600" />
               </div>
               <div>
                 <p className="font-medium text-surface-900 dark:text-white">
@@ -551,7 +551,7 @@ function CoverLetterEditor({
               <Button
                 onClick={() => onGenerateAI(tone)}
                 disabled={isGenerating}
-                className="bg-gradient-to-r from-purple-500 to-indigo-600"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600"
               >
                 {isGenerating ? (
                   <>
@@ -646,7 +646,7 @@ function QuestionsForm({
       {questions.map((q, index) => (
         <div key={q.id} className="space-y-2">
           <Label className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-xs font-medium text-purple-600">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-medium text-emerald-600">
               {index + 1}
             </span>
             {q.question}
@@ -720,7 +720,7 @@ function ReviewSection({
       <Card>
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-purple-100 to-indigo-100 text-xl font-bold text-purple-600">
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 text-xl font-bold text-emerald-600">
               {job.company?.name?.charAt(0)}
             </div>
             <div>
@@ -747,8 +747,8 @@ function ReviewSection({
       <div className="rounded-xl border border-surface-200 p-4 dark:border-surface-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/50">
-              <FileText className="h-5 w-5 text-purple-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/50">
+              <FileText className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
               <p className="text-sm font-medium text-surface-500">{isRu ? "Rezyume" : "Rezyume"}</p>
@@ -869,14 +869,14 @@ function SuccessScreen({ job, onViewApplications }: { job: Job; onViewApplicatio
         angle: 60,
         spread: 55,
         origin: { x: 0 },
-        colors: ["#6366F1", "#8B5CF6", "#10B981"],
+        colors: ["#10B981", "#2DD4BF", "#10B981"],
       });
       confetti({
         particleCount: 3,
         angle: 120,
         spread: 55,
         origin: { x: 1 },
-        colors: ["#6366F1", "#8B5CF6", "#10B981"],
+        colors: ["#10B981", "#2DD4BF", "#10B981"],
       });
 
       if (Date.now() < end) {
@@ -1014,7 +1014,7 @@ function SuccessScreen({ job, onViewApplications }: { job: Job; onViewApplicatio
         </Link>
         <Button
           onClick={onViewApplications}
-          className="bg-gradient-to-r from-purple-500 to-indigo-600"
+          className="bg-gradient-to-r from-emerald-500 to-teal-600"
         >
           {isRu ? "Посмотреть мои заявки" : "Arizalarimni ko'rish"}
         </Button>
@@ -1377,7 +1377,7 @@ export default function ApplyPage() {
         <Button
           onClick={handleNext}
           disabled={!isStepValid() || isSubmitting}
-          className="bg-gradient-to-r from-purple-500 to-indigo-600"
+          className="bg-gradient-to-r from-emerald-500 to-teal-600"
         >
           {isSubmitting ? (
             <>

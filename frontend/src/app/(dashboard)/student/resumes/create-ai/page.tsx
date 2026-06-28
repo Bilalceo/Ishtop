@@ -253,16 +253,16 @@ const tones = [
 ];
 
 const skillInputClassName =
-  "h-12 rounded-2xl border-surface-200 bg-white/95 text-surface-950 shadow-sm shadow-slate-200/60 placeholder:text-surface-400 focus-visible:ring-2 focus-visible:ring-purple-500/80 dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:shadow-none dark:placeholder:text-surface-400";
+  "h-12 rounded-2xl border-surface-200 bg-white/95 text-surface-950 shadow-sm shadow-slate-200/60 placeholder:text-surface-400 focus-visible:ring-2 focus-visible:ring-emerald-500/80 dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:shadow-none dark:placeholder:text-surface-400";
 
 const skillAddButtonClassName =
-  "h-12 rounded-2xl border-2 border-purple-500/70 bg-purple-50 text-purple-700 shadow-sm shadow-purple-500/10 hover:border-purple-400 hover:bg-purple-100 hover:text-purple-800 dark:border-violet-400/70 dark:bg-violet-400/10 dark:text-violet-100 dark:hover:border-violet-300 dark:hover:bg-violet-400/20";
+  "h-12 rounded-2xl border-2 border-emerald-500/70 bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-500/10 hover:border-emerald-400 hover:bg-emerald-100 hover:text-emerald-800 dark:border-emerald-400/70 dark:bg-emerald-400/10 dark:text-emerald-100 dark:hover:border-emerald-300 dark:hover:bg-emerald-400/20";
 
 const selectedSkillBadgeClassName =
   "group cursor-pointer border border-surface-200 bg-white px-3 py-1.5 text-sm font-semibold text-surface-700 shadow-sm shadow-slate-200/60 hover:border-red-300 hover:bg-red-50 hover:text-red-700 dark:border-white/10 dark:bg-white/[0.07] dark:text-surface-100 dark:shadow-none dark:hover:border-red-400/50 dark:hover:bg-red-500/12 dark:hover:text-red-100";
 
 const suggestedSkillChipClassName =
-  "rounded-full border border-surface-300 bg-white/90 px-3 py-1.5 text-sm font-semibold text-surface-700 shadow-sm shadow-slate-200/50 transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-300 hover:bg-purple-50 hover:text-purple-800 hover:shadow-md hover:shadow-purple-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/70 dark:border-white/15 dark:bg-white/[0.07] dark:text-surface-100 dark:shadow-none dark:hover:border-violet-300/70 dark:hover:bg-violet-400/16 dark:hover:text-white dark:focus-visible:ring-violet-300/70";
+  "rounded-full border border-surface-300 bg-white/90 px-3 py-1.5 text-sm font-semibold text-surface-700 shadow-sm shadow-slate-200/50 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 hover:shadow-md hover:shadow-emerald-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/70 dark:border-white/15 dark:bg-white/[0.07] dark:text-surface-100 dark:shadow-none dark:hover:border-emerald-300/70 dark:hover:bg-emerald-400/16 dark:hover:text-white dark:focus-visible:ring-emerald-300/70";
 
 // =============================================================================
 // MAIN COMPONENT
@@ -529,7 +529,7 @@ export default function AIResumeBuilderPage() {
           particleCount: 100,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ["#a855f7", "#6366f1", "#06b6d4"],
+          colors: ["#34D399", "#10B981", "#06b6d4"],
         });
       }
     } catch (error) {
@@ -656,7 +656,7 @@ export default function AIResumeBuilderPage() {
                 className={cn(
                   "flex flex-1 flex-col items-center gap-1 rounded-lg p-2 text-xs transition-all",
                   currentStep === step.id
-                    ? "bg-purple-100 text-purple-700"
+                    ? "bg-emerald-100 text-emerald-700"
                     : currentStep > step.id
                       ? "bg-green-100 text-green-700"
                       : "bg-surface-100 text-surface-500",
@@ -786,7 +786,7 @@ export default function AIResumeBuilderPage() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="shrink-0 text-purple-700 hover:bg-purple-50 dark:text-purple-300"
+                    className="shrink-0 text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300"
                     onClick={() => {
                       replaceExperiences([]);
                       setCurrentStep(3);
@@ -1238,7 +1238,7 @@ export default function AIResumeBuilderPage() {
                         className={cn(
                           "rounded-xl border-2 p-3 text-left transition-all",
                           selectedTemplate === template.id
-                            ? "border-purple-500 bg-purple-50"
+                            ? "border-emerald-500 bg-emerald-50"
                             : "border-surface-200 hover:border-surface-300",
                         )}
                       >
@@ -1268,7 +1268,7 @@ export default function AIResumeBuilderPage() {
                         className={cn(
                           "rounded-xl border-2 p-3 text-left transition-all",
                           selectedTone === tone.id
-                            ? "border-purple-500 bg-purple-50"
+                            ? "border-emerald-500 bg-emerald-50"
                             : "border-surface-200 hover:border-surface-300",
                         )}
                       >
@@ -1344,7 +1344,7 @@ export default function AIResumeBuilderPage() {
             {currentStep < 5 ? (
               <Button
                 onClick={nextStep}
-                className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600"
+                className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600"
               >
                 {t("aiResumeBuilder.next")}
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -1353,7 +1353,7 @@ export default function AIResumeBuilderPage() {
               <Button
                 onClick={handleGenerate}
                 disabled={isGenerating}
-                className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
+                className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
               >
                 {isGenerating ? (
                   <>

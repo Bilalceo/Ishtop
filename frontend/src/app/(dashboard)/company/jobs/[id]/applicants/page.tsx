@@ -54,8 +54,8 @@ const STATUS_FLOW: Array<{
 }> = [
   { key: "pending", labelUz: "Yangi ariza", labelRu: "Новая заявка", tone: "border-yellow-200 bg-yellow-50 dark:border-yellow-500/30 dark:bg-yellow-500/10" },
   { key: "reviewing", labelUz: "Ko'rib chiqilmoqda", labelRu: "На проверке", tone: "border-blue-200 bg-blue-50 dark:border-blue-500/30 dark:bg-blue-500/10" },
-  { key: "shortlisted", labelUz: "Saralangan", labelRu: "Шорт-лист", tone: "border-purple-200 bg-purple-50 dark:border-purple-500/30 dark:bg-purple-500/10" },
-  { key: "interview", labelUz: "Intervyu", labelRu: "Интервью", tone: "border-indigo-200 bg-indigo-50 dark:border-indigo-500/30 dark:bg-indigo-500/10" },
+  { key: "shortlisted", labelUz: "Saralangan", labelRu: "Шорт-лист", tone: "border-emerald-200 bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10" },
+  { key: "interview", labelUz: "Intervyu", labelRu: "Интервью", tone: "border-teal-200 bg-teal-50 dark:border-teal-500/30 dark:bg-teal-500/10" },
   { key: "accepted", labelUz: "Taklif", labelRu: "Оффер", tone: "border-emerald-200 bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10" },
   { key: "hired", labelUz: "Yollandi", labelRu: "Нанят", tone: "border-green-200 bg-green-50 dark:border-green-500/30 dark:bg-green-500/10" },
   { key: "rejected", labelUz: "Rad etildi", labelRu: "Отклонен", tone: "border-red-200 bg-red-50 dark:border-red-500/30 dark:bg-red-500/10" },

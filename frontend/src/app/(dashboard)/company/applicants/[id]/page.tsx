@@ -62,7 +62,7 @@ const statusConfig: Record<KnownApplicationStatus, { label: string; color: strin
   pending: { label: "Kutilmoqda", color: "bg-yellow-100 text-yellow-700", icon: Clock },
   reviewing: { label: "Ko'rib chiqilmoqda", color: "bg-blue-100 text-blue-700", icon: Eye },
   shortlisted: { label: "Saralangan", color: "bg-amber-100 text-amber-700", icon: Award },
-  interview: { label: "Intervyu", color: "bg-purple-100 text-purple-700", icon: User },
+  interview: { label: "Intervyu", color: "bg-emerald-100 text-emerald-700", icon: User },
   accepted: { label: "Qabul qilindi", color: "bg-green-100 text-green-700", icon: CheckCircle },
   hired: { label: "Yollandi", color: "bg-emerald-100 text-emerald-700", icon: CheckCircle },
   rejected: { label: "Rad etildi", color: "bg-red-100 text-red-700", icon: XCircle },
@@ -761,7 +761,7 @@ export default function ApplicantDetailPage() {
             animate={{ opacity: 1, y: 0 }}
             className="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm text-center dark:border-surface-700 dark:bg-surface-800"
           >
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 text-3xl font-bold text-white">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-3xl font-bold text-white">
               {(applicant?.full_name || "A")[0].toUpperCase()}
             </div>
             <h2 className="mt-3 text-lg font-bold text-surface-900">
@@ -853,7 +853,7 @@ export default function ApplicantDetailPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="flex items-center gap-2 font-semibold text-surface-900">
-                  <Calendar className="h-5 w-5 text-purple-500" />
+                  <Calendar className="h-5 w-5 text-emerald-500" />
                   Intervyu jadvali
                 </h3>
                 <p className="mt-1 text-sm text-surface-500">
@@ -861,12 +861,12 @@ export default function ApplicantDetailPage() {
                 </p>
               </div>
               {application.status === "interview" && (
-                <Badge className="bg-purple-100 text-purple-700">Intervyu faol</Badge>
+                <Badge className="bg-emerald-100 text-emerald-700">Intervyu faol</Badge>
               )}
             </div>
 
             {application.interview_at && (
-              <div className="mt-4 rounded-xl border border-purple-100 bg-purple-50 p-3 text-sm text-surface-700 dark:border-purple-500/30 dark:bg-purple-500/10 dark:text-surface-200">
+              <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm text-surface-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-surface-200">
                 <p className="font-medium text-surface-900">Joriy intervyu vaqti</p>
                 <p className="mt-1">{formatDate(application.interview_at)}</p>
                 <p className="mt-1">
@@ -879,7 +879,7 @@ export default function ApplicantDetailPage() {
                       href={application.meeting_link}
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="font-medium text-purple-700 hover:underline"
+                      className="font-medium text-emerald-700 hover:underline"
                     >
                       {application.meeting_link}
                     </a>
@@ -916,7 +916,7 @@ export default function ApplicantDetailPage() {
                   disabled={isUpdating}
                   className={cn(
                     "flex h-10 w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm dark:border-surface-600 dark:bg-surface-800 dark:text-surface-100",
-                    "focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                    "focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                   )}
                 >
                   {Object.entries(interviewFormatLabels).map(([value, config]) => (
@@ -1122,7 +1122,7 @@ export default function ApplicantDetailPage() {
               className="rounded-2xl border border-surface-200 bg-white p-5 shadow-sm dark:border-surface-700 dark:bg-surface-800"
             >
               <h3 className="mb-3 flex items-center gap-2 font-semibold text-surface-900 dark:text-white">
-                <MessageSquare className="h-5 w-5 text-purple-500" />
+                <MessageSquare className="h-5 w-5 text-emerald-500" />
                 {isRu ? "Сопроводительное письмо" : "Motivatsion xat"}
               </h3>
               <p className="text-sm text-surface-600 leading-relaxed whitespace-pre-wrap dark:text-surface-300">
@@ -1141,7 +1141,7 @@ export default function ApplicantDetailPage() {
             >
               <div className="mb-4 flex items-start justify-between gap-3">
                 <h3 className="flex items-center gap-2 font-semibold text-surface-900 dark:text-white">
-                  <Target className="h-5 w-5 text-purple-500" />
+                  <Target className="h-5 w-5 text-emerald-500" />
                   {isRu ? "Анализ совпадения" : "Moslik tahlili"}
                 </h3>
                 {(() => {
@@ -1233,10 +1233,10 @@ export default function ApplicantDetailPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.28 }}
-            className="overflow-hidden rounded-2xl border border-purple-200 bg-gradient-to-br from-purple-50 to-white p-5 shadow-sm dark:border-purple-500/30 dark:from-purple-500/10 dark:to-surface-800"
+            className="overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-5 shadow-sm dark:border-emerald-500/30 dark:from-emerald-500/10 dark:to-surface-800"
           >
             <div className="mb-4 flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-md">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md">
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
@@ -1254,7 +1254,7 @@ export default function ApplicantDetailPage() {
             {/* AI Summary */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">
+                <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
                   {isRu ? "Краткое резюме кандидата" : "Nomzod tahlili"}
                 </p>
                 {!aiSummary && (
@@ -1279,7 +1279,7 @@ export default function ApplicantDetailPage() {
                 )}
               </div>
               {aiSummary && (
-                <div className="rounded-xl border border-purple-100 bg-white p-4 dark:border-purple-500/20 dark:bg-surface-900/50">
+                <div className="rounded-xl border border-emerald-100 bg-white p-4 dark:border-emerald-500/20 dark:bg-surface-900/50">
                   <div className="flex items-start justify-between gap-3">
                     <p className="flex-1 text-sm leading-relaxed text-surface-700 dark:text-surface-300">
                       {aiSummary.summary}
@@ -1340,7 +1340,7 @@ export default function ApplicantDetailPage() {
             {/* AI Interview Questions */}
             <div className="mt-5 space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">
+                <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
                   {isRu ? "Вопросы для интервью" : "Intervyu savollari"}
                 </p>
                 <Button
@@ -1363,10 +1363,10 @@ export default function ApplicantDetailPage() {
                 </Button>
               </div>
               {aiQuestions && aiQuestions.length > 0 && (
-                <ol className="space-y-2 rounded-xl border border-purple-100 bg-white p-4 dark:border-purple-500/20 dark:bg-surface-900/50">
+                <ol className="space-y-2 rounded-xl border border-emerald-100 bg-white p-4 dark:border-emerald-500/20 dark:bg-surface-900/50">
                   {aiQuestions.map((q, i) => (
                     <li key={i} className="flex gap-3 text-sm">
-                      <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-purple-100 text-xs font-bold text-purple-700 dark:bg-purple-500/20 dark:text-purple-300">
+                      <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
                         {i + 1}
                       </span>
                       <div className="flex-1">
@@ -1385,7 +1385,7 @@ export default function ApplicantDetailPage() {
 
             {/* AI Email Templates */}
             <div className="mt-5 space-y-2">
-              <p className="text-xs font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
                 {isRu ? "Шаблон письма кандидату" : "Nomzodga xat shabloni"}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -1410,7 +1410,7 @@ export default function ApplicantDetailPage() {
                 ))}
               </div>
               {aiEmail && (
-                <div className="space-y-2 rounded-xl border border-purple-100 bg-white p-4 dark:border-purple-500/20 dark:bg-surface-900/50">
+                <div className="space-y-2 rounded-xl border border-emerald-100 bg-white p-4 dark:border-emerald-500/20 dark:bg-surface-900/50">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-wider text-surface-500">
                       {isRu ? "Тема" : "Mavzu"}
@@ -1707,7 +1707,7 @@ export default function ApplicantDetailPage() {
               className="rounded-2xl border border-surface-200 bg-white p-5 shadow-sm dark:border-surface-700 dark:bg-surface-800"
             >
               <h3 className="mb-4 flex items-center gap-2 font-semibold text-surface-900">
-                <FileText className="h-5 w-5 text-purple-500" />
+                <FileText className="h-5 w-5 text-emerald-500" />
                 Resume
               </h3>
 
@@ -1728,7 +1728,7 @@ export default function ApplicantDetailPage() {
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {resume.content.skills.technical.map((s) => (
-                      <span key={s} className="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-700">
+                      <span key={s} className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
                         {s}
                       </span>
                     ))}
@@ -1743,7 +1743,7 @@ export default function ApplicantDetailPage() {
                     Ish tajribasi
                   </p>
                   {resume.content.experience.slice(0, 2).map((exp, i) => (
-                    <div key={i} className="mb-2 border-l-2 border-purple-200 pl-3">
+                    <div key={i} className="mb-2 border-l-2 border-emerald-200 pl-3">
                       <p className="text-sm font-medium text-surface-900">{exp.position}</p>
                       <p className="text-xs text-surface-500">{exp.company}</p>
                     </div>
@@ -1758,7 +1758,7 @@ export default function ApplicantDetailPage() {
                     Ta'lim
                   </p>
                   {resume.content.education.map((edu, i) => (
-                    <div key={i} className="border-l-2 border-purple-200 pl-3">
+                    <div key={i} className="border-l-2 border-emerald-200 pl-3">
                       <p className="text-sm font-medium text-surface-900">{edu.institution}</p>
                       <p className="text-xs text-surface-500">{edu.degree} — {edu.field}</p>
                     </div>

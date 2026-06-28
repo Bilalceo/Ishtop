@@ -175,8 +175,8 @@ export default function CompanyJobsPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-500/20">
-                <Eye className="h-6 w-6 text-purple-600" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-500/20">
+                <Eye className="h-6 w-6 text-emerald-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-surface-900 dark:text-white">
@@ -256,7 +256,7 @@ export default function CompanyJobsPage() {
                             ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
                             : job.status === "closed"
                             ? "bg-surface-200 text-surface-700 dark:bg-surface-700 dark:text-surface-300"
-                            : "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300"
+                            : "bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300"
                         }
                       >
                         {statusLabel[job.status] || job.status}

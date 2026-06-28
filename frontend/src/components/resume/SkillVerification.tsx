@@ -144,9 +144,9 @@ export function SkillVerification({ skills, statuses, onChange, locale }: Props)
   // -------------------------------------------------------------- IDLE
   if (phase === "idle") {
     return (
-      <div className="mt-4 rounded-xl border border-purple-200 bg-purple-50/60 p-4 dark:border-purple-500/30 dark:bg-purple-500/10">
+      <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
         <div className="flex items-start gap-3">
-          <span className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-lg bg-purple-600/15 text-purple-600 dark:text-purple-300">
+          <span className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-lg bg-emerald-600/15 text-emerald-600 dark:text-emerald-300">
             <ShieldCheck className="h-5 w-5" />
           </span>
           <div className="min-w-0 flex-1">
@@ -161,7 +161,7 @@ export function SkillVerification({ skills, statuses, onChange, locale }: Props)
               <button
                 type="button"
                 onClick={() => setPhase("active")}
-                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-purple-600 px-4 text-sm font-semibold text-white transition hover:bg-purple-700"
+                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700"
               >
                 <Sparkles className="h-4 w-4" /> {t.start} ({plan.length})
               </button>
@@ -196,7 +196,7 @@ export function SkillVerification({ skills, statuses, onChange, locale }: Props)
           <button
             type="button"
             onClick={() => { setIdx(0); setPicked(null); setFeedback(null); setPhase("active"); }}
-            className="text-xs font-medium text-purple-600 hover:underline dark:text-purple-300"
+            className="text-xs font-medium text-emerald-600 hover:underline dark:text-emerald-300"
           >
             {t.again}
           </button>
@@ -207,12 +207,12 @@ export function SkillVerification({ skills, statuses, onChange, locale }: Props)
 
   // -------------------------------------------------------------- ACTIVE
   return (
-    <div className="mt-4 rounded-xl border border-purple-200 bg-white p-4 dark:border-purple-500/30 dark:bg-surface-900">
+    <div className="mt-4 rounded-xl border border-emerald-200 bg-white p-4 dark:border-emerald-500/30 dark:bg-surface-900">
       <div className="mb-3 flex items-center justify-between">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-purple-600 dark:text-purple-300">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">
           {t.progress(idx + 1, plan.length)}
         </span>
-        <span className="max-w-[55%] truncate rounded-full bg-purple-100 px-2 py-0.5 text-[11px] font-medium text-purple-700 dark:bg-purple-500/20 dark:text-purple-200">
+        <span className="max-w-[55%] truncate rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200">
           {t.forSkill}: {current.skill}
         </span>
       </div>
@@ -232,7 +232,7 @@ export function SkillVerification({ skills, statuses, onChange, locale }: Props)
               const isPicked = picked === i;
               const isCorrect = current.question.correct === i;
               let cls =
-                "border-surface-200 hover:border-purple-300 hover:bg-purple-50 dark:border-surface-700 dark:hover:bg-surface-800";
+                "border-surface-200 hover:border-emerald-300 hover:bg-emerald-50 dark:border-surface-700 dark:hover:bg-surface-800";
               if (picked !== null) {
                 if (isCorrect) cls = "border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10";
                 else if (isPicked) cls = "border-amber-400 bg-amber-50 dark:bg-amber-500/10";
@@ -276,7 +276,7 @@ export function SkillVerification({ skills, statuses, onChange, locale }: Props)
               <button
                 type="button"
                 onClick={advance}
-                className="inline-flex min-h-[40px] items-center gap-1 rounded-lg bg-purple-600 px-4 text-sm font-semibold text-white transition hover:bg-purple-700"
+                className="inline-flex min-h-[40px] items-center gap-1 rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700"
               >
                 {idx + 1 < plan.length ? t.next : t.finish}
                 <ChevronRight className="h-4 w-4" />

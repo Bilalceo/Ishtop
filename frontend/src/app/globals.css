@@ -16,7 +16,7 @@
     --card-foreground: 225 26% 12%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 247 86% 63%;
+    --primary: 160 84% 39%;
     --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -28,7 +28,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 224 20% 88%;
     --input: 224 20% 88%;
-    --ring: 247 86% 63%;
+    --ring: 160 84% 39%;
     --radius: 0.9rem;
 
     /* ===== Aurora tokens ===== */
@@ -51,8 +51,8 @@
     --card-foreground: 220 28% 96%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 187 94% 43%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 158 64% 52%;
+    --primary-foreground: 231 41% 8%;
     --secondary: 231 27% 18%;
     --secondary-foreground: 210 40% 98%;
     --muted: 230 26% 16%;
@@ -63,7 +63,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 230 24% 22%;
     --input: 230 24% 22%;
-    --ring: 251 91% 72%;
+    --ring: 158 64% 52%;
   }
 }
 

@@ -72,7 +72,7 @@ export function AuroraGreeting({
       {/* Ambient orbs */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -left-20 top-0 h-[280px] w-[280px] rounded-full bg-violet-500/35 blur-[100px]"
+        className="pointer-events-none absolute -left-20 top-0 h-[280px] w-[280px] rounded-full bg-emerald-500/35 blur-[100px]"
       />
       <div
         aria-hidden
@@ -136,7 +136,7 @@ export function AuroraGreeting({
             <svg width="140" height="140" viewBox="0 0 64 64" className="-rotate-90">
               <defs>
                 <linearGradient id="grg" x1="0" x2="1">
-                  <stop offset="0%" stopColor="#7C5CFF" />
+                  <stop offset="0%" stopColor="#10B981" />
                   <stop offset="60%" stopColor="#22D3EE" />
                   <stop offset="100%" stopColor="#3CCB7F" />
                 </linearGradient>

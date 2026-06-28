@@ -125,7 +125,7 @@ export default function CompanyClient() {
               {/* Avatars stack */}
               <div className="mt-8 flex items-center gap-2" aria-hidden>
                 <div className="flex -space-x-2">
-                  {["#7C5CFF", "#22D3EE", "#F5B544", "#3CCB7F", "#FF6B35"].map((c, i) => (
+                  {["#10B981", "#22D3EE", "#F5B544", "#3CCB7F", "#FF6B35"].map((c, i) => (
                     <span
                       key={i}
                       className="grid h-9 w-9 place-items-center rounded-full text-[11px] font-semibold text-white ring-2 ring-[#0E0F12]"

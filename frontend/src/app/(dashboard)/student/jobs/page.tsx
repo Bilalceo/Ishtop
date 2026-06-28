@@ -159,17 +159,29 @@ export default function JobsPage() {
 
   const loadMatchedJobs = useCallback(async () => {
     setHasCheckedResume(true);
-    const response = await resumeApi.list({
+
+    const extractResumes = (response: any) => {
+      const payload = response?.data?.data || response?.data;
+      return Array.isArray(payload?.resumes)
+        ? payload.resumes
+        : Array.isArray(payload)
+          ? payload
+          : [];
+    };
+
+    // Prefer a published resume, but fall back to any resume (e.g. an AI-built
+    // draft) so matching still works for users who haven't published yet.
+    const publishedResp = await resumeApi.list({
       status: "published",
       page: 1,
       limit: 100,
     });
-    const payload = response.data?.data || response.data;
-    const resumes = Array.isArray(payload?.resumes)
-      ? payload.resumes
-      : Array.isArray(payload)
-        ? payload
-        : [];
+    let resumes = extractResumes(publishedResp);
+
+    if (resumes.length === 0) {
+      const anyResp = await resumeApi.list({ page: 1, limit: 100 });
+      resumes = extractResumes(anyResp);
+    }
 
     if (resumes.length === 0) {
       setHasPublishedResume(false);
@@ -537,7 +549,7 @@ export default function JobsPage() {
               onClick={() => void switchToMatchedJobs()}
               className={cn(
                 feedMode === "matched" &&
-                  "bg-gradient-to-r from-purple-500 to-indigo-600",
+                  "bg-gradient-to-r from-emerald-500 to-teal-600",
               )}
             >
               <Target className="mr-1 h-3.5 w-3.5" />
@@ -550,7 +562,7 @@ export default function JobsPage() {
               onClick={() => void switchToAllJobs()}
               className={cn(
                 feedMode === "all" &&
-                  "bg-gradient-to-r from-purple-500 to-indigo-600",
+                  "bg-gradient-to-r from-emerald-500 to-teal-600",
               )}
             >
               <Briefcase className="mr-1 h-3.5 w-3.5" />
@@ -865,7 +877,7 @@ export default function JobsPage() {
                         : [...filters.locations, opt.value];
                       setFilters((prev) => ({ ...prev, locations: next }));
                     }}
-                    className="h-4 w-4 rounded border-surface-300 text-purple-600"
+                    className="h-4 w-4 rounded border-surface-300 text-emerald-600"
                   />
                   <span className="text-sm">{opt.label}</span>
                 </label>
@@ -904,7 +916,7 @@ export default function JobsPage() {
                         : [...filters.jobTypes, opt.value];
                       setFilters((prev) => ({ ...prev, jobTypes: next }));
                     }}
-                    className="h-4 w-4 rounded border-surface-300 text-purple-600"
+                    className="h-4 w-4 rounded border-surface-300 text-emerald-600"
                   />
                   <span className="text-sm">{opt.label}</span>
                 </label>
@@ -941,7 +953,7 @@ export default function JobsPage() {
                         experienceLevels: next,
                       }));
                     }}
-                    className="h-4 w-4 rounded border-surface-300 text-purple-600"
+                    className="h-4 w-4 rounded border-surface-300 text-emerald-600"
                   />
                   <span className="text-sm">{opt.label}</span>
                 </label>
@@ -968,7 +980,7 @@ export default function JobsPage() {
             </Button>
             <Button
               onClick={() => setShowMobileFilters(false)}
-              className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600"
+              className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600"
             >
               {isRu ? "Применить" : "Qo'llash"}
             </Button>

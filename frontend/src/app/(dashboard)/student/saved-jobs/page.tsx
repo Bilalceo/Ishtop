@@ -37,7 +37,7 @@ const getJobTypeLabels = (isRu: boolean): Record<string, string> => ({
 const jobTypeColors: Record<string, string> = {
   full_time: "bg-green-100 text-green-700",
   part_time: "bg-blue-100 text-blue-700",
-  remote: "bg-purple-100 text-purple-700",
+  remote: "bg-emerald-100 text-emerald-700",
   hybrid: "bg-cyan-100 text-cyan-700",
   contract: "bg-orange-100 text-orange-700",
   internship: "bg-pink-100 text-pink-700",
@@ -115,7 +115,7 @@ export default function SavedJobsPage() {
       >
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold text-surface-900">
-            <BookmarkCheck className="h-6 w-6 text-purple-600" />
+            <BookmarkCheck className="h-6 w-6 text-emerald-600" />
             Saqlangan ishlar
           </h1>
           <p className="mt-1 text-sm text-surface-500">
@@ -123,7 +123,7 @@ export default function SavedJobsPage() {
           </p>
         </div>
         <Link href="/student/jobs">
-          <Button className="bg-gradient-to-r from-purple-500 to-indigo-600">
+          <Button className="bg-gradient-to-r from-emerald-500 to-teal-600">
             <Search className="mr-2 h-4 w-4" />
             Ishlarni ko'rish
           </Button>
@@ -167,7 +167,7 @@ export default function SavedJobsPage() {
           </p>
           {!searchQuery && (
             <Link href="/student/jobs" className="mt-4">
-              <Button className="bg-gradient-to-r from-purple-500 to-indigo-600">
+              <Button className="bg-gradient-to-r from-emerald-500 to-teal-600">
                 <Search className="mr-2 h-4 w-4" />
                 Ishlarni ko'rish
               </Button>
@@ -188,7 +188,7 @@ export default function SavedJobsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: i * 0.05 }}
-                  className="group relative flex flex-col rounded-2xl border border-surface-200 bg-white p-5 shadow-sm transition-all hover:border-purple-200 hover:shadow-md dark:border-surface-700 dark:bg-surface-800 dark:hover:border-purple-700"
+                  className="group relative flex flex-col rounded-2xl border border-surface-200 bg-white p-5 shadow-sm transition-all hover:border-emerald-200 hover:shadow-md dark:border-surface-700 dark:bg-surface-800 dark:hover:border-emerald-700"
                 >
                   {/* Remove button */}
                   <button
@@ -205,7 +205,7 @@ export default function SavedJobsPage() {
 
                   {/* Company */}
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-sm font-bold text-white">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-sm font-bold text-white">
                       {companyLetter}
                     </div>
                     <div className="min-w-0">
@@ -219,7 +219,7 @@ export default function SavedJobsPage() {
 
                   {/* Title */}
                   <Link href={`/student/jobs/${job.id}`}>
-                    <h3 className="mt-3 text-base font-bold text-surface-900 hover:text-purple-600 transition-colors">
+                    <h3 className="mt-3 text-base font-bold text-surface-900 hover:text-emerald-600 transition-colors">
                       {job.title}
                     </h3>
                   </Link>
@@ -258,7 +258,7 @@ export default function SavedJobsPage() {
                     <Link href={`/student/jobs/${job.id}/apply`}>
                       <Button
                         size="sm"
-                        className="bg-gradient-to-r from-purple-500 to-indigo-600 text-xs"
+                        className="bg-gradient-to-r from-emerald-500 to-teal-600 text-xs"
                       >
                         <Sparkles className="mr-1 h-3 w-3" />
                         Ariza

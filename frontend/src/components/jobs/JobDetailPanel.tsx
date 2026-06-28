@@ -87,7 +87,7 @@ export function JobDetailPanel({
       <div className="border-b border-surface-200 px-6 py-6 dark:border-surface-700">
         <div className="flex items-start gap-4">
           {/* Logo */}
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 text-2xl font-bold text-purple-700 dark:from-purple-900/50 dark:to-indigo-900/50 dark:text-purple-300">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 text-2xl font-bold text-emerald-700 dark:from-emerald-900/50 dark:to-teal-900/50 dark:text-emerald-300">
             {job.company?.name?.charAt(0) || "C"}
           </div>
           {/* Title block */}
@@ -147,7 +147,7 @@ export function JobDetailPanel({
         {/* Big CTA buttons */}
         <div className="mt-5 flex gap-3">
           <Button
-            className="flex-1 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 shadow-lg shadow-purple-500/25"
+            className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25"
             onClick={onApply}
           >
             <Send className="mr-2 h-4 w-4" />
@@ -187,8 +187,8 @@ export function JobDetailPanel({
         {/* Quick info grid */}
         <div className="grid grid-cols-2 gap-4 rounded-2xl border border-surface-200 bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800/50">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/50">
-              <MapPin className="h-5 w-5 text-purple-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/50">
+              <MapPin className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
               <p className="text-xs text-surface-500">
@@ -382,7 +382,7 @@ export function JobDetailPanel({
           </h3>
           <div className="rounded-2xl border border-surface-200 p-4 dark:border-surface-700">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-100 to-indigo-100 text-xl font-bold text-purple-600 dark:from-purple-900/50 dark:to-indigo-900/50">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 text-xl font-bold text-emerald-600 dark:from-emerald-900/50 dark:to-teal-900/50">
                 {job.company?.name?.charAt(0)}
               </div>
               <div>

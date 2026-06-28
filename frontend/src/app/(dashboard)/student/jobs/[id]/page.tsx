@@ -76,7 +76,7 @@ function getExperienceLevelLabels(isRu: boolean): Record<string, string> {
 const jobTypeColors: Record<string, string> = {
   full_time: "bg-green-100 text-green-700",
   part_time: "bg-blue-100 text-blue-700",
-  remote: "bg-purple-100 text-purple-700",
+  remote: "bg-emerald-100 text-emerald-700",
   hybrid: "bg-cyan-100 text-cyan-700",
   contract: "bg-orange-100 text-orange-700",
   internship: "bg-pink-100 text-pink-700",
@@ -249,7 +249,7 @@ export default function JobDetailPage() {
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4">
             {/* Company Logo */}
-            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-2xl font-bold text-white shadow-lg">
+            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-2xl font-bold text-white shadow-lg">
               {companyLetter}
             </div>
             <div>
@@ -274,7 +274,7 @@ export default function JobDetailPage() {
               variant="ghost"
               size="icon"
               onClick={() => setIsSaved(!isSaved)}
-              className={isSaved ? "text-purple-600" : "text-surface-400"}
+              className={isSaved ? "text-emerald-600" : "text-surface-400"}
               title={isSaved ? c.removeFromSaved : c.saveJob}
               aria-label={isSaved ? c.removeFromSaved : c.saveJob}
             >
@@ -365,7 +365,7 @@ export default function JobDetailPage() {
         {/* Apply Button */}
         <div className="mt-6 flex gap-3">
           <Link href={`/student/jobs/${job.id}/apply`} className="flex-1">
-            <Button className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 py-3 text-base font-semibold shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40">
+            <Button className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 py-3 text-base font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40">
               <Sparkles className="mr-2 h-5 w-5" />
               {c.applyButton}
             </Button>
@@ -421,7 +421,7 @@ export default function JobDetailPage() {
                   {job.requirements.skills.map((skill) => (
                     <span
                       key={skill}
-                      className="rounded-full bg-purple-50 px-3 py-1 text-sm font-medium text-purple-700"
+                      className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700"
                     >
                       {skill}
                     </span>
@@ -483,7 +483,7 @@ export default function JobDetailPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="rounded-2xl border border-purple-100 bg-gradient-to-r from-purple-50 to-indigo-50 p-6"
+        className="rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-teal-50 p-6"
       >
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
           <div>
@@ -495,7 +495,7 @@ export default function JobDetailPage() {
             </p>
           </div>
           <Link href={`/student/jobs/${job.id}/apply`}>
-            <Button className="whitespace-nowrap bg-gradient-to-r from-purple-500 to-indigo-600 shadow-lg shadow-purple-500/25">
+            <Button className="whitespace-nowrap bg-gradient-to-r from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
               <Sparkles className="mr-2 h-4 w-4" />
               {c.applyButton}
             </Button>

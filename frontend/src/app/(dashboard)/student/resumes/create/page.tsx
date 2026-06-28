@@ -366,7 +366,7 @@ export default function CreateResumePage() {
                         type="button"
                         onClick={handleGenerateSummary}
                         disabled={isGeneratingSummary}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-500 to-fuchsia-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
                       >
                         {isGeneratingSummary ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />

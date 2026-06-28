@@ -109,10 +109,6 @@ export function Hero({ cms }: { cms?: HeroCmsPayload }) {
         aria-hidden
         className="pointer-events-none absolute -top-44 left-1/2 h-[460px] w-[820px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[150px]"
       />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:64px_64px]"
-      />
 
       <div className="section-shell relative grid items-center gap-12 pb-20 sm:pb-28 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:pb-32">
         {/* Left — copy */}

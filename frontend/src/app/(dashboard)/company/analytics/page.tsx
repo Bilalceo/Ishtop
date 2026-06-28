@@ -259,7 +259,7 @@ export default function CompanyAnalyticsPage() {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="value" fill="#4f46e5" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="value" fill="#059669" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -312,7 +312,7 @@ export default function CompanyAnalyticsPage() {
                   <YAxis />
                   <Tooltip />
                   <Line type="monotone" dataKey="views" stroke="#06b6d4" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="applications" stroke="#6366f1" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="applications" stroke="#10B981" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>

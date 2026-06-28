@@ -25,7 +25,7 @@ const ADMIN_ROLE_OPTIONS: Array<{ value: AdminAccessRole; label: string; tone: s
   { value: "operations_admin", label: "Operations Admin", tone: "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300" },
   { value: "finance_admin", label: "Finance Admin", tone: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300" },
   { value: "security_admin", label: "Security Admin", tone: "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300" },
-  { value: "support_agent", label: "Support Agent", tone: "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300" },
+  { value: "support_agent", label: "Support Agent", tone: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300" },
 ];
 
 const FALLBACK_MATRIX: AdminRoleMatrixItem[] = [
@@ -201,7 +201,7 @@ const ROLE_BAR: Record<AdminAccessRole, string> = {
   operations_admin: "bg-gradient-to-r from-blue-500 to-cyan-500",
   finance_admin: "bg-gradient-to-r from-emerald-500 to-teal-500",
   security_admin: "bg-gradient-to-r from-amber-500 to-orange-500",
-  support_agent: "bg-gradient-to-r from-violet-500 to-purple-500",
+  support_agent: "bg-gradient-to-r from-emerald-500 to-emerald-500",
 };
 
 function parseMatrix(data: unknown): AdminRoleMatrixItem[] {
@@ -432,7 +432,7 @@ export default function AdminAccessPage() {
     <div className="space-y-8">
       <section className="relative overflow-hidden rounded-3xl border border-surface-200 bg-white p-6 shadow-sm dark:border-surface-700 dark:bg-surface-900 sm:p-8">
         <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-gradient-to-br from-amber-500/15 via-rose-500/10 to-transparent blur-3xl" aria-hidden />
-        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-gradient-to-tr from-violet-500/10 via-transparent to-transparent blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-gradient-to-tr from-emerald-500/10 via-transparent to-transparent blur-3xl" aria-hidden />
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">

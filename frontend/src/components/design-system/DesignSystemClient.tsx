@@ -145,7 +145,7 @@ function SideNav() {
           <li key={s.id}>
             <a
               href={`#${s.id}`}
-              className="focus-ring block rounded-xl px-3 py-1.5 text-sm font-medium text-surface-700 hover:bg-surface-100 hover:text-violet-600 dark:text-white/70 dark:hover:bg-white/[0.04] dark:hover:text-violet-300"
+              className="focus-ring block rounded-xl px-3 py-1.5 text-sm font-medium text-surface-700 hover:bg-surface-100 hover:text-emerald-600 dark:text-white/70 dark:hover:bg-white/[0.04] dark:hover:text-emerald-300"
             >
               {s.label}
             </a>
@@ -172,7 +172,7 @@ function Section({
   return (
     <section id={id} aria-labelledby={`${id}-h`} className="scroll-mt-20">
       <header className="border-b border-surface-200/70 pb-4 dark:border-white/[0.06]">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-500 dark:text-violet-300">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-500 dark:text-emerald-300">
           /{id}
         </p>
         <h2 id={`${id}-h`} className="h-display mt-1 text-2xl text-surface-900 dark:text-white sm:text-3xl">
@@ -265,7 +265,7 @@ function Colors() {
   const swatches = [
     { name: "ink/900", hex: "#0B1020", role: "Hero / dark surface" },
     { name: "ink/800", hex: "#111733", role: "Card on dark" },
-    { name: "aurora/violet", hex: "#7C5CFF", role: "Primary brand" },
+    { name: "aurora/violet", hex: "#10B981", role: "Primary brand" },
     { name: "aurora/cyan", hex: "#22D3EE", role: "Secondary brand" },
     { name: "gold/500", hex: "#F5B544", role: "Warm signal" },
     { name: "mint/trust", hex: "#3CCB7F", role: "Trust / success" },
@@ -305,7 +305,7 @@ function Colors() {
             className="h-28"
             style={{
               background:
-                "linear-gradient(120deg, #7C5CFF 0%, #5B8CFF 60%, #22D3EE 110%)",
+                "linear-gradient(120deg, #10B981 0%, #5B8CFF 60%, #22D3EE 110%)",
             }}
           />
           <div className="p-4">
@@ -318,7 +318,7 @@ function Colors() {
             className="h-28"
             style={{
               background:
-                "conic-gradient(from 120deg at 50% 50%, #7C5CFF, #22D3EE, #F5B544, #7C5CFF)",
+                "conic-gradient(from 120deg at 50% 50%, #10B981, #22D3EE, #F5B544, #10B981)",
             }}
           />
           <div className="p-4">
@@ -394,7 +394,7 @@ function Spacing() {
               </span>
               <span
                 aria-hidden
-                className="block h-3 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400"
+                className="block h-3 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400"
                 style={{ width: n * 4 }}
               />
             </div>
@@ -421,7 +421,7 @@ function Radius() {
         <div className="flex flex-wrap items-end gap-5">
           {radii.map((r) => (
             <div key={r.name} className="text-center">
-              <div className={`h-20 w-20 ${r.className} bg-gradient-to-br from-violet-500 to-cyan-400`} />
+              <div className={`h-20 w-20 ${r.className} bg-gradient-to-br from-emerald-500 to-cyan-400`} />
               <p className="mt-2 font-mono text-xs text-surface-500 dark:text-white/55">{r.name}</p>
             </div>
           ))}
@@ -477,7 +477,7 @@ function Motion() {
             <button
               key={m.c}
               type="button"
-              className={`group h-24 rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-400 text-sm font-semibold text-white transition-transform ${m.c} hover:scale-105 hover:rotate-1`}
+              className={`group h-24 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-400 text-sm font-semibold text-white transition-transform ${m.c} hover:scale-105 hover:rotate-1`}
             >
               <span className="block">Hover · {m.label}</span>
             </button>
@@ -569,7 +569,7 @@ function Cards() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Eye className="h-4 w-4 text-violet-500" />
+              <Eye className="h-4 w-4 text-emerald-500" />
               shadcn / Card
             </CardTitle>
           </CardHeader>
@@ -582,7 +582,7 @@ function Cards() {
 
         <div className="card-aurora p-6">
           <div className="flex items-center gap-2">
-            <Bot className="h-4 w-4 text-violet-500" />
+            <Bot className="h-4 w-4 text-emerald-500" />
             <p className="font-display text-base font-semibold">card-aurora</p>
           </div>
           <p className="mt-3 text-sm text-surface-600 dark:text-white/70">
@@ -666,7 +666,7 @@ function Feedback() {
             Empty
           </p>
           <div className="mt-3 rounded-2xl border border-dashed border-surface-300 p-6 text-center dark:border-white/15">
-            <Bookmark className="mx-auto h-7 w-7 text-violet-500" />
+            <Bookmark className="mx-auto h-7 w-7 text-emerald-500" />
             <p className="mt-2 text-sm font-medium text-surface-900 dark:text-white">
               Saqlangan vakansiyalar yo&apos;q
             </p>
@@ -701,7 +701,7 @@ function Feedback() {
 function MobilePatterns() {
   const [open, setOpen] = useState(false);
   const slides = [
-    { title: "AI Resume", body: "Bullet pointlar bir tugma bilan kuchayadi", color: "#7C5CFF" },
+    { title: "AI Resume", body: "Bullet pointlar bir tugma bilan kuchayadi", color: "#10B981" },
     { title: "Smart match", body: "Ko'nikmalaringizga mos vakansiyalar", color: "#22D3EE" },
     { title: "Auto-apply", body: "10 ta vakansiyaga 1 tugma bilan", color: "#F5B544" },
   ];
@@ -741,7 +741,7 @@ function MobilePatterns() {
             <div className="space-y-3">
               {["Toshkent", "Remote", "Junior", "React", "Python"].map((t) => (
                 <label key={t} className="flex items-center gap-3 rounded-2xl border border-surface-200 p-3 dark:border-white/[0.06]">
-                  <input type="checkbox" defaultChecked className="h-4 w-4 accent-violet-500" />
+                  <input type="checkbox" defaultChecked className="h-4 w-4 accent-emerald-500" />
                   <span className="text-sm font-medium">{t}</span>
                 </label>
               ))}
@@ -831,7 +831,7 @@ function Primitives() {
         <CodeBlock
           code={`import tokens from "@/lib/design-tokens.json";
 
-tokens.color.aurora.violet.$value;   // "#7C5CFF"
+tokens.color.aurora.violet.$value;   // "#10B981"
 tokens.motion.easing["out-expo"].$value;
 // "cubic-bezier(0.19, 1, 0.22, 1)"`}
         />

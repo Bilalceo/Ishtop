@@ -262,7 +262,7 @@ export default function SettingsPage() {
                       fallback={user?.full_name?.charAt(0)}
                       size="xl"
                     />
-                    <label className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-purple-500 text-white shadow-lg hover:bg-purple-600">
+                    <label className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600">
                       <Camera className="h-4 w-4" />
                       <input
                         type="file"
@@ -357,7 +357,7 @@ export default function SettingsPage() {
                     onChange={(e) =>
                       setProfile((p) => ({ ...p, bio: e.target.value }))
                     }
-                    className="w-full rounded-lg border border-surface-300 p-3 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                    className="w-full rounded-lg border border-surface-300 p-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                     rows={3}
                     placeholder={t("settingsPage.bioPlaceholder")}
                   />
@@ -415,7 +415,7 @@ export default function SettingsPage() {
               <Button
                 onClick={handleSaveProfile}
                 disabled={isSaving}
-                className="bg-gradient-to-r from-purple-500 to-indigo-600 gap-2"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 gap-2"
               >
                 {isSaving ? (
                   <>
@@ -509,7 +509,7 @@ export default function SettingsPage() {
                 <Button
                   onClick={handleChangePassword}
                   disabled={isChangingPassword || !passwords.current || !passwords.new}
-                  className="bg-gradient-to-r from-purple-500 to-indigo-600"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600"
                 >
                   {isChangingPassword ? (
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
@@ -608,7 +608,7 @@ export default function SettingsPage() {
                         }
                         className="peer sr-only"
                       />
-                      <div className="peer h-6 w-11 rounded-full bg-surface-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow-sm after:transition-all after:content-[''] peer-checked:bg-purple-600 peer-checked:after:translate-x-full peer-focus:ring-2 peer-focus:ring-purple-300"></div>
+                      <div className="peer h-6 w-11 rounded-full bg-surface-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow-sm after:transition-all after:content-[''] peer-checked:bg-emerald-600 peer-checked:after:translate-x-full peer-focus:ring-2 peer-focus:ring-emerald-300"></div>
                     </label>
                   </div>
                 ))}
@@ -652,7 +652,7 @@ export default function SettingsPage() {
                         }
                         className="peer sr-only"
                       />
-                      <div className="peer h-6 w-11 rounded-full bg-surface-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow-sm after:transition-all after:content-[''] peer-checked:bg-purple-600 peer-checked:after:translate-x-full peer-focus:ring-2 peer-focus:ring-purple-300"></div>
+                      <div className="peer h-6 w-11 rounded-full bg-surface-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow-sm after:transition-all after:content-[''] peer-checked:bg-emerald-600 peer-checked:after:translate-x-full peer-focus:ring-2 peer-focus:ring-emerald-300"></div>
                     </label>
                   </div>
                 ))}
@@ -663,7 +663,7 @@ export default function SettingsPage() {
               <Button
                 onClick={handleSaveNotifications}
                 disabled={isSavingNotifications}
-                className="bg-gradient-to-r from-purple-500 to-indigo-600 gap-2"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 gap-2"
               >
                 {isSavingNotifications ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -699,7 +699,7 @@ export default function SettingsPage() {
                         onChange={(e) => setPrivacy((p) => ({ ...p, [item.key]: e.target.checked }))}
                         className="peer sr-only"
                       />
-                      <div className="peer h-6 w-11 rounded-full bg-surface-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow-sm after:transition-all after:content-[''] peer-checked:bg-purple-600 peer-checked:after:translate-x-full peer-focus:ring-2 peer-focus:ring-purple-300"></div>
+                      <div className="peer h-6 w-11 rounded-full bg-surface-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow-sm after:transition-all after:content-[''] peer-checked:bg-emerald-600 peer-checked:after:translate-x-full peer-focus:ring-2 peer-focus:ring-emerald-300"></div>
                     </label>
                   </div>
                 ))}
@@ -730,7 +730,7 @@ export default function SettingsPage() {
               <Button
                 onClick={handleSavePrivacy}
                 disabled={isSavingPrivacy}
-                className="bg-gradient-to-r from-purple-500 to-indigo-600 gap-2"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 gap-2"
               >
                 {isSavingPrivacy ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

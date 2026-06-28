@@ -180,7 +180,7 @@ export default function ResumeDetailPage() {
             {c.downloadPdf}
           </Button>
           <Link href={`/student/resumes/${resumeId}/edit`}>
-            <Button className="bg-gradient-to-r from-purple-500 to-indigo-600">
+            <Button className="bg-gradient-to-r from-emerald-500 to-teal-600">
               <Edit className="mr-2 h-4 w-4" />
               {c.edit}
             </Button>
@@ -195,11 +195,11 @@ export default function ResumeDetailPage() {
         className="flex items-center justify-between rounded-2xl border border-surface-200 bg-white p-4 shadow-sm dark:border-surface-700 dark:bg-surface-800"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100">
             {resume.ai_generated ? (
-              <Sparkles className="h-5 w-5 text-purple-600" />
+              <Sparkles className="h-5 w-5 text-emerald-600" />
             ) : (
-              <FolderOpen className="h-5 w-5 text-purple-600" />
+              <FolderOpen className="h-5 w-5 text-emerald-600" />
             )}
           </div>
           <div>

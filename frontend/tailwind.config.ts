@@ -83,19 +83,19 @@ const config: Config = {
           950: "#160438",
         },
 
-        // Brand (alias for primary)
+        // Brand (alias for primary) — emerald, matching the landing accent
         brand: {
-          DEFAULT: "#6366F1",
-          50: "#ECEFFE",
-          100: "#D8DFFD",
-          200: "#B4C1FB",
-          300: "#8FA2F9",
-          400: "#6B84F7",
-          500: "#6366F1",
-          600: "#3730ED",
-          700: "#1C16D5",
-          800: "#1512A1",
-          900: "#0E0D6E",
+          DEFAULT: "#10B981",
+          50: "#ECFDF5",
+          100: "#D1FAE5",
+          200: "#A7F3D0",
+          300: "#6EE7B7",
+          400: "#34D399",
+          500: "#10B981",
+          600: "#059669",
+          700: "#047857",
+          800: "#065F46",
+          900: "#064E3B",
         },
 
         // Surface - Neutral grays

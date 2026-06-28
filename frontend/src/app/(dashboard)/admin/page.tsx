@@ -266,9 +266,9 @@ const METRIC_PALETTE: Record<MetricColor, { bar: string; iconBg: string; iconTex
     iconText: "text-emerald-700 dark:text-emerald-300",
   },
   violet: {
-    bar: "bg-gradient-to-r from-violet-500 to-purple-500",
-    iconBg: "bg-violet-100 dark:bg-violet-500/20",
-    iconText: "text-violet-700 dark:text-violet-300",
+    bar: "bg-gradient-to-r from-emerald-500 to-emerald-500",
+    iconBg: "bg-emerald-100 dark:bg-emerald-500/20",
+    iconText: "text-emerald-700 dark:text-emerald-300",
   },
   amber: {
     bar: "bg-gradient-to-r from-amber-500 to-orange-500",
@@ -440,7 +440,7 @@ export default function AdminDashboardPage() {
       <motion.section variants={itemVariants} className="relative overflow-hidden rounded-3xl border border-surface-200 bg-white p-6 shadow-sm dark:border-surface-700 dark:bg-surface-900 sm:p-8">
         {/* Decorative accent blob */}
         <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-gradient-to-br from-brand-500/15 via-cyan-500/10 to-transparent blur-3xl" aria-hidden />
-        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-gradient-to-tr from-violet-500/10 via-transparent to-transparent blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-gradient-to-tr from-emerald-500/10 via-transparent to-transparent blur-3xl" aria-hidden />
 
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">

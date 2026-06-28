@@ -79,8 +79,8 @@ const statusConfig: Record<
   },
   interview: {
     labelKey: "applicationsPage.interview",
-    color: "text-purple-600",
-    bgColor: "bg-purple-100",
+    color: "text-emerald-600",
+    bgColor: "bg-emerald-100",
     icon: Calendar,
   },
   accepted: {
@@ -289,8 +289,8 @@ export default function ApplicationsPage() {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
-              <Calendar className="h-5 w-5 text-purple-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
+              <Calendar className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
               <p className="text-2xl font-bold text-surface-900">
@@ -337,11 +337,11 @@ export default function ApplicationsPage() {
       {/* Upcoming Interview Alert */}
       {upcomingInterview && (
         <motion.div variants={itemVariants}>
-          <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50">
+          <Card className="border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50">
             <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100">
-                  <Calendar className="h-6 w-6 text-purple-600" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+                  <Calendar className="h-6 w-6 text-emerald-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-surface-900">
@@ -371,7 +371,7 @@ export default function ApplicationsPage() {
                           asChild
                           variant="outline"
                           size="sm"
-                          className="h-8 rounded-full border-purple-200 bg-white px-3 text-purple-700 hover:bg-purple-50"
+                          className="h-8 rounded-full border-emerald-200 bg-white px-3 text-emerald-700 hover:bg-emerald-50"
                         >
                           <a
                             href={upcomingInterview.meeting_link}
@@ -391,7 +391,7 @@ export default function ApplicationsPage() {
                 <Button variant="outline" size="sm">
                   {t("applicationsPage.viewDetails")}
                 </Button>
-                <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
                   {t("applicationsPage.joinMeeting")}
                 </Button>
               </div>
@@ -467,7 +467,7 @@ export default function ApplicationsPage() {
               </p>
               {!searchQuery && statusFilter === "all" && (
                 <Link href="/student/jobs">
-                  <Button className="mt-6 bg-gradient-to-r from-purple-500 to-indigo-600">
+                  <Button className="mt-6 bg-gradient-to-r from-emerald-500 to-teal-600">
                     {t("applicationsPage.browseJobs")}
                   </Button>
                 </Link>
@@ -490,7 +490,7 @@ export default function ApplicationsPage() {
                       {/* Job Info */}
                       <div className="flex gap-4">
                         {/* Company Logo */}
-                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-100 to-indigo-100 text-xl font-bold text-purple-600">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 text-xl font-bold text-emerald-600">
                           {application.job?.company?.name?.charAt(0) ?? "C"}
                         </div>
 
@@ -525,14 +525,14 @@ export default function ApplicationsPage() {
                             </span>
                             {application.interview_at && (
                               <>
-                                <span className="flex items-center gap-1 text-purple-600">
+                                <span className="flex items-center gap-1 text-emerald-600">
                                   <Calendar className="h-4 w-4" />
                                   {t("applicationsPage.interview")}:{" "}
                                   {formatDate(application.interview_at)}
                                 </span>
                                 <Badge
                                   variant="secondary"
-                                  className="bg-purple-100 text-purple-700"
+                                  className="bg-emerald-100 text-emerald-700"
                                 >
                                   {formatInterviewTypeLabel(
                                     application.interview_type,
@@ -547,7 +547,7 @@ export default function ApplicationsPage() {
                                   asChild
                                   variant="outline"
                                   size="sm"
-                                  className="h-8 rounded-full border-purple-200 bg-white px-3 text-purple-700 hover:bg-purple-50"
+                                  className="h-8 rounded-full border-emerald-200 bg-white px-3 text-emerald-700 hover:bg-emerald-50"
                                 >
                                   <a
                                     href={application.meeting_link}

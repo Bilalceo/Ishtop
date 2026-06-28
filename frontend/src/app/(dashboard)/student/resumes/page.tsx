@@ -210,7 +210,7 @@ export default function ResumesPage() {
         </div>
         <Button
           onClick={() => setShowCreateDialog(true)}
-          className="bg-gradient-to-r from-purple-500 to-indigo-600 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
+          className="bg-gradient-to-r from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
         >
           <Plus className="mr-2 h-4 w-4" />
           {t("resumesPage.createNew")}
@@ -221,8 +221,8 @@ export default function ResumesPage() {
       <motion.div variants={itemVariants} className="grid gap-4 sm:grid-cols-4">
         <Card>
           <CardContent className="flex items-center gap-4 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
-              <FileText className="h-5 w-5 text-purple-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
+              <FileText className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
               <p className="text-2xl font-bold text-surface-900 dark:text-white">
@@ -408,7 +408,7 @@ export default function ResumesPage() {
               {!searchQuery && statusFilter === "all" && (
                 <Button
                   onClick={() => setShowCreateDialog(true)}
-                  className="mt-6 bg-gradient-to-r from-purple-500 to-indigo-600"
+                  className="mt-6 bg-gradient-to-r from-emerald-500 to-teal-600"
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   {isRu
@@ -457,7 +457,7 @@ export default function ResumesPage() {
                       {resume.ai_generated && (
                         <Badge
                           variant="default"
-                          className="gap-1 bg-gradient-to-r from-purple-500 to-indigo-600"
+                          className="gap-1 bg-gradient-to-r from-emerald-500 to-teal-600"
                         >
                           <Sparkles className="h-3 w-3" />
                           AI
@@ -655,7 +655,7 @@ export default function ResumesPage() {
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 p-6 text-white cursor-pointer"
+                className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 p-6 text-white cursor-pointer"
               >
                 <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10" />
                 <div className="relative flex items-start gap-4">

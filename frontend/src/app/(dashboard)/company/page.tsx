@@ -119,7 +119,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   const configs: Record<string, { label: string; variant: string; icon: any }> = {
     new: { label: t("companyDashboard.new"), variant: "bg-blue-100 text-blue-700", icon: Clock },
     reviewing: { label: t("companyDashboard.reviewing"), variant: "bg-yellow-100 text-yellow-700", icon: Eye },
-    interview: { label: t("companyDashboard.interview"), variant: "bg-purple-100 text-purple-700", icon: Calendar },
+    interview: { label: t("companyDashboard.interview"), variant: "bg-emerald-100 text-emerald-700", icon: Calendar },
     offered: { label: t("companyDashboard.offered"), variant: "bg-green-100 text-green-700", icon: CheckCircle },
     rejected: { label: t("companyDashboard.rejected"), variant: "bg-red-100 text-red-700", icon: XCircle },
   };
@@ -332,7 +332,7 @@ export default function CompanyDashboardPage() {
           title={t("companyDashboard.totalApplications")}
           value={isLoading ? "—" : totalApplications}
           icon={FileText}
-          color="bg-purple-100 dark:bg-purple-500/20 text-purple-600"
+          color="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600"
         />
         <StatsCard
           title={t("companyDashboard.totalJobs")}
@@ -374,7 +374,7 @@ export default function CompanyDashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-purple-500" />
+                <Users className="h-5 w-5 text-emerald-500" />
                 {t("companyDashboard.recentApplications")}
               </CardTitle>
               <Link href="/company/applicants">
@@ -405,10 +405,10 @@ export default function CompanyDashboardPage() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 * index }}
-                      className="flex items-center justify-between rounded-xl border border-surface-200 p-4 transition-all hover:border-purple-200 hover:bg-purple-50/50 dark:border-surface-700 dark:hover:border-purple-500/30 dark:hover:bg-purple-500/5"
+                      className="flex items-center justify-between rounded-xl border border-surface-200 p-4 transition-all hover:border-emerald-200 hover:bg-emerald-50/50 dark:border-surface-700 dark:hover:border-emerald-500/30 dark:hover:bg-emerald-500/5"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 text-lg font-bold text-white">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-lg font-bold text-white">
                           <Briefcase className="h-5 w-5" />
                         </div>
                         <div>
@@ -509,11 +509,11 @@ export default function CompanyDashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200 dark:border-purple-500/30">
+        <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-emerald-200 dark:border-emerald-500/30">
           <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 dark:bg-purple-500/20">
-                <Sparkles className="h-7 w-7 text-purple-600" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-500/20">
+                <Sparkles className="h-7 w-7 text-emerald-600" />
               </div>
               <div>
                 <h3 className="font-display text-lg font-semibold text-surface-900 dark:text-white">
@@ -542,9 +542,9 @@ export default function CompanyDashboardPage() {
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
       >
         <Link href="/company/jobs/new">
-          <Card className="cursor-pointer transition-all hover:border-purple-300 hover:shadow-lg">
+          <Card className="cursor-pointer transition-all hover:border-emerald-300 hover:shadow-lg">
             <CardContent className="flex items-center gap-4 pt-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-500/20">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20">
                 <PlusCircle className="h-6 w-6" />
               </div>
               <div>

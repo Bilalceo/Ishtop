@@ -49,7 +49,7 @@ export default function ActionItemsPanel() {
     },
     {
       icon: ClipboardCheck,
-      color: "bg-purple-100 dark:bg-purple-500/20 text-purple-600",
+      color: "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600",
       label: t("companyDashboard.actionItems.scorecardsPending"),
       value: data?.scorecards_pending,
       href: "/company/applicants?status=interview&scorecard=pending",

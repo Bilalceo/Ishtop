@@ -112,7 +112,7 @@ export default function UpcomingInterviewsPanel() {
                       className="h-9 w-9 flex-shrink-0 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 text-xs font-bold text-white">
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-xs font-bold text-white">
                       {getInitials(item.candidate_name)}
                     </div>
                   )}
@@ -132,7 +132,7 @@ export default function UpcomingInterviewsPanel() {
           {!loading && interviews.length > 0 && (
             <Link
               href="/company/applicants?status=interview&when=upcoming"
-              className="mt-4 block text-center text-sm text-purple-600 hover:underline"
+              className="mt-4 block text-center text-sm text-emerald-600 hover:underline"
             >
               {t("companyDashboard.upcomingInterviews.viewAll")}
             </Link>
