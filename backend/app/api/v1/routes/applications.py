@@ -1690,14 +1690,22 @@ async def company_dashboard_analytics(
         Application.job_id.in_(job_ids),
         Application.is_deleted == False,
     ).all()
+    # DB datetimes are stored as naive UTC; coerce to aware UTC before comparing
+    # against the timezone-aware analytics window (otherwise: "can't compare
+    # offset-naive and offset-aware datetimes").
+    def _as_utc(dt):
+        if dt is not None and dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt
+
     applications_in_window = [
         app for app in applications_all
-        if app.applied_at and start_at <= app.applied_at < end_at
+        if app.applied_at and start_at <= _as_utc(app.applied_at) < end_at
     ]
 
     today = datetime.now(timezone.utc).date()
     month_start = datetime.combine(today.replace(day=1), datetime.min.time(), tzinfo=timezone.utc)
-    applications_this_month = sum(1 for app in applications_all if app.applied_at and app.applied_at >= month_start)
+    applications_this_month = sum(1 for app in applications_all if app.applied_at and _as_utc(app.applied_at) >= month_start)
 
     responded = [app for app in applications_in_window if app.status != ApplicationStatus.PENDING.value]
     response_rate_pct = _safe_pct(len(responded), len(applications_in_window))
@@ -1784,7 +1792,7 @@ async def company_dashboard_analytics(
 
     apps_daily_map: Dict[str, int] = {}
     for app in applications_in_window:
-        key = app.applied_at.astimezone(timezone.utc).date().isoformat()
+        key = _as_utc(app.applied_at).astimezone(timezone.utc).date().isoformat()
         apps_daily_map[key] = apps_daily_map.get(key, 0) + 1
 
     source_rows = (
