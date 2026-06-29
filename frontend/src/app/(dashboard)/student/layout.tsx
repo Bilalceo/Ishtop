@@ -280,7 +280,7 @@ export default function StudentDashboardLayout({
         <div className="flex h-16 items-center justify-between border-b border-surface-200 px-4 dark:border-surface-700">
           <Link href="/student" className="flex items-center gap-2">
             <Image
-              src="/logo-mark.png"
+              src="/logo-mark.png?v=2"
               alt="IshTop"
               width={36}
               height={36}

@@ -59,7 +59,7 @@ export default function AuthLayout({
         >
           <Link href="/" className="inline-flex items-center gap-2">
             <Image
-              src="/logo-mark.png"
+              src="/logo-mark.png?v=2"
               alt="IshTop"
               width={40}
               height={40}
