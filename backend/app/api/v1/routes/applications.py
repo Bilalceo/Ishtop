@@ -1527,14 +1527,21 @@ async def vacancy_analytics(
         Application.is_deleted == False,
     ).all()
 
+    # DB datetimes are naive UTC; coerce to aware UTC before comparing against
+    # the timezone-aware analytics window.
+    def _as_utc(dt):
+        if dt is not None and dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt
+
     applications_in_window = [
         app for app in applications_all
-        if app.applied_at and start_at <= app.applied_at < end_at
+        if app.applied_at and start_at <= _as_utc(app.applied_at) < end_at
     ]
 
     daily_app_map: Dict[str, int] = {}
     for app in applications_in_window:
-        key = app.applied_at.astimezone(timezone.utc).date().isoformat()
+        key = _as_utc(app.applied_at).astimezone(timezone.utc).date().isoformat()
         daily_app_map[key] = daily_app_map.get(key, 0) + 1
 
     view_rows = (
