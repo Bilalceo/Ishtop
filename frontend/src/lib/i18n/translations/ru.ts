@@ -414,6 +414,7 @@ export const ru = {
       ai: "AI",
       jobPostings: "Вакансии",
       applicants: "Кандидаты",
+      analytics: "Аналитика",
       overview: "Обзор",
       systemHealth: "Состояние системы",
       users: "Пользователи",

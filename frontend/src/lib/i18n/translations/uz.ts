@@ -414,6 +414,7 @@ export const uz = {
       ai: "AI",
       jobPostings: "Vakansiyalar",
       applicants: "Nomzodlar",
+      analytics: "Analitika",
       overview: "Umumiy ko'rinish",
       systemHealth: "Tizim holati",
       users: "Foydalanuvchilar",
