@@ -531,23 +531,30 @@ class EmailService:
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>IshTop</title>
             <style>
-                body {{ font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }}
-                .container {{ max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
-                .header {{ background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color: white; padding: 30px; text-align: center; }}
-                .header h1 {{ margin: 0; font-size: 28px; }}
-                .content {{ padding: 30px; }}
-                .button {{ display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }}
-                .button:hover {{ opacity: 0.9; }}
-                .footer {{ background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 12px; }}
-                .info-box {{ background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; border-radius: 4px; }}
-                .warning-box {{ background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px; }}
+                body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; line-height: 1.6; color: #1f2328; margin: 0; padding: 0; background-color: #eef0f3; }}
+                .container {{ max-width: 600px; margin: 24px auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e6e8ec; box-shadow: 0 8px 30px rgba(16,24,40,0.06); }}
+                .header {{ background: #0a0a0b; padding: 38px 30px; text-align: center; }}
+                .logo {{ font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #ffffff; text-decoration: none; }}
+                .logo .accent {{ color: #34d399; }}
+                .bar {{ height: 3px; background: #10b981; line-height: 3px; font-size: 0; }}
+                .content {{ padding: 36px 32px; }}
+                .content h2 {{ color: #0a0a0b; font-size: 22px; font-weight: 700; margin: 0 0 12px; }}
+                .content p {{ color: #475467; font-size: 15px; margin: 0 0 14px; }}
+                .content ul {{ color: #475467; font-size: 15px; padding-left: 20px; margin: 0 0 14px; }}
+                .content li {{ margin: 6px 0; }}
+                .button {{ display: inline-block; background: #10b981; color: #ffffff !important; padding: 14px 34px; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 15px; margin: 18px 0; }}
+                .footer {{ background: #f7f8fa; padding: 24px; text-align: center; color: #98a2b3; font-size: 12px; border-top: 1px solid #eceef1; }}
+                .footer a {{ color: #059669; text-decoration: none; }}
+                .info-box {{ background: #ecfdf5; border-left: 4px solid #10b981; padding: 14px 16px; margin: 18px 0; border-radius: 8px; color: #065f46; font-size: 14px; }}
+                .warning-box {{ background: #fffbeb; border-left: 4px solid #f59e0b; padding: 14px 16px; margin: 18px 0; border-radius: 8px; color: #92400e; font-size: 14px; }}
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>🚀 IshTop</h1>
+                    <span class="logo">Ish<span class="accent">Top</span></span>
                 </div>
+                <div class="bar"></div>
                 <div class="content">
         """
         
@@ -564,7 +571,7 @@ class EmailService:
                         <li>📝 Подавать заявки одним кликом</li>
                         <li>📊 Отслеживать статус заявок</li>
                     </ul>
-                    <a href="{context.get('dashboard_url', '#')}" class="button">Перейти в личный кабинет</a>
+                    <a href="{context.get('dashboard_url', '#')}" class="button" style="display:inline-block;background:#10b981;color:#ffffff;padding:14px 34px;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;margin:18px 0">Перейти в личный кабинет</a>
                 """
             else:
                 html += f"""
@@ -577,7 +584,7 @@ class EmailService:
                         <li>📝 Bir marta bosish bilan ariza berish</li>
                         <li>📊 Arizalar holatini kuzatish</li>
                     </ul>
-                    <a href="{context.get('dashboard_url', '#')}" class="button">Boshqaruv paneliga o'tish</a>
+                    <a href="{context.get('dashboard_url', '#')}" class="button" style="display:inline-block;background:#10b981;color:#ffffff;padding:14px 34px;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;margin:18px 0">Boshqaruv paneliga o'tish</a>
                 """
         
         elif email_type == EmailType.PASSWORD_RESET:
@@ -586,7 +593,7 @@ class EmailService:
                     <h2>Сброс пароля</h2>
                     <p>Здравствуйте, {user_name}!</p>
                     <p>Мы получили запрос на сброс пароля для вашего аккаунта.</p>
-                    <a href="{context.get('reset_url', '#')}" class="button">Сбросить пароль</a>
+                    <a href="{context.get('reset_url', '#')}" class="button" style="display:inline-block;background:#10b981;color:#ffffff;padding:14px 34px;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;margin:18px 0">Сбросить пароль</a>
                     <div class="warning-box">
                         <strong>⚠️ Важно:</strong> Ссылка действительна в течение {context.get('expires_in', '1 час')}.
                         Если вы не запрашивали сброс пароля, проигнорируйте это письмо.
@@ -597,7 +604,7 @@ class EmailService:
                     <h2>Parolni tiklash</h2>
                     <p>Salom, {user_name}!</p>
                     <p>Hisobingiz uchun parolni tiklash so'rovi qabul qilindi.</p>
-                    <a href="{context.get('reset_url', '#')}" class="button">Parolni tiklash</a>
+                    <a href="{context.get('reset_url', '#')}" class="button" style="display:inline-block;background:#10b981;color:#ffffff;padding:14px 34px;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;margin:18px 0">Parolni tiklash</a>
                     <div class="warning-box">
                         <strong>⚠️ Muhim:</strong> Havola {context.get('expires_in', '1 soat')} davomida amal qiladi.
                         Agar siz parolni tiklashni so'ramagan bo'lsangiz, bu xabarni e'tiborsiz qoldiring.
@@ -678,7 +685,7 @@ class EmailService:
                     <div style="background: {status_color}; color: white; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0;">
                         <strong style="font-size: 18px;">{context.get('new_status', 'Обновлено').upper()}</strong>
                     </div>
-                    <a href="{context.get('applications_url', '#')}" class="button">Посмотреть заявки</a>
+                    <a href="{context.get('applications_url', '#')}" class="button" style="display:inline-block;background:#10b981;color:#ffffff;padding:14px 34px;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;margin:18px 0">Посмотреть заявки</a>
                 """
             else:
                 html += f"""
@@ -688,7 +695,7 @@ class EmailService:
                     <div style="background: {status_color}; color: white; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0;">
                         <strong style="font-size: 18px;">{context.get('new_status', 'Yangilandi').upper()}</strong>
                     </div>
-                    <a href="{context.get('applications_url', '#')}" class="button">Arizalarni ko'rish</a>
+                    <a href="{context.get('applications_url', '#')}" class="button" style="display:inline-block;background:#10b981;color:#ffffff;padding:14px 34px;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;margin:18px 0">Arizalarni ko'rish</a>
                 """
         
         elif email_type == EmailType.INTERVIEW_SCHEDULED:
@@ -733,9 +740,9 @@ class EmailService:
                 <div class="footer">
                     <p>© {datetime.now().year} IshTop. Barcha huquqlar himoyalangan.</p>
                     <p>
-                        <a href="{settings.FRONTEND_URL}" style="color: #7c3aed;">Veb-sayt</a> |
-                        <a href="{settings.FRONTEND_URL}/settings" style="color: #7c3aed;">Sozlamalar</a> |
-                        <a href="mailto:{settings.SUPPORT_EMAIL}" style="color: #7c3aed;">Yordam</a>
+                        <a href="{settings.FRONTEND_URL}" style="color: #059669;">Veb-sayt</a> |
+                        <a href="{settings.FRONTEND_URL}/settings" style="color: #059669;">Sozlamalar</a> |
+                        <a href="mailto:{settings.SUPPORT_EMAIL}" style="color: #059669;">Yordam</a>
                     </p>
                 </div>
             </div>
