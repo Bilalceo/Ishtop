@@ -552,7 +552,7 @@ class EmailService:
         <body>
             <div class="container">
                 <div class="header">
-                    <span class="logo">Ish<span class="accent">Top</span></span>
+                    <img src="https://ishtopuz.uz/logo-ishtop-ondark.png" alt="IshTop" width="160" height="46" style="display:inline-block;width:160px;height:46px;border:0;outline:none;text-decoration:none" />
                 </div>
                 <div class="bar"></div>
                 <div class="content">
