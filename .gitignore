@@ -154,3 +154,11 @@ secrets/
 
 # local toolchains
 tools/node-*/
+
+# Telegram import scripts + session (SENSITIVE — never commit)
+tg_import/
+*.session
+
+# Marketing media (large binaries kept locally, not committed)
+docs/higgsfield_assets/*.mp4
+docs/higgsfield_assets/*.wav
