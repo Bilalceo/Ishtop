@@ -120,7 +120,7 @@ export function Nav() {
               </li>
             ))}
             <li className="mt-2 flex items-center gap-2">
-              <LanguageSwitcher />
+              <LanguageSwitcher align="left" />
               <ThemeToggle />
             </li>
             <li className="mt-3 grid grid-cols-2 gap-2">

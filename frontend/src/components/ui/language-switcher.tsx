@@ -19,11 +19,15 @@ import { cn } from "@/lib/utils";
 interface LanguageSwitcherProps {
   variant?: "default" | "minimal" | "dropdown";
   className?: string;
+  /** Which edge the dropdown aligns to. Use "left" when the trigger sits near
+   *  the left edge (e.g. the mobile menu) so the panel doesn't overflow. */
+  align?: "left" | "right";
 }
 
 export function LanguageSwitcher({
   variant = "default",
   className,
+  align = "right",
 }: LanguageSwitcherProps) {
   const { locale, setLocale, locales } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -104,7 +108,9 @@ export function LanguageSwitcher({
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
             className={cn(
-              "absolute right-0 mt-2 w-40 py-1 z-50",
+              "absolute mt-2 w-40 py-1 z-50",
+              align === "left" ? "left-0" : "right-0",
+              "max-w-[calc(100vw-2rem)]",
               "bg-white rounded-xl shadow-lg border border-surface-200",
               "overflow-hidden",
             )}
