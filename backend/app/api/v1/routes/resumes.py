@@ -1160,6 +1160,20 @@ def _generate_pdf(resume: Resume) -> bytes:
             canvas.setFillColor(colors.HexColor("#94a3b8"))
             canvas.drawString(text_x, 9 * mm, f"{_label(locale, 'generated_by')} | {datetime.now(timezone.utc).date().isoformat()}")
             canvas.drawRightString(A4[0] - 16 * mm, 9 * mm, f"{_label(locale, 'page')} {doc_obj.page}")
+            # IshTop logo in the top-right corner of the first page (branding header)
+            if doc_obj.page == 1:
+                try:
+                    from reportlab.lib.utils import ImageReader
+                    if os.path.isfile(_RESUME_LOGO_PATH):
+                        hw = 18 * mm
+                        hh = hw * 292.0 / 1025.0
+                        canvas.drawImage(
+                            ImageReader(_RESUME_LOGO_PATH),
+                            A4[0] - 16 * mm - hw, A4[1] - 6.5 * mm - hh,
+                            width=hw, height=hh, mask="auto", preserveAspectRatio=True,
+                        )
+                except Exception:
+                    pass
             canvas.restoreState()
 
         doc.build(story, onFirstPage=draw_footer, onLaterPages=draw_footer)
