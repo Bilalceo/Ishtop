@@ -709,6 +709,9 @@ def _normalize_ai_resume_content(
 # paths (e.g. the Docker `fonts-dejavu-core` install) as a fallback.
 
 _BUNDLED_FONT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "fonts")
+_RESUME_LOGO_PATH = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "ishtop-logo.png")
+)
 
 # (regular_path, bold_path) candidates, tried in order. Bundled first.
 _UNICODE_FONT_CANDIDATES = (
@@ -1139,9 +1142,23 @@ def _generate_pdf(resume: Resume) -> bytes:
 
         def draw_footer(canvas, doc_obj):
             canvas.saveState()
+            text_x = 16 * mm
+            # IshTop logo (branding) on the left of the footer
+            try:
+                from reportlab.lib.utils import ImageReader
+                if os.path.isfile(_RESUME_LOGO_PATH):
+                    logo_w = 17 * mm
+                    logo_h = logo_w * 292.0 / 1025.0  # keep aspect ratio
+                    canvas.drawImage(
+                        ImageReader(_RESUME_LOGO_PATH), 16 * mm, 7.4 * mm,
+                        width=logo_w, height=logo_h, mask="auto", preserveAspectRatio=True,
+                    )
+                    text_x = 16 * mm + logo_w + 3 * mm
+            except Exception:
+                pass
             canvas.setFont(regular_font, 7)
             canvas.setFillColor(colors.HexColor("#94a3b8"))
-            canvas.drawString(16 * mm, 9 * mm, f"{_label(locale, 'generated_by')} | {datetime.now(timezone.utc).date().isoformat()}")
+            canvas.drawString(text_x, 9 * mm, f"{_label(locale, 'generated_by')} | {datetime.now(timezone.utc).date().isoformat()}")
             canvas.drawRightString(A4[0] - 16 * mm, 9 * mm, f"{_label(locale, 'page')} {doc_obj.page}")
             canvas.restoreState()
 
