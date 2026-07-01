@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   AlertTriangle,
   CheckCircle2,
+  ExternalLink,
   X,
 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -144,15 +145,34 @@ export function JobDetailPanel({
           </button>
         </div>
 
+        {job.external_apply_url && (
+          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+            <ExternalLink className="h-3.5 w-3.5" />
+            {isRu ? "Внешний источник — отклик на источнике" : "Tashqi manba — ariza manbada beriladi"}
+          </div>
+        )}
+
         {/* Big CTA buttons */}
         <div className="mt-5 flex gap-3">
-          <Button
-            className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25"
-            onClick={onApply}
-          >
-            <Send className="mr-2 h-4 w-4" />
-            {isRu ? "Откликнуться" : "Hozir ariza yuborish"}
-          </Button>
+          {job.external_apply_url ? (
+            <a
+              href={job.external_apply_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition hover:opacity-95"
+            >
+              <ExternalLink className="h-4 w-4" />
+              {isRu ? "Откликнуться на источнике" : "Manbada ariza berish"}
+            </a>
+          ) : (
+            <Button
+              className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25"
+              onClick={onApply}
+            >
+              <Send className="mr-2 h-4 w-4" />
+              {isRu ? "Откликнуться" : "Hozir ariza yuborish"}
+            </Button>
+          )}
           <Button variant="outline" className="flex-1 rounded-xl" onClick={onToggleSave}>
             {isSaved ? (
               <>

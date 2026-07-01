@@ -314,6 +314,7 @@ class JobResponse(BaseModel):
     trust_factors: List[Dict[str, Any]] = Field(default_factory=list)
     verification_state: Optional[str] = None
     is_featured: bool
+    external_apply_url: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     expires_at: Optional[datetime] = None

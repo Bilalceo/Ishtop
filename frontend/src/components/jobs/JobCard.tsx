@@ -11,6 +11,7 @@ import {
   Target,
   ShieldCheck,
   AlertTriangle,
+  ExternalLink,
 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Badge } from "@/components/ui/badge";
@@ -134,7 +135,12 @@ export function JobCard({
             {job.matchScore}% {isRu ? "mos" : "mos"}
           </Badge>
         ) : null}
-        {typeof job.trust_score === "number" ? (
+        {job.external_apply_url ? (
+          <Badge variant="secondary" className="gap-1">
+            <ExternalLink className="h-3 w-3" />
+            {isRu ? "Внешний" : "Tashqi manba"}
+          </Badge>
+        ) : typeof job.trust_score === "number" ? (
           <Badge
             variant={job.trust_score >= 75 ? "success" : job.trust_score >= 50 ? "warning" : "secondary"}
             className="gap-1"
