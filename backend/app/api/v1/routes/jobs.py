@@ -487,6 +487,7 @@ def job_to_response(job: Job, include_company: bool = True) -> JobResponse:
         trust_factors=trust_factors,
         verification_state=verification_state,
         is_featured=job.is_featured,
+        external_apply_url=job.external_apply_url,
         is_active=job.is_active,
         is_expired=job.is_expired,
         created_at=job.created_at,
