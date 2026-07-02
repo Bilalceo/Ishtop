@@ -53,6 +53,9 @@ function sanitizeFilename(value: string) {
 
 function normalizeResumeContent(raw?: ResumeContent): ResumeContent {
   return {
+    // Carry over fields this form doesn't edit (skillVerifications, _metadata, …)
+    // so saving from this page never strips them from the stored resume.
+    ...raw,
     personal_info: raw?.personal_info || {},
     summary: raw?.summary || "",
     experience: raw?.experience || [],
