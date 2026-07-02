@@ -136,9 +136,17 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
   const softSkills = flattenSkillList(skills.soft || skills.soft_skills);
 
   // Skill verification statuses (MVP). Absent on older resumes → empty map.
+  // The map is keyed by the user-entered quiz skills, while the rendered chips
+  // come from the AI-normalized skills list — so match on a folded key
+  // (case/punctuation-insensitive: "react.js" ≡ "React JS"), not exact strings.
   const skillVerifications = asRecord(rawContent.skillVerifications) as Record<string, string>;
+  const foldSkillKey = (skill: string) => skill.toLowerCase().replace(/[^a-z0-9+#]/g, "");
+  const foldedVerifications: Record<string, string> = {};
+  for (const [key, status] of Object.entries(skillVerifications)) {
+    foldedVerifications[foldSkillKey(key)] = status;
+  }
   const verificationFor = (skill: string): "verified" | "learning" | undefined => {
-    const status = skillVerifications[skill] ?? skillVerifications[skill.trim()];
+    const status = skillVerifications[skill] ?? foldedVerifications[foldSkillKey(skill)];
     return status === "verified" || status === "learning" ? status : undefined;
   };
   const hasVerified = Object.values(skillVerifications).some((v) => v === "verified");
