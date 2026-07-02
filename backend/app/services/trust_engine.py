@@ -11,7 +11,12 @@ def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def _to_aware(dt: Optional[datetime]) -> Optional[datetime]:
+def to_aware(dt: Optional[datetime]) -> Optional[datetime]:
+    """Coerce a naive datetime (stored as naive UTC in the DB) to aware UTC.
+
+    Shared by analytics/trust code that compares stored datetimes against
+    timezone-aware windows.
+    """
     if not dt:
         return None
     if dt.tzinfo is None:
@@ -44,7 +49,7 @@ def calculate_job_trust(job: Any, company: Any) -> Dict[str, Any]:
 
     salary_factor = 1.0 if (getattr(job, "is_salary_visible", False) and getattr(job, "salary_min", None) and getattr(job, "salary_max", None)) else 0.35
 
-    created_at = _to_aware(getattr(job, "created_at", None))
+    created_at = to_aware(getattr(job, "created_at", None))
     if created_at:
         age_days = max(0, int((_utc_now() - created_at).total_seconds() // 86400))
     else:
