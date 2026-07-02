@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+
 import { useTranslation } from "@/hooks/useTranslation";
 
 /**
@@ -7,8 +9,14 @@ import { useTranslation } from "@/hooks/useTranslation";
  * "--------- ----" placeholder and English-only month dropdown looked ugly and
  * confusing. Renders two plain selects (Month + Year) and emits the SAME
  * "YYYY-MM" string the rest of the app already stores — so no data or backend
- * changes are needed. Year-only selection emits "YYYY".
+ * changes are needed. Year-only selection emits "YYYY"; a month picked before
+ * the year is kept locally and only emitted once a year is entered, so a
+ * malformed "-MM" value can never reach the stored resume. Values that aren't
+ * "YYYY" / "YYYY-MM" (free-text dates from AI-generated resumes, e.g.
+ * "Jan 2020") leave the selects blank rather than mis-parsing.
  */
+
+const VALUE_PATTERN = /^(\d{4})(?:-(\d{2}))?$/;
 
 const MONTHS: Record<"uz" | "ru", string[]> = {
   uz: [
@@ -38,17 +46,31 @@ export function MonthYearPicker({
 
   const maxYear = new Date().getFullYear() + 1;
 
-  const [yearPart, monthPart] = (value || "").split("-");
-  const year = yearPart || "";
-  const month = monthPart || "";
+  // Local state (instead of deriving from `value`) keeps a half-filled
+  // selection — e.g. month chosen before year — without writing it upstream.
+  const initial = VALUE_PATTERN.exec(value || "");
+  const [year, setYear] = useState(initial?.[1] ?? "");
+  const [month, setMonth] = useState(initial?.[2] ?? "");
+  const lastEmitted = useRef(value || "");
+
+  useEffect(() => {
+    // Sync only on external value changes (e.g. resume loaded from the API),
+    // not on our own emits — those may be intentionally partial.
+    if ((value || "") === lastEmitted.current) return;
+    lastEmitted.current = value || "";
+    const match = VALUE_PATTERN.exec(value || "");
+    setYear(match?.[1] ?? "");
+    setMonth(match?.[2] ?? "");
+  }, [value]);
 
   const emit = (nextYear: string, nextMonth: string) => {
-    // Order-independent: keep whichever part is chosen so picking month before
-    // year (or vice-versa) never silently drops the other.
-    if (nextYear && nextMonth) onChange(`${nextYear}-${nextMonth}`);
-    else if (nextYear) onChange(nextYear);
-    else if (nextMonth) onChange(`-${nextMonth}`);
-    else onChange("");
+    setYear(nextYear);
+    setMonth(nextMonth);
+    // Order-independent: a month picked first stays local until the year is
+    // typed; only "YYYY-MM", "YYYY" or "" are ever emitted.
+    const next = nextYear && nextMonth ? `${nextYear}-${nextMonth}` : nextYear;
+    lastEmitted.current = next;
+    onChange(next);
   };
 
   const selectClass =
