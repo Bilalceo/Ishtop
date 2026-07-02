@@ -713,6 +713,43 @@ _RESUME_LOGO_PATH = os.path.normpath(
     os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "ishtop-logo.png")
 )
 
+# Process-wide cache: the logo never changes at runtime, and draw_footer runs
+# once per PDF page — re-reading/decoding the PNG per page would block the
+# event loop (the PDF is generated synchronously inside async routes).
+_RESUME_LOGO_READER = None
+
+
+def _get_logo_reader():
+    global _RESUME_LOGO_READER
+    if _RESUME_LOGO_READER is None and os.path.isfile(_RESUME_LOGO_PATH):
+        from reportlab.lib.utils import ImageReader
+
+        _RESUME_LOGO_READER = ImageReader(_RESUME_LOGO_PATH)
+    return _RESUME_LOGO_READER
+
+
+def _draw_logo(canvas, *, x: float, width: float, y: float = None, top: float = None) -> float:
+    """Draw the IshTop logo at its native aspect ratio.
+
+    Anchor with `y` (bottom edge) or `top` (top edge). Returns the drawn
+    height, or 0.0 when the logo is unavailable (callers treat that as
+    "no logo" and keep rendering).
+    """
+    try:
+        reader = _get_logo_reader()
+        if reader is None:
+            return 0.0
+        image_w, image_h = reader.getSize()
+        height = width * float(image_h) / float(image_w)
+        bottom = (top - height) if y is None else y
+        canvas.drawImage(
+            reader, x, bottom,
+            width=width, height=height, mask="auto", preserveAspectRatio=True,
+        )
+        return height
+    except Exception:
+        return 0.0
+
 # (regular_path, bold_path) candidates, tried in order. Bundled first.
 _UNICODE_FONT_CANDIDATES = (
     (
@@ -1144,36 +1181,17 @@ def _generate_pdf(resume: Resume) -> bytes:
             canvas.saveState()
             text_x = 16 * mm
             # IshTop logo (branding) on the left of the footer
-            try:
-                from reportlab.lib.utils import ImageReader
-                if os.path.isfile(_RESUME_LOGO_PATH):
-                    logo_w = 17 * mm
-                    logo_h = logo_w * 292.0 / 1025.0  # keep aspect ratio
-                    canvas.drawImage(
-                        ImageReader(_RESUME_LOGO_PATH), 16 * mm, 7.4 * mm,
-                        width=logo_w, height=logo_h, mask="auto", preserveAspectRatio=True,
-                    )
-                    text_x = 16 * mm + logo_w + 3 * mm
-            except Exception:
-                pass
+            logo_w = 17 * mm
+            if _draw_logo(canvas, x=16 * mm, y=7.4 * mm, width=logo_w):
+                text_x = 16 * mm + logo_w + 3 * mm
             canvas.setFont(regular_font, 7)
             canvas.setFillColor(colors.HexColor("#94a3b8"))
             canvas.drawString(text_x, 9 * mm, f"{_label(locale, 'generated_by')} | {datetime.now(timezone.utc).date().isoformat()}")
             canvas.drawRightString(A4[0] - 16 * mm, 9 * mm, f"{_label(locale, 'page')} {doc_obj.page}")
             # IshTop logo in the top-right corner of the first page (branding header)
             if doc_obj.page == 1:
-                try:
-                    from reportlab.lib.utils import ImageReader
-                    if os.path.isfile(_RESUME_LOGO_PATH):
-                        hw = 18 * mm
-                        hh = hw * 292.0 / 1025.0
-                        canvas.drawImage(
-                            ImageReader(_RESUME_LOGO_PATH),
-                            A4[0] - 16 * mm - hw, A4[1] - 6.5 * mm - hh,
-                            width=hw, height=hh, mask="auto", preserveAspectRatio=True,
-                        )
-                except Exception:
-                    pass
+                header_w = 18 * mm
+                _draw_logo(canvas, x=A4[0] - 16 * mm - header_w, top=A4[1] - 6.5 * mm, width=header_w)
             canvas.restoreState()
 
         doc.build(story, onFirstPage=draw_footer, onLaterPages=draw_footer)
@@ -1597,15 +1615,13 @@ async def generate_ai_summary(
             if getattr(gemini_service, "is_available", False):
                 summary_text = await gemini_service.generate(prompt, response_format="text")
         if not summary_text:
-            from app.services.ai_service import AIService
-            ai = AIService()
-            summary_text = await ai._call_openai_api(
+            from app.services.ai_service import get_ai_service
+            summary_text = await get_ai_service().generate_text(
                 system_message="You are an expert resume writer.",
                 prompt=prompt,
                 operation="generate_summary",
                 temperature=0.6,
                 max_tokens=220,
-                response_format_json=False,
             )
     except Exception as exc:  # AI unavailable / quota / network — degrade gracefully.
         logger.warning("AI summary generation failed, using template fallback: %s", exc)
