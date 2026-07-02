@@ -456,12 +456,12 @@ export default function CreateResumePage() {
                     </p>
                   )}
                   <div>
-                    <TextArea
-                      label="Texnik ko'nikmalar (vergul bilan)"
-                      value={(content.skills?.technical || []).join(", ")}
-                      onChange={(value) => setContent((previous) => ({ ...previous, skills: { ...previous.skills, technical: value.split(",").map((item) => item.trim()).filter(Boolean) } }))}
-                      placeholder="JavaScript, TypeScript, React, Node.js"
-                    />
+                  <TextArea
+                    label="Texnik ko'nikmalar (vergul bilan)"
+                    value={(content.skills?.technical || []).join(", ")}
+                    onChange={(value) => setContent((previous) => ({ ...previous, skills: { ...previous.skills, technical: value.split(",").map((item) => item.trim()).filter(Boolean) } }))}
+                    placeholder="JavaScript, TypeScript, React, Node.js"
+                  />
                     <SkillSuggestions
                       profileLabel={skillProfile?.label}
                       suggestions={technicalSuggestions}
@@ -470,12 +470,12 @@ export default function CreateResumePage() {
                     />
                   </div>
                   <div>
-                    <TextArea
-                      label="Soft skills (vergul bilan)"
-                      value={(content.skills?.soft || []).join(", ")}
-                      onChange={(value) => setContent((previous) => ({ ...previous, skills: { ...previous.skills, soft: value.split(",").map((item) => item.trim()).filter(Boolean) } }))}
-                      placeholder={isRu ? "Коммуникация, работа в команде, критическое мышление" : "Muloqot, jamoaviy ish, tanqidiy fikrlash"}
-                    />
+                  <TextArea
+                    label="Soft skills (vergul bilan)"
+                    value={(content.skills?.soft || []).join(", ")}
+                    onChange={(value) => setContent((previous) => ({ ...previous, skills: { ...previous.skills, soft: value.split(",").map((item) => item.trim()).filter(Boolean) } }))}
+                    placeholder={isRu ? "Коммуникация, работа в команде, критическое мышление" : "Muloqot, jamoaviy ish, tanqidiy fikrlash"}
+                  />
                     <SkillSuggestions
                       suggestions={softSuggestions}
                       onAdd={(s) => addSkill("soft", s)}
@@ -662,7 +662,7 @@ function TextArea({
   return (
     <div>
       <div className="flex items-center justify-between gap-2">
-        <Label>{label}</Label>
+      <Label>{label}</Label>
         {action}
       </div>
       <textarea
