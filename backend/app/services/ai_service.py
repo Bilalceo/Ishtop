@@ -42,6 +42,7 @@ VERSION: 1.0.0
 import json                          # For parsing JSON responses from GPT
 import logging                       # For logging operations and errors
 import os                            # For detecting test environment
+from functools import lru_cache      # For the shared service instance
 from typing import Dict, Any, List, Optional  # Type hints for better code clarity
 from datetime import datetime        # For timestamps in usage tracking
 from dataclasses import dataclass    # For structured data classes
@@ -706,6 +707,30 @@ class AIService:
             )
 
         return response.choices[0].message.content
+
+    async def generate_text(
+        self,
+        *,
+        system_message: str,
+        prompt: str,
+        operation: str,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+    ) -> str:
+        """
+        Public plain-text generation entrypoint.
+
+        Routes should call this rather than the private `_call_openai_api`
+        (which is a test seam patched by unit tests).
+        """
+        return await self._call_openai_api(
+            system_message=system_message,
+            prompt=prompt,
+            operation=operation,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            response_format_json=False,
+        )
 
     # =========================================================================
     # MAIN RESUME GENERATION METHOD
@@ -1550,5 +1575,18 @@ def create_ai_service() -> AIService:
         @app.post("/generate")
         async def generate(ai: AIService = Depends(create_ai_service)):
             return await ai.generate_resume_from_data(data)
+    """
+    return AIService()
+
+
+@lru_cache(maxsize=1)
+def get_ai_service() -> AIService:
+    """
+    Shared process-wide AIService instance.
+
+    AIService.__init__ builds an AsyncOpenAI client (connection pool) and a
+    tiktoken tokenizer; reusing one instance keeps HTTP connections alive
+    across requests instead of rebuilding them per call. A failed construction
+    (missing API key) is not cached — lru_cache does not memoize exceptions.
     """
     return AIService()
