@@ -138,7 +138,7 @@ export function AIFeatures() {
         <div className="section-shell">
           <div className="mx-auto max-w-2xl text-center">
             <span className="h-eyebrow !border-white/10 !bg-white/[0.06] !text-white/80">
-              <ShieldCheck className="h-3 w-3 text-emerald-300" />
+              <ShieldCheck className="h-3 w-3 text-brand-300" />
               {c.eyebrow}
             </span>
             <ScrollReveal3D>
@@ -162,13 +162,13 @@ export function AIFeatures() {
                       {/* Top accent */}
                       <span
                         aria-hidden
-                        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/80 to-transparent"
+                        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-400/80 to-transparent"
                       />
                       <div
                         className="flex items-start justify-between gap-4"
                         style={{ transform: "translateZ(30px)" }}
                       >
-                        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500/30 to-teal-400/30 text-white ring-1 ring-inset ring-white/15 shadow-lg shadow-emerald-500/20">
+                        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-brand-500/30 to-violet-400/30 text-white ring-1 ring-inset ring-white/15 shadow-lg shadow-brand-500/20">
                           <Icon className="h-5 w-5" />
                         </div>
                         <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/85 ring-1 ring-inset ring-white/10">
@@ -193,7 +193,7 @@ export function AIFeatures() {
                       >
                         {card.bullets.map((b) => (
                           <li key={b} className="flex items-start gap-2 text-sm text-white/85">
-                            <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-300" aria-hidden />
+                            <CheckCircle2 className="mt-0.5 h-4 w-4 text-brand-300" aria-hidden />
                             {b}
                           </li>
                         ))}
@@ -202,7 +202,7 @@ export function AIFeatures() {
                       {/* Hover sheen */}
                       <span
                         aria-hidden
-                        className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-gradient-to-br from-emerald-500/30 to-teal-400/30 opacity-0 blur-3xl transition group-hover:opacity-100"
+                        className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-gradient-to-br from-brand-500/30 to-violet-400/30 opacity-0 blur-3xl transition group-hover:opacity-100"
                       />
 
                       {/* Reduce-motion fallback note */}

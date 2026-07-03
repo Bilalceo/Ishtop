@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { Reveal } from "./primitives";
 
 type Locale = "uz" | "ru" | "en";
 
@@ -41,41 +42,55 @@ export function FinalCTA() {
   const c = COPY[L];
 
   return (
-    // Full-bleed dark gradient — matches Hero / AIFeatures / LiveDemoSection
-    // pattern (aurora-bg on the section itself). The earlier `absolute inset-x-4
-    // sm:inset-x-8 lg:inset-x-12 rounded-[40px]` wrapper left visible page
-    // background as side margins, which looked like the section was a floating
-    // card instead of an intentional full-width hero.
-    <section className="aurora-bg grain relative overflow-hidden py-24 sm:py-32" aria-labelledby="cta-heading">
+    // Silver rebrand: full-width pastel gradient wash on the silver ground,
+    // with a floating white card holding the CTA.
+    <section
+      className="silver-ground relative overflow-hidden py-24 sm:py-32"
+      aria-labelledby="cta-heading"
+    >
+      {/* Full-bleed pastel wash behind the card */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-1/2 h-[420px] -translate-y-1/2 bg-gradient-to-r from-[#d7e7ff]/70 via-[#e3ddff]/60 to-[#ffe9d6]/60 blur-3xl"
+      />
+
       <div className="section-shell relative">
-        <div className="mx-auto max-w-3xl rounded-[32px] border border-white/10 bg-white/[0.04] p-8 text-center backdrop-blur-xl sm:p-14">
-          <span className="h-eyebrow !border-white/15 !bg-white/[0.06] !text-white/85">
-            <Sparkles className="h-3 w-3 text-amber-300" />
-            {c.eyebrow}
-          </span>
-          <h2 id="cta-heading" className="h-display mt-6 pb-1 text-3xl leading-[1.15] text-white sm:text-5xl sm:leading-[1.12]">
-            {c.title}
-          </h2>
-          <p className="mx-auto mt-5 max-w-xl text-pretty text-white/75">{c.sub}</p>
+        <Reveal className="mx-auto max-w-3xl">
+          <div className="card-silver p-8 text-center sm:p-14">
+            <span className="chip-silver uppercase tracking-[0.18em] !text-[11px]">
+              <Sparkles className="h-3 w-3 text-[#e2b184]" />
+              {c.eyebrow}
+            </span>
+            <h2
+              id="cta-heading"
+              className="h-display mt-6 pb-1 text-3xl leading-[1.15] text-[#18181b] sm:text-5xl sm:leading-[1.12]"
+            >
+              {c.title}
+            </h2>
+            <p className="mx-auto mt-5 max-w-xl text-pretty text-[#63636b]">{c.sub}</p>
 
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/register" className="btn-aurora focus-ring group">
-              {c.primary}
-              <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
-            </Link>
-            <Link href="/company" className="btn-ghost-dark focus-ring">
-              {c.secondary}
-            </Link>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link href="/register" className="btn-silver-primary focus-ring group">
+                {c.primary}
+                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
+              </Link>
+              <Link
+                href="/business"
+                className="btn-silver-ghost focus-ring !bg-[#f6f6f4]"
+              >
+                {c.secondary}
+              </Link>
+            </div>
+
+            <ul className="mt-8 flex flex-col items-center gap-2 text-sm text-[#71717a] sm:flex-row sm:justify-center sm:gap-6">
+              {c.bullets.map((b) => (
+                <li key={b} className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-[#7cc7a2]" aria-hidden /> {b}
+                </li>
+              ))}
+            </ul>
           </div>
-
-          <ul className="mt-8 flex flex-col items-center gap-2 text-sm text-white/70 sm:flex-row sm:justify-center sm:gap-6">
-            {c.bullets.map((b) => (
-              <li key={b} className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-300" aria-hidden /> {b}
-              </li>
-            ))}
-          </ul>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
