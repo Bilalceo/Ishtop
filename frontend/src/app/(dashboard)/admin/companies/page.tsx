@@ -196,10 +196,10 @@ export default function AdminCompaniesPage() {
   return (
     <div className="space-y-6">
       <section className="relative overflow-hidden rounded-3xl border border-surface-200 bg-white p-6 shadow-sm dark:border-surface-700 dark:bg-surface-900 sm:p-8">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-gradient-to-br from-emerald-500/15 via-teal-500/10 to-transparent blur-3xl" />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-gradient-to-br from-brand-500/15 via-violet-500/10 to-transparent blur-3xl" />
         <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+            <div className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300">
               <Building2 className="h-3.5 w-3.5" />
               {t.title}
             </div>
@@ -323,7 +323,7 @@ export default function AdminCompaniesPage() {
                         <p className="flex items-center gap-1.5 truncate font-semibold text-surface-900 dark:text-white">
                           {company.company_name}
                           {company.is_verified && (
-                            <ShieldCheck className="h-4 w-4 flex-shrink-0 text-emerald-600" />
+                            <ShieldCheck className="h-4 w-4 flex-shrink-0 text-brand-600" />
                           )}
                         </p>
                         <p className="truncate text-xs text-surface-500">

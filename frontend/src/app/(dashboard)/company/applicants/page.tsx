@@ -372,11 +372,11 @@ export default function CompanyApplicantsPage() {
             onClick={() => setTopOnly((v) => !v)}
             className={`mt-3 inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
               topOnly
-                ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                ? "border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300"
                 : "border-surface-200 text-surface-700 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-300 dark:hover:bg-surface-800"
             }`}
           >
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-500" />
             {isRu ? "Топ совпадения (70%+)" : "Top moslar (70%+)"}
           </button>
         </CardContent>

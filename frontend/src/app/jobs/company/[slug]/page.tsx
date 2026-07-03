@@ -40,7 +40,7 @@ export default async function CompanyDiscoveryPage({ params }: { params: { slug:
           {company.name || params.slug.replace(/-/g, " ")}
         </h1>
         {company.is_verified && (
-          <span className="mt-3 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+          <span className="mt-3 inline-flex rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-700">
             Tasdiqlangan kompaniya
           </span>
         )}

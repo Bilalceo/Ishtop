@@ -46,9 +46,9 @@ type AdminApplication = {
 const STATUS_TONE: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300",
   reviewing: "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300",
-  shortlisted: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300",
-  interview: "bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300",
-  accepted: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300",
+  shortlisted: "bg-brand-100 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300",
+  interview: "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300",
+  accepted: "bg-brand-100 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300",
   rejected: "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300",
   withdrawn: "bg-surface-100 text-surface-600 dark:bg-surface-700 dark:text-surface-300",
 };
@@ -144,10 +144,10 @@ export default function AdminApplicationsPage() {
   return (
     <div className="space-y-6">
       <section className="relative overflow-hidden rounded-3xl border border-surface-200 bg-white p-6 shadow-sm dark:border-surface-700 dark:bg-surface-900 sm:p-8">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-gradient-to-br from-emerald-500/15 via-pink-500/10 to-transparent blur-3xl" />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-gradient-to-br from-brand-500/15 via-pink-500/10 to-transparent blur-3xl" />
         <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+            <div className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300">
               <ClipboardList className="h-3.5 w-3.5" />
               {t.title}
             </div>
@@ -266,7 +266,7 @@ export default function AdminApplicationsPage() {
                       </div>
                       <div>
                         {a.match_score && (
-                          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-brand-50 px-2 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
                             <Target className="h-3 w-3" /> {a.match_score}
                           </span>
                         )}

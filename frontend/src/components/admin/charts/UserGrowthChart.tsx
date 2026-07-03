@@ -20,7 +20,7 @@ export function UserGrowthChart({ data }: Props) {
           contentStyle={{ borderRadius: "0.75rem", fontSize: 12 }}
           labelFormatter={(label: string) => label}
         />
-        <Line type="monotone" dataKey="value" name="New users" stroke="#10B981" strokeWidth={2} dot={false} />
+        <Line type="monotone" dataKey="value" name="New users" stroke="#6F9BF0" strokeWidth={2} dot={false} />
       </LineChart>
     </ResponsiveContainer>
   );

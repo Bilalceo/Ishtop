@@ -7,9 +7,9 @@ type Props = { data: Record<string, number> };
 const STATUS_COLORS: Record<string, string> = {
   pending: "#f59e0b",
   reviewing: "#3b82f6",
-  shortlisted: "#2DD4BF",
-  interview: "#10B981",
-  accepted: "#10b981",
+  shortlisted: "#A08DE0",
+  interview: "#6F9BF0",
+  accepted: "#6f9bf0",
   rejected: "#ef4444",
   withdrawn: "#6b7280",
 };

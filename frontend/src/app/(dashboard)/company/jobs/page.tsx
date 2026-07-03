@@ -175,8 +175,8 @@ export default function CompanyJobsPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-500/20">
-                <Eye className="h-6 w-6 text-emerald-600" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100 dark:bg-brand-500/20">
+                <Eye className="h-6 w-6 text-brand-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-surface-900 dark:text-white">
@@ -251,12 +251,12 @@ export default function CompanyJobsPage() {
                       <Badge
                         className={
                           job.status === "active"
-                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
+                            ? "bg-brand-100 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300"
                             : job.status === "paused"
                             ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
                             : job.status === "closed"
                             ? "bg-surface-200 text-surface-700 dark:bg-surface-700 dark:text-surface-300"
-                            : "bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300"
+                            : "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300"
                         }
                       >
                         {statusLabel[job.status] || job.status}
@@ -426,7 +426,7 @@ export default function CompanyJobsPage() {
                 <button
                   type="button"
                   onClick={() => setCloseReasonCode("hired")}
-                  className={`rounded-lg border px-3 py-2 text-left text-sm ${closeReasonCode === "hired" ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-surface-300 text-surface-700"}`}
+                  className={`rounded-lg border px-3 py-2 text-left text-sm ${closeReasonCode === "hired" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-surface-300 text-surface-700"}`}
                 >
                   {isRu ? "Кандидат найден" : "Yollanuvchi topildi"}
                 </button>

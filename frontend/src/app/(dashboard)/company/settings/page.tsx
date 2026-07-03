@@ -371,7 +371,7 @@ export default function CompanySettingsPage() {
                 </div>
 
                 {user?.verification_state === "approved" && (
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+                  <div className="rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm font-medium text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300">
                     {isRu ? "Проверенная компания" : "Tasdiqlangan kompaniya"}
                   </div>
                 )}

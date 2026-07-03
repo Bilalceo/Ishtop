@@ -221,13 +221,13 @@ export default function EditJobPage() {
           Orqaga
         </Button>
         <div className="flex items-center gap-2">
-          <Briefcase className="h-5 w-5 text-emerald-600" />
+          <Briefcase className="h-5 w-5 text-brand-600" />
           <h1 className="font-bold text-surface-900">Ish e'lonini tahrirlash</h1>
         </div>
         <Button
           onClick={handleSave}
           disabled={isSaving}
-          className="bg-gradient-to-r from-emerald-500 to-teal-600"
+          className="bg-gradient-to-r from-brand-500 to-violet-600"
         >
           {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
           Saqlash
@@ -369,7 +369,7 @@ export default function EditJobPage() {
               {skills.map((skill) => (
                 <span
                   key={skill}
-                  className="flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700"
+                  className="flex items-center gap-1 rounded-full bg-brand-100 px-3 py-1 text-sm font-medium text-brand-700"
                 >
                   {skill}
                   <button type="button" onClick={() => removeSkill(skill)}>
@@ -406,7 +406,7 @@ export default function EditJobPage() {
           onClick={handleSave}
           disabled={isSaving}
           size="lg"
-          className="bg-gradient-to-r from-emerald-500 to-teal-600"
+          className="bg-gradient-to-r from-brand-500 to-violet-600"
         >
           {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
           O'zgarishlarni saqlash
@@ -478,7 +478,7 @@ export default function EditJobPage() {
                     <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip />
-                    <Line type="monotone" dataKey="value" stroke="#06b6d4" strokeWidth={2} dot={false} />
+                    <Line type="monotone" dataKey="value" stroke="#a08de0" strokeWidth={2} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -494,7 +494,7 @@ export default function EditJobPage() {
                     <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip />
-                    <Line type="monotone" dataKey="value" stroke="#10B981" strokeWidth={2} dot={false} />
+                    <Line type="monotone" dataKey="value" stroke="#6F9BF0" strokeWidth={2} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -515,7 +515,7 @@ export default function EditJobPage() {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="value" fill="#059669" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="value" fill="#5581E0" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

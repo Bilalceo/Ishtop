@@ -62,7 +62,7 @@ type AdminJob = {
 
 const STATUS_TONE: Record<string, string> = {
   active:
-    "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300",
+    "bg-brand-100 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300",
   draft:
     "bg-surface-100 text-surface-700 dark:bg-surface-700 dark:text-surface-200",
   paused:
@@ -401,7 +401,7 @@ export default function AdminJobsPage() {
                       <p className="flex items-center gap-1.5 truncate text-sm font-medium text-surface-900 dark:text-white">
                         {job.company.name || "—"}
                         {job.company.is_verified ? (
-                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                          <ShieldCheck className="h-3.5 w-3.5 text-brand-600" />
                         ) : null}
                       </p>
                       <p className="truncate text-xs text-surface-500">

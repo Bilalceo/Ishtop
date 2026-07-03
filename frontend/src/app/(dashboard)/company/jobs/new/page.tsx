@@ -400,7 +400,7 @@ export default function NewJobPage() {
               className={cn(
                 "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all",
                 currentStep === step.id
-                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20"
+                  ? "bg-brand-100 text-brand-700 dark:bg-brand-500/20"
                   : currentStep > step.id
                   ? "text-green-600"
                   : "text-surface-400"
@@ -410,7 +410,7 @@ export default function NewJobPage() {
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-full",
                   currentStep === step.id
-                    ? "bg-emerald-500 text-white"
+                    ? "bg-brand-500 text-white"
                     : currentStep > step.id
                     ? "bg-green-500 text-white"
                     : "bg-surface-200 dark:bg-surface-700"
@@ -758,7 +758,7 @@ export default function NewJobPage() {
                               key={skill}
                               type="button"
                               onClick={() => addSkill(skill)}
-                              className="rounded-full border border-surface-200 px-3 py-1 text-xs text-surface-600 hover:border-emerald-300 hover:bg-emerald-50"
+                              className="rounded-full border border-surface-200 px-3 py-1 text-xs text-surface-600 hover:border-brand-300 hover:bg-brand-50"
                             >
                               + {skill}
                             </button>
@@ -891,7 +891,7 @@ export default function NewJobPage() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-gradient-to-r from-emerald-500 to-teal-600"
+              className="bg-gradient-to-r from-brand-500 to-violet-600"
             >
               {isSubmitting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

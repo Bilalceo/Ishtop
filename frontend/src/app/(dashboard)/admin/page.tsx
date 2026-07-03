@@ -240,7 +240,7 @@ function healthClass(status?: string) {
 
 function healthBorderClass(status?: string) {
   const s = (status || "warning").toLowerCase();
-  if (s === "healthy") return "before:bg-emerald-500";
+  if (s === "healthy") return "before:bg-brand-500";
   if (s === "unhealthy") return "before:bg-red-500";
   return "before:bg-amber-500";
 }
@@ -261,14 +261,14 @@ const METRIC_PALETTE: Record<MetricColor, { bar: string; iconBg: string; iconTex
     iconText: "text-blue-700 dark:text-blue-300",
   },
   emerald: {
-    bar: "bg-gradient-to-r from-emerald-500 to-teal-500",
-    iconBg: "bg-emerald-100 dark:bg-emerald-500/20",
-    iconText: "text-emerald-700 dark:text-emerald-300",
+    bar: "bg-gradient-to-r from-brand-500 to-violet-500",
+    iconBg: "bg-brand-100 dark:bg-brand-500/20",
+    iconText: "text-brand-700 dark:text-brand-300",
   },
   violet: {
-    bar: "bg-gradient-to-r from-emerald-500 to-emerald-500",
-    iconBg: "bg-emerald-100 dark:bg-emerald-500/20",
-    iconText: "text-emerald-700 dark:text-emerald-300",
+    bar: "bg-gradient-to-r from-brand-500 to-brand-500",
+    iconBg: "bg-brand-100 dark:bg-brand-500/20",
+    iconText: "text-brand-700 dark:text-brand-300",
   },
   amber: {
     bar: "bg-gradient-to-r from-amber-500 to-orange-500",
@@ -290,7 +290,7 @@ function MetricCard({ title, value, subtitle, icon: Icon, color, trend }: { titl
             <p className="mt-1 text-xs text-surface-500">{subtitle}</p>
             {trend && (
               <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-surface-50 px-2.5 py-1 text-xs font-medium text-surface-700 ring-1 ring-inset ring-surface-200 dark:bg-surface-900/50 dark:text-surface-200 dark:ring-surface-700">
-                <TrendingUp className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                <TrendingUp className="h-3 w-3 text-brand-600 dark:text-brand-400" />
                 {trend}
               </div>
             )}
@@ -440,14 +440,14 @@ export default function AdminDashboardPage() {
       <motion.section variants={itemVariants} className="relative overflow-hidden rounded-3xl border border-surface-200 bg-white p-6 shadow-sm dark:border-surface-700 dark:bg-surface-900 sm:p-8">
         {/* Decorative accent blob */}
         <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-gradient-to-br from-brand-500/15 via-cyan-500/10 to-transparent blur-3xl" aria-hidden />
-        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-gradient-to-tr from-emerald-500/10 via-transparent to-transparent blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-gradient-to-tr from-brand-500/10 via-transparent to-transparent blur-3xl" aria-hidden />
 
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300">
               <Shield className="h-3.5 w-3.5" />
               {copy.heroBadge}
-              <span className="ml-1 inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.2)] motion-safe:animate-pulse" aria-hidden />
+              <span className="ml-1 inline-flex h-1.5 w-1.5 rounded-full bg-brand-500 shadow-[0_0_0_3px_rgba(16,185,129,0.2)] motion-safe:animate-pulse" aria-hidden />
             </div>
             <h1 className="mt-4 font-display text-3xl font-bold tracking-tight text-surface-900 dark:text-white sm:text-4xl">{copy.heroTitle}</h1>
             <p className="mt-3 max-w-2xl text-sm text-surface-600 dark:text-surface-400 sm:text-base">{copy.heroDescription}</p>
@@ -604,8 +604,8 @@ export default function AdminDashboardPage() {
             <CardContent>
               {loadState === "loading" ? <div className="space-y-3">{Array.from({ length: 5 }).map((_, index) => <Skeleton key={index} className="h-20 rounded-xl" />)}</div> : data.errors.length === 0 ? (
                 <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-surface-200 py-14 text-center dark:border-surface-700">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 ring-8 ring-emerald-50 dark:bg-emerald-500/20 dark:ring-emerald-500/5">
-                    <CheckCircle2 className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-100 ring-8 ring-brand-50 dark:bg-brand-500/20 dark:ring-brand-500/5">
+                    <CheckCircle2 className="h-7 w-7 text-brand-600 dark:text-brand-400" />
                   </div>
                   <p className="mt-4 font-display text-lg font-semibold text-surface-900 dark:text-white">{copy.noErrors}</p>
                   <p className="mt-1 max-w-xs text-sm text-surface-500">{copy.noErrorsDescription}</p>

@@ -593,7 +593,7 @@ export default function CheckoutPageClient() {
               </div>
             </Card>
 
-            <Card className="border-surface-200 bg-gradient-to-br from-brand-500 to-teal-600 p-6 text-white shadow-xl">
+            <Card className="border-surface-200 bg-gradient-to-br from-brand-500 to-violet-600 p-6 text-white shadow-xl">
               <div className="flex items-center gap-2 text-sm font-medium text-white/80">
                 <Zap className="h-4 w-4" />
                 {isRu ? "Безопасная подписка" : "Xavfsiz obuna"}
