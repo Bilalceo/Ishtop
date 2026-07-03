@@ -149,7 +149,7 @@ export const JOBS: Job[] = [
  *   - +(trustScore - 80) * 0.5 trust modifier
  *   - clamped to 5-99 to feel realistic
  */
-export function scoreJob(job: Job, selected: string[]): MatchResult {
+export function scoreJob(job: Job, selected: string[], locale: "uz" | "ru" = "uz"): MatchResult {
   const selSet = new Set(selected);
   const matched = job.required.filter((r) => selSet.has(r));
   const partial = job.nice.filter((n) => selSet.has(n));
@@ -170,29 +170,38 @@ export function scoreJob(job: Job, selected: string[]): MatchResult {
   const skillLabel = (id: string) =>
     SKILLS.find((s) => s.id === id)?.label ?? id;
 
+  const ru = locale === "ru";
   const reasons: MatchResult["reasons"] = [];
   if (matched.length > 0) {
     reasons.push({
       type: "match",
-      text: `${matched.length} ta talab qilingan ko'nikma mos: ${matched.map(skillLabel).join(", ")}`,
+      text: ru
+        ? `Совпало ${matched.length} требуемых навыков: ${matched.map(skillLabel).join(", ")}`
+        : `${matched.length} ta talab qilingan ko'nikma mos: ${matched.map(skillLabel).join(", ")}`,
     });
   }
   if (partial.length > 0) {
     reasons.push({
       type: "match",
-      text: `Bonus ko'nikma${partial.length > 1 ? "lar" : ""}: ${partial.map(skillLabel).join(", ")}`,
+      text: ru
+        ? `Бонусные навыки: ${partial.map(skillLabel).join(", ")}`
+        : `Bonus ko'nikma${partial.length > 1 ? "lar" : ""}: ${partial.map(skillLabel).join(", ")}`,
     });
   }
   if (gaps.length > 0 && matched.length > 0) {
     reasons.push({
       type: "gap",
-      text: `O'rganish kerak: ${gaps.map(skillLabel).join(", ")}`,
+      text: ru
+        ? `Стоит подтянуть: ${gaps.map(skillLabel).join(", ")}`
+        : `O'rganish kerak: ${gaps.map(skillLabel).join(", ")}`,
     });
   }
   if (job.trustScore >= 85) {
     reasons.push({
       type: "trust",
-      text: `Trust Score ${job.trustScore} — verified company`,
+      text: ru
+        ? `Trust Score ${job.trustScore} — проверенная компания`
+        : `Trust Score ${job.trustScore} — tasdiqlangan kompaniya`,
     });
   }
 
@@ -207,9 +216,9 @@ export function scoreJob(job: Job, selected: string[]): MatchResult {
 }
 
 /** Top-N matches sorted by score. */
-export function topMatches(selected: string[], n = 3): MatchResult[] {
+export function topMatches(selected: string[], n = 3, locale: "uz" | "ru" = "uz"): MatchResult[] {
   if (selected.length === 0) return [];
-  return JOBS.map((j) => scoreJob(j, selected))
+  return JOBS.map((j) => scoreJob(j, selected, locale))
     .sort((a, b) => b.score - a.score)
     .slice(0, n);
 }
@@ -218,7 +227,7 @@ export function topMatches(selected: string[], n = 3): MatchResult[] {
  * Generate the AI "thinking" trace given selected skills.
  * Returns an array of strings — one per line — to be typewritten.
  */
-export function generateThoughts(selected: string[]): string[] {
+export function generateThoughts(selected: string[], locale: "uz" | "ru" = "uz"): string[] {
   if (selected.length === 0) return [];
 
   const skillLabel = (id: string) => SKILLS.find((s) => s.id === id)?.label ?? id;
@@ -245,13 +254,24 @@ export function generateThoughts(selected: string[]): string[] {
   const seniority =
     selected.length >= 5 ? "Mid-junior" : selected.length >= 3 ? "Junior" : "Intern";
 
+  if (locale === "ru") {
+    return [
+      `> Навыки: ${selected.map(skillLabel).join(", ")}`,
+      `> Профиль стека: ${stack}`,
+      `> Оценка уровня: ${seniority}`,
+      `> Ищу подходящие роли среди 500+ проверенных компаний…`,
+      `> Фильтрую по Trust Score ≥ 80…`,
+      `> Считаю объяснимые match-скоры…`,
+      `✓ Топ-3 совпадения готовы.`,
+    ];
+  }
   return [
-    `> Detected skills: ${selected.map(skillLabel).join(", ")}`,
-    `> Stack profile: ${stack}`,
-    `> Estimated level: ${seniority}`,
-    `> Searching matched roles across 500+ verified companies…`,
-    `> Filtering by Trust Score ≥ 80…`,
-    `> Computing explainable match scores…`,
-    `✓ Top 3 matches surfaced.`,
+    `> Aniqlangan ko'nikmalar: ${selected.map(skillLabel).join(", ")}`,
+    `> Stack profili: ${stack}`,
+    `> Taxminiy daraja: ${seniority}`,
+    `> 500+ tasdiqlangan kompaniya bo'ylab mos rollarni qidiryapman…`,
+    `> Trust Score ≥ 80 bo'yicha filtrlanyapti…`,
+    `> Tushuntiriladigan match ballari hisoblanyapti…`,
+    `✓ Eng mos 3 ta vakansiya topildi.`,
   ];
 }

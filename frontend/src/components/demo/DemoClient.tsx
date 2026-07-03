@@ -46,11 +46,15 @@ import {
   saveSkillsLocally,
   syncUrlWithSkills,
 } from "./url-state";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type Phase = "idle" | "thinking" | "results";
 
 export default function DemoClient() {
   const reduce = useReducedMotion();
+  const { locale } = useTranslation();
+  const ru = locale === "ru";
+  const lang: "uz" | "ru" = ru ? "ru" : "uz";
 
   const [selected, setSelected] = useState<string[]>([]);
   const [phase, setPhase] = useState<Phase>("idle");
@@ -116,8 +120,8 @@ export default function DemoClient() {
     // Show thinking immediately
     setPhase("thinking");
     setThoughts([]);
-    const lines = generateThoughts(selected);
-    const results = topMatches(selected, 3);
+    const lines = generateThoughts(selected, lang);
+    const results = topMatches(selected, 3, lang);
 
     if (reduce) {
       // Instant for reduce-motion users
@@ -152,7 +156,7 @@ export default function DemoClient() {
       cancelled = true;
       if (nextTimer !== null) window.clearTimeout(nextTimer);
     };
-  }, [selected, reduce]);
+  }, [selected, reduce, lang]);
 
   // Mouse spotlight
   useEffect(() => {
@@ -187,7 +191,7 @@ export default function DemoClient() {
             </span>
             <span className="font-display text-lg font-semibold tracking-tight">IshTop</span>
             <span className="chip ml-2 !border-white/10 !bg-white/[0.04] !text-white/75 !text-[10px]">
-              · LIVE DEMO
+              · {ru ? "ЖИВОЕ ДЕМО" : "LIVE DEMO"}
             </span>
           </Link>
           <div className="flex items-center gap-3">
@@ -198,11 +202,11 @@ export default function DemoClient() {
                 className="focus-ring inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/80 hover:bg-white/[0.08]"
               >
                 <RotateCcw className="h-3 w-3" aria-hidden />
-                Tozalash
+                {ru ? "Сбросить" : "Tozalash"}
               </button>
             )}
             <Link href="/register" className="btn-aurora focus-ring">
-              Boshlash <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+              {ru ? "Начать" : "Boshlash"} <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </Link>
           </div>
         </div>
@@ -216,14 +220,13 @@ export default function DemoClient() {
         <div className="section-shell">
           <span className="h-eyebrow !border-white/10 !bg-white/[0.06] !text-white/80">
             <Wand2 className="h-3 w-3 text-amber-300" aria-hidden />
-            AI playground · jonli
+            {ru ? "AI-песочница · живая" : "AI playground · jonli"}
           </span>
           <h1 className="h-display mt-6 pb-1 text-4xl leading-tight text-white sm:text-5xl lg:text-[56px]">
-            Tinglab ko&apos;ring. <span className="aurora-text">5 soniyada.</span>
+            {ru ? "Попробуйте. " : "Tinglab ko'ring. "}<span className="aurora-text">{ru ? "За 5 секунд." : "5 soniyada."}</span>
           </h1>
           <p className="mt-4 max-w-2xl text-pretty text-white/70 sm:text-lg">
-            Ko&apos;nikmalaringizni tanlang — AI o&apos;ylab, izohlab, eng mos 3 ta vakansiyani topadi.
-            Hech qanday ro&apos;yxatdan o&apos;tish kerak emas. Bu — mahsulot ichida ko&apos;rasiz.
+            {ru ? "Выберите навыки — AI подумает, объяснит и найдёт 3 самые подходящие вакансии. Без регистрации. Это то, что вы увидите внутри продукта." : "Ko'nikmalaringizni tanlang — AI o'ylab, izohlab, eng mos 3 ta vakansiyani topadi. Hech qanday ro'yxatdan o'tish kerak emas. Bu — mahsulot ichida ko'rasiz."}
           </p>
         </div>
       </header>
@@ -237,10 +240,10 @@ export default function DemoClient() {
             <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-md sm:p-6">
               <div className="flex items-center justify-between">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
-                  1 · Ko&apos;nikmalaringizni tanlang
+                  {ru ? "1 · Выберите навыки" : "1 · Ko'nikmalaringizni tanlang"}
                 </p>
                 <span className="text-xs font-medium text-brand-300">
-                  {selected.length} tanlangan
+                  {selected.length} {ru ? "выбрано" : "tanlangan"}
                 </span>
               </div>
 
@@ -280,7 +283,7 @@ export default function DemoClient() {
               {selected.length === 0 && (
                 <p className="mt-5 flex items-center gap-2 rounded-2xl bg-brand-500/10 px-3 py-2.5 text-xs text-brand-200">
                   <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                  Boshlash uchun kamida 1 ta ko&apos;nikmani bosing.
+                  {ru ? "Нажмите хотя бы 1 навык, чтобы начать." : "Boshlash uchun kamida 1 ta ko'nikmani bosing."}
                 </p>
               )}
             </div>
@@ -289,17 +292,17 @@ export default function DemoClient() {
             <div className="rounded-3xl border border-white/10 bg-black/40 p-5 font-mono text-sm shadow-2xl shadow-brand-500/10 backdrop-blur-md sm:p-6">
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
-                  2 · AI Reasoning
+                  {ru ? "2 · Рассуждение AI" : "2 · AI Reasoning"}
                 </p>
                 {phase === "thinking" && (
                   <span className="flex items-center gap-1 text-xs text-brand-300">
                     <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-300 shadow-[0_0_8px_rgba(124,92,255,0.9)]" />
-                    thinking…
+                    {ru ? "думает…" : "o'ylayapti…"}
                   </span>
                 )}
                 {phase === "results" && (
                   <span className="flex items-center gap-1 text-xs text-brand-300">
-                    <CheckCircle2 className="h-3 w-3" aria-hidden /> done
+                    <CheckCircle2 className="h-3 w-3" aria-hidden /> {ru ? "готово" : "tayyor"}
                   </span>
                 )}
               </div>
@@ -330,7 +333,7 @@ export default function DemoClient() {
 
                 {phase === "idle" && (
                   <p className="text-white/45">
-                    {"// AI tushuntirishi shu yerda chiqadi."}
+                    {ru ? "// Объяснение AI появится здесь." : "// AI tushuntirishi shu yerda chiqadi."}
                   </p>
                 )}
               </div>
@@ -341,18 +344,18 @@ export default function DemoClient() {
           <div>
             <div className="mb-4 flex items-center justify-between">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
-                3 · Sizning eng mos vakansiyalaringiz
+                {ru ? "3 · Ваши лучшие совпадения" : "3 · Sizning eng mos vakansiyalaringiz"}
               </p>
-              <span className="text-xs text-white/55">{matches.length} ta natija</span>
+              <span className="text-xs text-white/55">{matches.length} {ru ? "результата" : "ta natija"}</span>
             </div>
 
             {phase !== "results" || matches.length === 0 ? (
-              <EmptyMatches phase={phase} selected={selected.length} />
+              <EmptyMatches phase={phase} selected={selected.length} ru={ru} />
             ) : (
               <ul className="space-y-4">
                 <AnimatePresence>
                   {matches.map((m, i) => (
-                    <MatchCard key={m.job.id} m={m} index={i} reduce={!!reduce} />
+                    <MatchCard key={m.job.id} m={m} index={i} reduce={!!reduce} ru={ru} />
                   ))}
                 </AnimatePresence>
               </ul>
@@ -366,18 +369,17 @@ export default function DemoClient() {
                 className="mt-6 rounded-3xl border border-white/10 bg-gradient-to-br from-brand-500/10 to-cyan-400/10 p-5 backdrop-blur-md"
               >
                 <p className="text-sm text-white/85">
-                  Bu faqat demo. Haqiqiy IshTop&apos;da: 500+ verified kompaniya, Auto-Apply,
-                  Resume AI va Interview Coach.
+                  {ru ? "Это только демо. В настоящем IshTop: 500+ проверенных компаний, авто-отклики, AI-резюме и тренажёр собеседований." : "Bu faqat demo. Haqiqiy IshTop'da: 500+ tasdiqlangan kompaniya, avto-ariza, AI rezyume va suhbat murabbiyi."}
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <Link
                     href="/register"
                     className="btn-aurora focus-ring"
                   >
-                    Bepul ro&apos;yxatdan o&apos;tish
+                    {ru ? "Зарегистрироваться бесплатно" : "Bepul ro'yxatdan o'tish"}
                     <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                   </Link>
-                  <ShareButton selected={selected} />
+                  <ShareButton selected={selected} ru={ru} />
                 </div>
               </motion.div>
             )}
@@ -394,10 +396,12 @@ function MatchCard({
   m,
   index,
   reduce,
+  ru,
 }: {
   m: MatchResult;
   index: number;
   reduce: boolean;
+  ru: boolean;
 }) {
   const [expanded, setExpanded] = useState(index === 0);
 
@@ -457,7 +461,7 @@ function MatchCard({
         aria-expanded={expanded}
         className="focus-ring mt-3 inline-flex items-center gap-1 rounded-full text-xs font-semibold text-brand-300 hover:text-brand-200"
       >
-        Nega? <ChevronRight className={`h-3 w-3 transition-transform ${expanded ? "rotate-90" : ""}`} aria-hidden />
+        {ru ? "Почему?" : "Nega?"} <ChevronRight className={`h-3 w-3 transition-transform ${expanded ? "rotate-90" : ""}`} aria-hidden />
       </button>
 
       <AnimatePresence initial={false}>
@@ -532,7 +536,7 @@ function ScoreNumber({ score, reduce }: { score: number; reduce: boolean }) {
 
 /* --------------------------------------------------------- Empty state */
 
-function EmptyMatches({ phase, selected }: { phase: Phase; selected: number }) {
+function EmptyMatches({ phase, selected, ru }: { phase: Phase; selected: number; ru: boolean }) {
   return (
     <div className="grid place-items-center rounded-3xl border border-dashed border-white/10 bg-white/[0.02] p-10 text-center backdrop-blur-md">
       {phase === "idle" || selected === 0 ? (
@@ -544,9 +548,9 @@ function EmptyMatches({ phase, selected }: { phase: Phase; selected: number }) {
             <Wand2 className="h-6 w-6 text-brand-300" aria-hidden />
           </span>
           <p className="mt-4 text-sm font-medium text-white/80">
-            Boshlash uchun chap tomondan ko&apos;nikma tanlang
+            {ru ? "Выберите навык слева, чтобы начать" : "Boshlash uchun chap tomondan ko'nikma tanlang"}
           </p>
-          <p className="mt-1 text-xs text-white/55">3-5 ta ko&apos;nikma — eng yaxshi natija</p>
+          <p className="mt-1 text-xs text-white/55">{ru ? "3-5 навыков — лучший результат" : "3-5 ta ko'nikma — eng yaxshi natija"}</p>
         </>
       ) : (
         <>
@@ -559,7 +563,7 @@ function EmptyMatches({ phase, selected }: { phase: Phase; selected: number }) {
               />
             ))}
           </div>
-          <p className="mt-4 text-sm text-white/70">AI vakansiyalarni qidirmoqda…</p>
+          <p className="mt-4 text-sm text-white/70">{ru ? "AI ищет вакансии…" : "AI vakansiyalarni qidirmoqda…"}</p>
         </>
       )}
     </div>
@@ -568,13 +572,13 @@ function EmptyMatches({ phase, selected }: { phase: Phase; selected: number }) {
 
 /* ----------------------------------------------------- ShareButton */
 
-function ShareButton({ selected }: { selected: string[] }) {
+function ShareButton({ selected, ru }: { selected: string[]; ru: boolean }) {
   const [copied, setCopied] = useState(false);
 
   const onShare = async () => {
     const url = buildShareUrl(selected);
-    const title = "IshTop · Mening AI match natijam";
-    const text = "Mening ko'nikmalarim bo'yicha AI top 3 vakansiyani topdi. Sinab ko'r:";
+    const title = ru ? "IshTop · Мой AI-подбор" : "IshTop · Mening AI match natijam";
+    const text = ru ? "AI нашёл топ-3 вакансии по моим навыкам. Попробуй:" : "Mening ko'nikmalarim bo'yicha AI top 3 vakansiyani topdi. Sinab ko'r:";
 
     // Prefer native Web Share API (iOS, Android, modern Chrome)
     const nav = navigator as Navigator & { share?: (data: ShareData) => Promise<void> };
@@ -592,7 +596,7 @@ function ShareButton({ selected }: { selected: string[] }) {
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
       // clipboard blocked — fallback prompt
-      window.prompt("Link nusxalang:", url);
+      window.prompt(ru ? "Скопируйте ссылку:" : "Link nusxalang:", url);
     }
   };
 
@@ -600,18 +604,18 @@ function ShareButton({ selected }: { selected: string[] }) {
     <button
       type="button"
       onClick={onShare}
-      aria-label={copied ? "Link nusxalandi" : "Natijani share qilish"}
+      aria-label={copied ? (ru ? "Ссылка скопирована" : "Link nusxalandi") : (ru ? "Поделиться результатом" : "Natijani share qilish")}
       className="focus-ring inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-white/85 backdrop-blur-md transition hover:border-white/30 hover:bg-white/[0.08]"
     >
       {copied ? (
         <>
           <Check className="h-3.5 w-3.5 text-brand-300" aria-hidden />
-          Link nusxalandi
+          {ru ? "Ссылка скопирована" : "Link nusxalandi"}
         </>
       ) : (
         <>
           <Share2 className="h-3.5 w-3.5" aria-hidden />
-          Natijani share qilish
+          {ru ? "Поделиться" : "Natijani share qilish"}
         </>
       )}
     </button>
