@@ -18,7 +18,7 @@ const STEPS: Record<Locale, { title: string; desc: string }[]> = {
   uz: [
     { title: "Profil yarating", desc: "Ko'nikma, tajriba va maqsadlaringizni 3 daqiqada to'ldiring. AI qolganini o'zi to'ldiradi." },
     { title: "AI sizga mos topadi", desc: "Har bir vakansiya uchun aniq tushuntirish: nega mos, qaysi ko'nikmalar etishmaydi." },
-    { title: "Bir tugma bilan ariza", desc: "AI cover letter va resume to'g'rilanadi. 1 click bilan yuboring." },
+    { title: "Bir tugma bilan ariza", desc: "AI ilova xati va rezyumeni moslab beradi — bir bosishda yuboring." },
     { title: "Suhbat va offer", desc: "Suhbatga tayyorgarlik va savol bankasi bilan o'ziga ishonch — birinchi offer bilan yakun." },
   ],
   ru: [

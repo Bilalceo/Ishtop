@@ -43,7 +43,7 @@ const PRINCIPLES = [
     n: "04",
     title: "Tezlik — ehtirom belgisi.",
     body:
-      "Sayt yuklanishi 1.8s, ariza 1 click. Foydalanuvchi vaqti bizning eng qadrli resurs ekanligini bilamiz — uni isrof qilmaymiz.",
+      "Sayt yuklanishi 1.8s, ariza bir bosishda. Foydalanuvchi vaqti bizning eng qadrli resurs ekanligini bilamiz — uni isrof qilmaymiz.",
   },
 ];
 
