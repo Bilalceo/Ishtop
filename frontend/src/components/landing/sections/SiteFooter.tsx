@@ -12,15 +12,15 @@ const COL: Record<
 > = {
   uz: {
     product: [
-      { label: "AI rezyume", href: "/student/resumes/create-ai" },
-      { label: "Aqlli moslik", href: "/student/jobs" },
-      { label: "Avtomatik ariza", href: "/student/applications" },
-      { label: "Suhbat murabbiyi", href: "/student" },
+      { label: "AI rezyume yaratish", href: "/register" },
+      { label: "Jonli demo", href: "/demo" },
+      { label: "Qanday ishlaydi", href: "/#how" },
+      { label: "Narxlar", href: "/plans" },
     ],
     company: [
       { label: "Biz haqimizda", href: "/about" },
-      { label: "Kompaniyalar uchun", href: "/company" },
-      { label: "Narxlar", href: "/pricing" },
+      { label: "Kompaniyalar uchun", href: "/business" },
+      { label: "Narxlar", href: "/plans" },
       { label: "Bog'lanish", href: "/contact" },
     ],
     legal: [
@@ -30,33 +30,33 @@ const COL: Record<
   },
   ru: {
     product: [
-      { label: "AI-резюме", href: "/student/resumes/create-ai" },
-      { label: "Умный подбор", href: "/student/jobs" },
-      { label: "Автоотклик", href: "/student/applications" },
-      { label: "Тренер интервью", href: "/student" },
+      { label: "Создать AI-резюме", href: "/register" },
+      { label: "Живое демо", href: "/demo" },
+      { label: "Как это работает", href: "/#how" },
+      { label: "Тарифы", href: "/plans" },
     ],
     company: [
       { label: "О нас", href: "/about" },
-      { label: "Для компаний", href: "/company" },
-      { label: "Тарифы", href: "/pricing" },
+      { label: "Для компаний", href: "/business" },
+      { label: "Тарифы", href: "/plans" },
       { label: "Контакты", href: "/contact" },
     ],
     legal: [
-      { label: "Политика", href: "/privacy" },
-      { label: "Условия", href: "/terms" },
+      { label: "Политика конфиденциальности", href: "/privacy" },
+      { label: "Условия использования", href: "/terms" },
     ],
   },
   en: {
     product: [
-      { label: "AI Resume", href: "/student/resumes/create-ai" },
-      { label: "Smart Match", href: "/student/jobs" },
-      { label: "Auto-apply", href: "/student/applications" },
-      { label: "Interview Coach", href: "/student" },
+      { label: "Create AI resume", href: "/register" },
+      { label: "Live demo", href: "/demo" },
+      { label: "How it works", href: "/#how" },
+      { label: "Pricing", href: "/plans" },
     ],
     company: [
       { label: "About", href: "/about" },
-      { label: "For companies", href: "/company" },
-      { label: "Pricing", href: "/pricing" },
+      { label: "For companies", href: "/business" },
+      { label: "Pricing", href: "/plans" },
       { label: "Contact", href: "/contact" },
     ],
     legal: [
@@ -75,15 +75,15 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#070A16] text-white/70" aria-label="Footer">
+    <footer className="border-t border-[#d8d8d5] bg-[#ececea] text-[#63636b]" aria-label="Footer">
       <div className="section-shell py-16">
         <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <Link href="/" className="focus-ring inline-flex items-center gap-2">
-              <span className="grid h-9 w-9 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-500 to-teal-400">
-                <Sparkles className="h-4 w-4 text-white" />
+              <span className="grid h-9 w-9 place-items-center rounded-2xl bg-gradient-to-br from-[#d7e7ff] via-[#e3ddff] to-[#ffe9d6]">
+                <Sparkles className="h-4 w-4 text-[#5b4a9e]" />
               </span>
-              <span className="font-display text-lg font-semibold tracking-tight text-white">
+              <span className="font-display text-lg font-semibold tracking-tight text-[#18181b]">
                 IshTop
               </span>
             </Link>
@@ -147,7 +147,7 @@ export function SiteFooter() {
                       key={label}
                       href={href}
                       aria-label={label}
-                      className="focus-ring grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[0.03] text-white/70 transition hover:bg-white/[0.08] hover:text-white"
+                      className="focus-ring grid h-10 w-10 place-items-center rounded-full bg-white text-[#63636b] shadow-[0_2px_8px_-2px_rgba(24,24,27,0.1)] transition hover:-translate-y-0.5 hover:text-[#18181b]"
                       target={href?.startsWith("http") ? "_blank" : undefined}
                       rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
                     >
@@ -164,9 +164,9 @@ export function SiteFooter() {
           <FooterCol title={L === "ru" ? "Право" : L === "en" ? "Legal" : "Huquqiy"} items={cols.legal} />
         </div>
 
-        <hr className="hr-aurora mt-12" />
+        <hr className="mt-12 border-[#d8d8d5]" />
 
-        <div className="mt-6 flex flex-col items-center justify-between gap-3 text-xs text-white/55 sm:flex-row">
+        <div className="mt-6 flex flex-col items-center justify-between gap-3 text-xs text-[#8e8e96] sm:flex-row">
           <p>© {year} IshTop. {L === "ru" ? "Все права защищены." : L === "en" ? "All rights reserved." : "Barcha huquqlar himoyalangan."}</p>
           <p>Made in Tashkent</p>
         </div>
@@ -178,7 +178,7 @@ export function SiteFooter() {
 function FooterCol({ title, items }: { title: string; items: { label: string; href: string }[] }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">{title}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8e8e96]">{title}</p>
       <ul className="mt-4 space-y-2.5 text-sm">
         {items.map((it) => (
           <li key={it.label}>
