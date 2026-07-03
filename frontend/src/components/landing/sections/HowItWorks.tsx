@@ -10,7 +10,7 @@ import {
 } from "framer-motion";
 import { User2, Sparkles, Send, Trophy } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
-import { ScrollReveal3D } from "./primitives";
+import { Reveal } from "./primitives";
 
 type Locale = "uz" | "ru" | "en";
 
@@ -37,6 +37,14 @@ const STEPS: Record<Locale, { title: string; desc: string }[]> = {
 
 const ICONS = [User2, Sparkles, Send, Trophy];
 
+// One pastel tile per step — sky, lavender, mint, peach
+const STEP_TILES = [
+  "bg-[#d7e7ff] text-[#3856a5]",
+  "bg-[#e3ddff] text-[#5b4a9e]",
+  "bg-[#d9f1e4] text-[#2f7a56]",
+  "bg-[#ffe9d6] text-[#9a5b28]",
+];
+
 export function HowItWorks() {
   const { locale } = useTranslation();
   const reduce = useReducedMotion();
@@ -57,44 +65,43 @@ export function HowItWorks() {
     <section
       ref={sectionRef}
       id="how"
-      className="section-y relative bg-white perspective-1600 dark:bg-[#0B1020]"
+      className="silver-ground section-y relative"
       aria-labelledby="how-heading"
     >
       <div className="section-shell">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="h-eyebrow">
+        <Reveal className="mx-auto max-w-2xl text-center">
+          <span className="chip-silver uppercase tracking-[0.18em] !text-[11px]">
             {L === "ru" ? "Как это работает" : L === "en" ? "How it works" : "Qanday ishlaydi"}
           </span>
-          <h2 id="how-heading" className="h-display mt-4 text-3xl text-surface-900 dark:text-white sm:text-5xl">
+          <h2 id="how-heading" className="h-display mt-4 text-3xl text-[#18181b] sm:text-5xl">
             {L === "ru"
               ? "Профиль → Совпадение → Отклик → Интервью"
               : L === "en"
               ? "Profile → Match → Apply → Interview"
               : "Profil → Mos topish → Ariza → Suhbat"}
           </h2>
-          <p className="mt-4 text-lg text-surface-600 dark:text-white/70">
+          <p className="mt-4 text-lg text-[#63636b]">
             {L === "ru"
               ? "Прозрачный путь от первого клика до подписанного оффера."
               : L === "en"
               ? "A transparent path from first click to signed offer."
               : "Birinchi bosishdan oferta imzolagunga qadar tushunarli yo'l."}
           </p>
-        </div>
+        </Reveal>
 
         <ol className="relative mt-16 grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Animated scroll-driven connector */}
+          {/* Scroll-driven pastel connector line */}
           <div
             aria-hidden
             className="pointer-events-none absolute left-0 right-0 top-12 hidden h-px overflow-hidden lg:block"
           >
-            <div className="h-full w-full bg-surface-200 dark:bg-white/[0.06]" />
+            <div className="h-full w-full bg-[#d4d4d1]" />
             <motion.div
               className="absolute inset-y-0 left-0 h-full origin-left"
               style={{
                 width: lineLen,
                 background:
-                  "linear-gradient(90deg, #10b981 0%, #14b8a6 60%, #F5B544 100%)",
-                boxShadow: "0 0 24px rgba(124,92,255,0.5)",
+                  "linear-gradient(90deg, #a5c4ff 0%, #c4b5fd 50%, #ffd1a8 100%)",
               }}
             />
           </div>
@@ -102,31 +109,30 @@ export function HowItWorks() {
           {steps.map((step, i) => {
             const Icon = ICONS[i];
             return (
-              <ScrollReveal3D key={step.title} delay={i * 0.08} fullHeight>
+              <Reveal key={step.title} delay={i * 0.1} className="h-full">
                 <motion.li
-                  whileHover={reduce ? undefined : { y: -6, rotateX: 4, rotateY: -3 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 18 }}
-                  className="card-aurora card-aurora-hover preserve-3d relative flex h-full flex-col p-6"
-                  style={{ transformStyle: "preserve-3d" }}
+                  whileHover={reduce ? undefined : { y: -6 }}
+                  transition={{ type: "spring", stiffness: 220, damping: 20 }}
+                  className="card-silver card-silver-hover relative flex h-full flex-col p-6"
                 >
-                  <div className="relative z-10" style={{ transform: "translateZ(20px)" }}>
-                    <div className="flex items-center justify-between">
-                      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-400 text-white shadow-lg shadow-emerald-500/30">
-                        <Icon className="h-5 w-5" />
-                      </span>
-                      <span className="font-display text-5xl font-bold text-surface-200 dark:text-white/10">
-                        0{i + 1}
-                      </span>
-                    </div>
-                    <h3 className="mt-5 font-display text-lg font-semibold text-surface-900 dark:text-white">
-                      {step.title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-surface-600 dark:text-white/65">
-                      {step.desc}
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`grid h-12 w-12 place-items-center rounded-2xl ${STEP_TILES[i % STEP_TILES.length]}`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <span className="font-display text-5xl font-bold text-[#ececea]">
+                      0{i + 1}
+                    </span>
                   </div>
+                  <h3 className="mt-5 font-display text-lg font-semibold text-[#18181b]">
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#63636b]">
+                    {step.desc}
+                  </p>
                 </motion.li>
-              </ScrollReveal3D>
+              </Reveal>
             );
           })}
         </ol>
