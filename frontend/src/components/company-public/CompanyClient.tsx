@@ -1,430 +1,347 @@
 "use client";
 
 /**
- * IshTop — /company (Bento Maximal)
+ * IshTop — /business (Silver rebrand)
  *
- * B2B landing for employers in Apple AirPods-style modular bento grid.
- * Mixed media tiles: large numbers, mock UIs, gradient chunks, screenshots.
- *
- * Audience: HR managers, hiring teams at Uzum, EPAM, TBC, Click, etc.
+ * B2B landing for employers in the platform's silver design language:
+ * E5E5E5 ground, white + pastel bento tiles, periwinkle accents,
+ * floating island nav, blur-fade reveals. Copy is Uzbek.
  */
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   ArrowUpRight,
-  Sparkles,
-  Users,
   Zap,
   ShieldCheck,
   TrendingUp,
-  Brain,
-  CheckCircle2,
   Star,
-  Clock,
-  BadgeCheck,
 } from "lucide-react";
-import "./company.css";
+import { Reveal } from "@/components/landing/sections/primitives";
 
 export default function CompanyClient() {
   const reduce = useReducedMotion();
 
   return (
-    <main className="bn-root">
-      {/* Nav */}
-      <nav aria-label="Primary" className="border-b" style={{ borderColor: "var(--bn-rule)" }}>
-        <div className="bn-shell flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span
-              aria-hidden
-              className="grid h-8 w-8 place-items-center rounded-xl text-white"
-              style={{
-                background: "linear-gradient(135deg, var(--bn-accent), #8B89FF)",
-              }}
-            >
-              <Sparkles className="h-4 w-4" />
+    <main className="silver-ground relative min-h-screen text-[#18181b] antialiased">
+      {/* Floating island nav */}
+      <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-4">
+        <nav className="mx-auto flex h-14 max-w-5xl items-center justify-between rounded-full bg-white/75 px-4 shadow-[0_6px_20px_-10px_rgba(24,24,27,0.16)] backdrop-blur-xl sm:h-16 sm:px-6">
+          <Link href="/" className="focus-ring flex items-center gap-2 rounded-xl" aria-label="IshTop home">
+            <Image
+              src="/logo-ishtop.png?v=3"
+              alt="IshTop"
+              width={1025}
+              height={292}
+              className="h-6 w-auto sm:h-7"
+            />
+            <span className="hidden rounded-full bg-[#e3ddff] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#5b4a9e] sm:inline">
+              Biznes
             </span>
-            <span className="bn-display text-base font-semibold">IshTop</span>
-            <span className="bn-eyebrow ml-2 hidden sm:inline">Biznes uchun</span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
             <Link
               href="/"
-              className="hidden text-sm font-medium hover:text-[var(--bn-accent)] sm:block"
-              style={{ color: "var(--bn-ink-soft)" }}
+              className="focus-ring hidden rounded-full px-4 py-2 text-sm font-medium text-[#52525b] hover:text-[#18181b] sm:block"
             >
               Talabalar uchun
             </Link>
-            <Link href="/contact" className="bn-btn">
+            <Link href="/contact" className="btn-silver-primary !px-5 !py-2.5">
               Demo so&apos;rash
-              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </Link>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </header>
 
       {/* HERO */}
-      <section className="relative py-16 sm:py-24" aria-labelledby="hero-h">
-        <div className="bn-shell">
-          <p className="bn-eyebrow">Biznes uchun · 2026</p>
-          <motion.h1
-            id="hero-h"
-            initial={reduce ? false : { opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="bn-display mt-5 text-5xl sm:text-7xl lg:text-[88px]"
-          >
-            Tezroq yollang.<br />
-            <span style={{ color: "var(--bn-accent)" }}>Aqlliroq yollang.</span>
-          </motion.h1>
-          <p
-            className="mt-6 max-w-2xl text-lg sm:text-xl"
-            style={{ color: "var(--bn-ink-soft)" }}
-          >
-            O&apos;zbekistondagi minglab junior talant. AI saralash, tasdiqlangan
-            ishonch reytingi va avtomatlashtirilgan yollash jarayoni.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/contact" className="bn-btn">
-              Demo so&apos;rash
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
-            <Link
-              href="/plans"
-              className="inline-flex items-center gap-2 text-sm font-semibold"
-              style={{ color: "var(--bn-ink)" }}
-            >
-              Tariflarni ko&apos;rish
-              <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
-            </Link>
-          </div>
+      <section className="relative overflow-hidden pt-32 sm:pt-36" aria-labelledby="hero-h">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-24 left-1/2 h-[380px] w-[760px] -translate-x-1/2 rounded-full bg-gradient-to-r from-[#d7e7ff]/70 via-[#e3ddff]/60 to-[#ffe9d6]/60 blur-3xl"
+        />
+        <div className="section-shell relative pb-14 text-center sm:pb-16">
+          <Reveal>
+            <span className="chip-silver uppercase tracking-[0.18em] !text-[11px]">
+              Biznes uchun · 2026
+            </span>
+            <h1 id="hero-h" className="h-display mx-auto mt-6 max-w-3xl text-4xl text-[#18181b] sm:text-6xl lg:text-7xl">
+              Tezroq yollang.{" "}
+              <span className="bg-gradient-to-r from-[#6f9bf0] to-[#a08de0] bg-clip-text text-transparent">
+                Aqlliroq yollang.
+              </span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-xl text-lg text-[#63636b] sm:text-xl">
+              O&apos;zbekistondagi minglab junior talant. AI saralash, tasdiqlangan
+              ishonch reytingi va avtomatlashtirilgan yollash jarayoni.
+            </p>
+            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link href="/contact" className="btn-silver-primary focus-ring group">
+                Demo so&apos;rash
+                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
+              </Link>
+              <Link href="/plans" className="btn-silver-ghost focus-ring">
+                Tariflarni ko&apos;rish
+                <ArrowUpRight className="h-3.5 w-3.5 text-[#8ab4ff]" aria-hidden />
+              </Link>
+            </div>
+          </Reveal>
         </div>
       </section>
 
       {/* BENTO GRID */}
-      <section className="pb-24 sm:pb-32" aria-label="Features">
-        <div className="bn-shell">
+      <section className="pb-20 sm:pb-28" aria-label="Imkoniyatlar">
+        <div className="section-shell">
           <div className="grid auto-rows-[minmax(180px,auto)] gap-4 sm:grid-cols-6 sm:gap-5">
-            {/* Big stat — 10,000+ candidates */}
-            <Tile
-              i={0}
-              reduce={!!reduce}
-              className="sm:col-span-3 sm:row-span-2"
-              variant="dark"
-            >
-              <span className="bn-eyebrow">Tasdiqlangan nomzodlar</span>
-              <div className="mt-6 flex items-end gap-2">
-                <p className="bn-num text-7xl sm:text-8xl lg:text-[128px]">10K+</p>
-              </div>
-              <p className="mt-4 max-w-sm text-sm text-white/70">
-                Hozir faol talaba, ko&apos;nikmalari AI tomonidan tekshirilgan.
-                Junior'lardan mid-level'gacha.
-              </p>
-
-              {/* Avatars stack */}
-              <div className="mt-8 flex items-center gap-2" aria-hidden>
-                <div className="flex -space-x-2">
-                  {["#6F9BF0", "#22D3EE", "#F5B544", "#3CCB7F", "#FF6B35"].map((c, i) => (
-                    <span
-                      key={i}
-                      className="grid h-9 w-9 place-items-center rounded-full text-[11px] font-semibold text-white ring-2 ring-[#0E0F12]"
-                      style={{ background: c }}
-                    >
-                      {["S", "N", "A", "B", "L"][i]}
+            {/* Big stat — candidates (pastel gradient tile) */}
+            <Reveal className="sm:col-span-3 sm:row-span-2">
+              <div className="card-silver h-full !bg-gradient-to-br !from-[#d7e7ff] !via-[#e0e2ff] !to-[#e3ddff] p-7">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#5470b8]">
+                  Tasdiqlangan nomzodlar
+                </span>
+                <p className="font-display mt-6 text-7xl font-bold tracking-tight text-[#2e4278] sm:text-8xl lg:text-[120px]">
+                  10K+
+                </p>
+                <p className="mt-4 max-w-sm text-sm text-[#4a5a85]">
+                  Hozir faol talaba, ko&apos;nikmalari AI tomonidan tekshirilgan.
+                  Junior&apos;lardan mid-level&apos;gacha.
+                </p>
+                <div className="mt-8 flex items-center gap-2" aria-hidden>
+                  <div className="flex -space-x-2">
+                    {[
+                      ["S", "#6f9bf0"],
+                      ["N", "#8f7fe8"],
+                      ["A", "#e2a86b"],
+                      ["B", "#5fb98a"],
+                      ["L", "#e88fae"],
+                    ].map(([ch, c]) => (
+                      <span
+                        key={ch}
+                        className="grid h-9 w-9 place-items-center rounded-full text-[11px] font-semibold text-white ring-2 ring-white"
+                        style={{ background: c }}
+                      >
+                        {ch}
+                      </span>
+                    ))}
+                    <span className="grid h-9 w-9 place-items-center rounded-full bg-white text-[11px] font-semibold text-[#3856a5] ring-2 ring-white">
+                      +9K
                     </span>
-                  ))}
-                  <span
-                    className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-[11px] font-semibold text-white ring-2 ring-[#0E0F12]"
-                  >
-                    +9K
-                  </span>
+                  </div>
+                  <p className="ml-2 text-xs text-[#4a5a85]">faol talaba</p>
                 </div>
-                <p className="ml-2 text-xs text-white/60">faol talaba</p>
               </div>
-            </Tile>
+            </Reveal>
 
             {/* Time to hire */}
-            <Tile i={1} reduce={!!reduce} className="sm:col-span-3" variant="accent">
-              <span className="bn-eyebrow">Yollash vaqti</span>
-              <p className="bn-num mt-4 text-5xl sm:text-6xl">12 kun</p>
-              <p className="mt-2 text-sm text-white/85">
-                O&apos;rtacha post → hire vaqti.{" "}
-                <span className="text-white/65">Bozorda — 47 kun.</span>
-              </p>
-              <div className="mt-5 flex items-center gap-2 text-xs">
-                <TrendingUp className="h-3.5 w-3.5 text-white/80" aria-hidden />
-                <span className="text-white/85">4× tezroq</span>
+            <Reveal className="sm:col-span-3" delay={0.06}>
+              <div className="card-silver h-full p-7">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#a0a0a8]">
+                  Yollash vaqti
+                </span>
+                <p className="font-display mt-4 text-5xl font-bold tracking-tight text-[#18181b] sm:text-6xl">
+                  12 kun
+                </p>
+                <p className="mt-2 text-sm text-[#63636b]">
+                  O&apos;rtacha e&apos;londan yollashgacha.{" "}
+                  <span className="text-[#8e8e96]">Bozorda — 47 kun.</span>
+                </p>
+                <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#d9f1e4] px-3 py-1 text-xs font-semibold text-[#2f7a56]">
+                  <TrendingUp className="h-3.5 w-3.5" aria-hidden />
+                  4× tezroq
+                </div>
               </div>
-            </Tile>
+            </Reveal>
 
             {/* AI screening mock */}
-            <Tile i={2} reduce={!!reduce} className="sm:col-span-3">
-              <span className="bn-eyebrow">AI saralash</span>
-              <h3 className="bn-display mt-3 text-xl">
-                Resume — 60 soniya, score — 5 soniya
-              </h3>
-              <div
-                className="mt-5 rounded-2xl border p-4"
-                style={{ borderColor: "var(--bn-rule)", background: "var(--bn-bg)" }}
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold">Sevinch Q.</p>
-                  <span
-                    className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                    style={{ background: "rgba(0, 168, 107, 0.12)", color: "var(--bn-success)" }}
-                  >
-                    94% moslik
-                  </span>
-                </div>
-                <div className="mt-3 grid grid-cols-3 gap-2">
-                  {["React", "TypeScript", "Tailwind"].map((s) => (
-                    <span
-                      key={s}
-                      className="rounded-full px-2 py-1 text-center text-xs"
-                      style={{
-                        background: "var(--bn-accent-soft)",
-                        color: "var(--bn-accent)",
-                      }}
-                    >
-                      {s}
+            <Reveal className="sm:col-span-3" delay={0.1}>
+              <div className="card-silver h-full p-7">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#a0a0a8]">
+                  AI saralash
+                </span>
+                <h3 className="font-display mt-3 text-xl font-semibold text-[#18181b]">
+                  Rezyume — 60 soniya, baho — 5 soniya
+                </h3>
+                <div className="mt-5 rounded-2xl bg-[#f6f6f4] p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-[#18181b]">Sevinch Q.</p>
+                    <span className="rounded-full bg-[#d9f1e4] px-2.5 py-0.5 text-[10px] font-semibold text-[#2f7a56]">
+                      94% moslik
                     </span>
+                  </div>
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    {["React", "TypeScript", "Tailwind"].map((s) => (
+                      <span
+                        key={s}
+                        className="rounded-full bg-[#d7e7ff] px-2 py-1 text-center text-xs text-[#3856a5]"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#ececea]">
+                    <motion.div
+                      initial={reduce ? false : { width: 0 }}
+                      whileInView={{ width: "94%" }}
+                      viewport={{ once: true, amount: 0.3 }}
+                      transition={{ duration: 1.1, ease: [0.19, 1, 0.22, 1], delay: 0.2 }}
+                      className="h-full rounded-full bg-gradient-to-r from-[#8ab4ff] via-[#b7a4ff] to-[#7cc7a2]"
+                    />
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Trust filter */}
+            <Reveal className="sm:col-span-2" delay={0.12}>
+              <div className="card-silver h-full p-6">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#a0a0a8]">
+                  Ishonch filtri
+                </span>
+                <h3 className="font-display mt-3 text-lg font-semibold text-[#18181b]">
+                  Soxta CV&apos;lar avtomatik filtrda
+                </h3>
+                <div className="mt-5 flex items-center gap-3">
+                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#d9f1e4]">
+                    <ShieldCheck className="h-5 w-5 text-[#2f7a56]" aria-hidden />
+                  </span>
+                  <div>
+                    <p className="font-display text-2xl font-bold text-[#18181b]">98%</p>
+                    <p className="text-xs text-[#8e8e96]">aniqlik darajasi</p>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Pipeline */}
+            <Reveal className="sm:col-span-2" delay={0.14}>
+              <div className="card-silver h-full p-6">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#a0a0a8]">
+                  Jarayon
+                </span>
+                <h3 className="font-display mt-3 text-lg font-semibold text-[#18181b]">
+                  Hammasi — bitta dashboard
+                </h3>
+                <div className="mt-5 grid grid-cols-4 gap-1.5">
+                  {[
+                    { l: "Ariza", v: 47, c: "#3856a5", bg: "#d7e7ff" },
+                    { l: "Ko'rik", v: 23, c: "#5b4a9e", bg: "#e3ddff" },
+                    { l: "Suhbat", v: 8, c: "#9a5b28", bg: "#ffe9d6" },
+                    { l: "Yollandi", v: 3, c: "#2f7a56", bg: "#d9f1e4" },
+                  ].map((p) => (
+                    <div key={p.l} className="rounded-xl py-2 text-center" style={{ background: p.bg }}>
+                      <p className="font-display text-base font-bold" style={{ color: p.c }}>
+                        {p.v}
+                      </p>
+                      <p className="text-[10px]" style={{ color: p.c }}>
+                        {p.l}
+                      </p>
+                    </div>
                   ))}
                 </div>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full" style={{ background: "var(--bn-rule)" }}>
-                  <motion.div
-                    initial={reduce ? false : { width: 0 }}
-                    whileInView={{ width: "94%" }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 1.1, ease: [0.19, 1, 0.22, 1], delay: 0.2 }}
-                    className="h-full rounded-full"
-                    style={{
-                      background: "linear-gradient(90deg, var(--bn-accent), var(--bn-success))",
-                    }}
-                  />
+              </div>
+            </Reveal>
+
+            {/* Auto-sourcing (peach pastel tile) */}
+            <Reveal className="sm:col-span-2" delay={0.16}>
+              <div className="card-silver h-full !bg-gradient-to-br !from-[#ffe9d6] !to-[#ffdfc2] p-6">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#a5642e]">
+                  Avto-qidiruv
+                </span>
+                <h3 className="font-display mt-3 text-lg font-semibold text-[#5c3a1c]">
+                  AI sizning o&apos;rningizga qidiradi
+                </h3>
+                <div className="mt-5">
+                  <p className="font-display text-4xl font-bold text-[#5c3a1c]">+3</p>
+                  <p className="mt-1 text-sm text-[#8a5a30]">yangi top moslik bugun</p>
+                </div>
+                <div className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#9a5b28]">
+                  <Zap className="h-3 w-3" aria-hidden />
+                  Jonli rejim
                 </div>
               </div>
-            </Tile>
+            </Reveal>
 
-            {/* Trust score auto-filter */}
-            <Tile i={3} reduce={!!reduce} className="sm:col-span-2">
-              <span className="bn-eyebrow">Ishonch filtri</span>
-              <h3 className="bn-display mt-3 text-lg">
-                Soxta CV'lar avtomatik filterda
-              </h3>
-              <div className="mt-5 flex items-center gap-3">
-                <ShieldCheck
-                  className="h-10 w-10"
-                  style={{ color: "var(--bn-success)" }}
-                  aria-hidden
-                />
-                <div>
-                  <p className="bn-num text-2xl">98%</p>
-                  <p className="text-xs" style={{ color: "var(--bn-mute)" }}>
-                    aniqlik darajasi
-                  </p>
-                </div>
-              </div>
-            </Tile>
-
-            {/* Pipeline mock */}
-            <Tile i={4} reduce={!!reduce} className="sm:col-span-2">
-              <span className="bn-eyebrow">Jarayon</span>
-              <h3 className="bn-display mt-3 text-lg">
-                Hammasi — bitta dashboard
-              </h3>
-              <div className="mt-5 grid grid-cols-4 gap-1.5">
-                {[
-                  { l: "Ariza", v: 47, c: "var(--bn-accent)" },
-                  { l: "Ko'rik", v: 23, c: "var(--bn-warm)" },
-                  { l: "Suhbat", v: 8, c: "#FFB800" },
-                  { l: "Yollandi", v: 3, c: "var(--bn-success)" },
-                ].map((p) => (
-                  <div key={p.l} className="text-center">
-                    <p className="bn-num text-base" style={{ color: p.c }}>
-                      {p.v}
-                    </p>
-                    <p className="text-[10px]" style={{ color: "var(--bn-mute)" }}>
-                      {p.l}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </Tile>
-
-            {/* Sourcing automation */}
-            <Tile i={5} reduce={!!reduce} className="sm:col-span-2" variant="warm">
-              <span className="bn-eyebrow">Avto-qidiruv</span>
-              <h3 className="bn-display mt-3 text-lg">
-                AI sizning o&apos;rningizga qidiradi
-              </h3>
-              <div className="mt-5">
-                <p className="bn-num text-4xl">+3</p>
-                <p className="mt-1 text-sm text-white/85">
-                  yangi top match bugun
+            {/* Logos */}
+            <Reveal className="sm:col-span-6" delay={0.18}>
+              <div className="card-silver h-full p-6">
+                <p className="text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[#a0a0a8]">
+                  Bizga ishonganlar
                 </p>
+                <div className="mt-5 grid grid-cols-3 gap-4 sm:grid-cols-6">
+                  {["Uzum", "EPAM", "TBC Bank", "Click", "Payme", "Beeline"].map((n) => (
+                    <div key={n} className="text-center text-sm font-semibold text-[#8e8e96]">
+                      {n}
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white">
-                <Zap className="h-3 w-3" aria-hidden />
-                Jonli rejim
-              </div>
-            </Tile>
-
-            {/* Logos / customers */}
-            <Tile i={6} reduce={!!reduce} className="sm:col-span-6">
-              <p className="bn-eyebrow">Bizga ishonganlar</p>
-              <div className="mt-5 grid grid-cols-3 gap-4 sm:grid-cols-6">
-                {["Uzum", "EPAM", "TBC Bank", "Click", "Payme", "Beeline"].map((n) => (
-                  <div
-                    key={n}
-                    className="text-center text-sm font-semibold"
-                    style={{ color: "var(--bn-mute)" }}
-                  >
-                    {n}
-                  </div>
-                ))}
-              </div>
-            </Tile>
+            </Reveal>
           </div>
         </div>
       </section>
 
       {/* Testimonial */}
-      <section
-        className="border-t py-20 sm:py-24"
-        style={{ borderColor: "var(--bn-rule)", background: "var(--bn-card)" }}
-        aria-label="Testimonial"
-      >
-        <div className="bn-shell">
-          <div className="mx-auto max-w-3xl">
-            <div className="flex items-center gap-1" style={{ color: "var(--bn-warm)" }}>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className="h-4 w-4 fill-current" aria-hidden />
-              ))}
+      <section className="py-16 sm:py-20" aria-label="Mijoz fikri">
+        <div className="section-shell">
+          <Reveal className="mx-auto max-w-3xl">
+            <div className="card-silver p-8 sm:p-10">
+              <div className="flex items-center gap-1 text-[#e2b184]" aria-label="5 yulduz">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="h-4 w-4 fill-current" aria-hidden />
+                ))}
+              </div>
+              <p className="font-display mt-4 text-2xl font-semibold leading-tight text-[#18181b] sm:text-3xl">
+                &ldquo;IshTop bilan junior frontend yollash vaqtimiz 6 haftadan 11 kunga
+                qisqardi. AI saralash HR jamoamizning haftasiga 20 soatini tejaydi.&rdquo;
+              </p>
+              <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-[#8e8e96]">
+                Diyora R. · Uzum Market HR rahbari
+              </p>
             </div>
-            <p className="bn-display mt-4 text-2xl leading-tight sm:text-3xl">
-              &ldquo;IshTop bilan junior frontend yollash vaqtimiz 6 haftadan 11 kunga
-              qisqardi. AI saralash HR jamoamizning haftasiga 20 soatini
-              tejaydi.&rdquo;
-            </p>
-            <p className="bn-eyebrow mt-6">
-              Diyora R. · Uzum Market HR rahbari
-            </p>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-20 sm:py-32" aria-labelledby="cta-h">
-        <div className="bn-shell">
-          <div
-            className="bn-tile bn-tile-dark p-10 sm:p-16"
-            style={{ borderRadius: 36 }}
-          >
-            <div
-              aria-hidden
-              className="bn-blob"
-              style={{
-                top: "-20%",
-                right: "10%",
-                width: 400,
-                height: 400,
-                background: "var(--bn-accent)",
-              }}
-            />
-            <div
-              aria-hidden
-              className="bn-blob"
-              style={{
-                bottom: "-30%",
-                left: "10%",
-                width: 350,
-                height: 350,
-                background: "var(--bn-warm)",
-              }}
-            />
-            <div className="relative">
-              <span className="bn-eyebrow">{"// CTA"}</span>
-              <h2
-                id="cta-h"
-                className="bn-display mt-5 text-4xl sm:text-6xl lg:text-7xl"
-              >
-                10K+ talant. <br />
-                <span style={{ color: "var(--bn-accent)" }}>Sizning navbatingiz.</span>
+      <section className="relative overflow-hidden py-16 sm:py-28" aria-labelledby="cta-h">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-1/2 h-[360px] -translate-y-1/2 bg-gradient-to-r from-[#d7e7ff]/70 via-[#e3ddff]/60 to-[#ffe9d6]/60 blur-3xl"
+        />
+        <div className="section-shell relative">
+          <Reveal className="mx-auto max-w-3xl">
+            <div className="card-silver p-10 text-center sm:p-16">
+              <h2 id="cta-h" className="h-display text-4xl text-[#18181b] sm:text-5xl">
+                10K+ talant.{" "}
+                <span className="bg-gradient-to-r from-[#6f9bf0] to-[#a08de0] bg-clip-text text-transparent">
+                  Sizning navbatingiz.
+                </span>
               </h2>
-              <p className="mt-5 max-w-xl text-white/75 sm:text-lg">
+              <p className="mx-auto mt-5 max-w-xl text-[#63636b] sm:text-lg">
                 30 daqiqalik demo. Birinchi 10 ta vakansiya bepul. Karta yo&apos;q.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/contact" className="bn-btn bn-btn-light">
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Link href="/contact" className="btn-silver-primary focus-ring group">
                   Demo so&apos;rash
-                  <ArrowRight className="h-4 w-4" aria-hidden />
+                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
                 </Link>
-                <Link
-                  href="/plans"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white hover:bg-white/[0.08]"
-                >
+                <Link href="/plans" className="btn-silver-ghost focus-ring !bg-[#f6f6f4]">
                   Tariflarni ko&apos;rish
                 </Link>
               </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* Footer */}
-      <footer
-        className="border-t py-10"
-        style={{ borderColor: "var(--bn-rule)" }}
-        aria-label="Footer"
-      >
-        <div className="bn-shell flex flex-col items-start justify-between gap-3 text-sm sm:flex-row sm:items-center">
-          <p style={{ color: "var(--bn-mute)" }}>
-            © {new Date().getFullYear()} IshTop · Biznes uchun
-          </p>
-          <p style={{ color: "var(--bn-mute)" }}>Made in Tashkent</p>
+      <footer className="border-t border-[#d8d8d5] py-8" aria-label="Footer">
+        <div className="section-shell flex flex-col items-start justify-between gap-2 text-xs text-[#8e8e96] sm:flex-row sm:items-center">
+          <p>© {new Date().getFullYear()} IshTop · Biznes uchun</p>
+          <p>Made in Tashkent</p>
         </div>
       </footer>
     </main>
   );
 }
-
-/* ----------------------------------------------------------------- Tile */
-
-function Tile({
-  children,
-  className,
-  variant,
-  i,
-  reduce,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  variant?: "dark" | "accent" | "warm";
-  i: number;
-  reduce: boolean;
-}) {
-  const variantClass =
-    variant === "dark"
-      ? "bn-tile-dark"
-      : variant === "accent"
-      ? "bn-tile-accent"
-      : variant === "warm"
-      ? "bn-tile-warm"
-      : "";
-
-  return (
-    <motion.div
-      initial={reduce ? false : { opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.55, ease: [0.19, 1, 0.22, 1], delay: i * 0.05 }}
-      className={`bn-tile ${variantClass} ${className ?? ""}`}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-// Unused but kept for future tiles
-const _unused = { Users, Brain, CheckCircle2, Clock, BadgeCheck };
