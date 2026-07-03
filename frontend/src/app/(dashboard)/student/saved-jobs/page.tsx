@@ -102,7 +102,7 @@ export default function SavedJobsPage() {
     (job) =>
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (job.company?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.location.toLowerCase().includes(searchQuery.toLowerCase())
+      (job.location || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

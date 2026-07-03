@@ -312,14 +312,14 @@ export default function JobsPage() {
       !searchQuery ||
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.company?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.requirements.skills?.some((skill) =>
+      job.requirements?.skills?.some((skill) =>
         skill.toLowerCase().includes(searchQuery.toLowerCase()),
       );
 
     const matchesLocation =
       filters.locations.length === 0 ||
       filters.locations.some((loc) =>
-        job.location.toLowerCase().includes(loc.toLowerCase()),
+        (job.location || "").toLowerCase().includes(loc.toLowerCase()),
       );
 
     const matchesJobType =
