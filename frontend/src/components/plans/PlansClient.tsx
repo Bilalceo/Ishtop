@@ -102,7 +102,7 @@ const FAQ: { q: string; a: string }[] = [
     a: "Pro plan barcha .edu va talaba ID'lar uchun 50% chegirma — yiliga 250 000 so'm → 125 000 so'm.",
   },
   {
-    q: "Auto-apply qanday ishlaydi?",
+    q: "Avto-ariza qanday ishlaydi?",
     a: "AI rezyumeni har bir vakansiyaga moslab yuboradi. Limit (10 yoki 50) har kuni UTC yarim tunda yangilanadi.",
   },
 ];

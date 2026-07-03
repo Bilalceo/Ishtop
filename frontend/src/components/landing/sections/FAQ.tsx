@@ -10,7 +10,7 @@ const Q: Record<Locale, { q: string; a: string }[]> = {
   uz: [
     {
       q: "IshTop bepulmi?",
-      a: "Ha. Asosiy imkoniyatlar — profil, AI match va arizalar — bepul. Premium plan’da Auto-apply, Resume AI Pro va Interview Coach mavjud.",
+      a: "Ha. Asosiy imkoniyatlar — profil, AI moslik va arizalar — bepul. Premium'da avto-ariza, AI rezyume Pro va suhbat murabbiyi mavjud.",
     },
     {
       q: "AI mening ma'lumotlarimni o‘qiydimi?",
@@ -32,7 +32,7 @@ const Q: Record<Locale, { q: string; a: string }[]> = {
   ru: [
     {
       q: "IshTop бесплатный?",
-      a: "Да. Базовые функции — профиль, AI match и отклики — бесплатно. В Premium: Auto-apply, Resume AI Pro и Interview Coach.",
+      a: "Да. Базовые функции — профиль, AI-подбор и отклики — бесплатно. В Premium: авто-отклики, AI-резюме Pro и тренажёр собеседований.",
     },
     {
       q: "AI читает мои данные?",
