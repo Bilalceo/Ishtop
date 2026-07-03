@@ -22,7 +22,7 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { t, translations } = useTranslation();
+  const { t, locale, translations } = useTranslation();
   const sidebarFeatures = Array.isArray(translations?.auth?.sidebar?.features)
     ? (translations.auth.sidebar.features as string[])
     : [
@@ -156,9 +156,18 @@ export default function AuthLayout({
               className="mt-10 grid grid-cols-3 gap-3"
             >
               {[
-                { value: "2 daq.", label: "AI rezyume" },
-                { value: "UZ · RU", label: "Ikki tilda" },
-                { value: "Bepul", label: "Boshlash" },
+                {
+                  value: locale === "ru" ? "2 мин" : "2 daq.",
+                  label: locale === "ru" ? "AI-резюме" : "AI rezyume",
+                },
+                {
+                  value: "UZ · RU",
+                  label: locale === "ru" ? "Два языка" : "Ikki tilda",
+                },
+                {
+                  value: locale === "ru" ? "Бесплатно" : "Bepul",
+                  label: locale === "ru" ? "Старт" : "Boshlash",
+                },
               ].map((s) => (
                 <div
                   key={s.label}

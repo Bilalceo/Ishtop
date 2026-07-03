@@ -245,26 +245,32 @@ export function Hero({ cms }: { cms?: HeroCmsPayload }) {
                 </div>
               </div>
               <span className="shrink-0 rounded-full bg-[#d9f1e4] px-3 py-1 text-xs font-semibold text-[#2f7a56]">
-                94% mos
+                {L === "ru" ? "94% совпадение" : "94% mos"}
               </span>
             </div>
 
             <div className="mt-5 rounded-2xl bg-[#f6f6f4] p-4 text-left">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#a0a0a8]">
-                Nega mos keladi
+                {L === "ru" ? "Почему подходит" : "Nega mos keladi"}
               </p>
               <ul className="mt-3 space-y-2.5 text-sm text-[#3f3f46]">
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#7cc7a2]" />
-                  React, TypeScript va Tailwind portfolioda topildi
+                  {L === "ru"
+                    ? "React, TypeScript и Tailwind найдены в портфолио"
+                    : "React, TypeScript va Tailwind portfolioda topildi"}
                 </li>
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#7cc7a2]" />
-                  3 ta open-source PR — junior darajadan yuqori
+                  {L === "ru"
+                    ? "3 open-source PR — выше уровня junior"
+                    : "3 ta open-source PR — junior darajadan yuqori"}
                 </li>
                 <li className="flex items-start gap-2.5">
                   <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#8ab4ff]" />
-                  Kompaniya ishonch reytingi: 88 (tasdiqlangan)
+                  {L === "ru"
+                    ? "Рейтинг доверия компании: 88 (проверено)"
+                    : "Kompaniya ishonch reytingi: 88 (tasdiqlangan)"}
                 </li>
               </ul>
             </div>
@@ -272,9 +278,11 @@ export function Hero({ cms }: { cms?: HeroCmsPayload }) {
             <div className="mt-4 flex items-center justify-between rounded-2xl bg-[#f6f6f4] p-3">
               <span className="inline-flex items-center gap-2 text-xs text-[#63636b]">
                 <Sparkles className="h-3.5 w-3.5 text-[#b7a4ff]" />
-                AI ariza tayyorladi
+                {L === "ru" ? "AI подготовил отклик" : "AI ariza tayyorladi"}
               </span>
-              <span className="btn-silver-primary !px-4 !py-1.5 !text-xs">Yuborish</span>
+              <span className="btn-silver-primary !px-4 !py-1.5 !text-xs">
+                {L === "ru" ? "Отправить" : "Yuborish"}
+              </span>
             </div>
           </div>
         </motion.div>

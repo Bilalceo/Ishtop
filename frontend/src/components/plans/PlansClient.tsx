@@ -15,6 +15,7 @@ import Image from "next/image";
 import { Check, X, Minus, ArrowRight, ChevronDown, HelpCircle, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Reveal } from "@/components/landing/sections/primitives";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type Plan = {
   id: string;
@@ -28,23 +29,23 @@ type Plan = {
   accent: boolean;
 };
 
-const PLANS: Plan[] = [
+const getPlans = (ru: boolean): Plan[] => [
   {
     id: "free",
     name: "Free",
     price: "0 so'm",
     priceNote: "/ oy",
-    tagline: "Birinchi ish uchun yetarli",
+    tagline: ru ? "Для первой работы достаточно" : "Birinchi ish uchun yetarli",
     features: [
-      { text: "AI rezyume — 1 ta", ok: true },
-      { text: "Tushuntiriladigan moslik", ok: true },
-      { text: "100 ta vakansiya / oy", ok: true },
-      { text: "Ishonch reytingi filtri", ok: true },
-      { text: "Avto-ariza", ok: false },
-      { text: "Suhbat murabbiyi (AI)", ok: false },
-      { text: "Ustuvor qo'llab-quvvatlash", ok: false },
+      { text: ru ? "AI-резюме — 1 шт" : "AI rezyume — 1 ta", ok: true },
+      { text: ru ? "Объяснимый подбор" : "Tushuntiriladigan moslik", ok: true },
+      { text: ru ? "100 вакансий / мес" : "100 ta vakansiya / oy", ok: true },
+      { text: ru ? "Фильтр рейтинга доверия" : "Ishonch reytingi filtri", ok: true },
+      { text: ru ? "Авто-отклик" : "Avto-ariza", ok: false },
+      { text: ru ? "AI-тренажёр собеседований" : "Suhbat murabbiyi (AI)", ok: false },
+      { text: ru ? "Приоритетная поддержка" : "Ustuvor qo'llab-quvvatlash", ok: false },
     ],
-    cta: "Boshlash",
+    cta: ru ? "Начать" : "Boshlash",
     ctaHref: "/register",
     accent: false,
   },
@@ -53,62 +54,66 @@ const PLANS: Plan[] = [
     name: "Pro",
     price: "25 000 so'm",
     priceNote: "/ oy",
-    tagline: "Tezlik + AI Coach",
+    tagline: ru ? "Скорость + AI Coach" : "Tezlik + AI Coach",
     features: [
-      { text: "AI rezyume — cheksiz", ok: true },
-      { text: "Tushuntiriladigan moslik", ok: true },
-      { text: "Cheksiz vakansiya", ok: true },
-      { text: "Ishonch reytingi filtri", ok: true },
-      { text: "Avto-ariza (10/kun)", ok: true },
-      { text: "Suhbat murabbiyi (AI)", ok: true },
-      { text: "Ustuvor qo'llab-quvvatlash", ok: "limited" },
+      { text: ru ? "AI-резюме — безлимит" : "AI rezyume — cheksiz", ok: true },
+      { text: ru ? "Объяснимый подбор" : "Tushuntiriladigan moslik", ok: true },
+      { text: ru ? "Безлимит вакансий" : "Cheksiz vakansiya", ok: true },
+      { text: ru ? "Фильтр рейтинга доверия" : "Ishonch reytingi filtri", ok: true },
+      { text: ru ? "Авто-отклик (10/день)" : "Avto-ariza (10/kun)", ok: true },
+      { text: ru ? "AI-тренажёр собеседований" : "Suhbat murabbiyi (AI)", ok: true },
+      { text: ru ? "Приоритетная поддержка" : "Ustuvor qo'llab-quvvatlash", ok: "limited" },
     ],
-    cta: "Pro'ga o'tish",
+    cta: ru ? "Перейти на Pro" : "Pro'ga o'tish",
     ctaHref: "/register",
     accent: true,
   },
   {
     id: "team",
     name: "Team",
-    price: "Maxsus",
-    priceNote: "kelishiladi",
-    tagline: "5+ talaba uchun · Bootcamp",
+    price: ru ? "Инд." : "Maxsus",
+    priceNote: ru ? "по договорённости" : "kelishiladi",
+    tagline: ru ? "Для 5+ студентов · Bootcamp" : "5+ talaba uchun · Bootcamp",
     features: [
-      { text: "Pro'dagi hamma imkoniyat", ok: true },
-      { text: "Jamoa paneli", ok: true },
-      { text: "Bootcamp analitikasi", ok: true },
-      { text: "Mentor o'rni — 2 ta", ok: true },
-      { text: "Avto-ariza (50/kun)", ok: true },
-      { text: "Maxsus AI sozlamalari", ok: true },
-      { text: "SLA kafolatli yordam", ok: true },
+      { text: ru ? "Всё из Pro" : "Pro'dagi hamma imkoniyat", ok: true },
+      { text: ru ? "Командная панель" : "Jamoa paneli", ok: true },
+      { text: ru ? "Аналитика для bootcamp" : "Bootcamp analitikasi", ok: true },
+      { text: ru ? "Места менторов — 2" : "Mentor o'rni — 2 ta", ok: true },
+      { text: ru ? "Авто-отклик (50/день)" : "Avto-ariza (50/kun)", ok: true },
+      { text: ru ? "Кастомная настройка AI" : "Maxsus AI sozlamalari", ok: true },
+      { text: ru ? "Поддержка по SLA" : "SLA kafolatli yordam", ok: true },
     ],
-    cta: "Bog'lanish",
+    cta: ru ? "Связаться" : "Bog'lanish",
     ctaHref: "/contact",
     accent: false,
   },
 ];
 
-const FAQ: { q: string; a: string }[] = [
+const getFaq = (ru: boolean): { q: string; a: string }[] => [
   {
-    q: "Free plan uchun karta kerakmi?",
-    a: "Yo'q. Free plan haqiqatan ham bepul — kredit karta, trial, hech narsa kerak emas.",
+    q: ru ? "Нужна ли карта для Free?" : "Free plan uchun karta kerakmi?",
+    a: ru ? "Нет. Free действительно бесплатный — без карты, триала и скрытых условий." : "Yo'q. Free plan haqiqatan ham bepul — kredit karta, trial, hech narsa kerak emas.",
   },
   {
-    q: "Pro'dan istalgan vaqtda chiqsam bo'ladimi?",
-    a: "Ha. Bekor qilsangiz keyingi davr boshlanmaydi. Joriy davr oxirigacha imkoniyatlar saqlanadi.",
+    q: ru ? "Можно отменить Pro в любой момент?" : "Pro'dan istalgan vaqtda chiqsam bo'ladimi?",
+    a: ru ? "Да. После отмены следующий период не начнётся, возможности сохраняются до конца текущего." : "Ha. Bekor qilsangiz keyingi davr boshlanmaydi. Joriy davr oxirigacha imkoniyatlar saqlanadi.",
   },
   {
-    q: "Talabalar uchun chegirma bormi?",
-    a: "Pro plan barcha .edu va talaba ID'lar uchun 50% chegirma — yiliga 250 000 so'm → 125 000 so'm.",
+    q: ru ? "Есть ли скидка для студентов?" : "Talabalar uchun chegirma bormi?",
+    a: ru ? "Pro для всех .edu и студенческих ID — скидка 50%: 250 000 сум → 125 000 сум в год." : "Pro plan barcha .edu va talaba ID'lar uchun 50% chegirma — yiliga 250 000 so'm → 125 000 so'm.",
   },
   {
-    q: "Avto-ariza qanday ishlaydi?",
-    a: "AI rezyumeni har bir vakansiyaga moslab yuboradi. Limit (10 yoki 50) har kuni UTC yarim tunda yangilanadi.",
+    q: ru ? "Как работает авто-отклик?" : "Avto-ariza qanday ishlaydi?",
+    a: ru ? "AI адаптирует резюме под каждую вакансию и отправляет отклик. Лимит (10 или 50) обновляется в полночь UTC." : "AI rezyumeni har bir vakansiyaga moslab yuboradi. Limit (10 yoki 50) har kuni UTC yarim tunda yangilanadi.",
   },
 ];
 
 export default function PlansClient() {
   const [open, setOpen] = useState<number | null>(0);
+  const { locale } = useTranslation();
+  const ru = locale === "ru";
+  const plans = getPlans(ru);
+  const faq = getFaq(ru);
 
   return (
     <main className="silver-ground relative min-h-screen text-[#18181b] antialiased">
@@ -129,10 +134,10 @@ export default function PlansClient() {
               href="/demo"
               className="focus-ring hidden rounded-full px-4 py-2 text-sm font-medium text-[#52525b] hover:text-[#18181b] sm:block"
             >
-              Jonli demo
+              {ru ? "Живое демо" : "Jonli demo"}
             </Link>
             <Link href="/register" className="btn-silver-primary !px-5 !py-2.5">
-              Bepul boshlash
+              {ru ? "Начать бесплатно" : "Bepul boshlash"}
             </Link>
           </div>
         </nav>
@@ -148,17 +153,16 @@ export default function PlansClient() {
           <Reveal>
             <span className="chip-silver uppercase tracking-[0.18em] !text-[11px]">
               <Sparkles className="h-3 w-3 text-[#b7a4ff]" aria-hidden />
-              Narxlar · juniorlar uchun
+              {ru ? "Цены · для джуниоров" : "Narxlar · juniorlar uchun"}
             </span>
             <h1 className="h-display mt-6 text-4xl text-[#18181b] sm:text-6xl">
-              Oddiy va halol{" "}
+              {ru ? "Простые и честные " : "Oddiy va halol "}
               <span className="bg-gradient-to-r from-[#6f9bf0] to-[#a08de0] bg-clip-text text-transparent">
-                narxlar
+                {ru ? "цены" : "narxlar"}
               </span>
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-lg text-[#63636b]">
-              3 ta plan, bitta maqsad — birinchi ishingiz. Free haqiqatan bepul,
-              Pro AI Coach qo&apos;shadi, Team bootcamplar uchun.
+              {ru ? "3 тарифа, одна цель — ваша первая работа. Free действительно бесплатный, Pro добавляет AI Coach, Team — для буткемпов." : "3 ta plan, bitta maqsad — birinchi ishingiz. Free haqiqatan bepul, Pro AI Coach qo'shadi, Team bootcamplar uchun."}
             </p>
           </Reveal>
         </div>
@@ -167,11 +171,11 @@ export default function PlansClient() {
       {/* PLANS */}
       <section className="relative py-14 sm:py-16" aria-labelledby="plans-h">
         <h2 id="plans-h" className="sr-only">
-          Tariflar
+          {ru ? "Тарифы" : "Tariflar"}
         </h2>
         <div className="section-shell">
           <div className="mx-auto grid max-w-5xl items-stretch gap-5 lg:grid-cols-3">
-            {PLANS.map((plan, i) => (
+            {plans.map((plan, i) => (
               <Reveal key={plan.id} delay={i * 0.1} className="relative h-full">
                 {plan.accent && (
                   <div
@@ -186,7 +190,7 @@ export default function PlansClient() {
                 >
                   {plan.accent && (
                     <span className="absolute -top-3 left-7 rounded-full bg-gradient-to-r from-[#6f9bf0] to-[#8f7fe8] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-                      Eng ommabop
+                      {ru ? "Самый популярный" : "Eng ommabop"}
                     </span>
                   )}
 
@@ -255,13 +259,13 @@ export default function PlansClient() {
               FAQ
             </span>
             <h2 id="faq-h" className="h-display mt-4 text-3xl text-[#18181b] sm:text-4xl">
-              Ko&apos;p so&apos;raladigan savollar
+              {ru ? "Частые вопросы" : "Ko'p so'raladigan savollar"}
             </h2>
           </Reveal>
 
           <div className="mx-auto mt-10 max-w-3xl">
             <ul className="space-y-3">
-              {FAQ.map((item, i) => {
+              {faq.map((item, i) => {
                 const isOpen = open === i;
                 return (
                   <li key={item.q} className="card-silver overflow-hidden">
@@ -312,18 +316,18 @@ export default function PlansClient() {
           <Reveal className="mx-auto max-w-3xl">
             <div className="card-silver p-8 text-center sm:p-12">
               <h3 className="h-display text-3xl text-[#18181b] sm:text-4xl">
-                Birinchi ish — 4 hafta.
+                {ru ? "Первая работа — за 4 недели." : "Birinchi ish — 4 hafta."}
               </h3>
               <p className="mx-auto mt-3 max-w-md text-[#63636b]">
-                Free bilan boshlang. Karta yo&apos;q. Spam yo&apos;q. Faqat ishlatish kerak.
+                {ru ? "Начните с Free. Без карты. Без спама. Просто пользуйтесь." : "Free bilan boshlang. Karta yo'q. Spam yo'q. Faqat ishlatish kerak."}
               </p>
               <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <Link href="/register" className="btn-silver-primary focus-ring group">
-                  Bepul boshlash
+                  {ru ? "Начать бесплатно" : "Bepul boshlash"}
                   <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
                 </Link>
                 <Link href="/demo" className="btn-silver-ghost focus-ring !bg-[#f6f6f4]">
-                  Jonli demo
+                  {ru ? "Живое демо" : "Jonli demo"}
                 </Link>
               </div>
             </div>
@@ -334,7 +338,7 @@ export default function PlansClient() {
       {/* Footer */}
       <footer className="border-t border-[#d8d8d5] py-8" aria-label="Footer">
         <div className="section-shell flex flex-col items-start justify-between gap-2 text-xs text-[#8e8e96] sm:flex-row sm:items-center">
-          <p>© {new Date().getFullYear()} IshTop. Barcha huquqlar himoyalangan.</p>
+          <p>© {new Date().getFullYear()} IshTop. {ru ? "Все права защищены." : "Barcha huquqlar himoyalangan."}</p>
           <p>Made in Tashkent</p>
         </div>
       </footer>

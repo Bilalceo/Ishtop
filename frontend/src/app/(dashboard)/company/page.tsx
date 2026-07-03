@@ -140,7 +140,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 
 export default function CompanyDashboardPage() {
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { jobs, isLoading: jobsLoading, fetchMyJobs } = useJobs();
   const [profileCompletion, setProfileCompletion] = useState(100);
   const [onboarding, setOnboarding] = useState<OnboardingChecklist | null>(null);
@@ -276,7 +276,7 @@ export default function CompanyDashboardPage() {
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-brand-800 dark:text-brand-100">
-                Kompaniya onboarding checklist
+                {locale === "ru" ? "Чек-лист онбординга компании" : "Kompaniya onboarding checklist"}
               </p>
               <p className="text-xs text-brand-700 dark:text-brand-200">{onboarding.progress}</p>
             </div>
@@ -289,7 +289,7 @@ export default function CompanyDashboardPage() {
                 className="border-brand-300 text-brand-700 hover:bg-brand-100"
               >
                 <X className="mr-1 h-4 w-4" />
-                {dismissingChecklist ? "Yopilmoqda..." : "Checklistni yopish"}
+                {dismissingChecklist ? (locale === "ru" ? "Закрываем..." : "Yopilmoqda...") : (locale === "ru" ? "Закрыть чек-лист" : "Checklistni yopish")}
               </Button>
             )}
           </div>
@@ -304,10 +304,16 @@ export default function CompanyDashboardPage() {
                       <Circle className="h-4 w-4 text-brand-500" />
                     )}
                     <span className={cn("text-sm", step.completed ? "text-surface-700 dark:text-surface-200" : "text-surface-800 dark:text-white")}>
-                      {step.label}
+                      {locale === "ru"
+                        ? ({
+                            complete_profile: "Заполните профиль компании",
+                            first_job_posted: "Опубликуйте первую вакансию",
+                            first_candidate_responded: "Ответьте первому кандидату",
+                          }[step.key] ?? step.label)
+                        : step.label}
                     </span>
                   </div>
-                  <span className="text-xs text-surface-500">{step.completed ? "Bajarildi" : "Ochish"}</span>
+                  <span className="text-xs text-surface-500">{step.completed ? (locale === "ru" ? "Готово" : "Bajarildi") : (locale === "ru" ? "Открыть" : "Ochish")}</span>
                 </div>
               </Link>
             ))}

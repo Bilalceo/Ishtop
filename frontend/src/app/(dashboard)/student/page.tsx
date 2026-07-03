@@ -515,10 +515,10 @@ export default function StudentDashboardPage() {
               const total = Math.max(pipelineTotal, 1);
               const pct = Math.round((count / total) * 100);
               const stageMeta: Record<PipelineStage, { label: string; tone: string }> = {
-                applied: { label: "Yuborildi", tone: "from-brand-400 to-violet-500" },
-                reviewing: { label: "Ko'rib chiqilmoqda", tone: "from-amber-400 to-orange-500" },
-                interview: { label: "Suhbat", tone: "from-brand-400 to-violet-500" },
-                accepted: { label: "Qabul qilindi", tone: "from-brand-400 to-violet-500" },
+                applied: { label: locale === "ru" ? "Отправлено" : "Yuborildi", tone: "from-brand-400 to-violet-500" },
+                reviewing: { label: locale === "ru" ? "На рассмотрении" : "Ko'rib chiqilmoqda", tone: "from-amber-400 to-orange-500" },
+                interview: { label: locale === "ru" ? "Интервью" : "Suhbat", tone: "from-brand-400 to-violet-500" },
+                accepted: { label: locale === "ru" ? "Принято" : "Qabul qilindi", tone: "from-brand-400 to-violet-500" },
               };
               return (
                 <motion.li
@@ -666,14 +666,18 @@ export default function StudentDashboardPage() {
               <div className="rounded-2xl border border-dashed border-surface-200 p-6 text-center dark:border-white/[0.08]">
                 <Bookmark className="mx-auto h-7 w-7 text-brand-500" />
                 <p className="mt-2 text-sm font-medium text-surface-900 dark:text-white">
-                  Saqlangan vakansiyalar shu yerda paydo bo&apos;ladi
+                  {locale === "ru"
+                    ? "Сохранённые вакансии появятся здесь"
+                    : "Saqlangan vakansiyalar shu yerda paydo bo'ladi"}
                 </p>
                 <p className="mt-1 text-xs text-surface-500 dark:text-white/55">
-                  Vakansiya kartasidagi belgi orqali saqlab qo&apos;ying — keyin bir joydan ariza yuborasiz.
+                  {locale === "ru"
+                    ? "Сохраняйте вакансии по значку на карточке — потом откликнетесь из одного места."
+                    : "Vakansiya kartasidagi belgi orqali saqlab qo'ying — keyin bir joydan ariza yuborasiz."}
                 </p>
                 <Link href="/student/jobs" className="mt-4 inline-flex">
                   <Button variant="outline" size="sm" className="rounded-full">
-                    Vakansiyalarni ko&apos;rish
+                    {locale === "ru" ? "Смотреть вакансии" : "Vakansiyalarni ko'rish"}
                   </Button>
                 </Link>
               </div>
@@ -1106,14 +1110,16 @@ function RecCard({
                 {/* Trust signal */}
                 <div className="flex items-center gap-2 rounded-lg bg-cyan-500/10 px-2.5 py-1.5 text-xs text-cyan-700 dark:text-cyan-300">
                   <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
-                  Kompaniya verified · Trust score yuqori
+                  {locale === "ru"
+                    ? "Компания проверена · Высокий рейтинг доверия"
+                    : "Kompaniya tasdiqlangan · Ishonch reytingi yuqori"}
                 </div>
 
                 <Link
                   href={jobUrl}
                   className="focus-ring inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-500 to-cyan-400 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40"
                 >
-                  Vakansiyani ko&apos;rib chiqish
+                  {locale === "ru" ? "Посмотреть вакансию" : "Vakansiyani ko'rib chiqish"}
                   <ChevronRight className="h-3 w-3" aria-hidden />
                 </Link>
               </div>
