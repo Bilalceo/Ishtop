@@ -270,7 +270,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex h-16 items-center justify-between px-4 border-b border-surface-200 dark:border-surface-800">
             <Link href={dashboardHome} className="flex items-center gap-2">
               <Image
-                src="/logo-mark.png?v=2"
+                src="/logo-mark.png?v=3"
                 alt="IshTop"
                 width={36}
                 height={36}
@@ -281,7 +281,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 IshTop
               </span>
               {isAdmin && (
-                <span className="ml-1 inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.2)] motion-safe:animate-pulse" aria-hidden="true" />
+                <span className="ml-1 inline-flex h-2 w-2 rounded-full bg-brand-500 shadow-[0_0_0_3px_rgba(16,185,129,0.2)] motion-safe:animate-pulse" aria-hidden="true" />
               )}
             </Link>
             <button

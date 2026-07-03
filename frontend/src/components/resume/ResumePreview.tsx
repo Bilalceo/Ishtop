@@ -163,7 +163,7 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
       )}
     >
       {/* Slim accent rail anchors the page without a heavy ink-hungry sidebar. */}
-      <span className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-emerald-500 to-teal-600" aria-hidden />
+      <span className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-brand-500 to-violet-600" aria-hidden />
 
       <div className="px-12 py-12">
         {/* ---------------- Header ---------------- */}
@@ -172,7 +172,7 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
             <h2 className="text-[33px] font-bold leading-[1.1] tracking-tight text-slate-900">
               {name}
             </h2>
-            <p className="mt-1.5 text-[14px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
+            <p className="mt-1.5 text-[14px] font-semibold uppercase tracking-[0.16em] text-brand-700">
               {role}
             </p>
           </div>
@@ -214,12 +214,12 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
 
                   return (
                     <div key={`${company}-${position}-${index}`} className="relative border-l-2 border-slate-100 pl-4">
-                      <span className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
+                      <span className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-brand-500" aria-hidden />
                       <div className="flex items-baseline justify-between gap-4">
                         <h3 className="text-[15px] font-semibold text-slate-900">{position || copy.position}</h3>
                         {period && <span className="shrink-0 text-[12px] font-medium text-slate-400">{period}</span>}
                       </div>
-                      {company && <p className="text-[13px] font-medium text-emerald-700">{company}</p>}
+                      {company && <p className="text-[13px] font-medium text-brand-700">{company}</p>}
                       {description && (
                         <p className="mt-2 text-[13px] leading-6 text-slate-600">{description}</p>
                       )}
@@ -227,7 +227,7 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
                         <ul className="mt-2 space-y-1.5">
                           {achievements.map((achievement, achievementIndex) => (
                             <li key={`${achievement}-${achievementIndex}`} className="flex gap-2 text-[13px] leading-6 text-slate-600">
-                              <CheckCircle2 className="mt-1 h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                              <CheckCircle2 className="mt-1 h-3.5 w-3.5 shrink-0 text-brand-600" />
                               <span>{achievement}</span>
                             </li>
                           ))}
@@ -245,14 +245,14 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
               <div className="space-y-4">
                 {education.map((item, index) => (
                   <div key={`${item.institution}-${index}`} className="relative border-l-2 border-slate-100 pl-4">
-                    <span className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
+                    <span className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-brand-500" aria-hidden />
                     <div className="flex items-baseline justify-between gap-4">
                       <h3 className="text-[15px] font-semibold text-slate-900">
                         {[firstText(item.degree, item.degree_type), firstText(item.field, item.field_of_study, item.major)].filter(Boolean).join(", ")}
                       </h3>
                       <span className="shrink-0 text-[12px] font-medium text-slate-400">{firstText(item.year, item.graduation_date)}</span>
                     </div>
-                    <p className="text-[13px] font-medium text-emerald-700">{firstText(item.institution, item.institution_name)}</p>
+                    <p className="text-[13px] font-medium text-brand-700">{firstText(item.institution, item.institution_name)}</p>
                   </div>
                 ))}
               </div>
@@ -269,10 +269,10 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
 
                   return (
                     <div key={`${projectName}-${index}`} className="relative border-l-2 border-slate-100 pl-4">
-                      <span className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
+                      <span className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-brand-500" aria-hidden />
                       <div className="flex items-center gap-2">
                         <h3 className="text-[15px] font-semibold text-slate-900">{projectName}</h3>
-                        {projectUrl && <ExternalLink className="h-3.5 w-3.5 text-emerald-600" />}
+                        {projectUrl && <ExternalLink className="h-3.5 w-3.5 text-brand-600" />}
                       </div>
                       {projectDescription && <p className="mt-1.5 text-[13px] leading-6 text-slate-600">{projectDescription}</p>}
                     </div>
@@ -295,7 +295,7 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
                   <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1 text-[10.5px] text-slate-400">
                     {hasVerified && (
                       <span className="flex items-center gap-1.5">
-                        <CheckCircle2 className="h-3 w-3 text-emerald-600" aria-hidden />
+                        <CheckCircle2 className="h-3 w-3 text-brand-600" aria-hidden />
                         {copy.verifiedSkills}
                       </span>
                     )}
@@ -343,7 +343,7 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
 
           {isPlaceholder && (
             <div className="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 text-center">
-              <Sparkles className="h-10 w-10 text-emerald-500" />
+              <Sparkles className="h-10 w-10 text-brand-500" />
               <p className="mt-4 max-w-sm text-sm font-medium text-slate-500">
                 {copy.fillForm}
               </p>
@@ -358,7 +358,7 @@ export function ResumePreview({ content, title, className, isPlaceholder, locale
 function ContactItem({ icon, text }: { icon: ReactNode; text: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span className="text-emerald-600">{icon}</span>
+      <span className="text-brand-600">{icon}</span>
       {text}
     </span>
   );
@@ -376,9 +376,9 @@ function Section({
   return (
     <section>
       <div className="mb-3 flex items-center gap-2">
-        <span className="h-3.5 w-1 rounded-full bg-emerald-500" aria-hidden />
+        <span className="h-3.5 w-1 rounded-full bg-brand-500" aria-hidden />
         <h2 className="flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.2em] text-slate-700">
-          {icon && <span className="text-emerald-600">{icon}</span>}
+          {icon && <span className="text-brand-600">{icon}</span>}
           {title}
         </h2>
       </div>
@@ -408,14 +408,14 @@ function SkillGroup({
               className={cn(
                 "inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-[12px] font-medium",
                 status === "verified"
-                  ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                  ? "border-brand-300 bg-brand-50 text-brand-800"
                   : status === "learning"
                     ? "border-dashed border-slate-300 bg-white text-slate-500"
                     : "border-slate-200 bg-slate-50 text-slate-700",
               )}
             >
               {status === "verified" && (
-                <CheckCircle2 className="h-3 w-3 text-emerald-600" aria-hidden />
+                <CheckCircle2 className="h-3 w-3 text-brand-600" aria-hidden />
               )}
               {skill}
             </span>

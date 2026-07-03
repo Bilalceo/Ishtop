@@ -33,12 +33,12 @@ export default function MobileBottomNav() {
                 className={cn(
                   "flex flex-1 flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
                   active
-                    ? "text-emerald-600 dark:text-emerald-400"
+                    ? "text-brand-600 dark:text-brand-400"
                     : "text-surface-500 dark:text-surface-400",
                 )}
               >
                 {primary ? (
-                  <span className="-mt-5 grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30">
+                  <span className="-mt-5 grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-violet-600 text-white shadow-lg shadow-brand-500/30">
                     <Icon className="h-5 w-5" />
                   </span>
                 ) : (

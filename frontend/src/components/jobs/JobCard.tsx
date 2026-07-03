@@ -48,7 +48,7 @@ export function JobCard({
         "relative cursor-pointer rounded-2xl border p-4 transition-all",
         "hover:-translate-y-0.5 hover:bg-surface-50 dark:hover:bg-surface-800/90",
         isSelected
-          ? "border-emerald-400 bg-emerald-50/70 shadow-lg ring-1 ring-emerald-300 dark:bg-emerald-900/20 dark:ring-emerald-500/40"
+          ? "border-brand-400 bg-brand-50/70 shadow-lg ring-1 ring-brand-300 dark:bg-brand-900/20 dark:ring-brand-500/40"
           : "border-surface-200 bg-white hover:border-surface-300 hover:shadow-md dark:border-surface-700 dark:bg-surface-900 dark:hover:border-surface-600",
       )}
     >
@@ -79,7 +79,7 @@ export function JobCard({
         className={cn(
           "absolute right-3 top-3 rounded-lg p-1.5 transition-colors",
           isSaved
-            ? "bg-emerald-100 text-emerald-600"
+            ? "bg-brand-100 text-brand-600"
             : "text-surface-400 hover:bg-surface-100 hover:text-surface-600",
         )}
       >
@@ -92,7 +92,7 @@ export function JobCard({
 
       {/* Header row: logo + title + company */}
       <div className="flex gap-3 pr-8">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 text-base font-bold text-emerald-700 dark:from-emerald-900/50 dark:to-teal-900/50 dark:text-emerald-300">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-100 to-violet-100 text-base font-bold text-brand-700 dark:from-brand-900/50 dark:to-violet-900/50 dark:text-brand-300">
           {job.company?.name?.charAt(0) || "C"}
         </div>
         <div className="min-w-0 flex-1">
@@ -190,7 +190,7 @@ export function JobCard({
             e.stopPropagation();
             onQuickApply();
           }}
-          className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 text-xs shadow-sm shadow-emerald-500/30"
+          className="rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 px-4 text-xs shadow-sm shadow-brand-500/30"
         >
           <Zap className="mr-1 h-3 w-3" />
           {isRu ? "Быстрый отклик" : "Tezkor ariza"}

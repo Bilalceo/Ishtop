@@ -100,7 +100,7 @@ export default function InstallPrompt() {
           style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 80px)" }}
         >
           <div className="flex items-start gap-3">
-            <div className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+            <div className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-violet-600 text-white">
               <Download className="h-5 w-5" />
             </div>
             <div className="min-w-0 flex-1">
@@ -114,7 +114,7 @@ export default function InstallPrompt() {
                 <button
                   type="button"
                   onClick={install}
-                  className="rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 px-3 py-1.5 text-xs font-medium text-white"
+                  className="rounded-lg bg-gradient-to-r from-brand-500 to-violet-600 px-3 py-1.5 text-xs font-medium text-white"
                 >
                   O&apos;rnatish
                 </button>

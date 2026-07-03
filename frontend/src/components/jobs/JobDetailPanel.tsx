@@ -88,7 +88,7 @@ export function JobDetailPanel({
       <div className="border-b border-surface-200 px-6 py-6 dark:border-surface-700">
         <div className="flex items-start gap-4">
           {/* Logo */}
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 text-2xl font-bold text-emerald-700 dark:from-emerald-900/50 dark:to-teal-900/50 dark:text-emerald-300">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-100 to-violet-100 text-2xl font-bold text-brand-700 dark:from-brand-900/50 dark:to-violet-900/50 dark:text-brand-300">
             {job.company?.name?.charAt(0) || "C"}
           </div>
           {/* Title block */}
@@ -100,7 +100,7 @@ export function JobDetailPanel({
               {job.company?.name}
             </p>
             {job.verification_state === "approved" && (
-              <span className="mt-2 inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
+              <span className="mt-2 inline-flex rounded-full bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">
                 {isRu ? "Проверенная компания" : "Tasdiqlangan kompaniya"}
               </span>
             )}
@@ -146,7 +146,7 @@ export function JobDetailPanel({
         </div>
 
         {job.external_apply_url && (
-          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300">
             <ExternalLink className="h-3.5 w-3.5" />
             {isRu ? "Внешний источник — отклик на источнике" : "Tashqi manba — ariza manbada beriladi"}
           </div>
@@ -159,14 +159,14 @@ export function JobDetailPanel({
               href={job.external_apply_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition hover:opacity-95"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition hover:opacity-95"
             >
               <ExternalLink className="h-4 w-4" />
               {isRu ? "Откликнуться на источнике" : "Manbada ariza berish"}
             </a>
           ) : (
             <Button
-              className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25"
+              className="flex-1 rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 shadow-lg shadow-brand-500/25"
               onClick={onApply}
             >
               <Send className="mr-2 h-4 w-4" />
@@ -207,8 +207,8 @@ export function JobDetailPanel({
         {/* Quick info grid */}
         <div className="grid grid-cols-2 gap-4 rounded-2xl border border-surface-200 bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800/50">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/50">
-              <MapPin className="h-5 w-5 text-emerald-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-100 dark:bg-brand-900/50">
+              <MapPin className="h-5 w-5 text-brand-600" />
             </div>
             <div>
               <p className="text-xs text-surface-500">
@@ -300,7 +300,7 @@ export function JobDetailPanel({
             <div className="space-y-2">
               {job.explainability.fit_reasons.slice(0, 3).map((reason, idx) => (
                 <div key={`${reason}-${idx}`} className="flex items-start gap-2 text-sm text-surface-700 dark:text-surface-300">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-500" />
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-brand-500" />
                   <span>{reason}</span>
                 </div>
               ))}
@@ -402,7 +402,7 @@ export function JobDetailPanel({
           </h3>
           <div className="rounded-2xl border border-surface-200 p-4 dark:border-surface-700">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 text-xl font-bold text-emerald-600 dark:from-emerald-900/50 dark:to-teal-900/50">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-brand-100 to-violet-100 text-xl font-bold text-brand-600 dark:from-brand-900/50 dark:to-violet-900/50">
                 {job.company?.name?.charAt(0)}
               </div>
               <div>

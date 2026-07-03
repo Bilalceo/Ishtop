@@ -181,7 +181,7 @@ export default function DemoClient() {
           >
             <span
               aria-hidden
-              className="grid h-9 w-9 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-400 shadow-lg shadow-emerald-500/30"
+              className="grid h-9 w-9 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 via-violet-500 to-cyan-400 shadow-lg shadow-brand-500/30"
             >
               <Sparkles className="h-4 w-4 text-white" />
             </span>
@@ -239,7 +239,7 @@ export default function DemoClient() {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
                   1 · Ko&apos;nikmalaringizni tanlang
                 </p>
-                <span className="text-xs font-medium text-emerald-300">
+                <span className="text-xs font-medium text-brand-300">
                   {selected.length} tanlangan
                 </span>
               </div>
@@ -261,7 +261,7 @@ export default function DemoClient() {
                             aria-pressed={isOn}
                             className={`focus-ring rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                               isOn
-                                ? "border-transparent bg-gradient-to-r from-emerald-500 to-cyan-400 text-white shadow-lg shadow-emerald-500/30"
+                                ? "border-transparent bg-gradient-to-r from-brand-500 to-cyan-400 text-white shadow-lg shadow-brand-500/30"
                                 : "border-white/10 bg-white/[0.04] text-white/75 hover:border-white/25 hover:bg-white/[0.08]"
                             }`}
                           >
@@ -278,7 +278,7 @@ export default function DemoClient() {
               </div>
 
               {selected.length === 0 && (
-                <p className="mt-5 flex items-center gap-2 rounded-2xl bg-emerald-500/10 px-3 py-2.5 text-xs text-emerald-200">
+                <p className="mt-5 flex items-center gap-2 rounded-2xl bg-brand-500/10 px-3 py-2.5 text-xs text-brand-200">
                   <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
                   Boshlash uchun kamida 1 ta ko&apos;nikmani bosing.
                 </p>
@@ -286,19 +286,19 @@ export default function DemoClient() {
             </div>
 
             {/* Thinking trace */}
-            <div className="rounded-3xl border border-white/10 bg-black/40 p-5 font-mono text-sm shadow-2xl shadow-emerald-500/10 backdrop-blur-md sm:p-6">
+            <div className="rounded-3xl border border-white/10 bg-black/40 p-5 font-mono text-sm shadow-2xl shadow-brand-500/10 backdrop-blur-md sm:p-6">
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
                   2 · AI Reasoning
                 </p>
                 {phase === "thinking" && (
-                  <span className="flex items-center gap-1 text-xs text-emerald-300">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-300 shadow-[0_0_8px_rgba(124,92,255,0.9)]" />
+                  <span className="flex items-center gap-1 text-xs text-brand-300">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-300 shadow-[0_0_8px_rgba(124,92,255,0.9)]" />
                     thinking…
                   </span>
                 )}
                 {phase === "results" && (
-                  <span className="flex items-center gap-1 text-xs text-emerald-300">
+                  <span className="flex items-center gap-1 text-xs text-brand-300">
                     <CheckCircle2 className="h-3 w-3" aria-hidden /> done
                   </span>
                 )}
@@ -316,12 +316,12 @@ export default function DemoClient() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.25 }}
                         className={
-                          isDone ? "text-emerald-300" : isArrow ? "text-white/75" : "text-white/85"
+                          isDone ? "text-brand-300" : isArrow ? "text-white/75" : "text-white/85"
                         }
                       >
                         {line}
                         {phase === "thinking" && i === arr.length - 1 && !isDone && (
-                          <span className="ml-1 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-emerald-300" />
+                          <span className="ml-1 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-brand-300" />
                         )}
                       </motion.p>
                     );
@@ -363,7 +363,7 @@ export default function DemoClient() {
                 initial={reduce ? false : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
-                className="mt-6 rounded-3xl border border-white/10 bg-gradient-to-br from-emerald-500/10 to-cyan-400/10 p-5 backdrop-blur-md"
+                className="mt-6 rounded-3xl border border-white/10 bg-gradient-to-br from-brand-500/10 to-cyan-400/10 p-5 backdrop-blur-md"
               >
                 <p className="text-sm text-white/85">
                   Bu faqat demo. Haqiqiy IshTop&apos;da: 500+ verified kompaniya, Auto-Apply,
@@ -403,7 +403,7 @@ function MatchCard({
 
   const tone =
     m.score >= 80
-      ? "bg-emerald-500/15 text-emerald-300"
+      ? "bg-brand-500/15 text-brand-300"
       : m.score >= 60
       ? "bg-amber-500/15 text-amber-300"
       : "bg-white/10 text-white/70";
@@ -425,7 +425,7 @@ function MatchCard({
             {m.job.company} · {m.job.location}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-            <span className="text-emerald-300">{m.job.salary}</span>
+            <span className="text-brand-300">{m.job.salary}</span>
             <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/15 px-2 py-0.5 text-cyan-300">
               <ShieldCheck className="h-3 w-3" aria-hidden /> Trust {m.job.trustScore}
             </span>
@@ -446,7 +446,7 @@ function MatchCard({
             initial={reduce ? false : { width: 0 }}
             animate={{ width: `${m.score}%` }}
             transition={{ duration: 1.1, ease: [0.19, 1, 0.22, 1], delay: 0.2 + index * 0.12 }}
-            className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-cyan-400 to-emerald-400"
+            className="h-full rounded-full bg-gradient-to-r from-brand-500 via-cyan-400 to-brand-400"
           />
         </div>
       </div>
@@ -455,7 +455,7 @@ function MatchCard({
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
-        className="focus-ring mt-3 inline-flex items-center gap-1 rounded-full text-xs font-semibold text-emerald-300 hover:text-emerald-200"
+        className="focus-ring mt-3 inline-flex items-center gap-1 rounded-full text-xs font-semibold text-brand-300 hover:text-brand-200"
       >
         Nega? <ChevronRight className={`h-3 w-3 transition-transform ${expanded ? "rotate-90" : ""}`} aria-hidden />
       </button>
@@ -479,7 +479,7 @@ function MatchCard({
                     : AlertCircle;
                 const color =
                   r.type === "match"
-                    ? "text-emerald-300"
+                    ? "text-brand-300"
                     : r.type === "trust"
                     ? "text-cyan-300"
                     : "text-amber-300";
@@ -539,9 +539,9 @@ function EmptyMatches({ phase, selected }: { phase: Phase; selected: number }) {
         <>
           <span
             aria-hidden
-            className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-400/20"
+            className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-brand-500/20 to-cyan-400/20"
           >
-            <Wand2 className="h-6 w-6 text-emerald-300" aria-hidden />
+            <Wand2 className="h-6 w-6 text-brand-300" aria-hidden />
           </span>
           <p className="mt-4 text-sm font-medium text-white/80">
             Boshlash uchun chap tomondan ko&apos;nikma tanlang
@@ -554,7 +554,7 @@ function EmptyMatches({ phase, selected }: { phase: Phase; selected: number }) {
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                className="h-2 w-2 animate-pulse rounded-full bg-emerald-400"
+                className="h-2 w-2 animate-pulse rounded-full bg-brand-400"
                 style={{ animationDelay: `${i * 150}ms` }}
               />
             ))}
@@ -605,7 +605,7 @@ function ShareButton({ selected }: { selected: string[] }) {
     >
       {copied ? (
         <>
-          <Check className="h-3.5 w-3.5 text-emerald-300" aria-hidden />
+          <Check className="h-3.5 w-3.5 text-brand-300" aria-hidden />
           Link nusxalandi
         </>
       ) : (

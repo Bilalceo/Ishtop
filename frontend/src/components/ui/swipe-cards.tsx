@@ -131,7 +131,7 @@ export function SwipeStack<T>({
           type="button"
           onClick={() => go(-1)}
           aria-label="Previous"
-          className="focus-ring grid h-11 w-11 place-items-center rounded-full border border-surface-200 bg-white text-surface-700 transition hover:border-emerald-300 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/80"
+          className="focus-ring grid h-11 w-11 place-items-center rounded-full border border-surface-200 bg-white text-surface-700 transition hover:border-brand-300 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/80"
         >
           <ChevronLeft className="h-5 w-5" aria-hidden />
         </button>
@@ -150,7 +150,7 @@ export function SwipeStack<T>({
                 aria-label={`Go to slide ${i + 1}`}
                 className={`focus-ring h-1.5 rounded-full transition-all ${
                   i === index
-                    ? "w-8 bg-gradient-to-r from-emerald-500 to-cyan-400"
+                    ? "w-8 bg-gradient-to-r from-brand-500 to-cyan-400"
                     : "w-1.5 bg-surface-300 hover:bg-surface-400 dark:bg-white/15"
                 }`}
               />
@@ -162,7 +162,7 @@ export function SwipeStack<T>({
           type="button"
           onClick={() => go(1)}
           aria-label="Next"
-          className="focus-ring grid h-11 w-11 place-items-center rounded-full border border-surface-200 bg-white text-surface-700 transition hover:border-emerald-300 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/80"
+          className="focus-ring grid h-11 w-11 place-items-center rounded-full border border-surface-200 bg-white text-surface-700 transition hover:border-brand-300 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/80"
         >
           <ChevronRight className="h-5 w-5" aria-hidden />
         </button>

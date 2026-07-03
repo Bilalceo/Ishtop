@@ -39,8 +39,8 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
     };
 
     const variantClasses = {
-      default: "bg-gradient-to-r from-emerald-500 to-teal-600",
-      success: "bg-gradient-to-r from-green-500 to-emerald-600",
+      default: "bg-gradient-to-r from-brand-500 to-violet-600",
+      success: "bg-gradient-to-r from-green-500 to-brand-600",
       warning: "bg-gradient-to-r from-amber-500 to-orange-600",
       danger: "bg-gradient-to-r from-red-500 to-rose-600",
     };

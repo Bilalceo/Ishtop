@@ -29,7 +29,7 @@ export function SalarySlider({
       </div>
       <div className="relative h-2 rounded-full bg-surface-200">
         <div
-          className="absolute h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-600"
+          className="absolute h-full rounded-full bg-gradient-to-r from-brand-500 to-violet-600"
           style={{
             left: `${(value[0] / SALARY_MAX) * 100}%`,
             right: `${100 - (value[1] / SALARY_MAX) * 100}%`,
