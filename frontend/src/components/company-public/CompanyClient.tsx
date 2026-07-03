@@ -46,7 +46,7 @@ export default function CompanyClient() {
               <Sparkles className="h-4 w-4" />
             </span>
             <span className="bn-display text-base font-semibold">IshTop</span>
-            <span className="bn-eyebrow ml-2 hidden sm:inline">For Business</span>
+            <span className="bn-eyebrow ml-2 hidden sm:inline">Biznes uchun</span>
           </Link>
           <div className="flex items-center gap-3">
             <Link
@@ -67,7 +67,7 @@ export default function CompanyClient() {
       {/* HERO */}
       <section className="relative py-16 sm:py-24" aria-labelledby="hero-h">
         <div className="bn-shell">
-          <p className="bn-eyebrow">For Business · 2026</p>
+          <p className="bn-eyebrow">Biznes uchun · 2026</p>
           <motion.h1
             id="hero-h"
             initial={reduce ? false : { opacity: 0, y: 14 }}
@@ -75,15 +75,15 @@ export default function CompanyClient() {
             transition={{ duration: 0.7 }}
             className="bn-display mt-5 text-5xl sm:text-7xl lg:text-[88px]"
           >
-            Hire faster.<br />
-            <span style={{ color: "var(--bn-accent)" }}>Hire smarter.</span>
+            Tezroq yollang.<br />
+            <span style={{ color: "var(--bn-accent)" }}>Aqlliroq yollang.</span>
           </motion.h1>
           <p
             className="mt-6 max-w-2xl text-lg sm:text-xl"
             style={{ color: "var(--bn-ink-soft)" }}
           >
-            O&apos;zbekiston'dagi 10,000+ junior talant. AI screening. Verified Trust Score.
-            Pipeline avtomatlashtirilgan.
+            O&apos;zbekistondagi minglab junior talant. AI saralash, tasdiqlangan
+            ishonch reytingi va avtomatlashtirilgan yollash jarayoni.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/contact" className="bn-btn">
@@ -113,7 +113,7 @@ export default function CompanyClient() {
               className="sm:col-span-3 sm:row-span-2"
               variant="dark"
             >
-              <span className="bn-eyebrow">Verified candidates</span>
+              <span className="bn-eyebrow">Tasdiqlangan nomzodlar</span>
               <div className="mt-6 flex items-end gap-2">
                 <p className="bn-num text-7xl sm:text-8xl lg:text-[128px]">10K+</p>
               </div>
@@ -125,7 +125,7 @@ export default function CompanyClient() {
               {/* Avatars stack */}
               <div className="mt-8 flex items-center gap-2" aria-hidden>
                 <div className="flex -space-x-2">
-                  {["#10B981", "#22D3EE", "#F5B544", "#3CCB7F", "#FF6B35"].map((c, i) => (
+                  {["#6F9BF0", "#22D3EE", "#F5B544", "#3CCB7F", "#FF6B35"].map((c, i) => (
                     <span
                       key={i}
                       className="grid h-9 w-9 place-items-center rounded-full text-[11px] font-semibold text-white ring-2 ring-[#0E0F12]"
@@ -146,7 +146,7 @@ export default function CompanyClient() {
 
             {/* Time to hire */}
             <Tile i={1} reduce={!!reduce} className="sm:col-span-3" variant="accent">
-              <span className="bn-eyebrow">Time to hire</span>
+              <span className="bn-eyebrow">Yollash vaqti</span>
               <p className="bn-num mt-4 text-5xl sm:text-6xl">12 kun</p>
               <p className="mt-2 text-sm text-white/85">
                 O&apos;rtacha post → hire vaqti.{" "}
@@ -160,7 +160,7 @@ export default function CompanyClient() {
 
             {/* AI screening mock */}
             <Tile i={2} reduce={!!reduce} className="sm:col-span-3">
-              <span className="bn-eyebrow">AI Screening</span>
+              <span className="bn-eyebrow">AI saralash</span>
               <h3 className="bn-display mt-3 text-xl">
                 Resume — 60 soniya, score — 5 soniya
               </h3>
@@ -174,7 +174,7 @@ export default function CompanyClient() {
                     className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
                     style={{ background: "rgba(0, 168, 107, 0.12)", color: "var(--bn-success)" }}
                   >
-                    94% match
+                    94% moslik
                   </span>
                 </div>
                 <div className="mt-3 grid grid-cols-3 gap-2">
@@ -208,7 +208,7 @@ export default function CompanyClient() {
 
             {/* Trust score auto-filter */}
             <Tile i={3} reduce={!!reduce} className="sm:col-span-2">
-              <span className="bn-eyebrow">Trust filter</span>
+              <span className="bn-eyebrow">Ishonch filtri</span>
               <h3 className="bn-display mt-3 text-lg">
                 Soxta CV'lar avtomatik filterda
               </h3>
@@ -229,16 +229,16 @@ export default function CompanyClient() {
 
             {/* Pipeline mock */}
             <Tile i={4} reduce={!!reduce} className="sm:col-span-2">
-              <span className="bn-eyebrow">Pipeline</span>
+              <span className="bn-eyebrow">Jarayon</span>
               <h3 className="bn-display mt-3 text-lg">
                 Hammasi — bitta dashboard
               </h3>
               <div className="mt-5 grid grid-cols-4 gap-1.5">
                 {[
-                  { l: "Apply", v: 47, c: "var(--bn-accent)" },
-                  { l: "Review", v: 23, c: "var(--bn-warm)" },
-                  { l: "Inter.", v: 8, c: "#FFB800" },
-                  { l: "Hired", v: 3, c: "var(--bn-success)" },
+                  { l: "Ariza", v: 47, c: "var(--bn-accent)" },
+                  { l: "Ko'rik", v: 23, c: "var(--bn-warm)" },
+                  { l: "Suhbat", v: 8, c: "#FFB800" },
+                  { l: "Yollandi", v: 3, c: "var(--bn-success)" },
                 ].map((p) => (
                   <div key={p.l} className="text-center">
                     <p className="bn-num text-base" style={{ color: p.c }}>
@@ -254,7 +254,7 @@ export default function CompanyClient() {
 
             {/* Sourcing automation */}
             <Tile i={5} reduce={!!reduce} className="sm:col-span-2" variant="warm">
-              <span className="bn-eyebrow">Auto-sourcing</span>
+              <span className="bn-eyebrow">Avto-qidiruv</span>
               <h3 className="bn-display mt-3 text-lg">
                 AI sizning o&apos;rningizga qidiradi
               </h3>
@@ -266,7 +266,7 @@ export default function CompanyClient() {
               </div>
               <div className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white">
                 <Zap className="h-3 w-3" aria-hidden />
-                Realtime
+                Jonli rejim
               </div>
             </Tile>
 
@@ -303,12 +303,12 @@ export default function CompanyClient() {
               ))}
             </div>
             <p className="bn-display mt-4 text-2xl leading-tight sm:text-3xl">
-              &ldquo;IshTop bilan junior frontend hire vaqtimiz 6 haftadan 11 kunga
-              kamaydi. AI screening bizning HR jamoamizning haftalik 20 soatini
+              &ldquo;IshTop bilan junior frontend yollash vaqtimiz 6 haftadan 11 kunga
+              qisqardi. AI saralash HR jamoamizning haftasiga 20 soatini
               tejaydi.&rdquo;
             </p>
             <p className="bn-eyebrow mt-6">
-              Diyora R. · HR Lead at Uzum Market
+              Diyora R. · Uzum Market HR rahbari
             </p>
           </div>
         </div>
@@ -380,9 +380,9 @@ export default function CompanyClient() {
       >
         <div className="bn-shell flex flex-col items-start justify-between gap-3 text-sm sm:flex-row sm:items-center">
           <p style={{ color: "var(--bn-mute)" }}>
-            © {new Date().getFullYear()} IshTop · For Business
+            © {new Date().getFullYear()} IshTop · Biznes uchun
           </p>
-          <p style={{ color: "var(--bn-mute)" }}>Bento v1 · Apple-style modular</p>
+          <p style={{ color: "var(--bn-mute)" }}>Made in Tashkent</p>
         </div>
       </footer>
     </main>

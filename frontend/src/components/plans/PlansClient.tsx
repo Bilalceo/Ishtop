@@ -9,7 +9,7 @@
  *   - Pricing tiers as ASCII-feel code blocks
  *   - Terminal prompt CTAs
  *
- * Links to /pricing for actual Stripe checkout.
+ * Pro CTA goes to /register (checkout keyinroq ulanadi).
  */
 
 import Link from "next/link";
@@ -65,7 +65,7 @@ const PLANS: Plan[] = [
       { text: "Priority support", ok: "limited" },
     ],
     cta: "Pro'ga o'tish",
-    ctaHref: "/pricing",
+    ctaHref: "/register",
     accent: true,
   },
   {
@@ -133,9 +133,9 @@ export default function PlansClient() {
       {/* HERO */}
       <section className="border-b py-20 sm:py-28" style={{ borderColor: "var(--br-rule)" }}>
         <div className="br-shell">
-          <p className="br-eyebrow">{"// PRICING_FOR_JUNIORS · v2"}</p>
+          <p className="br-eyebrow">{"// JUNIORLAR_UCHUN_NARXLAR · v2"}</p>
           <h1 className="br-display mt-6 text-5xl sm:text-7xl lg:text-[88px]">
-            $ pricing<span className="br-cursor" aria-hidden />
+            $ narxlar<span className="br-cursor" aria-hidden />
           </h1>
           <p className="mt-8 max-w-2xl text-base leading-relaxed" style={{ color: "var(--br-ink-soft)" }}>
             3 ta plan. Bitta maqsad — birinchi ishingiz. Free haqiqatan bepul, Pro AI Coach
@@ -161,7 +161,7 @@ export default function PlansClient() {
         <div className="br-shell">
           <p className="br-eyebrow" id="plans-h-eyebrow">{"// PLANS"}</p>
           <h2 id="plans-h" className="br-display mt-4 text-3xl sm:text-4xl">
-            Compare<span className="text-[var(--br-mute)]">.tiers()</span>
+            Tariflar<span className="text-[var(--br-mute)]">.solishtirish()</span>
           </h2>
 
           <div className="mt-12 grid gap-px lg:grid-cols-3" style={{ background: "var(--br-rule-strong)" }}>
@@ -180,7 +180,7 @@ export default function PlansClient() {
                     className="absolute -top-3 left-7 bg-[var(--br-accent)] px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.16em] text-white"
                     style={{ letterSpacing: "0.18em" }}
                   >
-                    Most popular
+                    Eng ommabop
                   </p>
                 )}
 
@@ -255,7 +255,7 @@ export default function PlansClient() {
         <div className="br-shell">
           <p className="br-eyebrow">{"// FAQ"}</p>
           <h2 id="faq-h" className="br-display mt-4 text-3xl sm:text-4xl">
-            Common.questions()
+            Savol.javob()
           </h2>
 
           <dl className="mt-12 divide-y" style={{ borderTop: "1px solid var(--br-rule)", borderBottom: "1px solid var(--br-rule)", borderColor: "var(--br-rule)" }}>
@@ -292,7 +292,7 @@ export default function PlansClient() {
         <div className="br-shell">
           <div className="grid items-center gap-8 sm:grid-cols-[1fr_auto]">
             <div>
-              <p className="br-meta">$ npm run apply</p>
+              <p className="br-meta">$ npm run ish_topish</p>
               <h3 className="br-display mt-3 text-3xl sm:text-4xl">
                 Birinchi ish — 4 hafta.
               </h3>
@@ -302,11 +302,11 @@ export default function PlansClient() {
             </div>
             <div className="flex flex-wrap gap-3">
               <Link href="/register" className="br-btn br-btn-accent">
-                $ register
+                $ ro'yxatdan o'tish
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden />
               </Link>
               <Link href="/demo" className="br-btn br-btn-ghost">
-                $ demo
+                $ demo ko'rish
               </Link>
             </div>
           </div>
