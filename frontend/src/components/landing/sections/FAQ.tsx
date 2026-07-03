@@ -86,16 +86,16 @@ export function FAQ() {
   return (
     <section
       id="faq"
-      className="mist-bg section-y border-y border-surface-200/60 dark:border-white/[0.06]"
+      className="silver-ground section-y"
       aria-labelledby="faq-heading"
     >
       <div className="section-shell">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="h-eyebrow">
-            <HelpCircle className="h-3 w-3" />
+          <span className="chip-silver uppercase tracking-[0.18em] !text-[11px]">
+            <HelpCircle className="h-3 w-3 text-[#8ab4ff]" />
             FAQ
           </span>
-          <h2 id="faq-heading" className="h-display mt-4 text-3xl text-surface-900 dark:text-white sm:text-4xl">
+          <h2 id="faq-heading" className="h-display mt-4 text-3xl text-[#18181b] sm:text-4xl">
             {L === "ru"
               ? "Часто задаваемые вопросы"
               : L === "en"
@@ -109,7 +109,7 @@ export function FAQ() {
             {items.map((item, i) => {
               const isOpen = open === i;
               return (
-                <li key={item.q} className="card-aurora overflow-hidden">
+                <li key={item.q} className="card-silver overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setOpen(isOpen ? null : i)}
@@ -117,13 +117,13 @@ export function FAQ() {
                     aria-controls={`faq-panel-${i}`}
                     className="focus-ring flex w-full items-center justify-between gap-4 p-5 text-left"
                   >
-                    <span className="font-display text-base font-semibold text-surface-900 dark:text-white sm:text-lg">
+                    <span className="font-display text-base font-semibold text-[#18181b] sm:text-lg">
                       {item.q}
                     </span>
                     <ChevronDown
                       aria-hidden
-                      className={`h-5 w-5 shrink-0 text-surface-500 transition-transform duration-300 ${
-                        isOpen ? "rotate-180 text-emerald-500" : ""
+                      className={`h-5 w-5 shrink-0 text-[#8e8e96] transition-transform duration-300 ${
+                        isOpen ? "rotate-180 text-[#8ab4ff]" : ""
                       }`}
                     />
                   </button>
@@ -135,7 +135,7 @@ export function FAQ() {
                       isOpen ? "grid-rows-[1fr] pb-5" : "grid-rows-[0fr]"
                     }`}
                   >
-                    <div className="overflow-hidden text-pretty text-surface-600 dark:text-white/70">
+                    <div className="overflow-hidden text-pretty text-[#63636b]">
                       {item.a}
                     </div>
                   </div>

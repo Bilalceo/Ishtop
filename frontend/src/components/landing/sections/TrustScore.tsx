@@ -92,36 +92,36 @@ export function TrustScore() {
   return (
     <section
       id="trust"
-      className="mist-bg section-y border-y border-surface-200/60 perspective-1600 dark:border-white/[0.06]"
+      className="silver-ground section-y"
       aria-labelledby="trustscore-heading"
     >
       <div className="section-shell grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
         <div>
-          <span className="h-eyebrow">
-            <ShieldCheck className="h-3 w-3 text-emerald-500" />
+          <span className="chip-silver uppercase tracking-[0.18em] !text-[11px]">
+            <ShieldCheck className="h-3 w-3 text-[#8ab4ff]" />
             {c.eyebrow}
           </span>
           <ScrollReveal3D>
             <h2
               id="trustscore-heading"
-              className="h-display mt-4 text-3xl text-surface-900 dark:text-white sm:text-4xl"
+              className="h-display mt-4 text-3xl text-[#18181b] sm:text-4xl"
             >
               {c.title}
             </h2>
           </ScrollReveal3D>
-          <p className="mt-4 text-lg text-surface-600 dark:text-white/70">{c.subtitle}</p>
+          <p className="mt-4 text-lg text-[#63636b]">{c.subtitle}</p>
 
           <ul className="mt-8 grid gap-3 sm:grid-cols-2">
             {c.factors.map((f, i) => (
               <ScrollReveal3D key={f.title} delay={i * 0.05} amount={0.3}>
-                <li className="card-aurora p-4">
+                <li className="card-silver p-4">
                   <div className="flex items-center gap-3">
-                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
+                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#d7e7ff] text-[#3856a5]">
                       <f.icon className="h-4 w-4" />
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-surface-900 dark:text-white">{f.title}</p>
-                      <p className="text-xs text-surface-500 dark:text-white/60">{f.desc}</p>
+                      <p className="text-sm font-semibold text-[#18181b]">{f.title}</p>
+                      <p className="text-xs text-[#8e8e96]">{f.desc}</p>
                     </div>
                   </div>
                 </li>
@@ -193,24 +193,24 @@ function ScoreDial({
 
   return (
     <div ref={ref} className="relative mx-auto w-full max-w-md">
-      <div className="pointer-events-none absolute -inset-10 -z-10 rounded-[40px] bg-[conic-gradient(from_120deg_at_50%_50%,rgba(124,92,255,0.20),rgba(34,211,238,0.18),rgba(60,203,127,0.18))] opacity-70 blur-3xl" />
+      <div className="pointer-events-none absolute -inset-10 -z-10 rounded-[40px] bg-[conic-gradient(from_120deg_at_50%_50%,rgba(215,231,255,0.9),rgba(227,221,255,0.8),rgba(255,233,214,0.8))] opacity-80 blur-3xl" />
 
       <Tilt max={6} className="group">
-        <div className="depth-card-light p-6 sm:p-8" style={{ transformStyle: "preserve-3d" }}>
+        <div className="card-silver p-6 sm:p-8" style={{ transformStyle: "preserve-3d" }}>
           <div
             className="flex items-center justify-between"
             style={{ transform: "translateZ(20px)" }}
           >
             <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-400 text-white font-bold">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#d7e7ff] text-[#3856a5] font-bold">
                 U
               </div>
               <div>
-                <p className="text-sm font-semibold text-surface-900 dark:text-white">{company}</p>
-                <p className="text-xs text-surface-500 dark:text-white/60">{note}</p>
+                <p className="text-sm font-semibold text-[#18181b]">{company}</p>
+                <p className="text-xs text-[#8e8e96]">{note}</p>
               </div>
             </div>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-300">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#d9f1e4] px-2.5 py-1 text-xs font-semibold text-[#2f7a56]">
               <BadgeCheck className="h-3 w-3" /> {badge}
             </span>
           </div>
@@ -226,9 +226,9 @@ function ScoreDial({
             >
               <defs>
                 <linearGradient id="scoreGrad" x1="0" x2="1">
-                  <stop offset="0%" stopColor="#10b981" />
-                  <stop offset="60%" stopColor="#14b8a6" />
-                  <stop offset="100%" stopColor="#3CCB7F" />
+                  <stop offset="0%" stopColor="#8ab4ff" />
+                  <stop offset="60%" stopColor="#b7a4ff" />
+                  <stop offset="100%" stopColor="#7cc7a2" />
                 </linearGradient>
                 <filter id="scoreGlow" x="-20%" y="-20%" width="140%" height="140%">
                   <feGaussianBlur stdDeviation="3" result="b" />
@@ -245,7 +245,7 @@ function ScoreDial({
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="14"
-                className="text-surface-200 dark:text-white/10"
+                className="text-[#ececea]"
               />
               <motion.circle
                 cx="120"
@@ -261,13 +261,13 @@ function ScoreDial({
               />
             </svg>
             <div className="-mt-44 text-center">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-500 dark:text-white/55">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8e8e96]">
                 {scoreLabel}
               </p>
-              <motion.p className="font-display text-6xl font-bold text-surface-900 dark:text-white">
+              <motion.p className="font-display text-6xl font-bold text-[#18181b]">
                 {displayScore}
               </motion.p>
-              <p className="text-xs text-surface-500 dark:text-white/55">/ 100</p>
+              <p className="text-xs text-[#8e8e96]">/ 100</p>
             </div>
           </div>
 
@@ -275,13 +275,13 @@ function ScoreDial({
             className="mt-6 grid grid-cols-3 gap-2 text-center text-[11px]"
             style={{ transform: "translateZ(20px)" }}
           >
-            <div className="rounded-2xl bg-emerald-500/10 px-2 py-2 text-emerald-700 dark:text-emerald-300">
+            <div className="rounded-2xl bg-[#d9f1e4] px-2 py-2 text-[#2f7a56]">
               {pills.reviews}
             </div>
-            <div className="rounded-2xl bg-emerald-500/10 px-2 py-2 text-emerald-700 dark:text-emerald-300">
+            <div className="rounded-2xl bg-[#d9f1e4] px-2 py-2 text-[#2f7a56]">
               {pills.reply}
             </div>
-            <div className="rounded-2xl bg-teal-500/10 px-2 py-2 text-teal-700 dark:text-teal-300">
+            <div className="rounded-2xl bg-[#d7e7ff] px-2 py-2 text-[#3856a5]">
               {pills.verified}
             </div>
           </div>

@@ -23,7 +23,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Sevinch Q.",
       role: "Junior Frontend Developer",
       company: "EPAM",
-      avatarBg: "linear-gradient(135deg,#10b981,#14b8a6)",
+      avatarBg: "linear-gradient(135deg,#8ab4ff,#b7a4ff)",
       initials: "SQ",
       quote:
         "12 ta ariza yubordim, 4 ta suhbat oldim, 2 ta oferta. IshTop tushuntirib bergan match score sababli qaysi ishga e'tibor qaratishni bildim.",
@@ -33,7 +33,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Nodirbek A.",
       role: "Data Analyst",
       company: "Uzum",
-      avatarBg: "linear-gradient(135deg,#F5B544,#10b981)",
+      avatarBg: "linear-gradient(135deg,#f0b98a,#e88fae)",
       initials: "NA",
       quote:
         "Resume AI portfeligimni o'zgartirdi. ATS-friendly bullet pointlar va explainable match — bularsiz hech ham birinchi ishni topa olmagan bo'lar edim.",
@@ -43,7 +43,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Aziza T.",
       role: "QA Engineer",
       company: "TBC Bank",
-      avatarBg: "linear-gradient(135deg,#14b8a6,#3CCB7F)",
+      avatarBg: "linear-gradient(135deg,#7cc7a2,#8ab4ff)",
       initials: "AT",
       quote:
         "Interview Coach realistik mock interviewlar bilan o'ziga ishonch berdi. Birinchi suhbatdayoq oferta oldim.",
@@ -55,7 +55,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Севинч К.",
       role: "Junior Frontend Developer",
       company: "EPAM",
-      avatarBg: "linear-gradient(135deg,#10b981,#14b8a6)",
+      avatarBg: "linear-gradient(135deg,#8ab4ff,#b7a4ff)",
       initials: "СК",
       quote:
         "12 откликов, 4 интервью, 2 оффера. Объяснимый match score помог сфокусироваться на правильных вакансиях.",
@@ -65,7 +65,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Нодирбек А.",
       role: "Data Analyst",
       company: "Uzum",
-      avatarBg: "linear-gradient(135deg,#F5B544,#10b981)",
+      avatarBg: "linear-gradient(135deg,#f0b98a,#e88fae)",
       initials: "НА",
       quote:
         "Resume AI переписал портфолио. ATS-friendly буллеты и понятный match — без этого первая работа точно бы не случилась.",
@@ -75,7 +75,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Азиза Т.",
       role: "QA Engineer",
       company: "TBC Bank",
-      avatarBg: "linear-gradient(135deg,#14b8a6,#3CCB7F)",
+      avatarBg: "linear-gradient(135deg,#7cc7a2,#8ab4ff)",
       initials: "АТ",
       quote:
         "Interview Coach с реалистичными mock-интервью дал уверенность. На первом же реальном интервью — оффер.",
@@ -87,7 +87,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Sevinch Q.",
       role: "Junior Frontend Developer",
       company: "EPAM",
-      avatarBg: "linear-gradient(135deg,#10b981,#14b8a6)",
+      avatarBg: "linear-gradient(135deg,#8ab4ff,#b7a4ff)",
       initials: "SQ",
       quote:
         "12 applications, 4 interviews, 2 offers. The explainable match score helped me focus on the right roles.",
@@ -97,7 +97,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Nodirbek A.",
       role: "Data Analyst",
       company: "Uzum",
-      avatarBg: "linear-gradient(135deg,#F5B544,#10b981)",
+      avatarBg: "linear-gradient(135deg,#f0b98a,#e88fae)",
       initials: "NA",
       quote:
         "Resume AI rewrote my portfolio. ATS-friendly bullets and explainable matches — without them I wouldn't have landed a job.",
@@ -107,7 +107,7 @@ const ITEMS: Record<Locale, Item[]> = {
       name: "Aziza T.",
       role: "QA Engineer",
       company: "TBC Bank",
-      avatarBg: "linear-gradient(135deg,#14b8a6,#3CCB7F)",
+      avatarBg: "linear-gradient(135deg,#7cc7a2,#8ab4ff)",
       initials: "AT",
       quote:
         "Interview Coach gave me realistic mock interviews and confidence. First real interview was an offer.",
@@ -124,13 +124,13 @@ export function Testimonials() {
   const items = ITEMS[L];
 
   return (
-    <section className="section-y perspective-1600 bg-white dark:bg-[#0B1020]" aria-labelledby="stories-heading">
+    <section className="silver-ground section-y" aria-labelledby="stories-heading">
       <div className="section-shell">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="h-eyebrow">
+          <span className="chip-silver uppercase tracking-[0.18em] !text-[11px]">
             {L === "ru" ? "Истории успеха" : L === "en" ? "Success stories" : "Muvaffaqiyat hikoyalari"}
           </span>
-          <h2 id="stories-heading" className="h-display mt-4 text-3xl text-surface-900 dark:text-white sm:text-5xl">
+          <h2 id="stories-heading" className="h-display mt-4 text-3xl text-[#18181b] sm:text-5xl">
             {L === "ru"
               ? "Студенты, которые вчера были как ты"
               : L === "en"
@@ -174,24 +174,24 @@ type TestimonialItem = (typeof ITEMS)["uz"][number];
 function TestimonialCard({ item: t }: { item: TestimonialItem }) {
   return (
     <figure
-      className="card-aurora card-aurora-hover relative flex h-full flex-col p-7"
+      className="card-silver card-silver-hover relative flex h-full flex-col p-7"
       style={{ transformStyle: "preserve-3d" }}
     >
-      <Quote className="absolute right-6 top-6 h-8 w-8 text-emerald-500/20" aria-hidden />
+      <Quote className="absolute right-6 top-6 h-8 w-8 text-[#c9d9f5]" aria-hidden />
       <div className="flex items-center gap-1 text-amber-400" aria-label="5 out of 5 stars">
         {Array.from({ length: 5 }).map((_, i) => (
           <Star key={i} className="h-4 w-4 fill-current" aria-hidden />
         ))}
       </div>
-      <blockquote className="mt-5 text-pretty text-surface-800 dark:text-white/85">
+      <blockquote className="mt-5 text-pretty text-[#3f3f46]">
         &ldquo;{t.quote}&rdquo;
       </blockquote>
 
-      <div className="mt-5 inline-flex w-fit items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
+      <div className="mt-5 inline-flex w-fit items-center gap-2 rounded-full bg-[#d9f1e4] px-3 py-1 text-xs font-semibold text-[#2f7a56]">
         {t.stat}
       </div>
 
-      <figcaption className="mt-auto flex items-center gap-3 border-t border-surface-200/70 pt-5 dark:border-white/[0.06]">
+      <figcaption className="mt-auto flex items-center gap-3 border-t border-[#ececea] pt-5">
         <span
           aria-hidden
           className="grid h-11 w-11 place-items-center rounded-full text-sm font-semibold text-white"
@@ -200,8 +200,8 @@ function TestimonialCard({ item: t }: { item: TestimonialItem }) {
           {t.initials}
         </span>
         <div>
-          <p className="font-semibold text-surface-900 dark:text-white">{t.name}</p>
-          <p className="text-xs text-surface-500 dark:text-white/60">
+          <p className="font-semibold text-[#18181b]">{t.name}</p>
+          <p className="text-xs text-[#8e8e96]">
             {t.role} · {t.company}
           </p>
         </div>
