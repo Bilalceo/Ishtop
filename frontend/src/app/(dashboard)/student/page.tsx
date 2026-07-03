@@ -239,8 +239,8 @@ export default function StudentDashboardPage() {
       label: t("dashboard.stats.totalResumes"),
       value: summaryCounts?.resumes ?? resumes.length,
       Icon: FileText,
-      tone: "text-emerald-600 dark:text-emerald-300",
-      bg: "bg-emerald-500/10",
+      tone: "text-brand-600 dark:text-brand-300",
+      bg: "bg-brand-500/10",
     },
     {
       label: t("dashboard.stats.applicationsSent"),
@@ -253,8 +253,8 @@ export default function StudentDashboardPage() {
       label: t("dashboard.stats.interviewsScheduled"),
       value: appStats.interview,
       Icon: Calendar,
-      tone: "text-emerald-600 dark:text-emerald-300",
-      bg: "bg-emerald-500/10",
+      tone: "text-brand-600 dark:text-brand-300",
+      bg: "bg-brand-500/10",
     },
     {
       label: t("dashboard.stats.profileViews"),
@@ -381,10 +381,10 @@ export default function StudentDashboardPage() {
           <Card className="card-aurora p-0">
             <CardHeader className="flex flex-row items-center justify-between border-b border-surface-200/60 pb-4 dark:border-white/[0.06]">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Target className="h-5 w-5 text-emerald-600 dark:text-emerald-300" />
+                <Target className="h-5 w-5 text-brand-600 dark:text-brand-300" />
                 {t("dashboard.recommended.title")}
               </CardTitle>
-              <Link href="/student/jobs" className="focus-ring rounded-full text-sm font-medium text-emerald-600 hover:underline dark:text-emerald-300">
+              <Link href="/student/jobs" className="focus-ring rounded-full text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">
                 {t("dashboard.recommended.browseAll")}
               </Link>
             </CardHeader>
@@ -421,7 +421,7 @@ export default function StudentDashboardPage() {
                 <Lightbulb className="h-5 w-5 text-amber-500" />
                 {isRu ? "План закрытия пробелов" : "Ko'nikma rejasi"}
               </CardTitle>
-              <Link href="/student/resumes" className="focus-ring rounded-full text-sm font-medium text-emerald-600 hover:underline dark:text-emerald-300">
+              <Link href="/student/resumes" className="focus-ring rounded-full text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">
                 {isRu ? "Улучшить" : "Yaxshilash"}
               </Link>
             </CardHeader>
@@ -444,7 +444,7 @@ export default function StudentDashboardPage() {
                   {/* Legend */}
                   <div className="mt-2 flex items-center justify-center gap-4 text-[11px] text-surface-500 dark:text-white/55">
                     <span className="inline-flex items-center gap-1.5">
-                      <span aria-hidden className="h-2 w-2 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-400" />
+                      <span aria-hidden className="h-2 w-2 rounded-full bg-gradient-to-br from-brand-500 to-cyan-400" />
                       Sizning daraja
                     </span>
                     <span className="inline-flex items-center gap-1.5">
@@ -481,14 +481,14 @@ export default function StudentDashboardPage() {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-surface-900 dark:text-white">
-                <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-300" />
+                <TrendingUp className="h-5 w-5 text-brand-600 dark:text-brand-300" />
                 Application pipeline
               </h2>
               <p className="text-sm text-surface-500 dark:text-white/60">
                 {pipelineTotal} ta jami ariza · realtime status
               </p>
             </div>
-            <Link href="/student/applications" className="focus-ring rounded-full text-sm font-medium text-emerald-600 hover:underline dark:text-emerald-300">
+            <Link href="/student/applications" className="focus-ring rounded-full text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">
               {t("dashboard.recentActivity.viewAll")}
             </Link>
           </div>
@@ -506,7 +506,7 @@ export default function StudentDashboardPage() {
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 1.3, ease: [0.19, 1, 0.22, 1] }}
                 style={{ transformOrigin: "0% 50%" }}
-                className="absolute inset-0 h-full bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-400 shadow-[0_0_18px_rgba(16,185,129,0.45)]"
+                className="absolute inset-0 h-full bg-gradient-to-r from-brand-400 via-brand-500 to-violet-400 shadow-[0_0_18px_rgba(16,185,129,0.45)]"
               />
             </div>
 
@@ -515,10 +515,10 @@ export default function StudentDashboardPage() {
               const total = Math.max(pipelineTotal, 1);
               const pct = Math.round((count / total) * 100);
               const stageMeta: Record<PipelineStage, { label: string; tone: string }> = {
-                applied: { label: "Yuborildi", tone: "from-emerald-400 to-teal-500" },
+                applied: { label: "Yuborildi", tone: "from-brand-400 to-violet-500" },
                 reviewing: { label: "Ko'rib chiqilmoqda", tone: "from-amber-400 to-orange-500" },
-                interview: { label: "Suhbat", tone: "from-emerald-400 to-teal-500" },
-                accepted: { label: "Qabul qilindi", tone: "from-emerald-400 to-teal-500" },
+                interview: { label: "Suhbat", tone: "from-brand-400 to-violet-500" },
+                accepted: { label: "Qabul qilindi", tone: "from-brand-400 to-violet-500" },
               };
               return (
                 <motion.li
@@ -577,14 +577,14 @@ export default function StudentDashboardPage() {
                   }}
                 />
                 <div className="relative">
-                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white/80 text-emerald-600 shadow-sm ring-1 ring-inset ring-surface-200 dark:bg-white/[0.04] dark:text-emerald-300 dark:ring-white/10">
+                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white/80 text-brand-600 shadow-sm ring-1 ring-inset ring-surface-200 dark:bg-white/[0.04] dark:text-brand-300 dark:ring-white/10">
                     <a.Icon className="h-5 w-5" />
                   </span>
                   <h3 className="mt-5 font-display text-lg font-semibold text-surface-900 dark:text-white">
                     {a.title}
                   </h3>
                   <p className="mt-1 text-sm text-surface-600 dark:text-white/65">{a.desc}</p>
-                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 dark:text-emerald-300">
+                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-300">
                     {t("dashboard.recommended.browseAll")}
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                   </span>
@@ -601,7 +601,7 @@ export default function StudentDashboardPage() {
           <Card className="card-aurora p-0">
             <CardHeader className="flex flex-row items-center justify-between border-b border-surface-200/60 pb-4 dark:border-white/[0.06]">
               <CardTitle className="text-lg">{t("dashboard.recentActivity.title")}</CardTitle>
-              <Link href="/student/applications" className="focus-ring rounded-full text-sm font-medium text-emerald-600 hover:underline dark:text-emerald-300">
+              <Link href="/student/applications" className="focus-ring rounded-full text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">
                 {t("dashboard.recentActivity.viewAll")}
               </Link>
             </CardHeader>
@@ -621,10 +621,10 @@ export default function StudentDashboardPage() {
                       app.status === "interview" ? Calendar : app.status === "accepted" ? CheckCircle2 : Send;
                     const tone =
                       app.status === "interview"
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300"
+                        ? "bg-brand-500/10 text-brand-600 dark:text-brand-300"
                         : app.status === "accepted"
                         ? "bg-cyan-500/10 text-cyan-600 dark:text-cyan-300"
-                        : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300";
+                        : "bg-brand-500/10 text-brand-600 dark:text-brand-300";
                     return (
                       <li key={app.id} className="flex items-center gap-3">
                         <span className={`grid h-10 w-10 place-items-center rounded-2xl ${tone}`}>
@@ -655,16 +655,16 @@ export default function StudentDashboardPage() {
           <Card className="card-aurora p-0">
             <CardHeader className="flex flex-row items-center justify-between border-b border-surface-200/60 pb-4 dark:border-white/[0.06]">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Bookmark className="h-5 w-5 text-emerald-600 dark:text-emerald-300" />
+                <Bookmark className="h-5 w-5 text-brand-600 dark:text-brand-300" />
                 {isRu ? "Сохранённые вакансии" : "Saqlangan ishlar"}
               </CardTitle>
-              <Link href="/student/saved-jobs" className="focus-ring rounded-full text-sm font-medium text-emerald-600 hover:underline dark:text-emerald-300">
+              <Link href="/student/saved-jobs" className="focus-ring rounded-full text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">
                 {t("dashboard.recentActivity.viewAll")}
               </Link>
             </CardHeader>
             <CardContent className="p-5">
               <div className="rounded-2xl border border-dashed border-surface-200 p-6 text-center dark:border-white/[0.08]">
-                <Bookmark className="mx-auto h-7 w-7 text-emerald-500" />
+                <Bookmark className="mx-auto h-7 w-7 text-brand-500" />
                 <p className="mt-2 text-sm font-medium text-surface-900 dark:text-white">
                   Saqlangan vakansiyalar shu yerda paydo bo&apos;ladi
                 </p>
@@ -723,14 +723,14 @@ function TodaysSignal({
   // Priority: upcoming interview > top match > profile completion nudge
   if (upcoming) {
     return (
-      <div className="relative overflow-hidden rounded-3xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50 via-white to-cyan-50 p-6 dark:border-emerald-500/20 dark:from-emerald-500/10 dark:via-transparent dark:to-cyan-500/5">
+      <div className="relative overflow-hidden rounded-3xl border border-brand-200/60 bg-gradient-to-br from-brand-50 via-white to-cyan-50 p-6 dark:border-brand-500/20 dark:from-brand-500/10 dark:via-transparent dark:to-cyan-500/5">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-4">
-            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">
+            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-500/15 text-brand-600 dark:text-brand-300">
               <Calendar className="h-7 w-7" />
             </span>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-700 dark:text-brand-300">
                 {signalKicker} · {t("dashboard.interview.title")}
               </p>
               <h2 className="mt-1 font-display text-xl font-semibold text-surface-900 dark:text-white sm:text-2xl">
@@ -743,7 +743,7 @@ function TodaysSignal({
           </div>
           <div className="flex flex-wrap gap-2">
             {upcoming.meeting_link ? (
-              <Button asChild className="rounded-full bg-emerald-600 hover:bg-emerald-700">
+              <Button asChild className="rounded-full bg-brand-600 hover:bg-brand-700">
                 <a href={upcoming.meeting_link} target="_blank" rel="noopener noreferrer">
                   <PlayCircle className="mr-2 h-4 w-4" />
                   {t("dashboard.interview.joinMeeting")}
@@ -763,7 +763,7 @@ function TodaysSignal({
     const score = Math.round(topRec.match_score);
     return (
       <div
-        className="relative overflow-hidden rounded-3xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50 via-white to-cyan-50 p-6 shadow-[0_1px_0_0_rgba(255,255,255,0.7)_inset,0_30px_60px_-30px_rgba(124,92,255,0.35),0_12px_30px_-12px_rgba(34,211,238,0.2)] dark:border-emerald-500/20 dark:from-emerald-500/10 dark:via-transparent dark:to-cyan-500/5 dark:shadow-[0_1px_0_0_rgba(255,255,255,0.15)_inset,0_30px_60px_-30px_rgba(124,92,255,0.55),0_12px_30px_-12px_rgba(34,211,238,0.35)]"
+        className="relative overflow-hidden rounded-3xl border border-brand-200/60 bg-gradient-to-br from-brand-50 via-white to-cyan-50 p-6 shadow-[0_1px_0_0_rgba(255,255,255,0.7)_inset,0_30px_60px_-30px_rgba(124,92,255,0.35),0_12px_30px_-12px_rgba(34,211,238,0.2)] dark:border-brand-500/20 dark:from-brand-500/10 dark:via-transparent dark:to-cyan-500/5 dark:shadow-[0_1px_0_0_rgba(255,255,255,0.15)_inset,0_30px_60px_-30px_rgba(124,92,255,0.55),0_12px_30px_-12px_rgba(34,211,238,0.35)]"
         style={{ transformStyle: "preserve-3d" }}
       >
         {/* Conic glow halo */}
@@ -777,16 +777,16 @@ function TodaysSignal({
         />
         <span
           aria-hidden
-          className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-emerald-500/25 blur-3xl"
+          className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-brand-500/25 blur-3xl"
         />
         {/* Top accent line */}
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/70 to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-400/70 to-transparent"
         />
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div style={{ transform: "translateZ(20px)" }}>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-700 dark:text-brand-300">
               {signalKicker} · {isRu ? "Лучшее совпадение" : "Eng yaxshi moslik"}
             </p>
             <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-surface-900 dark:text-white sm:text-3xl">
@@ -796,7 +796,7 @@ function TodaysSignal({
               {topRecCompany} · {topRec.job.location}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+              <span className="inline-flex items-center gap-1 rounded-full bg-brand-500/10 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:text-brand-300">
                 <CheckCircle2 className="h-3 w-3" /> {score}% {isRu ? "совпадение" : "moslik"}
               </span>
               {topRec.skill_matches.slice(0, 3).map((s) => (
@@ -811,7 +811,7 @@ function TodaysSignal({
           <div className="flex items-center gap-5" style={{ transform: "translateZ(40px)" }}>
             <MatchRing score={score} />
             <div className="hidden sm:block">
-              <Button asChild className="rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400">
+              <Button asChild className="rounded-full bg-gradient-to-r from-brand-500 to-cyan-400">
                 <Link href={`/student/jobs/${topRec.job.id}`}>
                   {reviewCta}
                   <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -821,7 +821,7 @@ function TodaysSignal({
           </div>
         </div>
         <div className="mt-4 sm:hidden">
-          <Button asChild className="w-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400">
+          <Button asChild className="w-full rounded-full bg-gradient-to-r from-brand-500 to-cyan-400">
             <Link href={`/student/jobs/${topRec.job.id}`}>{reviewCta}</Link>
           </Button>
         </div>
@@ -870,8 +870,8 @@ function MatchRing({ score }: { score: number }) {
       <svg width="80" height="80" viewBox="0 0 80 80" className="-rotate-90">
         <defs>
           <linearGradient id="ringGrad" x1="0" x2="1">
-            <stop offset="0%" stopColor="#10B981" />
-            <stop offset="100%" stopColor="#34D399" />
+            <stop offset="0%" stopColor="#6F9BF0" />
+            <stop offset="100%" stopColor="#82A8F7" />
           </linearGradient>
         </defs>
         <circle cx="40" cy="40" r={r} fill="none" stroke="currentColor" strokeWidth="6" className="text-surface-200 dark:text-white/10" />
@@ -961,7 +961,7 @@ function RecCard({
   const score = Math.round(rec.match_score);
   const tone =
     score >= 80
-      ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+      ? "bg-brand-500/15 text-brand-700 dark:text-brand-300"
       : score >= 60
       ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
       : "bg-surface-200 text-surface-700 dark:bg-white/[0.06] dark:text-white/70";
@@ -980,7 +980,7 @@ function RecCard({
       initial={reduce ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: index * 0.05 }}
-      className="group rounded-2xl border border-surface-200 bg-white transition hover:border-emerald-200 hover:shadow-sm dark:border-white/[0.06] dark:bg-white/[0.03] dark:hover:border-emerald-500/30"
+      className="group rounded-2xl border border-surface-200 bg-white transition hover:border-brand-200 hover:shadow-sm dark:border-white/[0.06] dark:bg-white/[0.03] dark:hover:border-brand-500/30"
     >
       {/* Top — clickable summary (navigates to job detail) */}
       <Link
@@ -990,14 +990,14 @@ function RecCard({
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold text-surface-900 group-hover:text-emerald-600 dark:text-white dark:group-hover:text-emerald-300">
+            <p className="truncate font-semibold text-surface-900 group-hover:text-brand-600 dark:text-white dark:group-hover:text-brand-300">
               {rec.job.title}
             </p>
             <p className="truncate text-sm text-surface-500 dark:text-white/55">
               {rec.job.company?.name || t("common.company")} · {rec.job.location}
             </p>
             {hasSalary && (
-              <p className="mt-1 text-sm font-medium text-emerald-600 dark:text-emerald-300">
+              <p className="mt-1 text-sm font-medium text-brand-600 dark:text-brand-300">
                 {formatSalaryRange(
                   rec.job.salary_min,
                   rec.job.salary_max,
@@ -1025,7 +1025,7 @@ function RecCard({
               ease: [0.19, 1, 0.22, 1],
               delay: 0.2 + index * 0.08,
             }}
-            className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-cyan-400 to-emerald-400"
+            className="h-full rounded-full bg-gradient-to-r from-brand-500 via-cyan-400 to-brand-400"
           />
         </div>
       </Link>
@@ -1037,7 +1037,7 @@ function RecCard({
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
           aria-controls={`rec-reasons-${rec.job.id}`}
-          className="focus-ring inline-flex items-center gap-1 rounded-full text-xs font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200"
+          className="focus-ring inline-flex items-center gap-1 rounded-full text-xs font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-300 dark:hover:text-brand-200"
         >
           Nega?
           <ChevronRight
@@ -1061,7 +1061,7 @@ function RecCard({
                 {/* Matched skills */}
                 {matches.length > 0 && (
                   <div>
-                    <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-300">
+                    <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-300">
                       <CheckCircle2 className="h-3 w-3" aria-hidden /> Sizning kuchli tomonlaringiz
                     </p>
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
@@ -1069,7 +1069,7 @@ function RecCard({
                         <Badge
                           key={skill}
                           variant="secondary"
-                          className="bg-emerald-50 text-xs text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
+                          className="bg-brand-50 text-xs text-brand-700 dark:bg-brand-500/10 dark:text-brand-300"
                         >
                           {skill}
                         </Badge>
@@ -1111,7 +1111,7 @@ function RecCard({
 
                 <Link
                   href={jobUrl}
-                  className="focus-ring inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
+                  className="focus-ring inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-500 to-cyan-400 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40"
                 >
                   Vakansiyani ko&apos;rib chiqish
                   <ChevronRight className="h-3 w-3" aria-hidden />
@@ -1127,13 +1127,13 @@ function RecCard({
 
 function EmptyResume({ t }: { t: (k: string) => string }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/40 py-10 text-center dark:border-emerald-500/30 dark:bg-emerald-500/5">
-      <Sparkles className="h-7 w-7 text-emerald-500" />
+    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-brand-200 bg-brand-50/40 py-10 text-center dark:border-brand-500/30 dark:bg-brand-500/5">
+      <Sparkles className="h-7 w-7 text-brand-500" />
       <p className="max-w-sm text-sm text-surface-600 dark:text-white/70">
         {t("dashboard.recommended.noResume")}
       </p>
       <Link href="/student/resumes/create-ai">
-        <Button size="sm" className="rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400">
+        <Button size="sm" className="rounded-full bg-gradient-to-r from-brand-500 to-cyan-400">
           {t("dashboard.recommended.createResumeCTA")}
         </Button>
       </Link>
@@ -1144,7 +1144,7 @@ function EmptyResume({ t }: { t: (k: string) => string }) {
 function EmptyActivity({ t }: { t: (k: string) => string }) {
   return (
     <div className="rounded-2xl border border-dashed border-surface-200 py-8 text-center dark:border-white/[0.08]">
-      <Send className="mx-auto h-7 w-7 text-emerald-500" />
+      <Send className="mx-auto h-7 w-7 text-brand-500" />
       <p className="mt-2 text-sm text-surface-600 dark:text-white/65">{t("dashboard.recentActivity.empty")}</p>
       <Link href="/student/jobs" className="mt-3 inline-flex">
         <Button size="sm" variant="outline" className="rounded-full">

@@ -16,7 +16,7 @@ interface StatCardProps {
   value: number;
   /** Any icon component (typed as ElementType to accept lucide-react icons) */
   Icon: ElementType;
-  /** Tailwind text color for the icon (e.g. "text-emerald-300") */
+  /** Tailwind text color for the icon (e.g. "text-brand-300") */
   iconClass?: string;
   /** Tailwind bg color for the icon halo */
   bgClass?: string;
@@ -30,8 +30,8 @@ export function StatCard({
   label,
   value,
   Icon,
-  iconClass = "text-emerald-300",
-  bgClass = "bg-emerald-500/10",
+  iconClass = "text-brand-300",
+  bgClass = "bg-brand-500/10",
   hint,
   loading = false,
 }: StatCardProps) {

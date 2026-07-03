@@ -270,7 +270,7 @@ export default function ResumeEditPage() {
               {isRu ? "Назад" : "Orqaga"}
             </Button>
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.26em] text-emerald-700">{isRu ? "РЕДАКТОР РЕЗЮМЕ" : "REZYUME TAHRIRLASH"}</p>
+              <p className="text-xs font-black uppercase tracking-[0.26em] text-brand-700">{isRu ? "РЕДАКТОР РЕЗЮМЕ" : "REZYUME TAHRIRLASH"}</p>
               <h1 className="font-display text-2xl font-black text-slate-950">{isRu ? "Редактирование резюме" : "Rezyume tahrirlash"}</h1>
               <p className="text-sm text-slate-500">{isRu ? "Изменения сразу видны в предпросмотре, затем можно скачать PDF." : "O'zgarishlarni real vaqtda ko'ring va tayyor PDF yuklab oling."}</p>
             </div>
@@ -281,7 +281,7 @@ export default function ResumeEditPage() {
               {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
               {isRu ? "Сохранить" : "Saqlash"}
             </Button>
-            <Button onClick={() => void handleSaveAndDownload()} disabled={isSaving || isDownloading} className="bg-gradient-to-r from-emerald-500 to-cyan-600">
+            <Button onClick={() => void handleSaveAndDownload()} disabled={isSaving || isDownloading} className="bg-gradient-to-r from-brand-500 to-cyan-600">
               {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
               {isRu ? "Сохранить и скачать PDF" : "Saqlab PDF yuklash"}
             </Button>
@@ -312,7 +312,7 @@ export default function ResumeEditPage() {
                       index === step
                         ? "bg-slate-950 text-white shadow-lg shadow-slate-300"
                         : index < step
-                          ? "bg-emerald-100 text-emerald-800"
+                          ? "bg-brand-100 text-brand-800"
                           : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                     )}
                   >
@@ -330,7 +330,7 @@ export default function ResumeEditPage() {
               className="rounded-[28px] border border-white/70 bg-white/95 p-6 shadow-xl shadow-slate-200/60 dark:border-surface-700/70 dark:bg-surface-800/95"
             >
               <div className="mb-5 flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-100 text-brand-700">
                   <CurrentIcon className="h-5 w-5" />
                 </div>
                 <div>
@@ -515,7 +515,7 @@ export default function ResumeEditPage() {
           <aside className="rounded-[28px] border border-white/70 bg-white/90 p-4 shadow-xl shadow-slate-200/60 lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)] lg:overflow-auto dark:border-surface-700/70 dark:bg-surface-800/90">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-                <Eye className="h-4 w-4 text-emerald-700" />
+                <Eye className="h-4 w-4 text-brand-700" />
                 {isRu ? "Предпросмотр в реальном времени" : "Jonli ko'rinish"}
               </div>
               <Button variant="outline" size="sm" onClick={() => void handleSaveAndDownload()} disabled={isSaving || isDownloading}>
@@ -584,7 +584,7 @@ function TextArea({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         rows={4}
-        className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-surface-600 dark:bg-surface-800 dark:text-surface-100 dark:placeholder-surface-400"
+        className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-surface-600 dark:bg-surface-800 dark:text-surface-100 dark:placeholder-surface-400"
       />
     </div>
   );

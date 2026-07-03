@@ -43,9 +43,9 @@ const typeConfig: Record<string, { icon: any; color: string; bg: string }> = {
   warning: { icon: AlertCircle, color: "text-yellow-600", bg: "bg-yellow-100" },
   error: { icon: AlertCircle, color: "text-red-600", bg: "bg-red-100" },
   info: { icon: Info, color: "text-blue-600", bg: "bg-blue-100" },
-  application: { icon: Briefcase, color: "text-emerald-600", bg: "bg-emerald-100" },
+  application: { icon: Briefcase, color: "text-brand-600", bg: "bg-brand-100" },
   interview: { icon: Calendar, color: "text-cyan-600", bg: "bg-cyan-100" },
-  resume: { icon: FileText, color: "text-teal-600", bg: "bg-teal-100" },
+  resume: { icon: FileText, color: "text-violet-600", bg: "bg-violet-100" },
   ai: { icon: Sparkles, color: "text-pink-600", bg: "bg-pink-100" },
 };
 
@@ -169,7 +169,7 @@ export default function NotificationsPage() {
       >
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold text-surface-900">
-            <Bell className="h-6 w-6 text-emerald-600" />
+            <Bell className="h-6 w-6 text-brand-600" />
             {c.title}
             {unreadCount > 0 && (
               <Badge className="bg-red-500 text-white">
@@ -285,7 +285,7 @@ export default function NotificationsPage() {
                     "group flex gap-4 rounded-2xl border p-4 transition-all hover:shadow-sm",
                     n.is_read
                       ? "border-surface-200 bg-white"
-                      : "border-emerald-100 bg-emerald-50/40"
+                      : "border-brand-100 bg-brand-50/40"
                   )}
                 >
                   {/* Icon */}
@@ -305,7 +305,7 @@ export default function NotificationsPage() {
                         {n.title}
                       </p>
                       {!n.is_read && (
-                        <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-emerald-500" />
+                        <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-brand-500" />
                       )}
                     </div>
                     <p className="mt-0.5 text-sm text-surface-500 leading-relaxed">
@@ -318,7 +318,7 @@ export default function NotificationsPage() {
                       {n.link && (
                         <Link
                           href={n.link}
-                          className="flex items-center gap-1 text-xs text-emerald-600 hover:underline"
+                          className="flex items-center gap-1 text-xs text-brand-600 hover:underline"
                           onClick={() => !n.is_read && markAsRead(n.id)}
                         >
                           {c.view}

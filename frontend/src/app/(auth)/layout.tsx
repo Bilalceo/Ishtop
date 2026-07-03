@@ -48,7 +48,7 @@ export default function AuthLayout({
           <div className="absolute inset-0 dark:hidden">
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
           </div>
-          <div className="hidden dark:block absolute inset-0 bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900" />
+          <div className="hidden dark:block absolute inset-0 bg-gradient-to-br from-slate-950 via-violet-950 to-slate-900" />
         </div>
 
         {/* Logo */}
@@ -59,7 +59,7 @@ export default function AuthLayout({
         >
           <Link href="/" className="inline-flex items-center gap-2">
             <Image
-              src="/logo-mark.png?v=2"
+              src="/logo-mark.png?v=3"
               alt="IshTop"
               width={40}
               height={40}
@@ -91,11 +91,11 @@ export default function AuthLayout({
         {/* One restrained emerald glow — no rainbow of orbs */}
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-40 left-1/2 h-[460px] w-[760px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[150px]"
+          className="pointer-events-none absolute -top-40 left-1/2 h-[460px] w-[760px] -translate-x-1/2 rounded-full bg-brand-500/10 blur-[150px]"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-40 left-1/3 h-[380px] w-[520px] rounded-full bg-teal-500/10 blur-[140px]"
+          className="pointer-events-none absolute -bottom-40 left-1/3 h-[380px] w-[520px] rounded-full bg-violet-500/10 blur-[140px]"
         />
 
         {/* Content */}
@@ -107,7 +107,7 @@ export default function AuthLayout({
               transition={{ delay: 0.15 }}
               className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/70"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              <span className="h-1.5 w-1.5 rounded-full bg-brand-400" />
               IshTop · AI-karyera
             </motion.span>
 
@@ -119,7 +119,7 @@ export default function AuthLayout({
               className="mt-6 text-balance text-4xl font-bold leading-[1.12] tracking-tight"
             >
               {t("auth.sidebar.title")}{" "}
-              <span className="text-emerald-400">
+              <span className="text-brand-400">
                 {t("auth.sidebar.titleHighlight")}
               </span>
             </motion.h2>
@@ -142,7 +142,7 @@ export default function AuthLayout({
             >
               {sidebarFeatures.map((feature: string, i: number) => (
                 <li key={i} className="flex items-start gap-3 text-sm text-white/80">
-                  <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
+                  <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand-400" />
                   <span>{feature}</span>
                 </li>
               ))}

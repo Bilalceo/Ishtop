@@ -144,20 +144,20 @@ export function AIInsightsPanel({ input }: { input: InsightsInput }) {
   }, [script, reduce, token]);
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-black/40 p-5 font-mono text-sm shadow-2xl shadow-emerald-500/10 backdrop-blur-md dark:bg-black/40 sm:p-6">
+    <div className="rounded-3xl border border-white/10 bg-black/40 p-5 font-mono text-sm shadow-2xl shadow-brand-500/10 backdrop-blur-md dark:bg-black/40 sm:p-6">
       <div className="mb-3 flex items-center justify-between">
         <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
-          <Brain className="h-3.5 w-3.5 text-emerald-300" aria-hidden />
+          <Brain className="h-3.5 w-3.5 text-brand-300" aria-hidden />
           AI sizning ma&apos;lumotlaringizni o&apos;qiyapti
         </p>
         <div className="flex items-center gap-3">
           {!done ? (
-            <span className="flex items-center gap-1 text-xs text-emerald-300">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-300 shadow-[0_0_8px_rgba(124,92,255,0.9)]" />
+            <span className="flex items-center gap-1 text-xs text-brand-300">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-300 shadow-[0_0_8px_rgba(124,92,255,0.9)]" />
               {ui.thinking}
             </span>
           ) : (
-            <span className="flex items-center gap-1 text-xs text-emerald-300">
+            <span className="flex items-center gap-1 text-xs text-brand-300">
               <CheckCircle2 className="h-3 w-3" aria-hidden /> {ui.ready}
             </span>
           )}
@@ -184,12 +184,12 @@ export function AIInsightsPanel({ input }: { input: InsightsInput }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25 }}
                 className={
-                  isDone ? "text-emerald-300" : isArrow ? "text-white/75" : "text-white/85"
+                  isDone ? "text-brand-300" : isArrow ? "text-white/75" : "text-white/85"
                 }
               >
                 {line}
                 {!done && i === arr.length - 1 && !isDone && (
-                  <span className="ml-1 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-emerald-300" />
+                  <span className="ml-1 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-brand-300" />
                 )}
               </motion.p>
             );

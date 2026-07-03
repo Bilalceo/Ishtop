@@ -72,14 +72,14 @@ export default function StudentHelpPage() {
           const content = (
             <Card className="h-full rounded-2xl border-surface-200 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-surface-700">
               <CardHeader>
-                <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
                   <Icon className="h-5 w-5" />
                 </div>
                 <CardTitle>{item.title}</CardTitle>
                 <CardDescription>{item.desc}</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full justify-between bg-gradient-to-r from-emerald-500 to-teal-600">
+                <Button className="w-full justify-between bg-gradient-to-r from-brand-500 to-violet-600">
                   {item.label}
                   <ArrowRight className="h-4 w-4" />
                 </Button>

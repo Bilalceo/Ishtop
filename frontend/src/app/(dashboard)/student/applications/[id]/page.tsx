@@ -46,7 +46,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: any; de
   },
   interview: {
     label: "Intervyu",
-    color: "bg-emerald-100 text-emerald-700",
+    color: "bg-brand-100 text-brand-700",
     icon: User,
     description: "Tabriklaymiz! Siz intervyuga taklif qilindingiz.",
   },
@@ -172,7 +172,7 @@ export default function ApplicationDetailPage() {
           "rounded-2xl p-6",
           isRejected
             ? "border border-red-200 bg-red-50"
-            : "border border-emerald-100 bg-gradient-to-r from-emerald-50 to-teal-50"
+            : "border border-brand-100 bg-gradient-to-r from-brand-50 to-violet-50"
         )}
       >
         <div className="flex items-center gap-4">
@@ -183,7 +183,7 @@ export default function ApplicationDetailPage() {
             )}
           >
             <StatusIcon
-              className={cn("h-7 w-7", isRejected ? "text-red-500" : "text-emerald-600")}
+              className={cn("h-7 w-7", isRejected ? "text-red-500" : "text-brand-600")}
             />
           </div>
           <div>
@@ -200,7 +200,7 @@ export default function ApplicationDetailPage() {
                 <div
                   className={cn(
                     "h-2 flex-1 rounded-full transition-all",
-                    i <= currentStepIndex ? "bg-emerald-500" : "bg-surface-200"
+                    i <= currentStepIndex ? "bg-brand-500" : "bg-surface-200"
                   )}
                 />
                 {i === statusSteps.length - 1 && (
@@ -208,7 +208,7 @@ export default function ApplicationDetailPage() {
                     className={cn(
                       "flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold",
                       i <= currentStepIndex
-                        ? "bg-emerald-500 text-white"
+                        ? "bg-brand-500 text-white"
                         : "bg-surface-200 text-surface-500"
                     )}
                   >
@@ -231,7 +231,7 @@ export default function ApplicationDetailPage() {
         >
           <h2 className="mb-4 font-bold text-surface-900">Ish haqida</h2>
           <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-xl font-bold text-white">
+            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-violet-600 text-xl font-bold text-white">
               {(job.company?.name || "K")[0]}
             </div>
             <div className="flex-1">
@@ -285,7 +285,7 @@ export default function ApplicationDetailPage() {
           {applicationDetails.interview_at && (
             <div className="flex justify-between">
               <span className="text-surface-500">Intervyu sanasi</span>
-              <span className="font-medium text-emerald-600">
+              <span className="font-medium text-brand-600">
                 <Calendar className="mr-1 inline h-4 w-4" />
                 {formatDate(applicationDetails.interview_at)}
               </span>
@@ -296,7 +296,7 @@ export default function ApplicationDetailPage() {
         {(application.status === "interview" ||
           applicationDetails.interview_type ||
           applicationDetails.meeting_link) && (
-          <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4">
+          <div className="mt-4 rounded-xl border border-brand-100 bg-brand-50 p-4">
             <p className="mb-3 text-sm font-semibold text-surface-700">
               Intervyu ma&apos;lumotlari
             </p>
@@ -314,7 +314,7 @@ export default function ApplicationDetailPage() {
                     asChild
                     variant="outline"
                     size="sm"
-                    className="h-8 rounded-full border-emerald-200 bg-white px-3 text-emerald-700 hover:bg-emerald-50"
+                    className="h-8 rounded-full border-brand-200 bg-white px-3 text-brand-700 hover:bg-brand-50"
                   >
                     <a
                       href={applicationDetails.meeting_link}

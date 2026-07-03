@@ -367,7 +367,7 @@ export default function AutoApplyPage() {
                       onClick={() => setJobTypes((prev) => toggleValue(prev, option.value))}
                       className={`rounded-full border px-3 py-2 text-sm transition ${
                         active
-                          ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                          ? "border-brand-500 bg-brand-50 text-brand-700"
                           : "border-surface-200 bg-white text-surface-600 hover:border-surface-300"
                       }`}
                     >
@@ -395,7 +395,7 @@ export default function AutoApplyPage() {
                       }
                       className={`rounded-full border px-3 py-2 text-sm transition ${
                         active
-                          ? "border-teal-500 bg-teal-50 text-teal-700"
+                          ? "border-violet-500 bg-violet-50 text-violet-700"
                           : "border-surface-200 bg-white text-surface-600 hover:border-surface-300"
                       }`}
                     >
@@ -480,7 +480,7 @@ export default function AutoApplyPage() {
             <Button
               onClick={handleStart}
               disabled={isBusy || !selectedResumeId || publishedResumes.length === 0}
-              className="w-full bg-gradient-to-r from-emerald-500 to-teal-600"
+              className="w-full bg-gradient-to-r from-brand-500 to-violet-600"
             >
               {isAutoApplying ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

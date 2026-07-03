@@ -290,7 +290,7 @@ export default function RegisterPage() {
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ["#34D399", "#10B981", "#06b6d4"],
+        colors: ["#82A8F7", "#6F9BF0", "#a08de0"],
       });
     }
   }, [isSuccess]);
@@ -367,7 +367,7 @@ export default function RegisterPage() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", delay: 0.2 }}
-          className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-emerald-600 shadow-xl shadow-green-500/30"
+          className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-brand-600 shadow-xl shadow-green-500/30"
         >
           <CheckCircle className="h-12 w-12 text-white" />
         </motion.div>
@@ -400,7 +400,7 @@ export default function RegisterPage() {
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
               transition={{ duration: 2, ease: "linear" }}
-              className="h-full bg-gradient-to-r from-emerald-500 to-teal-600"
+              className="h-full bg-gradient-to-r from-brand-500 to-violet-600"
             />
           </div>
         </motion.div>
@@ -467,7 +467,7 @@ export default function RegisterPage() {
                     className={cn(
                       "text-xs font-medium",
                       currentStep >= step.id
-                        ? "text-emerald-600"
+                        ? "text-brand-600"
                         : "text-surface-400"
                     )}
                   >
@@ -483,7 +483,7 @@ export default function RegisterPage() {
                     animate={{
                       width: currentStep > step.id ? "100%" : "0%",
                     }}
-                    className="h-full bg-emerald-500"
+                    className="h-full bg-brand-500"
                   />
                   <div className="h-full -mt-0.5 bg-surface-200" />
                 </div>
@@ -530,7 +530,7 @@ export default function RegisterPage() {
                       className={cn(
                         "flex h-12 w-full rounded-xl border bg-white text-surface-900 pl-10 pr-4 text-sm transition-all dark:bg-surface-900 dark:text-surface-100",
                         "placeholder:text-surface-400",
-                        "focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0",
+                        "focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-0",
                         errors.email
                           ? "border-red-300 focus:ring-red-500"
                           : "border-surface-300 hover:border-surface-400"
@@ -556,7 +556,7 @@ export default function RegisterPage() {
                       className={cn(
                         "flex h-12 w-full rounded-xl border bg-white text-surface-900 pl-10 pr-12 text-sm transition-all dark:bg-surface-900 dark:text-surface-100",
                         "placeholder:text-surface-400",
-                        "focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0",
+                        "focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-0",
                         errors.password
                           ? "border-red-300 focus:ring-red-500"
                           : "border-surface-300 hover:border-surface-400"
@@ -590,7 +590,7 @@ export default function RegisterPage() {
                       className={cn(
                         "flex h-12 w-full rounded-xl border bg-white text-surface-900 pl-10 pr-12 text-sm transition-all dark:bg-surface-900 dark:text-surface-100",
                         "placeholder:text-surface-400",
-                        "focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0",
+                        "focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-0",
                         errors.confirmPassword
                           ? "border-red-300 focus:ring-red-500"
                           : "border-surface-300 hover:border-surface-400"
@@ -658,7 +658,7 @@ export default function RegisterPage() {
                       className={cn(
                         "flex h-12 w-full rounded-xl border bg-white text-surface-900 pl-10 pr-4 text-sm transition-all dark:bg-surface-900 dark:text-surface-100",
                         "placeholder:text-surface-400",
-                        "focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0",
+                        "focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-0",
                         errors.fullName
                           ? "border-red-300 focus:ring-red-500"
                           : "border-surface-300 hover:border-surface-400"
@@ -684,7 +684,7 @@ export default function RegisterPage() {
                       className={cn(
                         "flex h-12 w-full rounded-xl border bg-white text-surface-900 pl-10 pr-4 text-sm transition-all dark:bg-surface-900 dark:text-surface-100",
                         "placeholder:text-surface-400",
-                        "focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0",
+                        "focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-0",
                         errors.phone
                           ? "border-red-300 focus:ring-red-500"
                           : "border-surface-300 hover:border-surface-400"
@@ -725,7 +725,7 @@ export default function RegisterPage() {
                     className={cn(
                       "relative w-full rounded-2xl border-2 p-6 text-left transition-all",
                       selectedRole === "student"
-                        ? "border-emerald-500 bg-emerald-50 shadow-lg shadow-emerald-500/10"
+                        ? "border-brand-500 bg-brand-50 shadow-lg shadow-brand-500/10"
                         : "border-surface-200 bg-white hover:border-surface-300"
                     )}
                   >
@@ -735,7 +735,7 @@ export default function RegisterPage() {
                         animate={{ scale: 1 }}
                         className="absolute right-4 top-4"
                       >
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-500">
                           <CheckCircle className="h-4 w-4 text-white" />
                         </div>
                       </motion.div>
@@ -745,7 +745,7 @@ export default function RegisterPage() {
                         className={cn(
                           "flex h-14 w-14 items-center justify-center rounded-xl",
                           selectedRole === "student"
-                            ? "bg-emerald-500 text-white"
+                            ? "bg-brand-500 text-white"
                             : "bg-surface-100 text-surface-600"
                         )}
                       >
@@ -759,7 +759,7 @@ export default function RegisterPage() {
                           {t("auth.register.studentDescription")}
                         </p>
                         <div className="mt-3 flex flex-wrap gap-2">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-brand-100 px-2 py-0.5 text-xs font-medium text-brand-700">
                             <Sparkles className="h-3 w-3" /> {t("auth.register.badges.student.resume")}
                           </span>
                           <span className="inline-flex items-center gap-1 rounded-full bg-cyan-100 px-2 py-0.5 text-xs font-medium text-cyan-700">
@@ -782,7 +782,7 @@ export default function RegisterPage() {
                     className={cn(
                       "relative w-full rounded-2xl border-2 p-6 text-left transition-all",
                       selectedRole === "company"
-                        ? "border-emerald-500 bg-emerald-50 shadow-lg shadow-emerald-500/10"
+                        ? "border-brand-500 bg-brand-50 shadow-lg shadow-brand-500/10"
                         : "border-surface-200 bg-white hover:border-surface-300"
                     )}
                   >
@@ -792,7 +792,7 @@ export default function RegisterPage() {
                         animate={{ scale: 1 }}
                         className="absolute right-4 top-4"
                       >
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-500">
                           <CheckCircle className="h-4 w-4 text-white" />
                         </div>
                       </motion.div>
@@ -802,7 +802,7 @@ export default function RegisterPage() {
                         className={cn(
                           "flex h-14 w-14 items-center justify-center rounded-xl",
                           selectedRole === "company"
-                            ? "bg-emerald-500 text-white"
+                            ? "bg-brand-500 text-white"
                             : "bg-surface-100 text-surface-600"
                         )}
                       >
@@ -851,7 +851,7 @@ export default function RegisterPage() {
                           id="companyName"
                           type="text"
                           placeholder={t("auth.register.placeholders.companyName")}
-                          className="flex h-12 w-full rounded-xl border border-surface-300 bg-white text-surface-900 pl-10 pr-4 text-sm transition-all dark:bg-surface-900 dark:text-surface-100 placeholder:text-surface-400 hover:border-surface-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
+                          className="flex h-12 w-full rounded-xl border border-surface-300 bg-white text-surface-900 pl-10 pr-4 text-sm transition-all dark:bg-surface-900 dark:text-surface-100 placeholder:text-surface-400 hover:border-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-0"
                           {...register("companyName")}
                         />
                       </div>
@@ -862,11 +862,11 @@ export default function RegisterPage() {
                 {/* Terms */}
                 <p className="text-xs text-surface-500 dark:text-surface-400">
                   {t("auth.register.terms.text")}{" "}
-                  <Link href="/terms" className="text-emerald-600 hover:underline">
+                  <Link href="/terms" className="text-brand-600 hover:underline">
                     {t("auth.register.terms.termsLink")}
                   </Link>{" "}
                   {t("auth.register.terms.and")}{" "}
-                  <Link href="/privacy" className="text-emerald-600 hover:underline">
+                  <Link href="/privacy" className="text-brand-600 hover:underline">
                     {t("auth.register.terms.privacyLink")}
                   </Link>
                 </p>
@@ -893,7 +893,7 @@ export default function RegisterPage() {
             <Button
               type="button"
               onClick={nextStep}
-              className="h-12 flex-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
+              className="h-12 flex-1 rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 text-white font-semibold shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40"
             >
               {t("auth.register.continue")}
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -902,7 +902,7 @@ export default function RegisterPage() {
             <Button
               type="submit"
               disabled={isLoading || !selectedRole}
-              className="h-12 flex-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
+              className="h-12 flex-1 rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 text-white font-semibold shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40"
             >
               {isLoading ? (
                 <>
@@ -967,7 +967,7 @@ export default function RegisterPage() {
         {t("auth.register.haveAccount")}{" "}
         <Link
           href="/login"
-          className="font-semibold text-emerald-600 hover:text-emerald-500 transition-colors"
+          className="font-semibold text-brand-600 hover:text-brand-500 transition-colors"
         >
           {t("auth.register.signIn")}
         </Link>

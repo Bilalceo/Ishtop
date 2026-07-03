@@ -549,7 +549,7 @@ export default function JobsPage() {
               onClick={() => void switchToMatchedJobs()}
               className={cn(
                 feedMode === "matched" &&
-                  "bg-gradient-to-r from-emerald-500 to-teal-600",
+                  "bg-gradient-to-r from-brand-500 to-violet-600",
               )}
             >
               <Target className="mr-1 h-3.5 w-3.5" />
@@ -562,7 +562,7 @@ export default function JobsPage() {
               onClick={() => void switchToAllJobs()}
               className={cn(
                 feedMode === "all" &&
-                  "bg-gradient-to-r from-emerald-500 to-teal-600",
+                  "bg-gradient-to-r from-brand-500 to-violet-600",
               )}
             >
               <Briefcase className="mr-1 h-3.5 w-3.5" />
@@ -877,7 +877,7 @@ export default function JobsPage() {
                         : [...filters.locations, opt.value];
                       setFilters((prev) => ({ ...prev, locations: next }));
                     }}
-                    className="h-4 w-4 rounded border-surface-300 text-emerald-600"
+                    className="h-4 w-4 rounded border-surface-300 text-brand-600"
                   />
                   <span className="text-sm">{opt.label}</span>
                 </label>
@@ -916,7 +916,7 @@ export default function JobsPage() {
                         : [...filters.jobTypes, opt.value];
                       setFilters((prev) => ({ ...prev, jobTypes: next }));
                     }}
-                    className="h-4 w-4 rounded border-surface-300 text-emerald-600"
+                    className="h-4 w-4 rounded border-surface-300 text-brand-600"
                   />
                   <span className="text-sm">{opt.label}</span>
                 </label>
@@ -953,7 +953,7 @@ export default function JobsPage() {
                         experienceLevels: next,
                       }));
                     }}
-                    className="h-4 w-4 rounded border-surface-300 text-emerald-600"
+                    className="h-4 w-4 rounded border-surface-300 text-brand-600"
                   />
                   <span className="text-sm">{opt.label}</span>
                 </label>
@@ -980,7 +980,7 @@ export default function JobsPage() {
             </Button>
             <Button
               onClick={() => setShowMobileFilters(false)}
-              className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600"
+              className="flex-1 bg-gradient-to-r from-brand-500 to-violet-600"
             >
               {isRu ? "Применить" : "Qo'llash"}
             </Button>

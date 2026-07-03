@@ -274,7 +274,7 @@ export default function CreateResumePage() {
               {isRu ? "Назад" : "Orqaga"}
             </Button>
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.26em] text-emerald-700">{isRu ? "КОНСТРУКТОР РЕЗЮМЕ" : "REZYUME KONSTRUKTORI"}</p>
+              <p className="text-xs font-black uppercase tracking-[0.26em] text-brand-700">{isRu ? "КОНСТРУКТОР РЕЗЮМЕ" : "REZYUME KONSTRUKTORI"}</p>
               <h1 className="font-display text-2xl font-black text-slate-950">{isRu ? "Создание нового резюме" : "Yangi rezyume yaratish"}</h1>
               <p className="text-sm text-slate-500">{isRu ? "Заполните форму, справа будет предпросмотр резюме в реальном времени." : "Formani to'ldiring, o'ng tomonda rezyume real vaqtda ko'rinadi."}</p>
             </div>
@@ -285,7 +285,7 @@ export default function CreateResumePage() {
               {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
               {isRu ? "Сохранить" : "Saqlash"}
             </Button>
-            <Button onClick={() => void handleSaveAndDownload()} disabled={isSaving || isDownloading} className="bg-gradient-to-r from-emerald-500 to-cyan-600">
+            <Button onClick={() => void handleSaveAndDownload()} disabled={isSaving || isDownloading} className="bg-gradient-to-r from-brand-500 to-cyan-600">
               {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
               {isRu ? "Сохранить и скачать PDF" : "Saqlab PDF yuklash"}
             </Button>
@@ -316,7 +316,7 @@ export default function CreateResumePage() {
                       index === step
                         ? "bg-slate-950 text-white shadow-lg shadow-slate-300"
                         : index < step
-                          ? "bg-emerald-100 text-emerald-800"
+                          ? "bg-brand-100 text-brand-800"
                           : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                     )}
                   >
@@ -334,7 +334,7 @@ export default function CreateResumePage() {
               className="rounded-[28px] border border-white/70 bg-white/95 p-6 shadow-xl shadow-slate-200/60 dark:border-surface-700/70 dark:bg-surface-800/95"
             >
               <div className="mb-5 flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-100 text-brand-700">
                   <CurrentIcon className="h-5 w-5" />
                 </div>
                 <div>
@@ -366,7 +366,7 @@ export default function CreateResumePage() {
                         type="button"
                         onClick={handleGenerateSummary}
                         disabled={isGeneratingSummary}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-brand-500 to-violet-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
                       >
                         {isGeneratingSummary ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -556,7 +556,7 @@ export default function CreateResumePage() {
           <aside className="rounded-[28px] border border-white/70 bg-white/90 p-4 shadow-xl shadow-slate-200/60 lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)] lg:overflow-auto dark:border-surface-700/70 dark:bg-surface-800/90">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-                <Eye className="h-4 w-4 text-emerald-700" />
+                <Eye className="h-4 w-4 text-brand-700" />
                 {isRu ? "Предпросмотр в реальном времени" : "Jonli ko'rinish"}
               </div>
               <Button variant="outline" size="sm" onClick={() => void handleSaveAndDownload()} disabled={isSaving || isDownloading}>
@@ -635,7 +635,7 @@ function SkillSuggestions({
             key={skill}
             type="button"
             onClick={() => onAdd(skill)}
-            className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-800/60 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50"
+            className="inline-flex items-center gap-1 rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700 transition hover:bg-brand-100 dark:border-brand-800/60 dark:bg-brand-900/30 dark:text-brand-300 dark:hover:bg-brand-900/50"
           >
             <Plus className="h-3 w-3" />
             {skill}
@@ -670,7 +670,7 @@ function TextArea({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         rows={4}
-        className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-surface-600 dark:bg-surface-800 dark:text-surface-100 dark:placeholder-surface-400"
+        className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-surface-600 dark:bg-surface-800 dark:text-surface-100 dark:placeholder-surface-400"
       />
     </div>
   );

@@ -55,11 +55,11 @@ export function SkillGapRadar({ data }: { data: SkillGapRow[] }) {
         <RadarChart data={chartData} margin={{ top: 8, right: 16, bottom: 8, left: 16 }}>
           <defs>
             <linearGradient id="radarFillBrand" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0%" stopColor="#10B981" stopOpacity={0.6} />
+              <stop offset="0%" stopColor="#6F9BF0" stopOpacity={0.6} />
               <stop offset="100%" stopColor="#22D3EE" stopOpacity={0.3} />
             </linearGradient>
             <linearGradient id="radarStrokeBrand" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0%" stopColor="#10B981" />
+              <stop offset="0%" stopColor="#6F9BF0" />
               <stop offset="100%" stopColor="#22D3EE" />
             </linearGradient>
           </defs>

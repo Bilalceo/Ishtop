@@ -181,7 +181,7 @@ export default function LoginPageClient() {
               className={cn(
                 "flex h-12 w-full rounded-xl border bg-white pl-10 pr-4 text-sm text-surface-900 transition-all dark:bg-surface-900 dark:text-surface-100",
                 "placeholder:text-surface-400",
-                "focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0",
+                "focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-0",
                 errors.email
                   ? "border-red-300 focus:ring-red-500"
                   : "border-surface-300 hover:border-surface-400",
@@ -210,7 +210,7 @@ export default function LoginPageClient() {
               className={cn(
                 "flex h-12 w-full rounded-xl border bg-white pl-10 pr-12 text-sm text-surface-900 transition-all dark:bg-surface-900 dark:text-surface-100",
                 "placeholder:text-surface-400",
-                "focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0",
+                "focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-0",
                 errors.password
                   ? "border-red-300 focus:ring-red-500"
                   : "border-surface-300 hover:border-surface-400",
@@ -257,7 +257,7 @@ export default function LoginPageClient() {
           </label>
           <Link
             href="/forgot-password"
-            className="text-sm text-emerald-600 hover:text-emerald-700"
+            className="text-sm text-brand-600 hover:text-brand-700"
           >
             {t("auth.login.forgotPassword")}
           </Link>
@@ -306,7 +306,7 @@ export default function LoginPageClient() {
           {t("auth.login.noAccount")}{" "}
           <Link
             href="/register"
-            className="font-medium text-emerald-600 hover:text-emerald-700"
+            className="font-medium text-brand-600 hover:text-brand-700"
           >
             {t("auth.login.createAccount")}
           </Link>
