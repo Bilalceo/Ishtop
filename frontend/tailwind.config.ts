@@ -83,19 +83,19 @@ const config: Config = {
           950: "#160438",
         },
 
-        // Brand (alias for primary) — emerald, matching the landing accent
+        // Brand (alias for primary) — periwinkle, matching the silver landing accent
         brand: {
-          DEFAULT: "#10B981",
-          50: "#ECFDF5",
-          100: "#D1FAE5",
-          200: "#A7F3D0",
-          300: "#6EE7B7",
-          400: "#34D399",
-          500: "#10B981",
-          600: "#059669",
-          700: "#047857",
-          800: "#065F46",
-          900: "#064E3B",
+          DEFAULT: "#6F9BF0",
+          50: "#F0F5FF",
+          100: "#DCE7FF",
+          200: "#C0D4FF",
+          300: "#9BBAFC",
+          400: "#82A8F7",
+          500: "#6F9BF0",
+          600: "#5581E0",
+          700: "#4468C2",
+          800: "#38539B",
+          900: "#2E4278",
         },
 
         // Surface - Neutral grays
