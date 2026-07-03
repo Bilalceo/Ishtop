@@ -16,7 +16,7 @@
     --card-foreground: 225 26% 12%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 160 84% 39%;
+    --primary: 221 69% 61%;
     --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -28,7 +28,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 224 20% 88%;
     --input: 224 20% 88%;
-    --ring: 160 84% 39%;
+    --ring: 221 69% 61%;
     --radius: 0.9rem;
 
     /* ===== Aurora tokens ===== */
@@ -51,7 +51,7 @@
     --card-foreground: 220 28% 96%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 158 64% 52%;
+    --primary: 221 88% 74%;
     --primary-foreground: 231 41% 8%;
     --secondary: 231 27% 18%;
     --secondary-foreground: 210 40% 98%;
@@ -63,7 +63,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 230 24% 22%;
     --input: 230 24% 22%;
-    --ring: 158 64% 52%;
+    --ring: 221 88% 74%;
   }
 }
 
@@ -282,7 +282,7 @@
 
   /* Accent text — single emerald, no rainbow gradient */
   .aurora-text {
-    color: #34d399;
+    color: #6f9bf0;
   }
 
   /* Minimal glass card surfaces */
@@ -290,24 +290,80 @@
     @apply relative overflow-hidden rounded-3xl border border-surface-200/70 bg-white/70 shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset,0_30px_60px_-30px_rgba(15,23,42,0.14)] backdrop-blur-md transition-all duration-300 dark:border-white/[0.08] dark:bg-white/[0.04];
   }
   .card-aurora-hover {
-    @apply hover:-translate-y-1 hover:border-emerald-300/60 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset,0_40px_80px_-30px_rgba(16,185,129,0.28)] dark:hover:border-emerald-400/25;
+    @apply hover:-translate-y-1 hover:border-brand-300/60 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset,0_40px_80px_-30px_rgba(111,155,240,0.28)] dark:hover:border-brand-400/25;
   }
 
   /* Premium button — primary (emerald) */
   .btn-aurora {
     @apply relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-300;
-    background: #10b981;
+    background: linear-gradient(105deg, #6f9bf0, #8f7fe8);
     color: #0a0a0b;
-    box-shadow: 0 12px 30px -14px rgba(16, 185, 129, 0.55);
+    box-shadow: 0 12px 30px -14px rgba(111, 155, 240, 0.55);
   }
   .btn-aurora:hover {
     transform: translateY(-1px);
-    background: #34d399;
-    box-shadow: 0 18px 40px -16px rgba(16, 185, 129, 0.7);
+    background: linear-gradient(105deg, #82a8f7, #a08de0);
+    box-shadow: 0 18px 40px -16px rgba(111, 155, 240, 0.7);
   }
   .btn-aurora:focus-visible {
-    outline: 2px solid #10b981;
+    outline: 2px solid #6f9bf0;
     outline-offset: 3px;
+  }
+
+  /* ===== Silver light system (landing E5E5E5 rebrand) ===== */
+  .silver-ground {
+    background-color: #e5e5e5;
+  }
+  /* Primary pill — soft pastel gradient, ink text, lifts on hover */
+  .btn-silver-primary {
+    @apply relative inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold transition-all duration-300;
+    color: #18181b;
+    background: linear-gradient(105deg, #d7e7ff 0%, #e3ddff 55%, #ffe9d6 120%);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.9) inset,
+      0 14px 30px -12px rgba(99, 102, 241, 0.28),
+      0 4px 10px -4px rgba(24, 24, 27, 0.12);
+  }
+  .btn-silver-primary:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.9) inset,
+      0 22px 44px -14px rgba(99, 102, 241, 0.38),
+      0 6px 14px -6px rgba(24, 24, 27, 0.14);
+  }
+  .btn-silver-primary:focus-visible {
+    outline: 2px solid #818cf8;
+    outline-offset: 3px;
+  }
+  /* Secondary pill — clean white */
+  .btn-silver-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold transition-all duration-300;
+    color: #18181b;
+    box-shadow: 0 2px 8px -2px rgba(24, 24, 27, 0.1);
+  }
+  .btn-silver-ghost:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px -10px rgba(24, 24, 27, 0.18);
+  }
+  /* White card on silver ground */
+  .card-silver {
+    @apply relative overflow-hidden rounded-3xl bg-white;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.8) inset,
+      0 24px 50px -28px rgba(24, 24, 27, 0.18);
+  }
+  .card-silver-hover {
+    @apply transition-all duration-300 hover:-translate-y-1;
+  }
+  .card-silver-hover:hover {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.8) inset,
+      0 34px 70px -30px rgba(24, 24, 27, 0.24);
+  }
+  /* Pastel chip */
+  .chip-silver {
+    @apply inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1.5 text-xs font-semibold text-[#52525b] backdrop-blur;
+    box-shadow: 0 1px 4px rgba(24, 24, 27, 0.08);
   }
 
   /* Ghost button on dark surfaces */
