@@ -404,13 +404,25 @@ export default function StudentDashboardLayout({
               </div>
             )}
 
-            <Link
-              href="/student/help"
-              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-surface-500 transition hover:text-brand-600 dark:text-surface-400 dark:hover:text-brand-400"
-            >
-              {locale === "ru" ? "Справочный центр" : "Yordam markazi"}
-              <ChevronRight className="h-3 w-3" aria-hidden />
-            </Link>
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <Link
+                href="/student/help"
+                className="inline-flex items-center gap-1 text-xs font-medium text-surface-500 transition hover:text-brand-600 dark:text-surface-400 dark:hover:text-brand-400"
+              >
+                {locale === "ru" ? "Справочный центр" : "Yordam markazi"}
+                <ChevronRight className="h-3 w-3" aria-hidden />
+              </Link>
+              <a
+                href="https://t.me/vioralab_admin"
+                target="_blank"
+                rel="noopener noreferrer"
+                title={locale === "ru" ? "Жалобы и предложения — Telegram" : "Shikoyat va takliflar — Telegram"}
+                className="inline-flex items-center gap-1 text-xs font-medium text-surface-500 transition hover:text-brand-600 dark:text-surface-400 dark:hover:text-brand-400"
+              >
+                <Send className="h-3 w-3" aria-hidden />
+                {locale === "ru" ? "Обратная связь" : "Fikr bildirish"}
+              </a>
+            </div>
           </div>
         </div>
       </aside>

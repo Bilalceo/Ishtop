@@ -28,6 +28,7 @@ import {
   KeyRound,
   Building2,
   ScrollText,
+  Send,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { UserAvatar } from "@/components/ui/avatar";
@@ -361,6 +362,26 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               );
             })}
           </nav>
+
+          {/* Feedback — complaints & suggestions via Telegram */}
+          <div className="px-4 pb-2">
+            <a
+              href="https://t.me/vioralab_admin"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 rounded-xl bg-surface-50 px-3 py-2.5 text-sm font-medium text-surface-600 transition-colors hover:bg-brand-50 hover:text-brand-700 dark:bg-surface-800/60 dark:text-surface-400 dark:hover:bg-brand-500/10 dark:hover:text-brand-400"
+            >
+              <Send className="h-4 w-4 shrink-0" aria-hidden />
+              <span className="min-w-0">
+                <span className="block truncate">
+                  {locale === "ru" ? "Жалобы и предложения" : "Shikoyat va takliflar"}
+                </span>
+                <span className="block truncate text-[11px] font-normal text-surface-400">
+                  @vioralab_admin
+                </span>
+              </span>
+            </a>
+          </div>
 
           {/* User section */}
           <div className="border-t border-surface-200 dark:border-surface-800 p-4">
