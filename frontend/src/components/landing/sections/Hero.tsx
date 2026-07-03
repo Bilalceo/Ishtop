@@ -1,7 +1,21 @@
 "use client";
 
+/**
+ * Hero — "Silver" light rebrand.
+ * E5E5E5 ground, white cards, soft pastel accents only.
+ * Motion: staggered blur-fade entrance, drifting pastel blobs,
+ * scroll parallax on the floating product card.
+ */
+
+import { useRef } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import { ArrowRight, CheckCircle2, ShieldCheck, Sparkles, PlayCircle } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 
@@ -49,11 +63,7 @@ const COPY: Record<Locale, {
   },
   en: {
     eyebrow: "AI career platform for students & juniors",
-    title: (h) => (
-      <>
-        Land your first job {h("with confidence")}.
-      </>
-    ),
+    title: (h) => <>Land your first job {h("with confidence")}.</>,
     subtitle:
       "AI reviews your resume, matches you to relevant roles and prepares your application in seconds — for students and junior talent in Uzbekistan.",
     primary: "Get started free",
@@ -82,13 +92,56 @@ function renderCmsTitleWithAccent(title: string, highlight: (s: string) => JSX.E
   );
 }
 
+/* Drifting pastel blob — pure ambience, GPU-cheap (transform + blur only) */
+function Blob({
+  className,
+  duration = 18,
+  delay = 0,
+}: {
+  className: string;
+  duration?: number;
+  delay?: number;
+}) {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div
+      aria-hidden
+      className={`pointer-events-none absolute rounded-full ${className}`}
+      animate={
+        reduce
+          ? undefined
+          : { x: [0, 30, -20, 0], y: [0, -24, 18, 0], scale: [1, 1.06, 0.97, 1] }
+      }
+      transition={{ duration, delay, repeat: Infinity, ease: "easeInOut" }}
+    />
+  );
+}
+
 export function Hero({ cms }: { cms?: HeroCmsPayload }) {
   const { locale } = useTranslation();
   const reduce = useReducedMotion();
   const L = (locale as Locale) in COPY ? (locale as Locale) : "uz";
   const c = COPY[L];
 
-  const highlight = (s: string) => <span className="text-emerald-400">{s}</span>;
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  // Parallax: the product card drifts up slower than the copy scrolls away
+  const cardYRaw = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 90]);
+  const cardY = useSpring(cardYRaw, { stiffness: 90, damping: 24, mass: 0.4 });
+
+  const highlight = (s: string) => (
+    <span className="relative inline-block">
+      <span className="relative z-10">{s}</span>
+      {/* soft pastel underline wash instead of a colored word */}
+      <span
+        aria-hidden
+        className="absolute inset-x-[-4px] bottom-[0.08em] z-0 h-[0.38em] rounded-md bg-gradient-to-r from-[#d7e7ff] via-[#e3ddff] to-[#ffe9d6]"
+      />
+    </span>
+  );
   const heroTitle = cms?.hero?.title
     ? renderCmsTitleWithAccent(cms.hero.title, highlight)
     : c.title(highlight);
@@ -97,124 +150,135 @@ export function Hero({ cms }: { cms?: HeroCmsPayload }) {
     reduce
       ? {}
       : {
-          initial: { opacity: 0, y: 14 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.55, delay, ease: [0.19, 1, 0.22, 1] as const },
+          initial: { opacity: 0, y: 20, filter: "blur(8px)" },
+          animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+          transition: { duration: 0.7, delay, ease: [0.19, 1, 0.22, 1] as const },
         };
 
   return (
-    <section className="relative overflow-hidden bg-[#0a0a0b] pt-28 sm:pt-32 lg:pt-36">
-      {/* One restrained accent glow — no rainbow of orbs. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-44 left-1/2 h-[460px] w-[820px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[150px]"
-      />
+    <section
+      ref={sectionRef}
+      className="silver-ground relative overflow-hidden pt-32 sm:pt-36 lg:pt-40"
+    >
+      {/* Ambient pastel blobs on the silver ground */}
+      <Blob className="-top-24 left-[8%] h-[380px] w-[380px] bg-[#d7e7ff]/70 blur-[110px]" duration={20} />
+      <Blob className="top-[16%] right-[6%] h-[320px] w-[320px] bg-[#e3ddff]/70 blur-[110px]" duration={24} delay={2} />
+      <Blob className="bottom-[-120px] left-[38%] h-[360px] w-[360px] bg-[#ffe9d6]/60 blur-[120px]" duration={26} delay={4} />
 
-      <div className="section-shell relative grid items-center gap-12 pb-20 sm:pb-28 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:pb-32">
-        {/* Left — copy */}
-        <div>
-          <motion.span
-            {...fade(0)}
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/70"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+      <div className="section-shell relative pb-24 sm:pb-32">
+        {/* Centered copy */}
+        <div className="mx-auto max-w-3xl text-center">
+          <motion.span {...fade(0)} className="chip-silver">
+            <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#8ab4ff] to-[#b7a4ff]" />
             {c.eyebrow}
           </motion.span>
 
           <motion.h1
-            {...fade(0.06)}
-            className="mt-6 text-balance text-4xl font-bold leading-[1.12] tracking-tight text-white sm:text-5xl lg:text-[58px] lg:leading-[1.08]"
+            {...fade(0.08)}
+            className="mt-7 text-balance text-4xl font-bold leading-[1.1] tracking-tight text-[#18181b] sm:text-5xl lg:text-[64px] lg:leading-[1.05]"
           >
             {heroTitle}
           </motion.h1>
 
           <motion.p
-            {...fade(0.12)}
-            className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-white/60 sm:text-lg"
+            {...fade(0.16)}
+            className="mx-auto mt-6 max-w-xl text-pretty text-base leading-relaxed text-[#63636b] sm:text-lg"
           >
             {cms?.hero?.subtitle ?? c.subtitle}
           </motion.p>
 
-          <motion.div {...fade(0.18)} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Link
-              href="/register"
-              className="group inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-[#0a0a0b] transition hover:bg-emerald-400"
-            >
+          {/* Perfectly balanced CTA row — primary left, demo right, equal height */}
+          <motion.div
+            {...fade(0.24)}
+            className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          >
+            <Link href="/register" className="btn-silver-primary group w-full sm:w-auto">
               {cms?.hero?.primaryCta ?? c.primary}
               <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
             </Link>
-            <a
-              href="#live-demo"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-white/90 transition hover:bg-white/5"
-            >
-              <PlayCircle className="h-4 w-4" aria-hidden />
+            <a href="#live-demo" className="btn-silver-ghost group w-full sm:w-auto">
+              <PlayCircle className="h-4 w-4 text-[#8ab4ff]" aria-hidden />
               {cms?.hero?.secondaryCta ?? c.secondary}
             </a>
           </motion.div>
 
-          <motion.div {...fade(0.26)} className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
+          <motion.div
+            {...fade(0.32)}
+            className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2"
+          >
             {c.badges.map((b) => (
-              <span key={b} className="inline-flex items-center gap-1.5 text-sm text-white/55">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400" aria-hidden />
+              <span key={b} className="inline-flex items-center gap-1.5 text-sm text-[#71717a]">
+                <CheckCircle2 className="h-4 w-4 text-[#7cc7a2]" aria-hidden />
                 {b}
               </span>
             ))}
           </motion.div>
         </div>
 
-        {/* Right — one clean product card */}
+        {/* Floating product card — parallax on scroll */}
         <motion.div
-          {...(reduce ? {} : { initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, delay: 0.2, ease: [0.19, 1, 0.22, 1] as const } })}
-          className="relative mx-auto w-full max-w-md lg:ml-auto lg:max-w-lg"
+          {...(reduce
+            ? {}
+            : {
+                initial: { opacity: 0, y: 36, filter: "blur(10px)" },
+                animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+                transition: { duration: 0.9, delay: 0.34, ease: [0.19, 1, 0.22, 1] as const },
+              })}
+          style={{ y: cardY }}
+          className="relative mx-auto mt-14 w-full max-w-2xl sm:mt-16"
           aria-hidden
         >
-          <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6 shadow-2xl shadow-black/40">
+          {/* soft pastel halo behind the card */}
+          <div className="pointer-events-none absolute -inset-8 rounded-[40px] bg-gradient-to-r from-[#d7e7ff]/60 via-[#e3ddff]/50 to-[#ffe9d6]/50 blur-2xl" />
+
+          <div className="card-silver relative p-6 sm:p-7">
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/5 text-sm font-bold text-white ring-1 ring-inset ring-white/10">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#d7e7ff] text-sm font-bold text-[#3856a5]">
                   UM
                 </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold leading-tight text-white">Junior Frontend Developer</p>
-                  <p className="mt-0.5 text-xs text-white/50">Uzum Market · Toshkent</p>
+                <div className="min-w-0 text-left">
+                  <p className="text-sm font-semibold leading-tight text-[#18181b]">
+                    Junior Frontend Developer
+                  </p>
+                  <p className="mt-0.5 text-xs text-[#8e8e96]">Uzum Market · Toshkent</p>
                 </div>
               </div>
-              <span className="shrink-0 rounded-full bg-emerald-400/10 px-2.5 py-1 text-xs font-semibold text-emerald-400 ring-1 ring-inset ring-emerald-400/20">
+              <span className="shrink-0 rounded-full bg-[#d9f1e4] px-3 py-1 text-xs font-semibold text-[#2f7a56]">
                 94% mos
               </span>
             </div>
 
-            <div className="mt-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40">Nega mos keladi</p>
-              <ul className="mt-3 space-y-2.5 text-sm text-white/80">
+            <div className="mt-5 rounded-2xl bg-[#f6f6f4] p-4 text-left">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#a0a0a8]">
+                Nega mos keladi
+              </p>
+              <ul className="mt-3 space-y-2.5 text-sm text-[#3f3f46]">
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#7cc7a2]" />
                   React, TypeScript va Tailwind portfolioda topildi
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#7cc7a2]" />
                   3 ta open-source PR — junior darajadan yuqori
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#8ab4ff]" />
                   Kompaniya ishonch reytingi: 88 (tasdiqlangan)
                 </li>
               </ul>
             </div>
 
-            <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3">
-              <span className="inline-flex items-center gap-2 text-xs text-white/70">
-                <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+            <div className="mt-4 flex items-center justify-between rounded-2xl bg-[#f6f6f4] p-3">
+              <span className="inline-flex items-center gap-2 text-xs text-[#63636b]">
+                <Sparkles className="h-3.5 w-3.5 text-[#b7a4ff]" />
                 AI ariza tayyorladi
               </span>
-              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-[#0a0a0b]">Yuborish</span>
+              <span className="btn-silver-primary !px-4 !py-1.5 !text-xs">Yuborish</span>
             </div>
           </div>
         </motion.div>
       </div>
-
-      {/* Soft fade into next section */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[#070A16]" />
     </section>
   );
 }

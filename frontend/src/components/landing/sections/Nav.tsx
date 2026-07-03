@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useTranslation } from "@/hooks/useTranslation";
 
 const NAV_ITEMS = [
@@ -32,37 +31,32 @@ export function Nav() {
     locale === "ru" ? item.labelRu : locale === "en" ? item.labelEn : item.labelUz;
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "border-b border-white/10 bg-[#0B1020]/80 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.7)] backdrop-blur-xl"
-          : "bg-gradient-to-b from-[#0B1020]/60 to-transparent backdrop-blur-[2px]"
-      }`}
-      aria-label="Primary"
-    >
-      <nav className="section-shell flex h-16 items-center justify-between sm:h-20">
-        <Link
-          href="/"
-          className="focus-ring flex shrink-0 items-center rounded-xl"
-          aria-label="IshTop home"
-        >
+    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-4" aria-label="Primary">
+      {/* Floating island nav — white glass pill on the silver ground */}
+      <nav
+        className={`mx-auto flex h-14 max-w-5xl items-center justify-between rounded-full bg-white/75 px-4 backdrop-blur-xl transition-shadow duration-300 sm:h-16 sm:px-6 ${
+          scrolled
+            ? "shadow-[0_18px_40px_-18px_rgba(24,24,27,0.28)]"
+            : "shadow-[0_6px_20px_-10px_rgba(24,24,27,0.16)]"
+        }`}
+      >
+        <Link href="/" className="focus-ring flex items-center rounded-xl" aria-label="IshTop home">
           <Image
-            src="/logo-ishtop-ondark.png?v=2"
+            src="/logo-ishtop.png?v=3"
             alt="IshTop"
             width={1025}
             height={292}
             priority
-            sizes="(max-width: 640px) 112px, 128px"
-            className="block h-7 w-auto shrink-0 object-contain sm:h-8"
+            className="h-6 w-auto sm:h-7"
           />
         </Link>
 
-        <ul className="hidden items-center gap-1 lg:flex">
+        <ul className="hidden items-center gap-1 md:flex">
           {NAV_ITEMS.map((item) => (
             <li key={item.href}>
               <a
                 href={item.href}
-                className="focus-ring whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium text-white/85 transition hover:text-white"
+                className="focus-ring whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium text-[#52525b] transition hover:bg-[#f1f1ef] hover:text-[#18181b]"
               >
                 {label(item)}
               </a>
@@ -70,23 +64,17 @@ export function Nav() {
           ))}
         </ul>
 
-        <div className="hidden items-center gap-1.5 lg:flex">
-          {/* Language + theme toggles are utility controls — tone them down so
-              the primary "Bepul boshlash" CTA is the dominant visual target.
-              No bordered chip, no background pill — same compact size, less weight. */}
-          <div className="opacity-75 transition hover:opacity-100">
+        <div className="hidden items-center gap-1.5 md:flex">
+          <div className="opacity-80 transition hover:opacity-100">
             <LanguageSwitcher />
-          </div>
-          <div className="opacity-75 transition hover:opacity-100">
-            <ThemeToggle />
           </div>
           <Link
             href="/login"
-            className="focus-ring rounded-full px-4 py-2 text-sm font-semibold text-white/90 hover:text-white"
+            className="focus-ring rounded-full px-4 py-2 text-sm font-semibold text-[#3f3f46] hover:text-[#18181b]"
           >
             {locale === "ru" ? "Войти" : locale === "en" ? "Sign in" : "Kirish"}
           </Link>
-          <Link href="/register" className="btn-aurora focus-ring">
+          <Link href="/register" className="btn-silver-primary !px-5 !py-2.5">
             {locale === "ru" ? "Начать бесплатно" : locale === "en" ? "Get started" : "Bepul boshlash"}
           </Link>
         </div>
@@ -96,7 +84,7 @@ export function Nav() {
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="focus-ring grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-white lg:hidden"
+          className="focus-ring grid h-10 w-10 place-items-center rounded-full bg-[#f1f1ef] text-[#18181b] md:hidden"
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -105,15 +93,15 @@ export function Nav() {
       {open && (
         <div
           id="mobile-menu"
-          className="border-t border-white/10 bg-[#0B1020]/95 backdrop-blur-xl lg:hidden"
+          className="mx-auto mt-2 max-w-5xl rounded-3xl bg-white/90 shadow-[0_24px_50px_-20px_rgba(24,24,27,0.3)] backdrop-blur-xl md:hidden"
         >
-          <ul className="section-shell flex flex-col gap-1 py-4">
+          <ul className="flex flex-col gap-1 p-4">
             {NAV_ITEMS.map((item) => (
               <li key={item.href}>
                 <a
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="block rounded-2xl px-3 py-3 text-base font-medium text-white/80 hover:bg-white/[0.04] hover:text-white"
+                  className="block rounded-2xl px-3 py-3 text-base font-medium text-[#3f3f46] hover:bg-[#f1f1ef] hover:text-[#18181b]"
                 >
                   {label(item)}
                 </a>
@@ -121,16 +109,15 @@ export function Nav() {
             ))}
             <li className="mt-2 flex items-center gap-2">
               <LanguageSwitcher align="left" />
-              <ThemeToggle />
             </li>
             <li className="mt-3 grid grid-cols-2 gap-2">
               <Link
                 href="/login"
-                className="rounded-full border border-white/10 px-4 py-3 text-center text-sm font-semibold text-white/80"
+                className="rounded-full bg-[#f1f1ef] px-4 py-3 text-center text-sm font-semibold text-[#18181b]"
               >
                 {locale === "ru" ? "Войти" : locale === "en" ? "Sign in" : "Kirish"}
               </Link>
-              <Link href="/register" className="btn-aurora">
+              <Link href="/register" className="btn-silver-primary !py-3">
                 {locale === "ru" ? "Начать" : locale === "en" ? "Start" : "Boshlash"}
               </Link>
             </li>
