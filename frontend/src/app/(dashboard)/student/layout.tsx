@@ -30,7 +30,6 @@ import {
   Menu,
   X,
   Sparkles,
-  HelpCircle,
   ChevronRight,
   BookmarkCheck,
   Loader2,
@@ -101,7 +100,7 @@ const getQuickActions = (t: (key: string) => string) => [
     name: t("dashboard.sidebar.createAIResume"),
     href: "/student/resumes/create-ai",
     icon: Sparkles,
-    color: "from-emerald-500 to-teal-600",
+    color: "from-brand-500 to-violet-600",
   },
 ];
 
@@ -280,7 +279,7 @@ export default function StudentDashboardLayout({
         <div className="flex h-16 items-center justify-between border-b border-surface-200 px-4 dark:border-surface-700">
           <Link href="/student" className="flex items-center gap-2">
             <Image
-              src="/logo-mark.png?v=2"
+              src="/logo-mark.png?v=3"
               alt="IshTop"
               width={36}
               height={36}
@@ -306,7 +305,7 @@ export default function StudentDashboardLayout({
             <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 p-3 text-white shadow-lg shadow-emerald-500/25"
+              className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 p-3 text-white shadow-lg shadow-brand-500/25"
             >
               <Sparkles className="h-5 w-5" />
               <span className="font-medium">
@@ -325,7 +324,7 @@ export default function StudentDashboardLayout({
                   className={cn(
                     "flex items-center justify-between rounded-xl px-3 py-2.5 transition-colors",
                     active
-                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400"
+                      ? "bg-brand-50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-400"
                       : "text-surface-600 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700",
                   )}
                 >
@@ -353,77 +352,64 @@ export default function StudentDashboardLayout({
           })}
         </nav>
 
-        {/* Sidebar Footer */}
+        {/* Sidebar Footer — minimal AI helper */}
         <div className="border-t border-surface-200 p-4 dark:border-surface-700">
-          <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 p-4 dark:from-emerald-900/20 dark:to-teal-900/20">
-            <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
-              <HelpCircle className="h-5 w-5" />
-              <span className="font-medium">
-                {t("dashboard.sidebar.needHelp")}
+          <div className="rounded-2xl bg-surface-50 p-3.5 dark:bg-surface-800/60">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-brand-500" aria-hidden />
+              <span className="text-sm font-semibold text-surface-900 dark:text-white">
+                {locale === "ru" ? "AI-помощник" : "AI yordamchi"}
               </span>
             </div>
-            <p className="mt-2 text-sm text-surface-600 dark:text-surface-400">
-              {t("dashboard.sidebar.helpText")}
-            </p>
-            <div className="mt-3 space-y-2">
+
+            {/* One integrated control: input + send inside */}
+            <div className="relative mt-3">
               <Input
                 value={helpQuestion}
                 onChange={(e) => setHelpQuestion(e.target.value)}
-                placeholder={
-                  locale === "ru"
-                    ? "Спросите, например: как быстро откликнуться?"
-                    : "Masalan: tezkor ariza qanday yuboriladi?"
-                }
-                className="h-9 border-emerald-200 bg-white/80 text-xs dark:border-emerald-700 dark:bg-surface-800/70"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && helpQuestion.trim() && !helpLoading) {
+                    void askHelpAssistant();
+                  }
+                }}
+                placeholder={locale === "ru" ? "Задайте вопрос..." : "Savol yozing..."}
+                className="h-10 rounded-xl border-surface-200 bg-white pr-10 text-xs dark:border-surface-700 dark:bg-surface-900"
               />
-              <Button
-                size="sm"
+              <button
+                type="button"
                 onClick={() => void askHelpAssistant()}
                 disabled={helpLoading || !helpQuestion.trim()}
-                className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-xs"
+                aria-label={locale === "ru" ? "Отправить" : "Yuborish"}
+                className="absolute right-1.5 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-lg bg-brand-500 text-white transition hover:bg-brand-600 disabled:opacity-35"
               >
                 {helpLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                    {locale === "ru" ? "Отвечаем..." : "Javob tayyorlanmoqda..."}
-                  </>
-                ) : locale === "ru" ? (
-                  "Спросить AI-помощника"
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
                 ) : (
-                  "AI yordamchidan so'rash"
+                  <Send className="h-3.5 w-3.5" aria-hidden />
                 )}
-              </Button>
-              {helpAnswer && (
-                <>
-                  <div className="relative rounded-lg border border-emerald-200 bg-white/90 p-2 pr-9 text-xs leading-relaxed text-surface-700 dark:border-emerald-700 dark:bg-surface-800/80 dark:text-surface-300">
-                    <button
-                      type="button"
-                      onClick={() => setHelpAnswer("")}
-                      className="absolute right-1.5 top-1.5 rounded p-1 text-surface-500 transition-colors hover:bg-surface-100 hover:text-surface-700 dark:hover:bg-surface-700 dark:hover:text-surface-200"
-                      aria-label={locale === "ru" ? "Закрыть ответ" : "Javobni yopish"}
-                      title={locale === "ru" ? "Закрыть" : "Yopish"}
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                    {helpAnswer}
-                  </div>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    className="w-full border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-300"
-                    onClick={() => setHelpAnswer("")}
-                  >
-                    <X className="mr-1.5 h-3.5 w-3.5" />
-                    {locale === "ru" ? "Закрыть ответ" : "Javobni yopish"}
-                  </Button>
-                </>
-              )}
+              </button>
             </div>
-            <Link href="/student/help" className="block">
-              <Button variant="outline" size="sm" className="mt-3 w-full">
-                {t("dashboard.sidebar.viewDocs")}
-              </Button>
+
+            {helpAnswer && (
+              <div className="relative mt-2 rounded-xl bg-white p-3 pr-8 text-xs leading-relaxed text-surface-700 shadow-sm dark:bg-surface-900 dark:text-surface-300">
+                <button
+                  type="button"
+                  onClick={() => setHelpAnswer("")}
+                  className="absolute right-1.5 top-1.5 rounded-md p-1 text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-700 dark:hover:bg-surface-700 dark:hover:text-surface-200"
+                  aria-label={locale === "ru" ? "Закрыть" : "Yopish"}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+                {helpAnswer}
+              </div>
+            )}
+
+            <Link
+              href="/student/help"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-surface-500 transition hover:text-brand-600 dark:text-surface-400 dark:hover:text-brand-400"
+            >
+              {locale === "ru" ? "Справочный центр" : "Yordam markazi"}
+              <ChevronRight className="h-3 w-3" aria-hidden />
             </Link>
           </div>
         </div>
@@ -450,7 +436,7 @@ export default function StudentDashboardLayout({
                 placeholder={`${t("common.search")} ${t("dashboard.jobs.title").toLowerCase()}, ${t("dashboard.resumes.title").toLowerCase()}...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-64 rounded-xl border border-surface-200 bg-surface-50 py-2 pl-10 pr-4 text-sm placeholder-surface-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 lg:w-80"
+                className="w-64 rounded-xl border border-surface-200 bg-surface-50 py-2 pl-10 pr-4 text-sm placeholder-surface-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 lg:w-80"
               />
               <kbd className="absolute right-3 top-1/2 -translate-y-1/2 rounded bg-surface-200 px-1.5 py-0.5 text-xs text-surface-500">
                 {shortcutHint}
@@ -501,7 +487,7 @@ export default function StudentDashboardLayout({
                         {unreadCount > 0 && (
                           <button
                             onClick={markAllRead}
-                            className="text-sm text-emerald-600 hover:underline"
+                            className="text-sm text-brand-600 hover:underline"
                           >
                             {t("notificationsPage.markAllRead")}
                           </button>
@@ -522,7 +508,7 @@ export default function StudentDashboardLayout({
                               className={cn(
                                 "flex gap-3 border-b border-surface-100 p-4 last:border-0 dark:border-surface-700",
                                 !n.is_read &&
-                                  "bg-emerald-50/50 dark:bg-emerald-900/10",
+                                  "bg-brand-50/50 dark:bg-brand-900/10",
                               )}
                             >
                               <div className="flex-1">
@@ -540,7 +526,7 @@ export default function StudentDashboardLayout({
                                 </p>
                               </div>
                               {!n.is_read && (
-                                <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-emerald-500" />
+                                <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-brand-500" />
                               )}
                             </div>
                           ))
