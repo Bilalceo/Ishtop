@@ -7,6 +7,7 @@
 
 import {
   motion,
+  useInView,
   useMotionValue,
   useScroll,
   useSpring,
@@ -16,10 +17,88 @@ import {
 import {
   useEffect,
   useRef,
+  useState,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
+
+/* --------------------------------------------------------------- Reveal
+ * Trend 2026: fade-up + blur-to-sharp, staggered by `delay`.
+ * Use for every section entrance on the silver landing. */
+
+export function Reveal({
+  children,
+  className,
+  delay = 0,
+  y = 28,
+  amount = 0.3,
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+  y?: number;
+  amount?: number;
+}) {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div
+      initial={reduce ? false : { opacity: 0, y, filter: "blur(8px)" }}
+      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      viewport={{ once: true, amount }}
+      transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1], delay }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* --------------------------------------------------------------- Counter
+ * Counts up when scrolled into view. Keeps suffix ("+", "%") static. */
+
+export function Counter({
+  to,
+  suffix = "",
+  duration = 1.6,
+  className,
+}: {
+  to: number;
+  suffix?: string;
+  duration?: number;
+  className?: string;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.6 });
+  const reduce = useReducedMotion();
+  const [val, setVal] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    if (reduce) {
+      setVal(to);
+      return;
+    }
+    let raf = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / (duration * 1000), 1);
+      // easeOutExpo
+      const eased = p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
+      setVal(Math.round(to * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [inView, to, duration, reduce]);
+
+  return (
+    <span ref={ref} className={className} style={{ fontVariantNumeric: "tabular-nums" }}>
+      {val.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
 
 /* ----------------------------------------------------------------- Tilt 3D */
 
@@ -197,7 +276,7 @@ export function ScrollProgressBar() {
     <motion.div
       aria-hidden
       style={{ scaleX, transformOrigin: "0% 50%" }}
-      className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[2px] bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400"
+      className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[2px] bg-gradient-to-r from-[#a5c4ff] via-[#c4b5fd] to-[#ffd1a8]"
     />
   );
 }
