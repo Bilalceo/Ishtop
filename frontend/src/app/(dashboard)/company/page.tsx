@@ -222,22 +222,38 @@ export default function CompanyDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <motion.div {...fadeInUp} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-surface-900 dark:text-white">
-            {t("companyDashboard.welcome")}, {user?.company_name || t("common.company")}
-          </h1>
-          <p className="mt-1 text-surface-500">
-            {t("companyDashboard.subtitle")}
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Link href="/company/jobs/new">
-            <Button variant="gradient">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              {t("companyDashboard.newJob")}
-            </Button>
+      {/* Header — silver greeting card (matches the student dashboard) */}
+      <motion.div
+        {...fadeInUp}
+        className="relative overflow-hidden rounded-[28px] border border-surface-200/70 bg-white p-6 dark:border-white/[0.06] dark:bg-surface-900 sm:p-8"
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-24 -top-24 h-[280px] w-[280px] rounded-full bg-[#d7e7ff]/60 blur-[90px] dark:bg-brand-500/15"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-24 -right-20 h-[280px] w-[280px] rounded-full bg-[#ffe9d6]/50 blur-[100px] dark:bg-violet-500/10"
+        />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="font-display text-2xl font-bold tracking-[-0.01em] text-surface-900 dark:text-white sm:text-3xl">
+              {t("companyDashboard.welcome")},{" "}
+              <span className="relative inline-block">
+                <span className="relative z-10">{user?.company_name || t("common.company")}</span>
+                <span
+                  aria-hidden
+                  className="absolute inset-x-[-3px] bottom-[0.08em] z-0 h-[0.32em] rounded-md bg-gradient-to-r from-[#d7e7ff] via-[#e3ddff] to-[#ffe9d6] dark:from-brand-500/30 dark:via-violet-500/30 dark:to-brand-500/30"
+                />
+              </span>
+            </h1>
+            <p className="mt-2 text-surface-500 dark:text-surface-400">
+              {t("companyDashboard.subtitle")}
+            </p>
+          </div>
+          <Link href="/company/jobs/new" className="btn-silver-primary focus-ring shrink-0">
+            <PlusCircle className="h-4 w-4" />
+            {t("companyDashboard.newJob")}
           </Link>
         </div>
       </motion.div>
@@ -246,20 +262,30 @@ export default function CompanyDashboardPage() {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-500/30 dark:bg-amber-500/10"
+          className="rounded-2xl border border-surface-200/70 bg-white p-4 dark:border-white/[0.06] dark:bg-surface-900"
         >
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="flex items-center gap-2 text-sm font-semibold text-amber-800 dark:text-amber-200">
-                <AlertTriangle className="h-4 w-4" />
-                {t("companyDashboard.companyProfile")} {profileCompletion}%
-              </p>
-              <p className="text-xs text-amber-700 dark:text-amber-300">
-                {t("companyDashboard.companyProfileDesc")}
-              </p>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#ffe9d6] dark:bg-amber-500/15">
+                <AlertTriangle className="h-[18px] w-[18px] text-[#9a5b28] dark:text-amber-300" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-surface-900 dark:text-white">
+                  {t("companyDashboard.companyProfile")} {profileCompletion}%
+                </p>
+                <p className="text-xs text-surface-500 dark:text-surface-400">
+                  {t("companyDashboard.companyProfileDesc")}
+                </p>
+                <div className="mt-2 h-1.5 w-44 overflow-hidden rounded-full bg-surface-100 dark:bg-white/[0.06]">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[#e2b184] to-[#f0c9a0]"
+                    style={{ width: `${profileCompletion}%` }}
+                  />
+                </div>
+              </div>
             </div>
             <Link href="/company/settings#company">
-              <Button size="sm" variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100">
+              <Button size="sm" variant="outline" className="rounded-full">
                 {t("common.completeProfile")}
               </Button>
             </Link>
@@ -271,14 +297,14 @@ export default function CompanyDashboardPage() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-500/30 dark:bg-brand-500/10"
+          className="rounded-2xl border border-surface-200/70 bg-white p-4 dark:border-white/[0.06] dark:bg-surface-900"
         >
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-brand-800 dark:text-brand-100">
+              <p className="text-sm font-semibold text-surface-900 dark:text-white">
                 {locale === "ru" ? "Чек-лист онбординга компании" : "Kompaniya onboarding checklist"}
               </p>
-              <p className="text-xs text-brand-700 dark:text-brand-200">{onboarding.progress}</p>
+              <p className="text-xs text-surface-500 dark:text-surface-400">{onboarding.progress}</p>
             </div>
             {onboarding.all_done && (
               <Button
@@ -286,7 +312,7 @@ export default function CompanyDashboardPage() {
                 variant="outline"
                 onClick={handleDismissChecklist}
                 disabled={dismissingChecklist}
-                className="border-brand-300 text-brand-700 hover:bg-brand-100"
+                className="rounded-full"
               >
                 <X className="mr-1 h-4 w-4" />
                 {dismissingChecklist ? (locale === "ru" ? "Закрываем..." : "Yopilmoqda...") : (locale === "ru" ? "Закрыть чек-лист" : "Checklistni yopish")}
@@ -296,12 +322,12 @@ export default function CompanyDashboardPage() {
           <div className="space-y-2">
             {onboarding.steps.map((step) => (
               <Link key={step.key} href={step.url}>
-                <div className="flex items-center justify-between rounded-lg border border-brand-100 bg-white px-3 py-2 transition hover:bg-brand-50/40 dark:border-brand-500/20 dark:bg-surface-900/50">
+                <div className="flex items-center justify-between rounded-xl bg-surface-50 px-3.5 py-2.5 transition hover:bg-brand-50 dark:bg-white/[0.04] dark:hover:bg-brand-500/10">
                   <div className="flex items-center gap-2">
                     {step.completed ? (
                       <CircleCheck className="h-4 w-4 text-brand-600" />
                     ) : (
-                      <Circle className="h-4 w-4 text-brand-500" />
+                      <Circle className="h-4 w-4 text-surface-300 dark:text-surface-600" />
                     )}
                     <span className={cn("text-sm", step.completed ? "text-surface-700 dark:text-surface-200" : "text-surface-800 dark:text-white")}>
                       {locale === "ru"

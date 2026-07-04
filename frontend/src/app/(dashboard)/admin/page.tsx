@@ -81,8 +81,8 @@ const adminCopy = {
     errorsLast24h: "Oxirgi 24 soatdagi xatolar",
     monitoringSignal: "Monitoring signali",
     heroBadge: "Admin nazorat markazi",
-    heroTitle: "Platformani kuzating, xatolarni tez bartaraf qiling va foydalanuvchi faolligini boshqaring",
-    heroDescription: "Bu panel backend admin endpointlariga ulanadi va real vaqtda platformaning holati, foydalanuvchilar soni hamda xatolar statistikasi haqida ma'lumot beradi.",
+    heroTitle: "Platforma nazorati — bir joyda",
+    heroDescription: "Foydalanuvchilar, kontent va xatolar — hammasi real vaqtda.",
     refreshData: "Ma'lumotlarni yangilash",
     jumpToErrors: "Xatolarga o'tish",
     overview: "Umumiy",
@@ -157,8 +157,8 @@ const adminCopy = {
     errorsLast24h: "Ошибки за 24 часа",
     monitoringSignal: "Сигнал мониторинга",
     heroBadge: "Центр администрирования",
-    heroTitle: "Следите за платформой, быстро устраняйте ошибки и управляйте активностью пользователей",
-    heroDescription: "Эта панель подключена к backend admin endpoint'ам и показывает состояние платформы, количество пользователей и статистику ошибок в реальном времени.",
+    heroTitle: "Контроль платформы — в одном месте",
+    heroDescription: "Пользователи, контент и ошибки — всё в реальном времени.",
     refreshData: "Обновить данные",
     jumpToErrors: "Перейти к ошибкам",
     overview: "Обзор",
@@ -256,22 +256,22 @@ type MetricColor = "blue" | "emerald" | "violet" | "amber";
 
 const METRIC_PALETTE: Record<MetricColor, { bar: string; iconBg: string; iconText: string }> = {
   blue: {
-    bar: "bg-gradient-to-r from-blue-500 to-cyan-500",
+    bar: "bg-gradient-to-r from-[#9bbafc] to-[#c0d4ff]",
     iconBg: "bg-blue-100 dark:bg-blue-500/20",
     iconText: "text-blue-700 dark:text-blue-300",
   },
   emerald: {
-    bar: "bg-gradient-to-r from-brand-500 to-violet-500",
+    bar: "bg-gradient-to-r from-[#9bbafc] to-[#c4b5fd]",
     iconBg: "bg-brand-100 dark:bg-brand-500/20",
     iconText: "text-brand-700 dark:text-brand-300",
   },
   violet: {
-    bar: "bg-gradient-to-r from-brand-500 to-brand-500",
+    bar: "bg-gradient-to-r from-[#c4b5fd] to-[#ddd0ff]",
     iconBg: "bg-brand-100 dark:bg-brand-500/20",
     iconText: "text-brand-700 dark:text-brand-300",
   },
   amber: {
-    bar: "bg-gradient-to-r from-amber-500 to-orange-500",
+    bar: "bg-gradient-to-r from-[#f0c9a0] to-[#ffdfc2]",
     iconBg: "bg-amber-100 dark:bg-amber-500/20",
     iconText: "text-amber-700 dark:text-amber-300",
   },
@@ -439,8 +439,8 @@ export default function AdminDashboardPage() {
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8">
       <motion.section variants={itemVariants} className="relative overflow-hidden rounded-3xl border border-surface-200 bg-white p-6 shadow-sm dark:border-surface-700 dark:bg-surface-900 sm:p-8">
         {/* Decorative accent blob */}
-        <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-gradient-to-br from-brand-500/15 via-cyan-500/10 to-transparent blur-3xl" aria-hidden />
-        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-gradient-to-tr from-brand-500/10 via-transparent to-transparent blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-gradient-to-br from-[#d7e7ff]/70 via-[#e3ddff]/50 to-transparent dark:from-brand-500/15 dark:via-violet-500/10 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-gradient-to-tr from-[#ffe9d6]/60 via-transparent to-transparent dark:from-brand-500/10 blur-3xl" aria-hidden />
 
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
