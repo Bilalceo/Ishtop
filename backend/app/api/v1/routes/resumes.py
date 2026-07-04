@@ -906,6 +906,41 @@ def _render_pdf_bytes(lines: List[str]) -> bytes:
     return bytes(pdf)
 
 
+# ---------------------------------------------------------------------------
+# PDF template themes — each "Rezyume shabloni" choice renders a visibly
+# different document. Resolved from resume.content._metadata.template.
+_PDF_THEMES = {
+    # Periwinkle accents, left-aligned header (default, matches the product UI)
+    "modern": {
+        "accent": "#5581E0", "name": "#0f172a", "role": "#4468C2",
+        "muted": "#64748b", "body": "#334155", "section": "#334155",
+        "divider": "#e2e8f0", "skills_bg": "#f2f5fc", "skills_box": "#d5e0f5",
+        "center": False, "rule_w": 0.8, "name_size": 24, "name_upper": False,
+    },
+    # Black & white, centered serif-feel header, strong rules
+    "classic": {
+        "accent": "#1f2937", "name": "#111827", "role": "#374151",
+        "muted": "#6b7280", "body": "#1f2937", "section": "#111827",
+        "divider": "#9ca3af", "skills_bg": "#f6f6f4", "skills_box": "#d1d5db",
+        "center": True, "rule_w": 1.0, "name_size": 22, "name_upper": True,
+    },
+    # Hairlines only, generous whitespace, no boxes
+    "minimal": {
+        "accent": "#d4d4d8", "name": "#18181b", "role": "#71717a",
+        "muted": "#a1a1aa", "body": "#3f3f46", "section": "#52525b",
+        "divider": "#e4e4e7", "skills_bg": None, "skills_box": None,
+        "center": False, "rule_w": 0.4, "name_size": 22, "name_upper": False,
+    },
+    # Violet identity, bold rules, tinted skills panel
+    "creative": {
+        "accent": "#7C5CE0", "name": "#3b2d7a", "role": "#7C5CE0",
+        "muted": "#64748b", "body": "#334155", "section": "#5b4a9e",
+        "divider": "#d8ccff", "skills_bg": "#f1ecff", "skills_box": "#cbb9f5",
+        "center": False, "rule_w": 1.6, "name_size": 25, "name_upper": False,
+    },
+}
+
+
 def _generate_pdf(resume: Resume) -> bytes:
     """Generate a polished PDF version of a resume.
 
@@ -916,7 +951,7 @@ def _generate_pdf(resume: Resume) -> bytes:
     try:
         import html
         from reportlab.lib import colors
-        from reportlab.lib.enums import TA_LEFT
+        from reportlab.lib.enums import TA_CENTER, TA_LEFT
         from reportlab.lib.pagesizes import A4
         from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
         from reportlab.lib.units import mm
@@ -936,6 +971,11 @@ def _generate_pdf(resume: Resume) -> bytes:
         content = resume.content or {}
         locale = _resolve_resume_locale(content)
         personal_info = content.get("personal_info") if isinstance(content.get("personal_info"), dict) else {}
+
+        meta = content.get("_metadata") if isinstance(content.get("_metadata"), dict) else {}
+        template_key = str(meta.get("template") or "modern").lower()
+        theme = _PDF_THEMES.get(template_key, _PDF_THEMES["modern"])
+        header_align = TA_CENTER if theme["center"] else TA_LEFT
 
         # Unicode-capable font (Cyrillic + Uzbek Latin); Helvetica only as last resort.
         regular_font, bold_font = _resolve_pdf_fonts()
@@ -957,10 +997,10 @@ def _generate_pdf(resume: Resume) -> bytes:
                 "Name",
                 parent=base_styles["Title"],
                 fontName=bold_font,
-                fontSize=24,
-                leading=28,
-                alignment=TA_LEFT,
-                textColor=colors.HexColor("#0f172a"),
+                fontSize=theme["name_size"],
+                leading=theme["name_size"] + 4,
+                alignment=header_align,
+                textColor=colors.HexColor(theme["name"]),
                 spaceAfter=4,
             ),
             "role": ParagraphStyle(
@@ -969,7 +1009,8 @@ def _generate_pdf(resume: Resume) -> bytes:
                 fontName=bold_font,
                 fontSize=10.5,
                 leading=14,
-                textColor=colors.HexColor("#047857"),
+                alignment=header_align,
+                textColor=colors.HexColor(theme["role"]),
             ),
             "contact": ParagraphStyle(
                 "Contact",
@@ -977,7 +1018,8 @@ def _generate_pdf(resume: Resume) -> bytes:
                 fontName=regular_font,
                 fontSize=8.5,
                 leading=13,
-                textColor=colors.HexColor("#64748b"),
+                alignment=header_align,
+                textColor=colors.HexColor(theme["muted"]),
             ),
             "section": ParagraphStyle(
                 "Section",
@@ -985,7 +1027,7 @@ def _generate_pdf(resume: Resume) -> bytes:
                 fontName=bold_font,
                 fontSize=10.5,
                 leading=14,
-                textColor=colors.HexColor("#334155"),
+                textColor=colors.HexColor(theme["section"]),
                 spaceBefore=10,
                 spaceAfter=5,
                 uppercase=True,
@@ -996,7 +1038,7 @@ def _generate_pdf(resume: Resume) -> bytes:
                 fontName=regular_font,
                 fontSize=9.5,
                 leading=14,
-                textColor=colors.HexColor("#334155"),
+                textColor=colors.HexColor(theme["body"]),
                 spaceAfter=5,
             ),
             "muted": ParagraphStyle(
@@ -1005,7 +1047,7 @@ def _generate_pdf(resume: Resume) -> bytes:
                 fontName=regular_font,
                 fontSize=8.5,
                 leading=12,
-                textColor=colors.HexColor("#64748b"),
+                textColor=colors.HexColor(theme["muted"]),
             ),
             "item_title": ParagraphStyle(
                 "ItemTitle",
@@ -1013,7 +1055,7 @@ def _generate_pdf(resume: Resume) -> bytes:
                 fontName=bold_font,
                 fontSize=10,
                 leading=13,
-                textColor=colors.HexColor("#0f172a"),
+                textColor=colors.HexColor(theme["name"]),
                 spaceAfter=1,
             ),
             "bullet": ParagraphStyle(
@@ -1022,9 +1064,17 @@ def _generate_pdf(resume: Resume) -> bytes:
                 fontName=regular_font,
                 fontSize=9,
                 leading=13,
-                textColor=colors.HexColor("#334155"),
+                textColor=colors.HexColor(theme["body"]),
             ),
         }
+
+        def section_rule() -> HRFlowable:
+            return HRFlowable(
+                width="100%",
+                thickness=theme["rule_w"],
+                color=colors.HexColor(theme["accent"]),
+                spaceAfter=5,
+            )
 
         def clean(value: Any) -> str:
             return html.escape(_first_text(value) or "")
@@ -1048,26 +1098,26 @@ def _generate_pdf(resume: Resume) -> bytes:
         # thin divider. No ink-hungry dark block.
         contact_text = "   ·   ".join(html.escape(item) for item in contacts if item)
 
-        story.append(Paragraph(html.escape(name), styles["name"]))
+        story.append(Paragraph(html.escape(name.upper() if theme["name_upper"] else name), styles["name"]))
         story.append(Paragraph(html.escape(role.upper()), styles["role"]))
         if contact_text:
             story.append(Spacer(1, 5))
             story.append(Paragraph(contact_text, styles["contact"]))
         story.append(Spacer(1, 7))
-        story.append(HRFlowable(width="100%", thickness=0.6, color=colors.HexColor("#e2e8f0")))
+        story.append(HRFlowable(width="100%", thickness=theme["rule_w"], color=colors.HexColor(theme["divider"])))
         story.append(Spacer(1, 5))
 
         summary = _first_text(content.get("summary"), (content.get("professional_summary") or {}).get("text") if isinstance(content.get("professional_summary"), dict) else content.get("professional_summary"))
         if summary:
             story.extend([
                 paragraph(_label(locale, "summary"), "section"),
-                HRFlowable(width="100%", thickness=0.6, color=colors.HexColor("#10b981"), spaceAfter=5),
+                section_rule(),
                 paragraph(summary),
             ])
 
         experience = content.get("experience") or content.get("work_experience") or []
         if isinstance(experience, list) and experience:
-            story.extend([paragraph(_label(locale, "experience"), "section"), HRFlowable(width="100%", thickness=0.6, color=colors.HexColor("#10b981"), spaceAfter=5)])
+            story.extend([paragraph(_label(locale, "experience"), "section"), section_rule()])
             for item in experience:
                 if not isinstance(item, dict):
                     continue
@@ -1094,7 +1144,7 @@ def _generate_pdf(resume: Resume) -> bytes:
 
         education = content.get("education") or []
         if isinstance(education, list) and education:
-            story.extend([paragraph(_label(locale, "education"), "section"), HRFlowable(width="100%", thickness=0.6, color=colors.HexColor("#10b981"), spaceAfter=5)])
+            story.extend([paragraph(_label(locale, "education"), "section"), section_rule()])
             for item in education:
                 if not isinstance(item, dict):
                     continue
@@ -1120,7 +1170,7 @@ def _generate_pdf(resume: Resume) -> bytes:
         verified_list = [s for s, st in verifications.items() if st == "verified"]
         learning_list = [s for s, st in verifications.items() if st == "learning"]
         if technical or soft or verified_list or learning_list:
-            story.extend([paragraph(_label(locale, "skills"), "section"), HRFlowable(width="100%", thickness=0.6, color=colors.HexColor("#10b981"), spaceAfter=5)])
+            story.extend([paragraph(_label(locale, "skills"), "section"), section_rule()])
             skill_rows = []
             if technical:
                 skill_rows.append([paragraph(_label(locale, "technical_skills"), "item_title"), paragraph(", ".join(technical), "body")])
@@ -1131,24 +1181,36 @@ def _generate_pdf(resume: Resume) -> bytes:
                 skill_rows.append([paragraph(_label(locale, "verified_skills"), "item_title"), paragraph(", ".join("✓ " + s for s in verified_list), "body")])
             if learning_list:
                 skill_rows.append([paragraph(_label(locale, "learning_skills"), "item_title"), paragraph(", ".join(learning_list), "body")])
-            story.append(Table(
-                skill_rows,
-                colWidths=[34 * mm, 136 * mm],
-                style=TableStyle([
+            if theme["skills_bg"]:
+                skills_style = TableStyle([
                     ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                    ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
-                    ("BOX", (0, 0), (-1, -1), 0.4, colors.HexColor("#e2e8f0")),
-                    ("INNERGRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#e2e8f0")),
+                    ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor(theme["skills_bg"])),
+                    ("BOX", (0, 0), (-1, -1), 0.4, colors.HexColor(theme["skills_box"])),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.3, colors.HexColor(theme["skills_box"])),
                     ("LEFTPADDING", (0, 0), (-1, -1), 8),
                     ("RIGHTPADDING", (0, 0), (-1, -1), 8),
                     ("TOPPADDING", (0, 0), (-1, -1), 6),
                     ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-                ]),
+                ])
+            else:
+                # Minimal: quiet rows, hairline separators only
+                skills_style = TableStyle([
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("LINEBELOW", (0, 0), (-1, -2), 0.3, colors.HexColor(theme["divider"])),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                    ("TOPPADDING", (0, 0), (-1, -1), 5),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                ])
+            story.append(Table(
+                skill_rows,
+                colWidths=[34 * mm, 136 * mm],
+                style=skills_style,
             ))
 
         projects = content.get("projects") or []
         if isinstance(projects, list) and projects:
-            story.extend([paragraph(_label(locale, "projects"), "section"), HRFlowable(width="100%", thickness=0.6, color=colors.HexColor("#10b981"), spaceAfter=5)])
+            story.extend([paragraph(_label(locale, "projects"), "section"), section_rule()])
             for item in projects:
                 if not isinstance(item, dict):
                     continue
@@ -1170,7 +1232,7 @@ def _generate_pdf(resume: Resume) -> bytes:
                 if isinstance(language, dict):
                     extras.append(" - ".join(part for part in [_first_text(language.get("name")), _first_text(language.get("proficiency"), language.get("level"))] if part))
         if extras:
-            story.extend([paragraph(_label(locale, "additional"), "section"), HRFlowable(width="100%", thickness=0.6, color=colors.HexColor("#10b981"), spaceAfter=5)])
+            story.extend([paragraph(_label(locale, "additional"), "section"), section_rule()])
             story.append(ListFlowable(
                 [ListItem(paragraph(item, "bullet"), leftIndent=10) for item in extras if item],
                 bulletType="bullet",
