@@ -146,33 +146,37 @@ export function JobDetailPanel({
         </div>
 
         {job.external_apply_url && (
-          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300">
+          <a
+            href={job.external_apply_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 transition hover:bg-brand-100 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300"
+            title={isRu ? "Открыть оригинал в Telegram" : "Asl e'lonni Telegram'da ochish"}
+          >
             <ExternalLink className="h-3.5 w-3.5" />
-            {isRu ? "Внешний источник — отклик на источнике" : "Tashqi manba — ariza manbada beriladi"}
+            {isRu ? "Источник: Telegram-канал" : "Manba: Telegram kanali"}
+          </a>
+        )}
+
+        {/* Contact from the source post (aggregated jobs) */}
+        {job.contact_info && (
+          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-2xl bg-surface-50 px-4 py-3 text-sm dark:bg-surface-800/50">
+            <span className="font-semibold text-surface-900 dark:text-white">
+              {isRu ? "Контакт работодателя:" : "Ish beruvchi kontakti:"}
+            </span>
+            <span className="select-all text-surface-700 dark:text-surface-300">{job.contact_info}</span>
           </div>
         )}
 
-        {/* Big CTA buttons */}
+        {/* Big CTA buttons — platform apply for every job */}
         <div className="mt-5 flex gap-3">
-          {job.external_apply_url ? (
-            <a
-              href={job.external_apply_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition hover:opacity-95"
-            >
-              <ExternalLink className="h-4 w-4" />
-              {isRu ? "Откликнуться на источнике" : "Manbada ariza berish"}
-            </a>
-          ) : (
-            <Button
-              className="flex-1 rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 shadow-lg shadow-brand-500/25"
-              onClick={onApply}
-            >
-              <Send className="mr-2 h-4 w-4" />
-              {isRu ? "Откликнуться" : "Hozir ariza yuborish"}
-            </Button>
-          )}
+          <Button
+            className="flex-1 rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 shadow-lg shadow-brand-500/25"
+            onClick={onApply}
+          >
+            <Send className="mr-2 h-4 w-4" />
+            {isRu ? "Откликнуться" : "Hozir ariza yuborish"}
+          </Button>
           <Button variant="outline" className="flex-1 rounded-xl" onClick={onToggleSave}>
             {isSaved ? (
               <>

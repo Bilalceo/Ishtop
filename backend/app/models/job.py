@@ -470,6 +470,12 @@ class Job(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
         nullable=True,
         comment="External URL for applications (if not using platform)"
     )
+
+    contact_info = Column(
+        String(500),
+        nullable=True,
+        comment="Public contact from the source post (phone/telegram/email) for aggregated jobs"
+    )
     
     is_featured = Column(
         Boolean,

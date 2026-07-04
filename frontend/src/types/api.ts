@@ -242,6 +242,7 @@ export interface Job {
   verification_state?: "unverified" | "pending" | "approved" | "rejected" | string;
   /** When set, this is an external (aggregated) listing — apply happens on the source. */
   external_apply_url?: string | null;
+  contact_info?: string | null;
   created_at: string;
   updated_at: string;
   expires_at?: string;

@@ -315,6 +315,7 @@ class JobResponse(BaseModel):
     verification_state: Optional[str] = None
     is_featured: bool
     external_apply_url: Optional[str] = None
+    contact_info: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     expires_at: Optional[datetime] = None
