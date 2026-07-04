@@ -86,28 +86,31 @@ export default function AuthLayout({
         </motion.div>
       </div>
 
-      {/* Right side - Decorative (matches landing: dark + single emerald accent) */}
-      <div className="relative hidden overflow-hidden bg-[#0a0a0b] lg:block lg:w-1/2">
-        {/* One restrained emerald glow — no rainbow of orbs */}
+      {/* Right side - Decorative (silver: pastel washes on the E5E5E5 ground) */}
+      <div className="relative hidden overflow-hidden bg-[#e5e5e5] lg:block lg:w-1/2">
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-40 left-1/2 h-[460px] w-[760px] -translate-x-1/2 rounded-full bg-brand-500/10 blur-[150px]"
+          className="pointer-events-none absolute -top-40 left-1/2 h-[460px] w-[760px] -translate-x-1/2 rounded-full bg-[#d7e7ff]/70 blur-[130px]"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-40 left-1/3 h-[380px] w-[520px] rounded-full bg-violet-500/10 blur-[140px]"
+          className="pointer-events-none absolute -bottom-40 left-1/3 h-[380px] w-[520px] rounded-full bg-[#e3ddff]/70 blur-[120px]"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-24 right-[-80px] h-[300px] w-[300px] rounded-full bg-[#ffe9d6]/60 blur-[110px]"
         />
 
         {/* Content */}
-        <div className="relative flex h-full flex-col items-center justify-center px-12 text-white">
+        <div className="relative flex h-full flex-col items-center justify-center px-12 text-[#18181b]">
           <div className="max-w-md">
             <motion.span
               initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/70"
+              className="chip-silver"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-brand-400" />
+              <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#8ab4ff] to-[#b7a4ff]" />
               IshTop · AI-karyera
             </motion.span>
 
@@ -119,7 +122,7 @@ export default function AuthLayout({
               className="mt-6 text-balance text-4xl font-bold leading-[1.12] tracking-tight"
             >
               {t("auth.sidebar.title")}{" "}
-              <span className="text-brand-400">
+              <span className="bg-gradient-to-r from-[#6f9bf0] to-[#a08de0] bg-clip-text text-transparent">
                 {t("auth.sidebar.titleHighlight")}
               </span>
             </motion.h2>
@@ -128,7 +131,7 @@ export default function AuthLayout({
               initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="mt-4 text-pretty text-base leading-relaxed text-white/60"
+              className="mt-4 text-pretty text-base leading-relaxed text-[#63636b]"
             >
               {t("auth.sidebar.subtitle")}
             </motion.p>
@@ -141,8 +144,8 @@ export default function AuthLayout({
               className="mt-8 space-y-3"
             >
               {sidebarFeatures.map((feature: string, i: number) => (
-                <li key={i} className="flex items-start gap-3 text-sm text-white/80">
-                  <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand-400" />
+                <li key={i} className="flex items-start gap-3 text-sm text-[#3f3f46]">
+                  <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#7cc7a2]" />
                   <span>{feature}</span>
                 </li>
               ))}
@@ -171,10 +174,10 @@ export default function AuthLayout({
               ].map((s) => (
                 <div
                   key={s.label}
-                  className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 text-center"
+                  className="rounded-2xl bg-white p-3 text-center shadow-[0_10px_24px_-16px_rgba(24,24,27,0.25)]"
                 >
-                  <div className="text-lg font-semibold text-white">{s.value}</div>
-                  <div className="mt-0.5 text-xs text-white/50">{s.label}</div>
+                  <div className="text-lg font-semibold text-[#18181b]">{s.value}</div>
+                  <div className="mt-0.5 text-xs text-[#8e8e96]">{s.label}</div>
                 </div>
               ))}
             </motion.div>

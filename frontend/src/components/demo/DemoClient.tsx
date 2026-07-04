@@ -174,7 +174,7 @@ export default function DemoClient() {
   }, [reduce]);
 
   return (
-    <main className="aurora-bg grain relative min-h-screen overflow-hidden text-white">
+    <main className="silver-ground relative min-h-screen overflow-hidden text-[#18181b]">
       {/* ===== Nav ===== */}
       <nav aria-label="Primary" className="relative z-30">
         <div className="section-shell flex h-16 items-center justify-between sm:h-20">
@@ -185,12 +185,12 @@ export default function DemoClient() {
           >
             <span
               aria-hidden
-              className="grid h-9 w-9 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 via-violet-500 to-cyan-400 shadow-lg shadow-brand-500/30"
+              className="grid h-9 w-9 place-items-center rounded-2xl bg-gradient-to-br from-[#8ab4ff] to-[#b7a4ff] shadow-lg shadow-[#b7c9f0]/60"
             >
               <Sparkles className="h-4 w-4 text-white" />
             </span>
             <span className="font-display text-lg font-semibold tracking-tight">IshTop</span>
-            <span className="chip ml-2 !border-white/10 !bg-white/[0.04] !text-white/75 !text-[10px]">
+            <span className="chip-silver ml-2 !px-2.5 !py-0.5 !text-[10px]">
               · {ru ? "ЖИВОЕ ДЕМО" : "LIVE DEMO"}
             </span>
           </Link>
@@ -199,13 +199,13 @@ export default function DemoClient() {
               <button
                 type="button"
                 onClick={reset}
-                className="focus-ring inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/80 hover:bg-white/[0.08]"
+                className="focus-ring btn-silver-ghost !px-3 !py-1.5 !text-xs"
               >
                 <RotateCcw className="h-3 w-3" aria-hidden />
                 {ru ? "Сбросить" : "Tozalash"}
               </button>
             )}
-            <Link href="/register" className="btn-aurora focus-ring">
+            <Link href="/register" className="btn-silver-primary focus-ring">
               {ru ? "Начать" : "Boshlash"} <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </Link>
           </div>
@@ -218,14 +218,14 @@ export default function DemoClient() {
         className="spotlight relative z-10 pb-10 pt-6 sm:pt-10"
       >
         <div className="section-shell">
-          <span className="h-eyebrow !border-white/10 !bg-white/[0.06] !text-white/80">
-            <Wand2 className="h-3 w-3 text-amber-300" aria-hidden />
+          <span className="chip-silver uppercase tracking-[0.18em] !text-[11px]">
+            <Wand2 className="h-3 w-3 text-[#e2b184]" aria-hidden />
             {ru ? "AI-песочница · живая" : "AI playground · jonli"}
           </span>
-          <h1 className="h-display mt-6 pb-1 text-4xl leading-tight text-white sm:text-5xl lg:text-[56px]">
-            {ru ? "Попробуйте. " : "Tinglab ko'ring. "}<span className="aurora-text">{ru ? "За 5 секунд." : "5 soniyada."}</span>
+          <h1 className="h-display mt-6 pb-1 text-4xl leading-tight text-[#18181b] sm:text-5xl lg:text-[56px]">
+            {ru ? "Попробуйте. " : "Tinglab ko'ring. "}<span className="bg-gradient-to-r from-[#6f9bf0] to-[#a08de0] bg-clip-text text-transparent">{ru ? "За 5 секунд." : "5 soniyada."}</span>
           </h1>
-          <p className="mt-4 max-w-2xl text-pretty text-white/70 sm:text-lg">
+          <p className="mt-4 max-w-2xl text-pretty text-[#63636b] sm:text-lg">
             {ru ? "Выберите навыки — AI подумает, объяснит и найдёт 3 самые подходящие вакансии. Без регистрации. Это то, что вы увидите внутри продукта." : "Ko'nikmalaringizni tanlang — AI o'ylab, izohlab, eng mos 3 ta vakansiyani topadi. Hech qanday ro'yxatdan o'tish kerak emas. Bu — mahsulot ichida ko'rasiz."}
           </p>
         </div>
@@ -237,12 +237,12 @@ export default function DemoClient() {
           {/* ─── Left: skill palette + thinking ─── */}
           <div className="space-y-6">
             {/* Skill palette */}
-            <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-md sm:p-6">
+            <div className="card-silver p-5 sm:p-6">
               <div className="flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8e8e96]">
                   {ru ? "1 · Выберите навыки" : "1 · Ko'nikmalaringizni tanlang"}
                 </p>
-                <span className="text-xs font-medium text-brand-300">
+                <span className="text-xs font-medium text-[#5b8def]">
                   {selected.length} {ru ? "выбрано" : "tanlangan"}
                 </span>
               </div>
@@ -250,7 +250,7 @@ export default function DemoClient() {
               <div className="mt-5 space-y-4">
                 {grouped.map(([cat, list]) => (
                   <div key={cat}>
-                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
+                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#a0a0a8]">
                       {catLabel(cat)}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -264,8 +264,8 @@ export default function DemoClient() {
                             aria-pressed={isOn}
                             className={`focus-ring rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                               isOn
-                                ? "border-transparent bg-gradient-to-r from-brand-500 to-cyan-400 text-white shadow-lg shadow-brand-500/30"
-                                : "border-white/10 bg-white/[0.04] text-white/75 hover:border-white/25 hover:bg-white/[0.08]"
+                                ? "border-transparent bg-gradient-to-r from-[#d7e7ff] to-[#e3ddff] text-[#3856a5] shadow-lg shadow-[#b7c9f0]/50"
+                                : "border-[#e2e2df] bg-white text-[#52525b] hover:border-[#c9d9f5] hover:bg-[#f6f8ff]"
                             }`}
                           >
                             {isOn && (
@@ -281,7 +281,7 @@ export default function DemoClient() {
               </div>
 
               {selected.length === 0 && (
-                <p className="mt-5 flex items-center gap-2 rounded-2xl bg-brand-500/10 px-3 py-2.5 text-xs text-brand-200">
+                <p className="mt-5 flex items-center gap-2 rounded-2xl bg-[#eef3ff] px-3 py-2.5 text-xs text-[#4a6bb8]">
                   <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
                   {ru ? "Нажмите хотя бы 1 навык, чтобы начать." : "Boshlash uchun kamida 1 ta ko'nikmani bosing."}
                 </p>
@@ -289,25 +289,25 @@ export default function DemoClient() {
             </div>
 
             {/* Thinking trace */}
-            <div className="rounded-3xl border border-white/10 bg-black/40 p-5 font-mono text-sm shadow-2xl shadow-brand-500/10 backdrop-blur-md sm:p-6">
+            <div className="card-silver p-5 font-mono text-sm sm:p-6">
               <div className="mb-3 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8e8e96]">
                   {ru ? "2 · Рассуждение AI" : "2 · AI Reasoning"}
                 </p>
                 {phase === "thinking" && (
-                  <span className="flex items-center gap-1 text-xs text-brand-300">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-300 shadow-[0_0_8px_rgba(124,92,255,0.9)]" />
+                  <span className="flex items-center gap-1 text-xs text-[#5b8def]">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#8ab4ff]" />
                     {ru ? "думает…" : "o'ylayapti…"}
                   </span>
                 )}
                 {phase === "results" && (
-                  <span className="flex items-center gap-1 text-xs text-brand-300">
+                  <span className="flex items-center gap-1 text-xs text-[#2f7a56]">
                     <CheckCircle2 className="h-3 w-3" aria-hidden /> {ru ? "готово" : "tayyor"}
                   </span>
                 )}
               </div>
 
-              <div className="min-h-[160px] space-y-1.5 text-white/85">
+              <div className="min-h-[160px] space-y-1.5 rounded-2xl bg-[#f6f6f4] p-4 text-[#3f3f46]">
                 <AnimatePresence>
                   {thoughts.filter(Boolean).map((line, i, arr) => {
                     const isDone = line.startsWith("✓");
@@ -319,12 +319,12 @@ export default function DemoClient() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.25 }}
                         className={
-                          isDone ? "text-brand-300" : isArrow ? "text-white/75" : "text-white/85"
+                          isDone ? "text-[#2f7a56]" : isArrow ? "text-[#71717a]" : "text-[#3f3f46]"
                         }
                       >
                         {line}
                         {phase === "thinking" && i === arr.length - 1 && !isDone && (
-                          <span className="ml-1 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-brand-300" />
+                          <span className="ml-1 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-[#8ab4ff]" />
                         )}
                       </motion.p>
                     );
@@ -332,7 +332,7 @@ export default function DemoClient() {
                 </AnimatePresence>
 
                 {phase === "idle" && (
-                  <p className="text-white/45">
+                  <p className="text-[#a0a0a8]">
                     {ru ? "// Объяснение AI появится здесь." : "// AI tushuntirishi shu yerda chiqadi."}
                   </p>
                 )}
@@ -343,10 +343,10 @@ export default function DemoClient() {
           {/* ─── Right: live matches ─── */}
           <div>
             <div className="mb-4 flex items-center justify-between">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8e8e96]">
                 {ru ? "3 · Ваши лучшие совпадения" : "3 · Sizning eng mos vakansiyalaringiz"}
               </p>
-              <span className="text-xs text-white/55">{matches.length} {ru ? "результата" : "ta natija"}</span>
+              <span className="text-xs text-[#8e8e96]">{matches.length} {ru ? "результата" : "ta natija"}</span>
             </div>
 
             {phase !== "results" || matches.length === 0 ? (
@@ -366,15 +366,15 @@ export default function DemoClient() {
                 initial={reduce ? false : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
-                className="mt-6 rounded-3xl border border-white/10 bg-gradient-to-br from-brand-500/10 to-cyan-400/10 p-5 backdrop-blur-md"
+                className="mt-6 rounded-3xl bg-gradient-to-br from-[#d7e7ff]/60 via-white to-[#ffe9d6]/60 p-5 shadow-[0_10px_30px_-18px_rgba(24,24,27,0.25)]"
               >
-                <p className="text-sm text-white/85">
+                <p className="text-sm text-[#52525b]">
                   {ru ? "Это только демо. В настоящем IshTop: 500+ проверенных компаний, авто-отклики, AI-резюме и тренажёр собеседований." : "Bu faqat demo. Haqiqiy IshTop'da: 500+ tasdiqlangan kompaniya, avto-ariza, AI rezyume va suhbat murabbiyi."}
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <Link
                     href="/register"
-                    className="btn-aurora focus-ring"
+                    className="btn-silver-primary focus-ring"
                   >
                     {ru ? "Зарегистрироваться бесплатно" : "Bepul ro'yxatdan o'tish"}
                     <ArrowRight className="h-3.5 w-3.5" aria-hidden />
@@ -407,10 +407,10 @@ function MatchCard({
 
   const tone =
     m.score >= 80
-      ? "bg-brand-500/15 text-brand-300"
+      ? "bg-[#d9f1e4] text-[#2f7a56]"
       : m.score >= 60
-      ? "bg-amber-500/15 text-amber-300"
-      : "bg-white/10 text-white/70";
+      ? "bg-[#ffe9d6] text-[#9a5b28]"
+      : "bg-[#ececea] text-[#71717a]";
 
   return (
     <motion.li
@@ -418,19 +418,19 @@ function MatchCard({
       animate={{ opacity: 1, y: 0, rotateX: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.55, ease: [0.19, 1, 0.22, 1], delay: index * 0.12 }}
-      className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/[0.06] sm:p-6"
+      className="card-silver card-silver-hover p-5 sm:p-6"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-display text-base font-semibold text-white sm:text-lg">
+          <p className="font-display text-base font-semibold text-[#18181b] sm:text-lg">
             {m.job.title}
           </p>
-          <p className="mt-0.5 text-sm text-white/65">
+          <p className="mt-0.5 text-sm text-[#8e8e96]">
             {m.job.company} · {m.job.location}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-            <span className="text-brand-300">{m.job.salary}</span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/15 px-2 py-0.5 text-cyan-300">
+            <span className="font-semibold text-[#2f7a56]">{m.job.salary}</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#d7e7ff] px-2 py-0.5 text-[#3856a5]">
               <ShieldCheck className="h-3 w-3" aria-hidden /> Trust {m.job.trustScore}
             </span>
           </div>
@@ -445,12 +445,12 @@ function MatchCard({
 
       {/* Reasoning bar */}
       <div className="mt-4">
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#ececea]">
           <motion.div
             initial={reduce ? false : { width: 0 }}
             animate={{ width: `${m.score}%` }}
             transition={{ duration: 1.1, ease: [0.19, 1, 0.22, 1], delay: 0.2 + index * 0.12 }}
-            className="h-full rounded-full bg-gradient-to-r from-brand-500 via-cyan-400 to-brand-400"
+            className="h-full rounded-full bg-gradient-to-r from-[#8ab4ff] via-[#b7a4ff] to-[#7cc7a2]"
           />
         </div>
       </div>
@@ -459,7 +459,7 @@ function MatchCard({
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
-        className="focus-ring mt-3 inline-flex items-center gap-1 rounded-full text-xs font-semibold text-brand-300 hover:text-brand-200"
+        className="focus-ring mt-3 inline-flex items-center gap-1 rounded-full text-xs font-semibold text-[#5b8def] hover:text-[#3856a5]"
       >
         {ru ? "Почему?" : "Nega?"} <ChevronRight className={`h-3 w-3 transition-transform ${expanded ? "rotate-90" : ""}`} aria-hidden />
       </button>
@@ -473,7 +473,7 @@ function MatchCard({
             transition={{ duration: 0.4, ease: [0.19, 1, 0.22, 1] }}
             className="overflow-hidden"
           >
-            <ul className="mt-4 space-y-2 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 text-sm">
+            <ul className="mt-4 space-y-2 rounded-2xl bg-[#f6f6f4] p-4 text-sm">
               {m.reasons.map((r, i) => {
                 const Icon =
                   r.type === "match"
@@ -483,14 +483,14 @@ function MatchCard({
                     : AlertCircle;
                 const color =
                   r.type === "match"
-                    ? "text-brand-300"
+                    ? "text-[#2f7a56]"
                     : r.type === "trust"
-                    ? "text-cyan-300"
-                    : "text-amber-300";
+                    ? "text-[#3856a5]"
+                    : "text-[#9a5b28]";
                 return (
                   <li key={i} className="flex items-start gap-2">
                     <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${color}`} aria-hidden />
-                    <span className="text-white/85">{r.text}</span>
+                    <span className="text-[#3f3f46]">{r.text}</span>
                   </li>
                 );
               })}
@@ -538,19 +538,19 @@ function ScoreNumber({ score, reduce }: { score: number; reduce: boolean }) {
 
 function EmptyMatches({ phase, selected, ru }: { phase: Phase; selected: number; ru: boolean }) {
   return (
-    <div className="grid place-items-center rounded-3xl border border-dashed border-white/10 bg-white/[0.02] p-10 text-center backdrop-blur-md">
+    <div className="grid place-items-center rounded-3xl border border-dashed border-[#d4d4d1] bg-white/60 p-10 text-center">
       {phase === "idle" || selected === 0 ? (
         <>
           <span
             aria-hidden
-            className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-brand-500/20 to-cyan-400/20"
+            className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[#d7e7ff] to-[#e3ddff]"
           >
-            <Wand2 className="h-6 w-6 text-brand-300" aria-hidden />
+            <Wand2 className="h-6 w-6 text-[#5b4a9e]" aria-hidden />
           </span>
-          <p className="mt-4 text-sm font-medium text-white/80">
+          <p className="mt-4 text-sm font-medium text-[#3f3f46]">
             {ru ? "Выберите навык слева, чтобы начать" : "Boshlash uchun chap tomondan ko'nikma tanlang"}
           </p>
-          <p className="mt-1 text-xs text-white/55">{ru ? "3-5 навыков — лучший результат" : "3-5 ta ko'nikma — eng yaxshi natija"}</p>
+          <p className="mt-1 text-xs text-[#8e8e96]">{ru ? "3-5 навыков — лучший результат" : "3-5 ta ko'nikma — eng yaxshi natija"}</p>
         </>
       ) : (
         <>
@@ -558,12 +558,12 @@ function EmptyMatches({ phase, selected, ru }: { phase: Phase; selected: number;
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                className="h-2 w-2 animate-pulse rounded-full bg-brand-400"
+                className="h-2 w-2 animate-pulse rounded-full bg-[#8ab4ff]"
                 style={{ animationDelay: `${i * 150}ms` }}
               />
             ))}
           </div>
-          <p className="mt-4 text-sm text-white/70">{ru ? "AI ищет вакансии…" : "AI vakansiyalarni qidirmoqda…"}</p>
+          <p className="mt-4 text-sm text-[#63636b]">{ru ? "AI ищет вакансии…" : "AI vakansiyalarni qidirmoqda…"}</p>
         </>
       )}
     </div>
@@ -605,11 +605,11 @@ function ShareButton({ selected, ru }: { selected: string[]; ru: boolean }) {
       type="button"
       onClick={onShare}
       aria-label={copied ? (ru ? "Ссылка скопирована" : "Link nusxalandi") : (ru ? "Поделиться результатом" : "Natijani share qilish")}
-      className="focus-ring inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-white/85 backdrop-blur-md transition hover:border-white/30 hover:bg-white/[0.08]"
+      className="focus-ring btn-silver-ghost !px-5 !py-2.5"
     >
       {copied ? (
         <>
-          <Check className="h-3.5 w-3.5 text-brand-300" aria-hidden />
+          <Check className="h-3.5 w-3.5 text-[#2f7a56]" aria-hidden />
           {ru ? "Ссылка скопирована" : "Link nusxalandi"}
         </>
       ) : (
