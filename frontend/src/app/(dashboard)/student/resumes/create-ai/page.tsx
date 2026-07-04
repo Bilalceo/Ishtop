@@ -1464,6 +1464,7 @@ export default function AIResumeBuilderPage() {
               title={formData.fullName || t("aiResumeBuilder.title")}
               locale={locale}
               isPlaceholder={!formData.fullName}
+              template={selectedTemplate}
             />
           </div>
         </div>
