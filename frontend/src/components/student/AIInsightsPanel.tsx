@@ -93,7 +93,7 @@ export function AIInsightsPanel({ input }: { input: InsightsInput }) {
   const isRu = locale === "ru";
   const ui = isRu
     ? { thinking: "обдумываю…", ready: "готово", refresh: "Повторить анализ" }
-    : { thinking: "thinking…", ready: "tayyor", refresh: "Tahlilni qayta yuritish" };
+    : { thinking: "o'ylayapti…", ready: "tayyor", refresh: "Tahlilni qayta yuritish" };
   const [thoughts, setThoughts] = useState<string[]>([]);
   const [done, setDone] = useState(false);
   const [token, setToken] = useState(0);
@@ -144,20 +144,20 @@ export function AIInsightsPanel({ input }: { input: InsightsInput }) {
   }, [script, reduce, token]);
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-black/40 p-5 font-mono text-sm shadow-2xl shadow-brand-500/10 backdrop-blur-md dark:bg-black/40 sm:p-6">
+    <div className="rounded-3xl border border-surface-200/70 bg-white p-5 text-sm dark:border-white/[0.06] dark:bg-surface-900 sm:p-6">
       <div className="mb-3 flex items-center justify-between">
-        <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
-          <Brain className="h-3.5 w-3.5 text-brand-300" aria-hidden />
-          AI sizning ma&apos;lumotlaringizni o&apos;qiyapti
+        <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-white/55">
+          <Brain className="h-3.5 w-3.5 text-brand-500 dark:text-brand-300" aria-hidden />
+          {isRu ? "AI изучает ваши данные" : "AI ma'lumotlaringizni o'qiyapti"}
         </p>
         <div className="flex items-center gap-3">
           {!done ? (
-            <span className="flex items-center gap-1 text-xs text-brand-300">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-300 shadow-[0_0_8px_rgba(124,92,255,0.9)]" />
+            <span className="flex items-center gap-1 text-xs text-brand-600 dark:text-brand-300">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-500 dark:bg-brand-300" />
               {ui.thinking}
             </span>
           ) : (
-            <span className="flex items-center gap-1 text-xs text-brand-300">
+            <span className="flex items-center gap-1 text-xs text-[#2f7a56] dark:text-brand-300">
               <CheckCircle2 className="h-3 w-3" aria-hidden /> {ui.ready}
             </span>
           )}
@@ -165,14 +165,14 @@ export function AIInsightsPanel({ input }: { input: InsightsInput }) {
             type="button"
             onClick={() => setToken((t) => t + 1)}
             aria-label={ui.refresh}
-            className="focus-ring grid h-7 w-7 place-items-center rounded-full bg-white/[0.05] text-white/60 transition hover:bg-white/[0.1] hover:text-white"
+            className="focus-ring grid h-7 w-7 place-items-center rounded-full bg-surface-100 text-surface-500 transition hover:bg-surface-200 hover:text-surface-800 dark:bg-white/[0.05] dark:text-white/60 dark:hover:bg-white/[0.1] dark:hover:text-white"
           >
             <RefreshCw className="h-3.5 w-3.5" aria-hidden />
           </button>
         </div>
       </div>
 
-      <div className="min-h-[100px] space-y-1.5 text-white/85">
+      <div className="min-h-[100px] space-y-2 rounded-2xl bg-surface-50 p-4 dark:bg-white/[0.03]">
         <AnimatePresence>
           {thoughts.filter(Boolean).map((line, i, arr) => {
             const isDone = line.startsWith("✓");
@@ -183,14 +183,22 @@ export function AIInsightsPanel({ input }: { input: InsightsInput }) {
                 initial={reduce ? false : { opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25 }}
-                className={
-                  isDone ? "text-brand-300" : isArrow ? "text-white/75" : "text-white/85"
-                }
+                className={`flex items-start gap-2 text-[13px] leading-relaxed ${
+                  isDone
+                    ? "font-medium text-[#2f7a56] dark:text-brand-300"
+                    : "text-surface-600 dark:text-white/75"
+                }`}
               >
-                {line}
-                {!done && i === arr.length - 1 && !isDone && (
-                  <span className="ml-1 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-brand-300" />
+                {isDone ? (
+                  <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+                ) : (
+                  <span
+                    aria-hidden
+                    className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-300 dark:bg-brand-400"
+                  />
                 )}
+                <span>{line.replace(/^[>✓]\s*/, "")}</span>
+
               </motion.p>
             );
           })}
