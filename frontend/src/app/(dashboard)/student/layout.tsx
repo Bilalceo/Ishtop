@@ -32,6 +32,7 @@ import {
   Sparkles,
   ChevronRight,
   BookmarkCheck,
+  MessageSquare,
   Loader2,
 } from "lucide-react";
 import { useAuth, useRequireAuth } from "@/hooks/useAuth";
@@ -77,6 +78,11 @@ const getNavigation = (t: (key: string) => string) => [
     icon: Send,
     badge: undefined as string | undefined,
     badgeColor: "warning",
+  },
+  {
+    name: t("dashboard.sidebar.interviewCoach"),
+    href: "/student/interview",
+    icon: MessageSquare,
   },
   {
     name: t("dashboard.sidebar.savedJobs"),

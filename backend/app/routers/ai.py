@@ -896,3 +896,163 @@ async def ai_hr_email_send(
         },
         "message": "Email sent successfully",
     }
+
+
+# =============================================================================
+# AI INTERVIEW COACH — Gemini-powered mock interview for students
+# =============================================================================
+import json as _json
+
+
+class InterviewQuestionsRequest(BaseModel):
+    role: str = Field(..., min_length=2, max_length=160, description="Target role / job title")
+    skills: List[str] = Field(default_factory=list, description="Candidate skills (optional)")
+    level: str = Field(default="junior", max_length=40, description="intern | junior | mid")
+    locale: str = Field(default="uz", description="uz | ru")
+    count: int = Field(default=5, ge=3, le=8)
+
+
+class InterviewEvaluateRequest(BaseModel):
+    role: str = Field(..., min_length=2, max_length=160)
+    question: str = Field(..., min_length=3, max_length=600)
+    answer: str = Field(..., min_length=1, max_length=4000)
+    locale: str = Field(default="uz", description="uz | ru")
+
+
+def _parse_ai_json(text: str) -> Any:
+    """Best-effort JSON extraction from an AI text response."""
+    raw = (text or "").strip()
+    if raw.startswith("```"):
+        raw = raw.strip("`")
+        if raw.lower().startswith("json"):
+            raw = raw[4:]
+    try:
+        return _json.loads(raw)
+    except Exception:
+        start = raw.find("{")
+        arr = raw.find("[")
+        if arr != -1 and (start == -1 or arr < start):
+            start = arr
+        end = max(raw.rfind("}"), raw.rfind("]"))
+        if start != -1 and end != -1 and end > start:
+            return _json.loads(raw[start : end + 1])
+        raise
+
+
+async def _ai_generate(system: str, prompt: str, operation: str) -> str:
+    service = get_ai_service()
+    if hasattr(service, "generate"):
+        return await service.generate(f"{system}\n\n{prompt}", response_format="json")
+    if hasattr(service, "generate_text"):
+        return await service.generate_text(
+            system_message=system, prompt=prompt, operation=operation,
+            temperature=0.4, max_tokens=1200,
+        )
+    if hasattr(service, "_call_openai_api"):
+        return await service._call_openai_api(  # type: ignore[attr-defined]
+            system_message=system, prompt=prompt, operation=operation,
+            response_format_json=True, temperature=0.4, max_tokens=1200,
+        )
+    raise Exception("No AI generation method available")
+
+
+@router.post(
+    "/interview/questions",
+    response_model=Dict[str, Any],
+    summary="Generate mock interview questions",
+    description="Role- and resume-aware interview questions for a practice session.",
+)
+async def interview_questions(
+    request: InterviewQuestionsRequest,
+    _user=Depends(get_current_active_user),
+    _rl: None = Depends(rate_limit(max_requests=12, window_seconds=60)),
+):
+    locale = (request.locale or "uz").strip().lower()
+    if locale not in {"uz", "ru"}:
+        locale = "uz"
+    lang = "Russian (Cyrillic)" if locale == "ru" else "Uzbek (Latin script)"
+    skills = ", ".join([s for s in request.skills if s][:12]) or "—"
+
+    system = (
+        "You are IshTop Interview Coach, an experienced technical recruiter who "
+        "prepares junior candidates in Uzbekistan for real interviews."
+    )
+    prompt = (
+        f"Generate exactly {request.count} interview questions for the role "
+        f'"{request.role}" at {request.level} level. Candidate skills: {skills}.\n'
+        f"Write every question in {lang}. Mix the types: behavioral, technical "
+        "and situational, appropriate for a junior. Keep each question one "
+        "sentence, realistic and specific.\n"
+        'Return ONLY JSON: {"questions":[{"q":"...","type":"behavioral|technical|situational"}]}'
+    )
+    try:
+        text = await _ai_generate(system, prompt, "interview_questions")
+        data = _parse_ai_json(text)
+        items = data.get("questions") if isinstance(data, dict) else data
+        questions = []
+        for it in (items or []):
+            if isinstance(it, dict) and it.get("q"):
+                questions.append({"q": str(it["q"]).strip(), "type": str(it.get("type", "general")).strip()})
+            elif isinstance(it, str) and it.strip():
+                questions.append({"q": it.strip(), "type": "general"})
+        if not questions:
+            raise Exception("empty questions")
+        return {"success": True, "data": {"questions": questions[: request.count], "locale": locale}}
+    except Exception as exc:
+        logger.exception("interview_questions failed: %s", exc)
+        raise HTTPException(status_code=503, detail="AI is busy, please try again.")
+
+
+@router.post(
+    "/interview/evaluate",
+    response_model=Dict[str, Any],
+    summary="Evaluate an interview answer",
+    description="Scores a candidate answer with strengths, improvements and a model answer.",
+)
+async def interview_evaluate(
+    request: InterviewEvaluateRequest,
+    _user=Depends(get_current_active_user),
+    _rl: None = Depends(rate_limit(max_requests=20, window_seconds=60)),
+):
+    locale = (request.locale or "uz").strip().lower()
+    if locale not in {"uz", "ru"}:
+        locale = "uz"
+    lang = "Russian (Cyrillic)" if locale == "ru" else "Uzbek (Latin script)"
+
+    system = (
+        "You are IshTop Interview Coach. Evaluate the candidate's answer fairly "
+        "and constructively, at a junior level. Be encouraging but honest."
+    )
+    prompt = (
+        f'Role: "{request.role}".\nQuestion: "{request.question}".\n'
+        f'Candidate answer: "{request.answer}".\n\n'
+        f"Write all text fields in {lang}. Give a score 0-100, 1-3 concrete "
+        "strengths, 1-3 concrete improvements, and a short model answer (3-5 "
+        "sentences) the candidate could learn from.\n"
+        'Return ONLY JSON: {"score":<int>,"strengths":["..."],'
+        '"improvements":["..."],"model_answer":"..."}'
+    )
+    try:
+        text = await _ai_generate(system, prompt, "interview_evaluate")
+        data = _parse_ai_json(text)
+        if not isinstance(data, dict):
+            raise Exception("bad shape")
+        try:
+            score = max(0, min(100, int(round(float(data.get("score", 0))))))
+        except Exception:
+            score = 0
+        def _lst(v):
+            return [str(x).strip() for x in (v or []) if str(x).strip()][:3]
+        return {
+            "success": True,
+            "data": {
+                "score": score,
+                "strengths": _lst(data.get("strengths")),
+                "improvements": _lst(data.get("improvements")),
+                "model_answer": str(data.get("model_answer", "")).strip(),
+                "locale": locale,
+            },
+        }
+    except Exception as exc:
+        logger.exception("interview_evaluate failed: %s", exc)
+        raise HTTPException(status_code=503, detail="AI is busy, please try again.")

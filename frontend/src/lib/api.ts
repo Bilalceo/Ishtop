@@ -566,6 +566,21 @@ export const aiApi = {
 
   projectHelp: (data: { question: string; locale?: "uz" | "ru"; context_page?: string }) =>
     api.post("/ai/help-assistant", data),
+
+  interviewQuestions: (data: {
+    role: string;
+    skills?: string[];
+    level?: string;
+    locale?: "uz" | "ru";
+    count?: number;
+  }) => api.post("/ai/interview/questions", data),
+
+  interviewEvaluate: (data: {
+    role: string;
+    question: string;
+    answer: string;
+    locale?: "uz" | "ru";
+  }) => api.post("/ai/interview/evaluate", data),
 };
 
 // Payment endpoints

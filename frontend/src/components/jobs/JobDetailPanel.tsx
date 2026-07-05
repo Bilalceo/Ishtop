@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { motion } from "framer-motion";
 import {
   MapPin,
@@ -19,6 +21,7 @@ import {
   CheckCircle2,
   ExternalLink,
   X,
+  MessageSquare,
 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Badge } from "@/components/ui/badge";
@@ -201,6 +204,15 @@ export function JobDetailPanel({
             <Share2 className="h-4 w-4" />
           </Button>
         </div>
+
+        {/* Prepare for this interview with the AI coach */}
+        <Link
+          href={`/student/interview?role=${encodeURIComponent(job.title || "")}`}
+          className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 transition hover:text-brand-700 dark:text-brand-300"
+        >
+          <MessageSquare className="h-4 w-4" />
+          {isRu ? "Подготовиться к собеседованию (AI)" : "Suhbatga tayyorlanish (AI)"}
+        </Link>
       </div>
 
       {/* Scrollable body */}

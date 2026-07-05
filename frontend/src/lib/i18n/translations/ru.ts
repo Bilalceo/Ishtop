@@ -406,6 +406,7 @@ export const ru = {
       findJobs: "Найти работу",
       universities: "Университеты",
       myApplications: "Мои отклики",
+      interviewCoach: "Тренажёр собеседований",
       settings: "Настройки",
       needHelp: "Нужна помощь?",
       helpText: "Смотрите документацию или свяжитесь с поддержкой",

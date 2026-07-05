@@ -406,6 +406,7 @@ export const uz = {
       findJobs: "Ish topish",
       universities: "Universitetlar",
       myApplications: "Arizalarim",
+      interviewCoach: "Suhbat murabbiyi",
       settings: "Sozlamalar",
       needHelp: "Yordam kerakmi?",
       helpText: "Hujjatlar yoki yordam bilan bog'laning",
