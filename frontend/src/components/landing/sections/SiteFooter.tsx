@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Sparkles, Github, Linkedin, Twitter, Mail } from "lucide-react";
+import { Sparkles, Github, Linkedin, Twitter, Mail, Send } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 
 type Locale = "uz" | "ru" | "en";
@@ -100,6 +100,17 @@ export function SiteFooter() {
                 const envHas = (k: string) =>
                   typeof process !== "undefined" && !!process.env[k]?.trim();
                 const links = [
+                  {
+                    Icon: Send,
+                    href: "https://t.me/ishtopuz_official",
+                    enabled: true,
+                    label:
+                      L === "ru"
+                        ? "Официальный Telegram-канал IshTop (новая вкладка)"
+                        : L === "en"
+                        ? "IshTop official Telegram channel (opens in new tab)"
+                        : "IshTop rasmiy Telegram kanali (yangi oynada)",
+                  },
                   {
                     Icon: Twitter,
                     href: process.env.NEXT_PUBLIC_TWITTER_URL,
