@@ -351,6 +351,13 @@ class User(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
         comment="Company LinkedIn URL",
     )
 
+    telegram_chat_id = Column(
+        String(40),
+        nullable=True,
+        index=True,
+        comment="Linked Telegram chat id for job-alert notifications",
+    )
+
     company_telegram_url = Column(
         String(500),
         nullable=True,

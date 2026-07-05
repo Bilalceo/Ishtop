@@ -13,6 +13,7 @@ from app.api.v1.routes import (
     profile, notifications, saved_searches
 )
 from app.routers import ai  # Import AI router
+from app.routers import telegram_bot  # Telegram link/unlink endpoints
 
 # Create main v1 router
 api_router = APIRouter()
@@ -53,6 +54,12 @@ api_router.include_router(
     ai.router,
     prefix="/ai",
     tags=["AI Features"]
+)
+
+# Telegram link/unlink (auth) — the public webhook stays mounted at root in main.py
+api_router.include_router(
+    telegram_bot.router,
+    tags=["Telegram"]
 )
 
 # Admin Router - Admin dashboard and management

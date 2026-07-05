@@ -13,13 +13,18 @@ import logging
 import re
 
 import httpx
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 
 from app.config import settings
+from app.core.dependencies import get_current_active_user
+from app.core.telegram_link import create_link_token, verify_link_token
+from app.database import SessionLocal, get_db
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/telegram", tags=["telegram-bot"])
+
+BOT_USERNAME = "ishtop_ariza_bot"
 
 _CYRILLIC = re.compile(r"[а-яА-ЯёЁ]")
 
@@ -165,9 +170,80 @@ async def telegram_webhook(secret: str, request: Request):
     locale = _detect_locale(text)
 
     if text.startswith("/start"):
+        parts = text.split(maxsplit=1)
+        payload = parts[1].strip() if len(parts) > 1 else ""
+        if payload:
+            linked = _link_chat_to_user(payload, str(chat_id))
+            if linked:
+                await _send(token, chat_id, _link_ok(locale))
+            else:
+                await _send(token, chat_id, _link_fail(locale))
+            return {"ok": True}
         await _send(token, chat_id, _welcome(locale))
         return {"ok": True}
 
     answer = await _ai_answer(text, locale)
     await _send(token, chat_id, answer)
     return {"ok": True}
+
+
+def _link_chat_to_user(link_token: str, chat_id: str) -> bool:
+    """Verify a deep-link token and store the chat id on that user."""
+    user_id = verify_link_token(link_token)
+    if not user_id:
+        return False
+    db = SessionLocal()
+    try:
+        from app.models.user import User
+
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return False
+        user.telegram_chat_id = chat_id
+        db.commit()
+        return True
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("telegram link failed: %s", exc)
+        db.rollback()
+        return False
+    finally:
+        db.close()
+
+
+def _link_ok(locale: str) -> str:
+    if locale == "ru":
+        return (
+            "✅ Готово! Ваш аккаунт IshTop подключён.\n\n"
+            "Теперь вы будете получать здесь новые подходящие вакансии каждый день."
+        )
+    return (
+        "✅ Tayyor! IshTop akkauntingiz ulandi.\n\n"
+        "Endi har kuni sizga mos yangi ish o'rinlarini shu yerda olasiz."
+    )
+
+
+def _link_fail(locale: str) -> str:
+    if locale == "ru":
+        return "Ссылка устарела. Откройте страницу настроек в IshTop и попробуйте снова."
+    return "Havola eskirgan. IshTop sozlamalar sahifasidan qayta urinib ko'ring."
+
+
+@router.get("/link")
+async def telegram_link(current_user=Depends(get_current_active_user), db=Depends(get_db)):
+    """Return a deep link the user opens to connect their Telegram for alerts."""
+    token = create_link_token(str(current_user.id))
+    return {
+        "success": True,
+        "data": {
+            "deep_link": f"https://t.me/{BOT_USERNAME}?start={token}",
+            "connected": bool(getattr(current_user, "telegram_chat_id", None)),
+        },
+    }
+
+
+@router.post("/unlink")
+async def telegram_unlink(current_user=Depends(get_current_active_user), db=Depends(get_db)):
+    """Disconnect Telegram alerts for the current user."""
+    current_user.telegram_chat_id = None
+    db.commit()
+    return {"success": True, "data": {"connected": False}}
