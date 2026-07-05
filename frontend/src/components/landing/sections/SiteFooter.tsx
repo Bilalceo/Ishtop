@@ -22,6 +22,7 @@ const COL: Record<
       { label: "Kompaniyalar uchun", href: "/business" },
       { label: "Narxlar", href: "/plans" },
       { label: "Bog'lanish", href: "/contact" },
+      { label: "AI yordamchi (Telegram)", href: "https://t.me/ishtop_ariza_bot" },
     ],
     legal: [
       { label: "Maxfiylik", href: "/privacy" },
@@ -40,6 +41,7 @@ const COL: Record<
       { label: "Для компаний", href: "/business" },
       { label: "Тарифы", href: "/plans" },
       { label: "Контакты", href: "/contact" },
+      { label: "AI-помощник (Telegram)", href: "https://t.me/ishtop_ariza_bot" },
     ],
     legal: [
       { label: "Политика конфиденциальности", href: "/privacy" },
@@ -58,6 +60,7 @@ const COL: Record<
       { label: "For companies", href: "/business" },
       { label: "Pricing", href: "/plans" },
       { label: "Contact", href: "/contact" },
+      { label: "AI assistant (Telegram)", href: "https://t.me/ishtop_ariza_bot" },
     ],
     legal: [
       { label: "Privacy", href: "/privacy" },
@@ -191,13 +194,21 @@ function FooterCol({ title, items }: { title: string; items: { label: string; hr
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8e8e96]">{title}</p>
       <ul className="mt-4 space-y-2.5 text-sm">
-        {items.map((it) => (
-          <li key={it.label}>
-            <Link href={it.href} className="focus-ring link-underline rounded">
-              {it.label}
-            </Link>
-          </li>
-        ))}
+        {items.map((it) => {
+          const external = it.href.startsWith("http");
+          return (
+            <li key={it.label}>
+              <Link
+                href={it.href}
+                className="focus-ring link-underline rounded"
+                target={external ? "_blank" : undefined}
+                rel={external ? "noopener noreferrer" : undefined}
+              >
+                {it.label}
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
