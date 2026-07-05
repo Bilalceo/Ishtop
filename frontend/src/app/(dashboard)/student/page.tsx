@@ -59,6 +59,7 @@ import { AIInsightsPanel } from "@/components/student/AIInsightsPanel";
 import { StatCard } from "@/components/student/StatCard";
 import { SkillGapRadar } from "@/components/student/SkillGapRadar";
 import { Tilt } from "@/components/landing/sections/primitives";
+import { TelegramFollowBanner } from "@/components/TelegramFollowBanner";
 
 // =============================================================================
 // MOTION
@@ -323,6 +324,11 @@ export default function StudentDashboardPage() {
           ctaHref="/student/resumes/create-ai"
           ctaLabel={t("dashboard.sidebar.createAIResume")}
         />
+      </motion.section>
+
+      {/* ===== Follow us on Telegram — convert dashboard traffic ===== */}
+      <motion.section variants={item}>
+        <TelegramFollowBanner storageKey="tg_follow_dashboard" />
       </motion.section>
 
       {/* ===== AI Insights — streaming reasoning trace about you ===== */}

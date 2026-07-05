@@ -47,6 +47,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { JobCard } from "@/components/jobs/JobCard";
 import { JobDetailPanel } from "@/components/jobs/JobDetailPanel";
 import { FilterPillBar } from "@/components/jobs/FilterPillBar";
+import { TelegramFollowBanner } from "@/components/TelegramFollowBanner";
 import { SalarySlider, SALARY_MAX } from "@/components/jobs/SalarySlider";
 
 // =============================================================================
@@ -662,6 +663,11 @@ export default function JobsPage() {
           </div>
         </div>
       )}
+
+      {/* Follow-on-Telegram nudge — job seekers get daily jobs in the channel */}
+      <div className="mx-3 mt-3 lg:mx-4">
+        <TelegramFollowBanner storageKey="tg_follow_jobs" />
+      </div>
 
       {/* ------------------------------------------------------------------ */}
       {/* BODY: 2-column                                                      */}
