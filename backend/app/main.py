@@ -425,7 +425,11 @@ def create_application() -> FastAPI:
         api_router,
         prefix="/api/v1"
     )
-    
+
+    # Public Telegram bot webhook (no auth; guarded by a secret path segment)
+    from app.routers.telegram_bot import router as telegram_bot_router
+    application.include_router(telegram_bot_router)
+
     return application
 
 

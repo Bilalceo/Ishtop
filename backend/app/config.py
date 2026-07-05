@@ -264,6 +264,8 @@ class Settings(BaseSettings):
     # admin group via this bot, since those jobs have no real company account.
     TELEGRAM_APPS_BOT_TOKEN: str = ""
     TELEGRAM_APPS_CHAT_ID: str = ""
+    # Secret path segment for the public bot webhook (/telegram/webhook/<secret>)
+    TELEGRAM_WEBHOOK_SECRET: str = ""
 
     # =========================================================================
     # 📬 COMPANY WEEKLY DIGEST
