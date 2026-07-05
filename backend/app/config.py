@@ -260,6 +260,11 @@ class Settings(BaseSettings):
     TELEGRAM_BOT_TOKEN: str = ""
     TELEGRAM_API_BASE_URL: str = "https://api.telegram.org"
 
+    # Aggregated (Telegram-import) job applications are relayed to an internal
+    # admin group via this bot, since those jobs have no real company account.
+    TELEGRAM_APPS_BOT_TOKEN: str = ""
+    TELEGRAM_APPS_CHAT_ID: str = ""
+
     # =========================================================================
     # 📬 COMPANY WEEKLY DIGEST
     # =========================================================================

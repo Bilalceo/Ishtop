@@ -63,6 +63,7 @@ from app.models import (
 )
 from app.services import job_matching
 from app.services.telegram_service import send_company_telegram_notification
+from app.services.external_apply_alert import is_external_job, send_external_application_alert
 from app.services.trust_engine import to_aware
 from app.config import settings
 
@@ -872,7 +873,21 @@ async def apply_to_job(
                 title="📥 Yangi ariza",
                 message=telegram_body,
             )
-        
+
+        # Aggregated (Telegram-import) jobs have no real company account —
+        # relay the applicant to the internal admin group so the team can
+        # forward them to the source employer. Best-effort, never blocks.
+        try:
+            if is_external_job(job):
+                await send_external_application_alert(
+                    job=job,
+                    student=student,
+                    resume=resume,
+                    match_score=application.match_score,
+                )
+        except Exception as alert_exc:  # noqa: BLE001
+            logger.warning(f"[{request_id}] external apply alert skipped: {alert_exc}")
+
         # Build response
         app_data = application_to_data(
             application,
