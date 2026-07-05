@@ -6,7 +6,7 @@
  * -> summary (average score). Silver design, UZ/RU. Text-based MVP.
  */
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -38,6 +38,16 @@ type Feedback = {
 const LEVELS = ["intern", "junior", "mid"] as const;
 
 export default function InterviewCoachPage() {
+  // useSearchParams() requires a Suspense boundary in the Next.js app router;
+  // without it the route 404s when opened with no query string.
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-3xl py-10 text-center text-sm text-surface-400">…</div>}>
+      <InterviewCoach />
+    </Suspense>
+  );
+}
+
+function InterviewCoach() {
   const { user } = useAuth();
   const { locale } = useTranslation();
   const ru = locale === "ru";
