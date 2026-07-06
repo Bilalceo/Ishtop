@@ -16,9 +16,12 @@ import httpx
 from fastapi import APIRouter, Depends, Request
 
 from app.config import settings
-from app.core.dependencies import get_current_active_user
+# get_db MUST come from app.core.dependencies (the same one get_current_active_user
+# uses) so the endpoint and the authenticated user share one DB session; otherwise
+# writes to current_user are committed on a different session and silently lost.
+from app.core.dependencies import get_current_active_user, get_db
 from app.core.telegram_link import consume_link_token, issue_link_token
-from app.database import SessionLocal, get_db
+from app.database import SessionLocal
 
 logger = logging.getLogger(__name__)
 
