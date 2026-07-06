@@ -59,7 +59,7 @@ import { AIInsightsPanel } from "@/components/student/AIInsightsPanel";
 import { StatCard } from "@/components/student/StatCard";
 import { SkillGapRadar } from "@/components/student/SkillGapRadar";
 import { Tilt } from "@/components/landing/sections/primitives";
-import { TelegramFollowBanner } from "@/components/TelegramFollowBanner";
+import { TelegramProCard } from "@/components/TelegramProCard";
 
 // =============================================================================
 // MOTION
@@ -326,9 +326,9 @@ export default function StudentDashboardPage() {
         />
       </motion.section>
 
-      {/* ===== Follow us on Telegram — convert dashboard traffic ===== */}
+      {/* ===== Free PRO for Telegram subscribers ===== */}
       <motion.section variants={item}>
-        <TelegramFollowBanner storageKey="tg_follow_dashboard" />
+        <TelegramProCard />
       </motion.section>
 
       {/* ===== AI Insights — streaming reasoning trace about you ===== */}

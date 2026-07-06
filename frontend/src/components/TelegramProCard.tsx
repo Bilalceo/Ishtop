@@ -10,13 +10,17 @@ import { useEffect, useState } from "react";
 import { Send, CheckCircle2, Loader2, Crown, ArrowRight } from "lucide-react";
 import { telegramApi } from "@/lib/api";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
 const CHANNEL_URL = "https://t.me/ishtopuz_official";
 
 export function TelegramProCard() {
   const { locale } = useTranslation();
+  const { user } = useAuth();
   const ru = locale === "ru";
+  const alreadyPro =
+    user?.subscription_tier === "premium" || user?.subscription_tier === "enterprise";
   const [connected, setConnected] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
   const [granted, setGranted] = useState(false);
@@ -52,11 +56,15 @@ export function TelegramProCard() {
       };
 
   useEffect(() => {
+    if (alreadyPro) return;
     telegramApi
       .link()
       .then((r) => setConnected(!!r.data?.data?.connected))
       .catch(() => setConnected(false));
-  }, []);
+  }, [alreadyPro]);
+
+  // Existing PRO/enterprise users don't need the offer.
+  if (alreadyPro) return null;
 
   const connect = async () => {
     setLoading(true);
