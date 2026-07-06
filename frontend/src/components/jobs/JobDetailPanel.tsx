@@ -19,7 +19,6 @@ import {
   ShieldCheck,
   AlertTriangle,
   CheckCircle2,
-  ExternalLink,
   X,
   MessageSquare,
 } from "lucide-react";
@@ -148,26 +147,47 @@ export function JobDetailPanel({
           </button>
         </div>
 
-        {job.external_apply_url && (
-          <a
-            href={job.external_apply_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 transition hover:bg-brand-100 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300"
-            title={isRu ? "Открыть оригинал в Telegram" : "Asl e'lonni Telegram'da ochish"}
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
-            {isRu ? "Источник: Telegram-канал" : "Manba: Telegram kanali"}
-          </a>
-        )}
-
-        {/* Contact from the source post (aggregated jobs) */}
+        {/* Employer contact from the source post. We deliberately do NOT link
+            out to the aggregator channel — applications stay on IshTop, and the
+            only outbound option is the employer's own phone / HR Telegram. */}
         {job.contact_info && (
-          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-2xl bg-surface-50 px-4 py-3 text-sm dark:bg-surface-800/50">
-            <span className="font-semibold text-surface-900 dark:text-white">
-              {isRu ? "Контакт работодателя:" : "Ish beruvchi kontakti:"}
-            </span>
-            <span className="select-all text-surface-700 dark:text-surface-300">{job.contact_info}</span>
+          <div className="mt-3 rounded-2xl bg-surface-50 px-4 py-3 text-sm dark:bg-surface-800/50">
+            <p className="mb-1.5 font-semibold text-surface-900 dark:text-white">
+              {isRu ? "Контакт работодателя" : "Ish beruvchi kontakti"}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {job.contact_info
+                .split(/[,\n]/)
+                .map((raw) => raw.trim())
+                .filter(Boolean)
+                .map((token, i) => {
+                  const isTg = token.startsWith("@");
+                  const isPhone = /^\+?\d[\d\s()-]{5,}$/.test(token);
+                  const href = isTg
+                    ? `https://t.me/${token.slice(1)}`
+                    : isPhone
+                    ? `tel:${token.replace(/[\s()-]/g, "")}`
+                    : undefined;
+                  const cls =
+                    "inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-brand-700 shadow-sm dark:bg-surface-700 dark:text-brand-300";
+                  return href ? (
+                    <a
+                      key={i}
+                      href={href}
+                      target={isTg ? "_blank" : undefined}
+                      rel={isTg ? "noopener noreferrer" : undefined}
+                      className={`${cls} transition hover:bg-brand-50 dark:hover:bg-surface-600`}
+                    >
+                      {isTg ? <Send className="h-3.5 w-3.5" /> : <span aria-hidden>📞</span>}
+                      {token}
+                    </a>
+                  ) : (
+                    <span key={i} className={`${cls} select-all`}>
+                      {token}
+                    </span>
+                  );
+                })}
+            </div>
           </div>
         )}
 
