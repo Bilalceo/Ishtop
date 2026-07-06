@@ -33,9 +33,10 @@ test.describe("Smoke Expansion", () => {
     await page.goto(`${APP_URL}/admin`);
 
     await expect(page).toHaveURL(/\/admin/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText(/Platformani kuzating/i, {
-      timeout: 15000,
-    });
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      /Platforma nazorati|Контроль платформы/i,
+      { timeout: 15000 },
+    );
     await expect(page.getByText(/Foydalanuvchi statistikasi/i)).toBeVisible({ timeout: 15000 });
     await expect(
       page.getByRole("heading", {
