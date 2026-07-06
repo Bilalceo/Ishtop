@@ -11,6 +11,7 @@
  */
 
 import Link from "next/link";
+import { TelegramProCard } from "@/components/TelegramProCard";
 import Image from "next/image";
 import { Check, X, Minus, ArrowRight, ChevronDown, HelpCircle, Sparkles } from "lucide-react";
 import { useState } from "react";
@@ -174,6 +175,9 @@ export default function PlansClient() {
           {ru ? "Тарифы" : "Tariflar"}
         </h2>
         <div className="section-shell">
+          <div className="mx-auto mb-8 max-w-2xl">
+            <TelegramProCard />
+          </div>
           <div className="mx-auto grid max-w-5xl items-stretch gap-5 lg:grid-cols-3">
             {plans.map((plan, i) => (
               <Reveal key={plan.id} delay={i * 0.1} className="relative h-full">

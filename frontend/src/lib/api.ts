@@ -583,6 +583,13 @@ export const aiApi = {
   }) => api.post("/ai/interview/evaluate", data),
 };
 
+// Telegram link / channel-subscription PRO
+export const telegramApi = {
+  link: () => api.get("/telegram/link"),
+  unlink: () => api.post("/telegram/unlink"),
+  claimPro: () => api.post("/telegram/claim-pro"),
+};
+
 // Payment endpoints
 export const paymentApi = {
   createPaymentIntent: (data: CreatePaymentIntentRequest) =>

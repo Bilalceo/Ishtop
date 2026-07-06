@@ -31,6 +31,8 @@ webhook_router = APIRouter(prefix="/telegram", tags=["telegram-bot"])
 router = APIRouter(prefix="/telegram", tags=["telegram-bot"])
 
 BOT_USERNAME = "ishtop_ariza_bot"
+CHANNEL_USERNAME = "ishtopuz_official"
+PRO_DAYS = 30  # free PRO granted per channel-subscription claim
 
 _CYRILLIC = re.compile(r"[а-яА-ЯёЁ]")
 
@@ -282,3 +284,66 @@ async def telegram_unlink(current_user=Depends(get_current_active_user), db=Depe
     current_user.telegram_chat_id = None
     db.commit()
     return {"success": True, "data": {"connected": False}}
+
+
+async def _is_channel_member(chat_id: str) -> bool:
+    """True if the given Telegram user is subscribed to our channel.
+
+    Requires the bot to be an administrator of @ishtopuz_official.
+    """
+    token = (settings.TELEGRAM_APPS_BOT_TOKEN or "").strip()
+    if not token or not chat_id:
+        return False
+    url = f"{settings.TELEGRAM_API_BASE_URL}/bot{token}/getChatMember"
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(
+                url, params={"chat_id": f"@{CHANNEL_USERNAME}", "user_id": chat_id}
+            )
+        data = resp.json()
+        if not data.get("ok"):
+            logger.warning("getChatMember failed: %s", data.get("description"))
+            return False
+        status = (data.get("result") or {}).get("status")
+        return status in {"member", "administrator", "creator"}
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("channel membership check error: %s", exc)
+        return False
+
+
+@router.post("/claim-pro")
+async def claim_pro(current_user=Depends(get_current_active_user), db=Depends(get_db)):
+    """Grant free PRO if the user is subscribed to the official Telegram channel.
+
+    Requires the user to have connected their Telegram first (telegram_chat_id).
+    Returns granted=False with a reason otherwise.
+    """
+    from datetime import datetime, timedelta, timezone
+
+    from app.core.premium import SubscriptionTier
+
+    chat_id = getattr(current_user, "telegram_chat_id", None)
+    if not chat_id:
+        return {"success": True, "data": {"granted": False, "reason": "not_linked"}}
+
+    if not await _is_channel_member(str(chat_id)):
+        return {"success": True, "data": {"granted": False, "reason": "not_subscribed"}}
+
+    now = datetime.now(timezone.utc)
+    # Extend from an existing future expiry so re-claims don't shorten access.
+    base = current_user.subscription_expires_at
+    if base is not None and base.tzinfo is None:
+        base = base.replace(tzinfo=timezone.utc)
+    start = base if (base and base > now) else now
+    current_user.subscription_tier = SubscriptionTier.PREMIUM
+    current_user.subscription_expires_at = start + timedelta(days=PRO_DAYS)
+    db.commit()
+    return {
+        "success": True,
+        "data": {
+            "granted": True,
+            "tier": "premium",
+            "expires_at": current_user.subscription_expires_at.isoformat(),
+            "days": PRO_DAYS,
+        },
+    }
