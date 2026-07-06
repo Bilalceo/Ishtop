@@ -361,8 +361,11 @@ export const useAuthStore = create<AuthState>()(
         }),
 
       bootstrapSession: async () => {
-        const { isAuthenticated } = get();
-        if (isAuthenticated) return;
+        // Always refresh on app load: a persisted `isAuthenticated` from
+        // localStorage doesn't guarantee a valid (10-min) access cookie, so
+        // we exchange the 7-day refresh cookie for a fresh access cookie and
+        // authoritative user. On failure we leave state as-is (no logout) so
+        // a transient network error doesn't bounce the user.
         try {
           const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
             method: "POST",
