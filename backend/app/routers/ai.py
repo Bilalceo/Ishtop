@@ -1042,7 +1042,13 @@ async def interview_evaluate(
         except Exception:
             score = 0
         def _lst(v):
-            return [str(x).strip() for x in (v or []) if str(x).strip()][:3]
+            # Guard against the model returning a plain string instead of a
+            # list, otherwise iterating it would yield single characters.
+            if isinstance(v, str):
+                v = [v]
+            elif not isinstance(v, (list, tuple)):
+                v = []
+            return [str(x).strip() for x in v if str(x).strip()][:3]
         return {
             "success": True,
             "data": {

@@ -358,6 +358,19 @@ class User(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
         comment="Linked Telegram chat id for job-alert notifications",
     )
 
+    telegram_link_token = Column(
+        String(64),
+        nullable=True,
+        index=True,
+        comment="Short opaque one-time token for the Telegram deep-link connect flow",
+    )
+
+    telegram_link_expires = Column(
+        DateTime(timezone=True),
+        nullable=True,
+        comment="Expiry for telegram_link_token",
+    )
+
     company_telegram_url = Column(
         String(500),
         nullable=True,

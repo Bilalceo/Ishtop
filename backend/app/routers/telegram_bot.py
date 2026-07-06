@@ -17,11 +17,14 @@ from fastapi import APIRouter, Depends, Request
 
 from app.config import settings
 from app.core.dependencies import get_current_active_user
-from app.core.telegram_link import create_link_token, verify_link_token
+from app.core.telegram_link import consume_link_token, issue_link_token
 from app.database import SessionLocal, get_db
 
 logger = logging.getLogger(__name__)
 
+# Public webhook — mounted at the app root (Telegram calls it, no auth).
+webhook_router = APIRouter(prefix="/telegram", tags=["telegram-bot"])
+# Authenticated link/unlink — mounted under /api/v1.
 router = APIRouter(prefix="/telegram", tags=["telegram-bot"])
 
 BOT_USERNAME = "ishtop_ariza_bot"
@@ -137,7 +140,7 @@ def _welcome(locale: str) -> str:
     )
 
 
-@router.post("/webhook/{secret}")
+@webhook_router.post("/webhook/{secret}")
 async def telegram_webhook(secret: str, request: Request):
     """Telegram calls this on every update. Always returns 200 quickly."""
     expected = (settings.TELEGRAM_WEBHOOK_SECRET or "").strip()
@@ -188,17 +191,22 @@ async def telegram_webhook(secret: str, request: Request):
 
 
 def _link_chat_to_user(link_token: str, chat_id: str) -> bool:
-    """Verify a deep-link token and store the chat id on that user."""
-    user_id = verify_link_token(link_token)
-    if not user_id:
-        return False
+    """Consume a one-time deep-link token and store the chat id on that user."""
     db = SessionLocal()
     try:
         from app.models.user import User
 
+        user_id = consume_link_token(db, link_token)
+        if not user_id:
+            return False
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             return False
+        # Detach this chat from any other account it was previously linked to,
+        # otherwise both accounts would receive daily alerts on the same chat.
+        db.query(User).filter(
+            User.telegram_chat_id == chat_id, User.id != user.id
+        ).update({User.telegram_chat_id: None}, synchronize_session=False)
         user.telegram_chat_id = chat_id
         db.commit()
         return True
@@ -231,7 +239,7 @@ def _link_fail(locale: str) -> str:
 @router.get("/link")
 async def telegram_link(current_user=Depends(get_current_active_user), db=Depends(get_db)):
     """Return a deep link the user opens to connect their Telegram for alerts."""
-    token = create_link_token(str(current_user.id))
+    token = issue_link_token(db, current_user)
     return {
         "success": True,
         "data": {

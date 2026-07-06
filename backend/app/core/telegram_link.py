@@ -1,37 +1,59 @@
-"""Short-lived signed tokens that link a Telegram chat to an IshTop account.
+"""Short, Telegram-safe tokens that link a Telegram chat to an IshTop account.
 
-Flow: the app hands the logged-in user a deep link
-`https://t.me/<bot>?start=<token>`. When they open it, Telegram sends the bot
-`/start <token>`; the webhook verifies the token and stores the chat id on the
-user. No DB state is needed for the token itself — it is a signed JWT.
+Telegram's deep-link `start` parameter allows only [A-Za-z0-9_-] and at most
+64 characters, so a JWT (long, contains dots) cannot be used there. Instead we
+mint a short random `secrets.token_urlsafe` token, store it (with expiry) on the
+user row, and consume it when the bot receives `/start <token>`.
 """
 from __future__ import annotations
 
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from jose import jwt
 
-from app.config import settings
-
-_TYPE = "telegram_link"
+def _now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
-def create_link_token(user_id: str, expires_minutes: int = 30) -> str:
-    payload = {
-        "sub": str(user_id),
-        "type": _TYPE,
-        "exp": datetime.now(timezone.utc) + timedelta(minutes=expires_minutes),
-    }
-    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+def issue_link_token(db, user, expires_minutes: int = 30) -> str:
+    """Generate and persist a fresh connect token for `user`. Returns the token.
+
+    token_urlsafe(18) -> 24 chars from [A-Za-z0-9_-]: well within Telegram's
+    64-char, dot-free start-parameter limit.
+    """
+    token = secrets.token_urlsafe(18)
+    user.telegram_link_token = token
+    user.telegram_link_expires = _now() + timedelta(minutes=expires_minutes)
+    db.commit()
+    return token
 
 
-def verify_link_token(token: str) -> Optional[str]:
-    try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-    except Exception:
+def consume_link_token(db, token: str) -> Optional[str]:
+    """Look up a valid, unexpired token, clear it, and return the user id.
+
+    One-time use: the token is cleared whether or not it had expired so a leaked
+    link cannot be replayed.
+    """
+    if not token:
         return None
-    if payload.get("type") != _TYPE:
+    from app.models.user import User
+
+    user = db.query(User).filter(User.telegram_link_token == token).first()
+    if not user:
         return None
-    user_id = payload.get("sub")
-    return str(user_id) if user_id else None
+
+    expires = user.telegram_link_expires
+    # Normalise to aware UTC for comparison.
+    if expires is not None and expires.tzinfo is None:
+        expires = expires.replace(tzinfo=timezone.utc)
+
+    user.telegram_link_token = None
+    user.telegram_link_expires = None
+
+    if expires is None or expires < _now():
+        db.commit()  # clear the stale token
+        return None
+
+    db.commit()
+    return str(user.id)

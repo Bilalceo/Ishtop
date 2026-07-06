@@ -31,9 +31,15 @@ export function TelegramAlertsCard() {
   const connect = async () => {
     setLoading(true);
     try {
+      // Each link token is one-time, so fetch a fresh one on click. Open the
+      // tab synchronously right after the response resolves; if the browser
+      // blocks it (popup blocker after await), fall back to same-tab redirect.
       const r = await api.get("/telegram/link");
       const link = r.data?.data?.deep_link as string;
-      if (link) window.open(link, "_blank", "noopener,noreferrer");
+      if (link) {
+        const win = window.open(link, "_blank", "noopener,noreferrer");
+        if (!win) window.location.href = link;
+      }
       // Give the user a beat to press Start in Telegram, then refresh state.
       setTimeout(load, 6000);
     } catch {
