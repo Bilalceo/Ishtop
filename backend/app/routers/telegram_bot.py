@@ -136,12 +136,16 @@ def _welcome(locale: str) -> str:
         return (
             "Привет! Я AI-помощник IshTop 🤖\n\n"
             "Задайте любой вопрос о ishtopuz.uz: поиск работы, AI-резюме, отклики, "
-            "процент совпадения и т.д.\n\nНачать: ishtopuz.uz"
+            "процент совпадения и т.д.\n\n"
+            "🎁 Подпишитесь на этот канал — 1 месяц PRO бесплатно: ishtopuz.uz/plans\n\n"
+            "Начать: ishtopuz.uz"
         )
     return (
         "Salom! Men IshTop AI yordamchisiman 🤖\n\n"
         "ishtopuz.uz haqida istalgan savolni bering: ish topish, AI rezyume, "
-        "ariza berish, moslik foizi va boshqalar.\n\nBoshlash: ishtopuz.uz"
+        "ariza berish, moslik foizi va boshqalar.\n\n"
+        "🎁 Shu kanalga obuna bo'lsangiz — 1 oy PRO bepul: ishtopuz.uz/plans\n\n"
+        "Boshlash: ishtopuz.uz"
     )
 
 
@@ -235,6 +239,7 @@ def _help(locale: str) -> str:
             "• Ежедневные подходящие вакансии — подключите Telegram в "
             "Настройках на ishtopuz.uz\n"
             "• AI-резюме, отклики, процент совпадения — всё на сайте\n\n"
+            "🎁 Подпишитесь на канал — 1 месяц PRO бесплатно: ishtopuz.uz/plans\n\n"
             "Открыть: ishtopuz.uz  ·  Канал: @ishtopuz_official"
         )
     return (
@@ -243,6 +248,7 @@ def _help(locale: str) -> str:
         "• Har kuni mos ish o'rinlari — ishtopuz.uz Sozlamalar'da "
         "Telegram'ni ulang\n"
         "• AI rezyume, ariza, moslik foizi — hammasi saytda\n\n"
+        "🎁 Kanalga obuna bo'lsangiz — 1 oy PRO bepul: ishtopuz.uz/plans\n\n"
         "Ochish: ishtopuz.uz  ·  Kanal: @ishtopuz_official"
     )
 
