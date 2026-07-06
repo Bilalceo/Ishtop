@@ -336,13 +336,32 @@ async def claim_pro(current_user=Depends(get_current_active_user), db=Depends(ge
         return {"success": True, "data": {"granted": False, "reason": "not_subscribed"}}
 
     now = datetime.now(timezone.utc)
-    # Extend from an existing future expiry so re-claims don't shorten access.
     base = current_user.subscription_expires_at
     if base is not None and base.tzinfo is None:
         base = base.replace(tzinfo=timezone.utc)
-    start = base if (base and base > now) else now
+
+    # Anti-abuse: if PRO is already active, do NOT extend — otherwise a user
+    # could spam this endpoint and stack unlimited free months. They can
+    # re-claim only once the current period has lapsed (and they're still
+    # subscribed), which is exactly the retention loop we want.
+    already_active = (
+        current_user.subscription_tier
+        in (SubscriptionTier.PREMIUM, SubscriptionTier.ENTERPRISE)
+        and base is not None
+        and base > now
+    )
+    if already_active:
+        return {
+            "success": True,
+            "data": {
+                "granted": False,
+                "reason": "already_pro",
+                "expires_at": base.isoformat(),
+            },
+        }
+
     current_user.subscription_tier = SubscriptionTier.PREMIUM
-    current_user.subscription_expires_at = start + timedelta(days=PRO_DAYS)
+    current_user.subscription_expires_at = now + timedelta(days=PRO_DAYS)
     db.commit()
     return {
         "success": True,

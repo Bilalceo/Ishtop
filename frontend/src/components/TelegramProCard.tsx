@@ -38,6 +38,7 @@ export function TelegramProCard() {
         grantedMsg: "🎉 PRO активирован на 30 дней!",
         notLinked: "Сначала подключите Telegram.",
         notSub: "Вы не подписаны на канал. Подпишитесь и попробуйте снова.",
+        alreadyPro: "У вас уже активен PRO.",
         err: "Ошибка. Попробуйте снова.",
       }
     : {
@@ -52,6 +53,7 @@ export function TelegramProCard() {
         grantedMsg: "🎉 PRO 30 kunga faollashtirildi!",
         notLinked: "Avval Telegram'ni ulang.",
         notSub: "Kanalga obuna bo'lmagansiz. Obuna bo'lib, qayta urining.",
+        alreadyPro: "Sizda allaqachon PRO faol.",
         err: "Xatolik. Qayta urinib ko'ring.",
       };
 
@@ -98,6 +100,9 @@ export function TelegramProCard() {
       if (d.granted) {
         setGranted(true);
         toast.success(t.grantedMsg);
+      } else if (d.reason === "already_pro") {
+        setGranted(true);
+        toast.success(t.alreadyPro);
       } else if (d.reason === "not_linked") {
         setConnected(false);
         toast.error(t.notLinked);
