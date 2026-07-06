@@ -188,6 +188,10 @@ async def telegram_webhook(secret: str, request: Request):
         await _send(token, chat_id, _welcome(locale))
         return {"ok": True}
 
+    if text.startswith("/help"):
+        await _send(token, chat_id, _help(locale))
+        return {"ok": True}
+
     answer = await _ai_answer(text, locale)
     await _send(token, chat_id, answer)
     return {"ok": True}
@@ -219,6 +223,26 @@ def _link_chat_to_user(link_token: str, chat_id: str) -> bool:
         return False
     finally:
         db.close()
+
+
+def _help(locale: str) -> str:
+    if locale == "ru":
+        return (
+            "🤖 Я AI-помощник IshTop. Чем могу помочь:\n\n"
+            "• Задайте любой вопрос о ishtopuz.uz — отвечу с помощью AI\n"
+            "• Ежедневные подходящие вакансии — подключите Telegram в "
+            "Настройках на ishtopuz.uz\n"
+            "• AI-резюме, отклики, процент совпадения — всё на сайте\n\n"
+            "Открыть: ishtopuz.uz  ·  Канал: @ishtopuz_official"
+        )
+    return (
+        "🤖 Men IshTop AI yordamchisiman. Nima qila olaman:\n\n"
+        "• ishtopuz.uz haqida istalgan savol bering — AI javob beradi\n"
+        "• Har kuni mos ish o'rinlari — ishtopuz.uz Sozlamalar'da "
+        "Telegram'ni ulang\n"
+        "• AI rezyume, ariza, moslik foizi — hammasi saytda\n\n"
+        "Ochish: ishtopuz.uz  ·  Kanal: @ishtopuz_official"
+    )
 
 
 def _link_ok(locale: str) -> str:
