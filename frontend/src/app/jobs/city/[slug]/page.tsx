@@ -5,10 +5,10 @@ import { fetchDiscoveryJobs } from "@/lib/discovery-api";
 import { stripHtmlTags } from "@/lib/utils";
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const title = `Jobs in ${params.slug} | IshTop`;
+  const city = params.slug.replace(/-/g, " ");
   return {
-    title,
-    description: `Discover jobs in ${params.slug} with trust and match insights on IshTop.`,
+    title: `${city} bo'yicha ish o'rinlari | IshTop`,
+    description: `${city} shahridagi ishonch reytingi va moslik tahlili bilan ish o'rinlari — IshTop.`,
     alternates: { canonical: `/jobs/city/${params.slug}` },
   };
 }
@@ -26,12 +26,12 @@ export default async function CityDiscoveryPage({ params }: { params: { slug: st
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
       <header className="mb-8">
-        <p className="text-sm text-surface-500">City Discovery</p>
-        <h1 className="mt-2 text-3xl font-bold text-surface-900 dark:text-white">
-          Jobs in {params.slug.replace(/-/g, " ")}
+        <p className="text-sm text-surface-500">Shahar bo'yicha ishlar</p>
+        <h1 className="mt-2 text-3xl font-bold capitalize text-surface-900 dark:text-white">
+          {params.slug.replace(/-/g, " ")} bo'yicha ish o'rinlari
         </h1>
         <p className="mt-2 text-surface-600 dark:text-surface-300">
-          {payload.total || jobs.length} active opportunities with trust scoring.
+          {payload.total || jobs.length} ta faol vakansiya — ishonch reytingi bilan.
         </p>
       </header>
 
@@ -39,16 +39,14 @@ export default async function CityDiscoveryPage({ params }: { params: { slug: st
         {jobs.map((job: any) => (
           <article key={job.id} className="rounded-xl border border-surface-200 bg-white p-5 dark:border-surface-700 dark:bg-surface-900">
             <h2 className="text-xl font-semibold text-surface-900 dark:text-white">{job.title}</h2>
-            <p className="mt-1 text-sm text-surface-500">{job.company?.name || "Company"} • {job.location || "Uzbekistan"}</p>
+            <p className="mt-1 text-sm text-surface-500">{job.company?.name || "Ish beruvchi"} • {job.location || "O'zbekiston"}</p>
             <p className="mt-3 line-clamp-3 text-sm text-surface-700 dark:text-surface-300">{stripHtmlTags(job.description)}</p>
             <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-surface-600 dark:text-surface-300">
-              <span>Trust: {Math.round(job.trust_score || 0)}</span>
-              <span>Type: {job.job_type}</span>
-              <span>Level: {job.experience_level}</span>
+              <span>Ishonch: {Math.round(job.trust_score || 0)}</span>
             </div>
             <div className="mt-4">
               <Link href="/student/jobs" className="text-sm font-medium text-blue-700 hover:underline">
-                Open in student dashboard
+                IshTop'da ochish va ariza berish
               </Link>
             </div>
           </article>

@@ -57,18 +57,24 @@ export function TelegramProCard() {
         err: "Xatolik. Qayta urinib ko'ring.",
       };
 
+  const isGuest = !user;
+
   useEffect(() => {
-    if (alreadyPro) return;
+    if (alreadyPro || isGuest) return; // guests: no authed calls from a public page
     telegramApi
       .link()
       .then((r) => setConnected(!!r.data?.data?.connected))
       .catch(() => setConnected(false));
-  }, [alreadyPro]);
+  }, [alreadyPro, isGuest]);
 
   // Existing PRO/enterprise users don't need the offer.
   if (alreadyPro) return null;
 
   const connect = async () => {
+    if (isGuest) {
+      window.location.href = "/register";
+      return;
+    }
     setLoading(true);
     try {
       const r = await telegramApi.link();
@@ -93,6 +99,10 @@ export function TelegramProCard() {
   };
 
   const claim = async () => {
+    if (isGuest) {
+      window.location.href = "/register";
+      return;
+    }
     setLoading(true);
     try {
       const r = await telegramApi.claimPro();

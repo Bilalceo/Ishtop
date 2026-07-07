@@ -154,10 +154,16 @@ api.interceptors.response.use(
           return api(originalRequest);
         }
 
-        // Refresh failed — logout + redirect to login
+        // Refresh failed — logout, but only bounce to /login from protected
+        // areas. A guest browsing a public page (e.g. /plans) may trigger a
+        // stray 401 from an optional widget; hijacking them to /login would
+        // make public pages unusable.
         processQueue(error, false);
         useAuthStore.getState().logout();
-        if (typeof window !== "undefined") {
+        if (
+          typeof window !== "undefined" &&
+          /^\/(student|company|admin)(\/|$)/.test(window.location.pathname)
+        ) {
           window.location.href = "/login";
         }
         return Promise.reject(error);

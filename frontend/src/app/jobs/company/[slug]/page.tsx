@@ -6,8 +6,8 @@ import { stripHtmlTags } from "@/lib/utils";
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   return {
-    title: `${params.slug.replace(/-/g, " ")} jobs | IshTop`,
-    description: `Browse open roles from ${params.slug.replace(/-/g, " ")} on IshTop.`,
+    title: `${params.slug.replace(/-/g, " ")} — ish o'rinlari | IshTop`,
+    description: `${params.slug.replace(/-/g, " ")} kompaniyasining ochiq ish o'rinlari — IshTop'da.`,
     alternates: { canonical: `/jobs/company/${params.slug}` },
   };
 }
@@ -106,7 +106,7 @@ export default async function CompanyDiscoveryPage({ params }: { params: { slug:
         {jobs.map((job: any) => (
           <article key={job.id} className="rounded-xl border border-surface-200 bg-white p-5 dark:border-surface-700 dark:bg-surface-900">
             <h2 className="text-xl font-semibold text-surface-900 dark:text-white">{job.title}</h2>
-            <p className="mt-1 text-sm text-surface-500">{job.location || "Uzbekistan"}</p>
+            <p className="mt-1 text-sm text-surface-500">{job.location || "O'zbekiston"}</p>
             <p className="mt-3 line-clamp-3 text-sm text-surface-700 dark:text-surface-300">{stripHtmlTags(job.description)}</p>
             <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-surface-600 dark:text-surface-300">
               <span>Ishonch: {Math.round(job.trust_score || 0)}</span>
