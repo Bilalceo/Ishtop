@@ -605,7 +605,7 @@ export default function CheckoutPageClient() {
                     {isRu ? "Итого" : "Jami"}
                   </span>
                   <span className="text-lg font-bold text-surface-900 dark:text-white">
-                    {formatCurrency(price.usd * 100, "USD")}
+                    {price.uzs.toLocaleString("ru-RU").replace(/,/g, " ")} {isRu ? "сум" : "so'm"}
                   </span>
                 </div>
               </div>
