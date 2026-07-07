@@ -1020,10 +1020,12 @@ payment_service = PaymentService()
 
 SUBSCRIPTION_PRICING = {
     SubscriptionTier.PREMIUM: {
-        "monthly": 400,  # $4.00 in cents
-        "yearly": 4000,  # $40.00 (save 2 months!)
-        "monthly_uzs": 1000000,  # 1,000,000 UZS (~$91 at 11,000 rate)
-        "yearly_uzs": 10000000,  # 10,000,000 UZS (~$909)
+        # Public price is 25 000 so'm/oy (250 000 so'm/yil). UZS is the primary
+        # currency; USD kept only as a rough fallback for card rails.
+        "monthly": 200,  # ~$2.00 in cents
+        "yearly": 2000,  # ~$20.00
+        "monthly_uzs": 25000,  # 25 000 so'm
+        "yearly_uzs": 250000,  # 250 000 so'm (2 oy tejab)
         "features": [
             "Unlimited AI resume generation",
             "Auto-apply to 50 jobs/month",

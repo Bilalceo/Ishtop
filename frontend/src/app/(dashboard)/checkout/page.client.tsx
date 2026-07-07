@@ -31,8 +31,8 @@ interface PriceInfo {
 }
 
 const PRICES: Record<BillingCycle, PriceInfo> = {
-  monthly: { usd: 4, uzs: 1000000 },
-  yearly: { usd: 40, uzs: 10000000 },
+  monthly: { usd: 2, uzs: 25000 },
+  yearly: { usd: 20, uzs: 250000 },
 };
 
 const cardElementOptions = {
@@ -384,7 +384,7 @@ export default function CheckoutPageClient() {
                     {isRu ? "Итого по плану" : "Tarif jami"}
                   </p>
                   <p className="text-2xl font-bold text-surface-900 dark:text-white">
-                    {formatCurrency(price.usd * 100, "USD")}
+                    {price.uzs.toLocaleString("ru-RU").replace(/,/g, " ")} {isRu ? "сум" : "so'm"}
                   </p>
                 </div>
               </div>
@@ -496,7 +496,29 @@ export default function CheckoutPageClient() {
                 </div>
               ) : null}
 
-              {paymentIntent ? (
+              {isMockMode ? (
+                /* Card rails aren't live yet. Don't dead-end the user — send them
+                   to the free-PRO-via-Telegram flow, which works today. */
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm dark:border-amber-700/40 dark:bg-amber-900/20">
+                    <div className="flex items-center gap-2 font-semibold text-amber-900 dark:text-amber-200">
+                      <Sparkles className="h-4 w-4" />
+                      {isRu ? "Карта скоро — а PRO можно получить бесплатно" : "Karta tez orada — PRO'ni hozir bepul oling"}
+                    </div>
+                    <p className="mt-2 text-amber-800 dark:text-amber-100/80">
+                      {isRu
+                        ? "Онлайн-оплата картой ещё настраивается. Пока подпишитесь на наш Telegram-канал и активируйте PRO на 30 дней бесплатно."
+                        : "Karta orqali onlayn to'lov hali sozlanmoqda. Hozircha Telegram kanalimizga obuna bo'lib, PRO'ni 30 kunga bepul faollashtiring."}
+                    </p>
+                    <Button
+                      className="mt-4 w-full"
+                      onClick={() => router.push("/student?pro=telegram")}
+                    >
+                      {isRu ? "Получить PRO бесплатно" : "PRO'ni bepul olish"}
+                    </Button>
+                  </div>
+                </div>
+              ) : paymentIntent ? (
                 <div className="space-y-4">
                   <div className="rounded-2xl border border-surface-200 bg-surface-50 p-4 text-sm text-surface-600 dark:border-surface-700 dark:bg-surface-950/50 dark:text-surface-400">
                     <div className="flex items-center gap-2 font-medium text-surface-900 dark:text-white">
@@ -504,11 +526,7 @@ export default function CheckoutPageClient() {
                       {isRu ? "Безопасный ввод карты" : "Xavfsiz karta kiritish"}
                     </div>
                     <p className="mt-2">
-                      {isMockMode
-                        ? isRu
-                          ? "Бэкенд вернул mock payment intent. Добавьте реальные Stripe secret/publishable ключи, чтобы завершить оплату картой."
-                          : "Backend mock payment intent qaytardi. Karta to'lovini yakunlash uchun haqiqiy Stripe secret/publishable kalitlarini qo'shing."
-                        : isRu
+                      {isRu
                         ? "Данные вашей карты отправляются напрямую в Stripe. Мы никогда не храним номера карт на сервере."
                         : "Karta ma'lumotlari Stripe'ga to'g'ridan-to'g'ri yuboriladi. Biz serverda karta raqamlarini saqlamaymiz."}
                     </p>
