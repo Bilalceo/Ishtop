@@ -48,7 +48,7 @@ def test_create_payment_intent_success(client: TestClient, student_headers: dict
     data = response.json()
     assert data["success"] is True
     assert "client_secret" in data
-    assert data["amount"] == 400  # $4.00 in cents
+    assert data["amount"] == 200  # $2.00 in cents (25 000 so'm/oy)
     assert data["subscription_tier"] == "premium"
 
 
@@ -66,7 +66,7 @@ def test_create_payment_intent_quarterly(client: TestClient, student_headers: di
     
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
-    assert data["amount"] == 1200  # 3 months * $4.00
+    assert data["amount"] == 600  # 3 months * $2.00
 
 
 @pytest.mark.payment
@@ -83,7 +83,7 @@ def test_create_payment_intent_yearly(client: TestClient, student_headers: dict)
     
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
-    assert data["amount"] == 4000  # $40.00 yearly plan
+    assert data["amount"] == 2000  # yearly plan (~$20)
 
 
 @pytest.mark.payment
@@ -308,7 +308,7 @@ def test_get_pricing(client: TestClient):
     
     # Verify premium pricing
     premium = data["pricing"]["premium"]
-    assert premium["monthly"] == 400
+    assert premium["monthly"] == 200
     assert "features" in premium
 
 
