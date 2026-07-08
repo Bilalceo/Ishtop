@@ -102,18 +102,18 @@ test.describe("Discovery and explainability UX", () => {
 
     await expect(page).toHaveURL(/\/jobs\/city\/tashkent/);
     await expect(
-      page.getByRole("heading", { level: 1, name: /jobs in tashkent/i }),
+      page.getByRole("heading", { level: 1, name: /ish o.rinlari/i }),
     ).toBeVisible({
       timeout: 15000,
     });
     await expect(
-      page.getByText(/active (opportunities|roles)|trust/i).first(),
+      page.getByText(/faol vakansiya|ishonch/i).first(),
     ).toBeVisible();
     await expect(page.locator("article").first()).toBeVisible({
       timeout: 15000,
     });
     await expect(
-      page.getByRole("link", { name: /open in student dashboard/i }).first(),
+      page.getByRole("link", { name: /ariza berish|ochish/i }).first(),
     ).toBeVisible();
   });
 
