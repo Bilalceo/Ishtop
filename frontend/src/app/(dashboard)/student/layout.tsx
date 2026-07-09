@@ -46,6 +46,7 @@ import { Badge } from "@/components/ui/badge";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import MobileBottomNav from "@/components/pwa/MobileBottomNav";
+import { AiChatWidget } from "@/components/AiChatWidget";
 import { cn } from "@/lib/utils";
 
 // =============================================================================
@@ -133,9 +134,6 @@ export default function StudentDashboardLayout({
   const [applicationCount, setApplicationCount] = useState<number>(0);
   const [showJobsNewBadge, setShowJobsNewBadge] = useState(false);
   const [shortcutHint, setShortcutHint] = useState("Ctrl+K");
-  const [helpQuestion, setHelpQuestion] = useState("");
-  const [helpAnswer, setHelpAnswer] = useState("");
-  const [helpLoading, setHelpLoading] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -231,30 +229,6 @@ export default function StudentDashboardLayout({
   const isActive = (href: string, exact?: boolean) => {
     if (exact) return pathname === href;
     return pathname.startsWith(href);
-  };
-
-  const askHelpAssistant = async () => {
-    const question = helpQuestion.trim();
-    if (!question) return;
-
-    setHelpLoading(true);
-    try {
-      const res = await aiApi.projectHelp({
-        question,
-        locale: locale === "ru" ? "ru" : "uz",
-        context_page: pathname,
-      });
-      const answer =
-        (res.data as { data?: { answer?: string } })?.data?.answer ||
-        (locale === "ru"
-          ? "Помощник пока не ответил. Попробуйте снова."
-          : "Yordamchi hozircha javob bermadi. Qayta urinib ko'ring.");
-      setHelpAnswer(answer);
-    } catch (error) {
-      setHelpAnswer(getErrorMessage(error));
-    } finally {
-      setHelpLoading(false);
-    }
   };
 
   if (!isAuthorized) return null;
@@ -358,66 +332,15 @@ export default function StudentDashboardLayout({
           })}
         </nav>
 
-        {/* Sidebar Footer — minimal AI helper */}
+        {/* Sidebar Footer — help center + feedback (AI moved to floating widget) */}
         <div className="border-t border-surface-200 p-4 dark:border-surface-700">
-          <div className="rounded-2xl bg-surface-50 p-3.5 dark:bg-surface-800/60">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-brand-500" aria-hidden />
-              <span className="text-sm font-semibold text-surface-900 dark:text-white">
-                {locale === "ru" ? "AI-помощник" : "AI yordamchi"}
-              </span>
-            </div>
-
-            {/* One integrated control: input + send inside */}
-            <div className="relative mt-3">
-              <Input
-                value={helpQuestion}
-                onChange={(e) => setHelpQuestion(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && helpQuestion.trim() && !helpLoading) {
-                    void askHelpAssistant();
-                  }
-                }}
-                placeholder={locale === "ru" ? "Задайте вопрос..." : "Savol yozing..."}
-                className="h-10 rounded-xl border-surface-200 bg-white pr-10 text-xs dark:border-surface-700 dark:bg-surface-900"
-              />
-              <button
-                type="button"
-                onClick={() => void askHelpAssistant()}
-                disabled={helpLoading || !helpQuestion.trim()}
-                aria-label={locale === "ru" ? "Отправить" : "Yuborish"}
-                className="absolute right-1.5 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-lg bg-brand-500 text-white transition hover:bg-brand-600 disabled:opacity-35"
-              >
-                {helpLoading ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
-                ) : (
-                  <Send className="h-3.5 w-3.5" aria-hidden />
-                )}
-              </button>
-            </div>
-
-            {helpAnswer && (
-              <div className="relative mt-2 rounded-xl bg-white p-3 pr-8 text-xs leading-relaxed text-surface-700 shadow-sm dark:bg-surface-900 dark:text-surface-300">
-                <button
-                  type="button"
-                  onClick={() => setHelpAnswer("")}
-                  className="absolute right-1.5 top-1.5 rounded-md p-1 text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-700 dark:hover:bg-surface-700 dark:hover:text-surface-200"
-                  aria-label={locale === "ru" ? "Закрыть" : "Yopish"}
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-                {helpAnswer}
-              </div>
-            )}
-
-            <Link
-              href="/student/help"
-              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-surface-500 transition hover:text-brand-600 dark:text-surface-400 dark:hover:text-brand-400"
-            >
-              {locale === "ru" ? "Справочный центр" : "Yordam markazi"}
-              <ChevronRight className="h-3 w-3" aria-hidden />
-            </Link>
-          </div>
+          <Link
+            href="/student/help"
+            className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-surface-500 transition hover:text-brand-600 dark:text-surface-400 dark:hover:text-brand-400"
+          >
+            {locale === "ru" ? "Справочный центр" : "Yordam markazi"}
+            <ChevronRight className="h-3 w-3" aria-hidden />
+          </Link>
 
           {/* Feedback — complaints & suggestions via Telegram (own clean row) */}
           <a
@@ -661,6 +584,9 @@ export default function StudentDashboardLayout({
 
       {/* Mobile bottom nav (PWA native feel) */}
       <MobileBottomNav />
+
+      {/* Floating AI assistant (bottom-right) */}
+      <AiChatWidget />
     </div>
   );
 }
