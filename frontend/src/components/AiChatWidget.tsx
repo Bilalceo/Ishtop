@@ -14,8 +14,9 @@ import { aiApi, getErrorMessage } from "@/lib/api";
 import { useTranslation } from "@/hooks/useTranslation";
 
 type Msg = { role: "user" | "ai"; text: string };
+type Audience = "student" | "company" | "admin";
 
-export function AiChatWidget() {
+export function AiChatWidget({ audience = "student" }: { audience?: Audience }) {
   const { locale } = useTranslation();
   const pathname = usePathname();
   const ru = locale === "ru";
@@ -25,15 +26,32 @@ export function AiChatWidget() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const COPY = {
+    student: {
+      hint: ru ? "Спросите об ishtopuz.uz" : "ishtopuz.uz haqida so'rang",
+      greeting: ru
+        ? "Привет! Помогу с резюме, поиском работы и откликами. Спросите!"
+        : "Salom! Rezyume, ish topish va arizalarda yordam beraman. Savolingizni yozing!",
+    },
+    company: {
+      hint: ru ? "Помощь по найму и вакансиям" : "Yollash va vakansiyalar bo'yicha",
+      greeting: ru
+        ? "Здравствуйте! Помогу с публикацией вакансий, откликами и панелью работодателя."
+        : "Salom! Vakansiya joylash, nomzodlar va ish beruvchi paneli bo'yicha yordam beraman.",
+    },
+    admin: {
+      hint: ru ? "Помощь по администрированию" : "Administratsiya bo'yicha",
+      greeting: ru
+        ? "Здравствуйте! Помогу с модерацией, пользователями и статистикой платформы."
+        : "Salom! Moderatsiya, foydalanuvchilar va platforma statistikasi bo'yicha yordam beraman.",
+    },
+  }[audience];
+
   const t = {
     title: ru ? "AI-помощник" : "AI yordamchi",
-    hint: ru
-      ? "Спросите что угодно об ishtopuz.uz"
-      : "ishtopuz.uz haqida istalgan savol bering",
+    hint: COPY.hint,
     placeholder: ru ? "Задайте вопрос..." : "Savol yozing...",
-    greeting: ru
-      ? "Привет! Я помогу с резюме, поиском работы, откликами и не только. Спросите!"
-      : "Salom! Rezyume, ish topish, ariza va boshqalarda yordam beraman. Savolingizni yozing!",
+    greeting: COPY.greeting,
     open: ru ? "Открыть AI-помощник" : "AI yordamchini ochish",
     close: ru ? "Закрыть" : "Yopish",
   };
@@ -53,6 +71,7 @@ export function AiChatWidget() {
         question,
         locale: ru ? "ru" : "uz",
         context_page: pathname || undefined,
+        audience,
       });
       const answer =
         (res.data as { data?: { answer?: string } })?.data?.answer ||

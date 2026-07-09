@@ -219,6 +219,7 @@ class HelpAssistantRequest(BaseModel):
     )
     locale: str = Field(default="uz", description="uz | ru")
     context_page: Optional[str] = Field(default=None, max_length=120)
+    audience: str = Field(default="student", description="student | company | admin")
 
 def _condense_help_answer(answer: str, locale: str) -> str:
     """
@@ -259,13 +260,51 @@ async def help_assistant(
     if locale not in {"uz", "ru"}:
         locale = "uz"
 
-    context = (
-        "You are IshTop Assistant for students. "
-        "IshTop includes: AI resume builder, job search filters, quick apply, "
-        "applications tracking, saved jobs, notifications, and profile settings. "
-        "Never fabricate credentials, secrets, API keys, or admin-only actions. "
-        "Give practical step-by-step instructions."
-    )
+    audience = (request.audience or "student").strip().lower()
+    if audience not in {"student", "company", "admin"}:
+        audience = "student"
+
+    # Role-scoped assistants: each one only answers about its own area and
+    # politely declines off-topic questions from other roles.
+    if audience == "company":
+        context = (
+            "You are IshTop HR Assistant, for EMPLOYERS/recruiters only. "
+            "Company features: post and edit jobs, review and rank applicants, "
+            "AI candidate screening, company profile and verification, analytics, "
+            "and company settings. "
+            "ONLY answer questions about hiring, job posting, applicants and the "
+            "employer dashboard. If asked about student topics (writing a resume, "
+            "applying to jobs as a candidate) or admin/platform-moderation topics, "
+            "politely say this assistant only covers employer/HR features and point "
+            "them to the right place. "
+            "Never fabricate credentials, secrets, API keys, or admin-only actions."
+        )
+        sections = "Vakansiyalar (Jobs), Nomzodlar (Applicants), Analitika, Sozlamalar"
+    elif audience == "admin":
+        context = (
+            "You are IshTop Admin Assistant, for platform ADMINISTRATORS only. "
+            "Admin features: user management, company/job moderation and approvals, "
+            "applications oversight, access control, audit log, landing content, and "
+            "platform statistics. "
+            "ONLY answer questions about platform administration and moderation. If "
+            "asked about student features (resumes, applying) or employer features "
+            "(posting jobs), politely say this assistant only covers admin tools. "
+            "Never reveal secrets/API keys or invent destructive actions."
+        )
+        sections = "Foydalanuvchilar, Kompaniyalar, Vakansiyalar, Ruxsatlar, Audit jurnal, Statistika"
+    else:
+        context = (
+            "You are IshTop Assistant for STUDENTS/job seekers only. "
+            "IshTop includes: AI resume builder, job search filters, quick apply, "
+            "applications tracking, saved jobs, interview coach, notifications, and "
+            "profile settings. "
+            "ONLY answer questions about finding a job and using the student "
+            "dashboard. If asked about employer/HR or admin/platform-moderation "
+            "topics, politely say this assistant only covers job-seeker features. "
+            "Never fabricate credentials, secrets, API keys, or admin-only actions."
+        )
+        sections = "Rezyumelar (Resumes), Ishlar (Jobs), Arizalar (Applications), Sozlamalar (Settings)"
+
     lang_rule = (
         "Answer only in Russian (Cyrillic)." if locale == "ru" else
         "Javobni faqat o'zbek tilida (lotin) bering."
@@ -279,7 +318,7 @@ async def help_assistant(
         "Rules:\n"
         "1) Keep answer very short and clear.\n"
         "2) Use at most 3 short lines.\n"
-        "3) Mention relevant section names in the app (Resumes, Jobs, Applications, Settings).\n"
+        f"3) Mention relevant section names in the app ({sections}).\n"
         "4) If problem may be network-related, suggest refresh + relogin + support contact.\n"
         "5) Avoid long explanations and avoid repeating the question.\n"
     )

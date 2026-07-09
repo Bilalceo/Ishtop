@@ -31,6 +31,7 @@ import {
   Send,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { AiChatWidget } from "@/components/AiChatWidget";
 import { UserAvatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -502,6 +503,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {isAdmin && (
         <CommandPalette open={cmdOpen} onOpenChange={setCmdOpen} />
       )}
+
+      {/* Floating AI assistant — scoped to the current role */}
+      <AiChatWidget audience={isAdmin ? "admin" : "company"} />
     </div>
   );
 }
