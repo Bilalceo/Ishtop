@@ -1423,7 +1423,7 @@ async def admin_list_applications(
 
 @router.get("/stats/timeseries")
 async def get_stats_timeseries(
-    metric: str = Query(..., regex="^(users|jobs|applications)$"),
+    metric: str = Query(..., pattern="^(users|jobs|applications)$"),
     days: int = Query(30, ge=7, le=90),
     db: Session = Depends(get_db),
     _current_admin=Depends(get_current_super_admin),

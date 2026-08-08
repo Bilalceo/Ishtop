@@ -2240,7 +2240,7 @@ async def top_candidates_for_job(
     pool: str = Query(
         "applicants",
         description="'applicants' = only people who applied; 'all' = every published resume in the DB",
-        regex="^(applicants|all)$",
+        pattern="^(applicants|all)$",
     ),
     company: User = Depends(get_current_company),
     db: Session = Depends(get_db),
