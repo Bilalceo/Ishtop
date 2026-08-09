@@ -102,27 +102,6 @@ const nextConfig = {
     ];
   },
 
-  // Same-origin API proxy.
-  // The browser calls /api/* on this very origin (see getApiBaseUrl) and Next
-  // forwards it to the real backend. This keeps the auth cookies first-party so
-  // sessions persist in Safari/ITP, in-app webviews, and with third-party
-  // cookies blocked. Target is the backend origin derived from the public API
-  // URL (override with API_PROXY_TARGET if the internal URL should be used).
-  async rewrites() {
-    let target = "";
-    try {
-      const raw = process.env.API_PROXY_TARGET || process.env.NEXT_PUBLIC_API_URL || "";
-      if (raw) target = new URL(raw).origin;
-    } catch {}
-    if (!target) return [];
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${target}/api/:path*`,
-      },
-    ];
-  },
-
   // Redirects
   async redirects() {
     return [
