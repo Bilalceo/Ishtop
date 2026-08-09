@@ -64,22 +64,38 @@ const frontendBaseUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(frontendBaseUrl),
   title: {
-    default: "IshTop - AI-Powered Career Platform",
+    default: "IshTop — O'zbekistonda AI bilan ish topish va rezyume yaratish",
     template: "%s | IshTop",
   },
   description:
-    "Build stunning resumes with AI, find your dream job, and accelerate your career with IshTop.",
+    "IshTop — sun'iy intellekt asosidagi ish topish platformasi. AI bilan professional rezyume yarating, O'zbekistondagi eng mos vakansiyalarni toping va arizani daqiqalar ichida yuboring.",
   keywords: [
-    "AI resume builder",
-    "job search",
-    "career platform",
-    "resume generator",
-    "job matching",
-    "career development",
+    "ish topish",
+    "ish o'rinlari",
+    "vakansiya",
+    "vakansiyalar O'zbekiston",
+    "ish qidirish",
+    "rezyume yaratish",
+    "AI rezyume",
+    "ishtopuz",
+    "Toshkentda ish",
+    "работа в Узбекистане",
+    "вакансии Ташкент",
+    "поиск работы",
+    "создать резюме",
   ],
-  authors: [{ name: "IshTop Team" }],
+  authors: [{ name: "IshTop" }],
+  creator: "IshTop",
+  publisher: "IshTop",
   manifest: "/manifest.json",
   applicationName: "IshTop",
+  alternates: {
+    canonical: "/",
+    languages: {
+      uz: "/",
+      ru: "/",
+    },
+  },
   appleWebApp: {
     capable: true,
     title: "IshTop",
@@ -94,29 +110,38 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "en_US",
-    url: "https://ishtop.uz",
+    locale: "uz_UZ",
+    alternateLocale: ["ru_RU"],
+    url: frontendBaseUrl,
     siteName: "IshTop",
-    title: "IshTop - AI-Powered Career Platform",
-    description: "Build stunning resumes with AI and find your dream job.",
+    title: "IshTop — O'zbekistonda AI bilan ish topish va rezyume yaratish",
+    description:
+      "AI bilan rezyume yarating, mos vakansiyalarni toping va ishga tez joylashing. O'zbekistonning sun'iy intellektli karyera platformasi.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "IshTop",
+        alt: "IshTop — AI karyera platformasi",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "IshTop",
-    description: "Build stunning resumes with AI and find your dream job.",
+    title: "IshTop — AI bilan ish topish",
+    description: "AI bilan rezyume yarating va O'zbekistondagi mos vakansiyalarni toping.",
     images: ["/og-image.png"],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
 };
 

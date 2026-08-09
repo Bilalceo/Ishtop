@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import LandingPageClient from "@/components/landing/LandingPageClient";
+import { JsonLd, organizationJsonLd, websiteJsonLd } from "@/lib/seo/jsonld";
 
 const siteUrl = process.env.NEXT_PUBLIC_FRONTEND_URL?.trim() || "http://localhost:3000";
 const apiBase = process.env.NEXT_PUBLIC_API_URL?.trim();
@@ -32,9 +33,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const canonical = new URL("/", siteUrl).toString();
 
   return {
-    title: "IshTop - AI Career Platform",
+    title: "IshTop — O'zbekistonda AI bilan ish topish va rezyume yaratish",
     description:
-      "AI yordamida professional rezyume yarating, ish toping va karyerangizni IshTop bilan tezlashtiring.",
+      "AI yordamida professional rezyume yarating, O'zbekistondagi mos vakansiyalarni toping va arizani daqiqalar ichida yuboring. IshTop — sun'iy intellektli karyera platformasi.",
     alternates: {
       canonical,
       languages: {
@@ -46,15 +47,15 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       url: canonical,
       siteName: "IshTop",
-      title: "IshTop - AI Career Platform",
+      title: "IshTop — O'zbekistonda AI bilan ish topish",
       description:
-        "O'zbekiston uchun AI-quvvatli karyera platformasi: rezyume yarating va ideal ishni toping.",
-      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "IshTop landing" }],
+        "AI bilan rezyume yarating, mos vakansiyalarni toping va ishga tez joylashing — O'zbekistonning sun'iy intellektli karyera platformasi.",
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "IshTop — AI karyera platformasi" }],
     },
     twitter: {
       card: "summary_large_image",
-      title: "IshTop - AI Career Platform",
-      description: "AI resume builder va aqlli ish mosligi platformasi.",
+      title: "IshTop — AI bilan ish topish",
+      description: "AI rezyume yaratish va aqlli ish mosligi platformasi.",
       images: ["/og-image.png"],
     },
   };
@@ -68,9 +69,12 @@ export default async function LandingPage() {
   // matching one once the user's locale is known on the client. Previously
   // only the UZ payload was passed, so a RU visitor saw UZ CMS text.
   return (
-    <LandingPageClient
-      cmsPayload={cmsPayloadUz || cmsPayloadRu}
-      cmsPayloads={{ uz: cmsPayloadUz, ru: cmsPayloadRu }}
-    />
+    <>
+      <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
+      <LandingPageClient
+        cmsPayload={cmsPayloadUz || cmsPayloadRu}
+        cmsPayloads={{ uz: cmsPayloadUz, ru: cmsPayloadRu }}
+      />
+    </>
   );
 }

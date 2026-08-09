@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { fetchDiscoveryCompany } from "@/lib/discovery-api";
 import { stripHtmlTags } from "@/lib/utils";
+import { JsonLd, jobListJsonLd } from "@/lib/seo/jsonld";
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   return {
@@ -23,9 +24,16 @@ export default async function CompanyDiscoveryPage({ params }: { params: { slug:
   const jobs = payload.jobs || [];
   const company = payload.company || {};
   const gallery: string[] = Array.isArray(company.gallery_images) ? company.gallery_images : [];
+  const jobsLd = jobListJsonLd(
+    jobs.map((j: any) => ({
+      ...j,
+      company: j.company || { name: company.name, website: company.website, logo: company.logo },
+    })),
+  );
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
+      {jobsLd && <JsonLd data={jobsLd} />}
       <header className="mb-8 overflow-hidden rounded-2xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-900">
         {company.cover_photo_url && (
           <img

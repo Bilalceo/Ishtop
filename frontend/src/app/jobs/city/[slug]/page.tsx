@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { fetchDiscoveryJobs } from "@/lib/discovery-api";
 import { stripHtmlTags } from "@/lib/utils";
+import { JsonLd, jobListJsonLd } from "@/lib/seo/jsonld";
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const city = params.slug.replace(/-/g, " ");
@@ -22,9 +23,11 @@ export default async function CityDiscoveryPage({ params }: { params: { slug: st
   }
 
   const jobs = payload.jobs || [];
+  const jobsLd = jobListJsonLd(jobs);
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
+      {jobsLd && <JsonLd data={jobsLd} />}
       <header className="mb-8">
         <p className="text-sm text-surface-500">Shahar bo'yicha ishlar</p>
         <h1 className="mt-2 text-3xl font-bold capitalize text-surface-900 dark:text-white">

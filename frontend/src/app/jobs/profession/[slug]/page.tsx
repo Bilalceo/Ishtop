@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { fetchDiscoveryJobs } from "@/lib/discovery-api";
 import { stripHtmlTags } from "@/lib/utils";
+import { JsonLd, jobListJsonLd } from "@/lib/seo/jsonld";
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const title = `${params.slug.replace(/-/g, " ")} — ish o'rinlari | IshTop`;
@@ -22,16 +23,18 @@ export default async function ProfessionDiscoveryPage({ params }: { params: { sl
   }
 
   const jobs = payload.jobs || [];
+  const jobsLd = jobListJsonLd(jobs);
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
+      {jobsLd && <JsonLd data={jobsLd} />}
       <header className="mb-8">
         <p className="text-sm text-surface-500">Kasb bo'yicha ishlar</p>
         <h1 className="mt-2 text-3xl font-bold text-surface-900 dark:text-white">
           {params.slug.replace(/-/g, " ")} — ish o'rinlari
         </h1>
         <p className="mt-2 text-surface-600 dark:text-surface-300">
-          {payload.total || jobs.length} active listings in this profession.
+          Ushbu yo'nalishda {payload.total || jobs.length} ta faol vakansiya.
         </p>
       </header>
 
@@ -43,11 +46,10 @@ export default async function ProfessionDiscoveryPage({ params }: { params: { sl
             <p className="mt-3 line-clamp-3 text-sm text-surface-700 dark:text-surface-300">{stripHtmlTags(job.description)}</p>
             <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-surface-600 dark:text-surface-300">
               <span>Ishonch: {Math.round(job.trust_score || 0)}</span>
-              <span>Badges: {(job.trust_badges || []).join(", ") || "none"}</span>
             </div>
             <div className="mt-4">
               <Link href="/student/jobs" className="text-sm font-medium text-blue-700 hover:underline">
-                Open in student dashboard
+                IshTop'da ochish va ariza berish
               </Link>
             </div>
           </article>
