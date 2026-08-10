@@ -139,6 +139,12 @@ export default function JobsPage() {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [showSplitView, setShowSplitView] = useState(false);
   const [loadTimedOut, setLoadTimedOut] = useState(false);
+  // True until the initial feed (matched-first, else all) has resolved — keeps
+  // the skeleton up so we never flash an empty/all view before matches load.
+  const [isInitializing, setIsInitializing] = useState(true);
+  // Set once the user picks a tab, so the initial matched-first default never
+  // overrides an explicit choice made while the first load was still running.
+  const manualFeedChoiceRef = useRef(false);
   const explainabilityViewedRef = useRef<Set<string>>(new Set());
 
   // Filters
@@ -222,8 +228,32 @@ export default function JobsPage() {
     [fetchJobs, loadMatchedJobs],
   );
 
+  // Smart default on first load: show the student's matched jobs when they have
+  // a resume, otherwise fall back to all jobs. Any failure (no resume, network,
+  // API error) degrades gracefully to the all-jobs feed — the page is never
+  // left empty. Respects an explicit tab choice made mid-load.
+  const loadInitialFeed = useCallback(async () => {
+    setIsInitializing(true);
+    try {
+      const ok = await loadMatchedJobs();
+      if (manualFeedChoiceRef.current) return; // user already picked a tab
+      if (ok) {
+        setFeedMode("matched");
+      } else {
+        setFeedMode("all");
+        await fetchJobs();
+      }
+    } catch {
+      if (manualFeedChoiceRef.current) return;
+      setFeedMode("all");
+      await fetchJobs();
+    } finally {
+      setIsInitializing(false);
+    }
+  }, [fetchJobs, loadMatchedJobs]);
+
   useEffect(() => {
-    void loadJobsForFeedMode("all");
+    void loadInitialFeed();
     jobApi
       .savedJobs({ limit: 100 })
       .then((res) => {
@@ -233,7 +263,7 @@ export default function JobsPage() {
         }
       })
       .catch(() => {});
-  }, [loadJobsForFeedMode]);
+  }, [loadInitialFeed]);
 
   useEffect(() => {
     const updateViewport = () => setShowSplitView(window.innerWidth >= 1500);
@@ -247,24 +277,26 @@ export default function JobsPage() {
   }, [jobs]);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && !isInitializing) {
       setLoadTimedOut(false);
       return;
     }
     const timer = window.setTimeout(() => setLoadTimedOut(true), 7000);
     return () => window.clearTimeout(timer);
-  }, [isLoading]);
+  }, [isLoading, isInitializing]);
 
   // -------------------------------------------------------------------------
   // Feed mode switching
   // -------------------------------------------------------------------------
 
   const switchToAllJobs = useCallback(async () => {
+    manualFeedChoiceRef.current = true;
     setFeedMode("all");
     await loadJobsForFeedMode("all");
   }, [loadJobsForFeedMode]);
 
   const switchToMatchedJobs = useCallback(async () => {
+    manualFeedChoiceRef.current = true;
     try {
       const ok = await loadMatchedJobs();
       if (!ok) {
@@ -363,7 +395,7 @@ export default function JobsPage() {
   });
 
   const isMatchedEmpty =
-    feedMode === "matched" && !isLoading && sortedJobs.length === 0;
+    feedMode === "matched" && !isLoading && !isInitializing && sortedJobs.length === 0;
 
   // -------------------------------------------------------------------------
   // Actions
@@ -680,7 +712,7 @@ export default function JobsPage() {
             showSplitView && "lg:w-[420px] lg:shrink-0 xl:w-[460px]",
           )}
         >
-          {isLoading ? (
+          {isLoading || isInitializing ? (
             <div className="space-y-3 p-4">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div
