@@ -115,20 +115,47 @@ def issue_refresh_token(
     return raw, row
 
 
+# A short window after a token is rotated during which presenting that same
+# (now-revoked) token is treated as a benign concurrent-refresh race rather than
+# theft. A single page load legitimately fires several refreshes at once
+# (bootstrap + data calls, or multiple tabs); without this grace they would trip
+# reuse-detection and log the user out. Real theft replays a token much later.
+REFRESH_ROTATION_GRACE = timedelta(seconds=30)
+
+
+def _aware(dt):
+    return dt.replace(tzinfo=timezone.utc) if (dt is not None and dt.tzinfo is None) else dt
+
+
 def rotate(db: Session, raw_token: str, request=None) -> tuple[str, RefreshToken]:
     """
     Validate the presented refresh token and rotate it.
 
-    Raises TokenError on: unknown, expired, or reuse (already-rotated) tokens.
-    On reuse -> the entire family is revoked (theft response).
+    Raises TokenError on: unknown, expired, or genuinely-reused tokens.
+    A token reused *within* the rotation grace window (concurrent refresh from
+    the same client) gets a fresh token; reuse *outside* the window -> the whole
+    family is revoked (theft response).
     """
     row = db.query(RefreshToken).filter_by(token_hash=_hash(raw_token)).first()
 
     if row is None:
         raise TokenError("Unknown refresh token")
 
-    # Reuse detection: a token that was already rotated is being replayed.
     if row.revoked_at is not None:
+        # Concurrent-refresh race: this token was rotated (has a successor) only
+        # a few seconds ago -> not theft. Hand out a fresh token in the same
+        # family instead of nuking it.
+        revoked_recently = (
+            datetime.now(timezone.utc) - _aware(row.revoked_at)
+        ) < REFRESH_ROTATION_GRACE
+        if row.replaced_by is not None and revoked_recently:
+            new_raw, new_row = issue_refresh_token(
+                db, row.user_id, remember_me=bool(row.remember_me),
+                family_id=row.family_id, request=request,
+            )
+            db.commit()
+            return new_raw, new_row
+        # Old reuse, or a token killed by explicit logout -> real theft.
         revoke_family(db, row.family_id)
         raise TokenError("Refresh token reuse detected — family revoked")
 
