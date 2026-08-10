@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { Send, CheckCircle2, Loader2, Crown, ArrowRight } from "lucide-react";
+import { Send, CheckCircle2, Loader2, Crown, ArrowRight, X } from "lucide-react";
 import { telegramApi } from "@/lib/api";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,6 +24,22 @@ export function TelegramProCard() {
   const [connected, setConnected] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
   const [granted, setGranted] = useState(false);
+  // Persisted "don't show me this again" — so the offer never nags a user who
+  // already subscribed (or simply isn't interested) on every dashboard visit.
+  const dismissKey = user?.id ? `tg_pro_dismissed:${user.id}` : "tg_pro_dismissed";
+  const [dismissed, setDismissed] = useState(true); // hidden until we read storage (no flash)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setDismissed(localStorage.getItem(dismissKey) === "1");
+  }, [dismissKey]);
+  const dismiss = () => {
+    setDismissed(true);
+    try {
+      localStorage.setItem(dismissKey, "1");
+    } catch {
+      /* ignore storage errors */
+    }
+  };
 
   const t = ru
     ? {
@@ -63,12 +79,30 @@ export function TelegramProCard() {
     if (alreadyPro || isGuest) return; // guests: no authed calls from a public page
     telegramApi
       .link()
-      .then((r) => setConnected(!!r.data?.data?.connected))
+      .then(async (r) => {
+        const isConnected = !!r.data?.data?.connected;
+        setConnected(isConnected);
+        // If they've already connected Telegram, try to activate PRO silently.
+        // Subscribed users then get PRO without clicking and the card disappears
+        // — so it stops re-appearing on every visit. Not subscribed -> no-op.
+        if (isConnected) {
+          try {
+            const c = await telegramApi.claimPro();
+            const d = c.data?.data || {};
+            if (d.granted || d.reason === "already_pro") {
+              setGranted(true);
+              dismiss();
+            }
+          } catch {
+            /* ignore — user can still claim manually */
+          }
+        }
+      })
       .catch(() => setConnected(false));
   }, [alreadyPro, isGuest]);
 
-  // Existing PRO/enterprise users don't need the offer.
-  if (alreadyPro) return null;
+  // Existing PRO users, or anyone who dismissed the offer, don't see it.
+  if (alreadyPro || dismissed) return null;
 
   const connect = async () => {
     if (isGuest) {
@@ -128,7 +162,15 @@ export function TelegramProCard() {
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-[#f0d9c2] bg-gradient-to-br from-[#fff3e8] via-white to-[#f3eeff] p-6 dark:border-white/[0.06] dark:from-brand-500/10 dark:via-surface-900 dark:to-surface-900 sm:p-7">
-      <div className="flex items-center gap-3">
+      <button
+        type="button"
+        onClick={dismiss}
+        aria-label={ru ? "Закрыть" : "Yopish"}
+        className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full text-surface-400 transition hover:bg-black/5 hover:text-surface-700 dark:hover:bg-white/10 dark:hover:text-white"
+      >
+        <X className="h-4 w-4" />
+      </button>
+      <div className="flex items-center gap-3 pr-8">
         <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#2e4278] text-white">
           <Crown className="h-6 w-6" />
         </span>
