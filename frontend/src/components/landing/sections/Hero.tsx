@@ -18,6 +18,7 @@ import {
 } from "framer-motion";
 import { ArrowRight, CheckCircle2, ShieldCheck, Sparkles, PlayCircle } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useDashboardCta, dashboardLabel } from "@/hooks/useDashboardCta";
 
 type HeroCmsPayload = {
   hero?: { title?: string; subtitle?: string; primaryCta?: string; secondaryCta?: string };
@@ -122,6 +123,7 @@ export function Hero({ cms }: { cms?: HeroCmsPayload }) {
   const reduce = useReducedMotion();
   const L = (locale as Locale) in COPY ? (locale as Locale) : "uz";
   const c = COPY[L];
+  const { showAuthed, dashboardHref } = useDashboardCta();
 
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -192,8 +194,11 @@ export function Hero({ cms }: { cms?: HeroCmsPayload }) {
             {...fade(0.24)}
             className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
-            <Link href="/register" className="btn-silver-primary group w-full sm:w-auto">
-              {cms?.hero?.primaryCta ?? c.primary}
+            <Link
+              href={showAuthed ? dashboardHref : "/register"}
+              className="btn-silver-primary group w-full sm:w-auto"
+            >
+              {showAuthed ? dashboardLabel(locale) : (cms?.hero?.primaryCta ?? c.primary)}
               <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
             </Link>
             <a href="#live-demo" className="btn-silver-ghost group w-full sm:w-auto">

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useDashboardCta, dashboardLabel } from "@/hooks/useDashboardCta";
 
 const NAV_ITEMS = [
   { href: "#how", labelUz: "Qanday ishlaydi", labelRu: "Как это работает", labelEn: "How it works" },
@@ -19,6 +20,7 @@ export function Nav() {
   const locale = rawLocale as string;
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const { showAuthed, dashboardHref } = useDashboardCta();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -68,15 +70,23 @@ export function Nav() {
           <div className="opacity-80 transition hover:opacity-100">
             <LanguageSwitcher />
           </div>
-          <Link
-            href="/login"
-            className="focus-ring rounded-full px-4 py-2 text-sm font-semibold text-[#3f3f46] hover:text-[#18181b]"
-          >
-            {locale === "ru" ? "Войти" : locale === "en" ? "Sign in" : "Kirish"}
-          </Link>
-          <Link href="/register" className="btn-silver-primary !px-5 !py-2.5">
-            {locale === "ru" ? "Начать бесплатно" : locale === "en" ? "Get started" : "Bepul boshlash"}
-          </Link>
+          {showAuthed ? (
+            <Link href={dashboardHref} className="btn-silver-primary !px-5 !py-2.5">
+              {dashboardLabel(locale)}
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="focus-ring rounded-full px-4 py-2 text-sm font-semibold text-[#3f3f46] hover:text-[#18181b]"
+              >
+                {locale === "ru" ? "Войти" : locale === "en" ? "Sign in" : "Kirish"}
+              </Link>
+              <Link href="/register" className="btn-silver-primary !px-5 !py-2.5">
+                {locale === "ru" ? "Начать бесплатно" : locale === "en" ? "Get started" : "Bepul boshlash"}
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -110,17 +120,29 @@ export function Nav() {
             <li className="mt-2 flex items-center gap-2">
               <LanguageSwitcher align="left" />
             </li>
-            <li className="mt-3 grid grid-cols-2 gap-2">
-              <Link
-                href="/login"
-                className="rounded-full bg-[#f1f1ef] px-4 py-3 text-center text-sm font-semibold text-[#18181b]"
-              >
-                {locale === "ru" ? "Войти" : locale === "en" ? "Sign in" : "Kirish"}
-              </Link>
-              <Link href="/register" className="btn-silver-primary !py-3">
-                {locale === "ru" ? "Начать" : locale === "en" ? "Start" : "Boshlash"}
-              </Link>
-            </li>
+            {showAuthed ? (
+              <li className="mt-3">
+                <Link
+                  href={dashboardHref}
+                  onClick={() => setOpen(false)}
+                  className="btn-silver-primary !py-3 block text-center"
+                >
+                  {dashboardLabel(locale)}
+                </Link>
+              </li>
+            ) : (
+              <li className="mt-3 grid grid-cols-2 gap-2">
+                <Link
+                  href="/login"
+                  className="rounded-full bg-[#f1f1ef] px-4 py-3 text-center text-sm font-semibold text-[#18181b]"
+                >
+                  {locale === "ru" ? "Войти" : locale === "en" ? "Sign in" : "Kirish"}
+                </Link>
+                <Link href="/register" className="btn-silver-primary !py-3">
+                  {locale === "ru" ? "Начать" : locale === "en" ? "Start" : "Boshlash"}
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
       )}
