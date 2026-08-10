@@ -344,7 +344,7 @@ export default function StudentDashboardLayout({
 
           {/* Feedback — complaints & suggestions via Telegram (own clean row) */}
           <a
-            href="https://t.me/asoslab_admin"
+            href="https://t.me/asoslab"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-2 flex items-center gap-3 rounded-2xl bg-surface-50 px-3.5 py-3 text-sm font-medium text-surface-600 transition-colors hover:bg-brand-50 hover:text-brand-700 dark:bg-surface-800/60 dark:text-surface-400 dark:hover:bg-brand-500/10 dark:hover:text-brand-400"
@@ -355,7 +355,7 @@ export default function StudentDashboardLayout({
                 {locale === "ru" ? "Жалобы и предложения" : "Shikoyat va takliflar"}
               </span>
               <span className="block truncate text-[11px] font-normal text-surface-400">
-                @asoslab_admin
+                @asoslab
               </span>
             </span>
           </a>

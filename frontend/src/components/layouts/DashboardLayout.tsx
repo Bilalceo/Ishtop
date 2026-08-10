@@ -367,7 +367,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Feedback — complaints & suggestions via Telegram */}
           <div className="px-4 pb-2">
             <a
-              href="https://t.me/asoslab_admin"
+              href="https://t.me/asoslab"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 rounded-xl bg-surface-50 px-3 py-2.5 text-sm font-medium text-surface-600 transition-colors hover:bg-brand-50 hover:text-brand-700 dark:bg-surface-800/60 dark:text-surface-400 dark:hover:bg-brand-500/10 dark:hover:text-brand-400"
@@ -378,7 +378,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   {locale === "ru" ? "Жалобы и предложения" : "Shikoyat va takliflar"}
                 </span>
                 <span className="block truncate text-[11px] font-normal text-surface-400">
-                  @asoslab_admin
+                  @asoslab
                 </span>
               </span>
             </a>
