@@ -9,9 +9,10 @@
  * `useSearchParams()` and interacts with browser APIs.
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -72,6 +73,19 @@ export default function LoginPageClient() {
   const loginSchema = useMemo(() => createLoginSchema(t), [t]);
   const [showPassword, setShowPassword] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // If the visitor is already signed in (session restored from cookie), skip
+  // the form entirely and send them to their dashboard.
+  const router = useRouter();
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const role = useAuthStore((s) => s.user?.role);
+  useEffect(() => {
+    if (hasHydrated && isAuthenticated) {
+      const dest = redirectTo || (role === "company" ? "/company" : role === "admin" ? "/admin" : "/student");
+      router.replace(dest);
+    }
+  }, [hasHydrated, isAuthenticated, role, redirectTo, router]);
 
   const {
     register,

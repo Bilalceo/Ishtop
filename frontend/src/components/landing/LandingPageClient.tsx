@@ -13,12 +13,15 @@
 
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Nav } from "./sections/Nav";
 import { Hero } from "./sections/Hero";
 import { TrustLayer } from "./sections/TrustLayer";
 import { ScrollProgressBar } from "./sections/primitives";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useAuthStore } from "@/store/authStore";
 
 // Below-fold sections — deferred so they don't block first paint.
 // SSR enabled for SEO crawlers; client hydration is split into chunks.
@@ -60,6 +63,22 @@ interface LandingPageClientProps {
 
 export default function LandingPageClient({ cmsPayload, cmsPayloads }: LandingPageClientProps) {
   const { locale } = useTranslation();
+
+  // Already-signed-in visitors shouldn't sit on the marketing page — send them
+  // to their dashboard, like HH/LinkedIn. Runs only after the session is
+  // restored from the cookie (hasHydrated) so we don't bounce logged-out users.
+  // SSR still renders the full landing for crawlers (they're never authed).
+  const router = useRouter();
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const role = useAuthStore((s) => s.user?.role);
+  useEffect(() => {
+    if (hasHydrated && isAuthenticated) {
+      const dest = role === "company" ? "/company" : role === "admin" ? "/admin" : "/student";
+      router.replace(dest);
+    }
+  }, [hasHydrated, isAuthenticated, role, router]);
+
   // Prefer the per-locale payload so an RU visitor sees the RU CMS hero.
   // Fall back to the legacy single payload for callers that haven't been
   // updated.
