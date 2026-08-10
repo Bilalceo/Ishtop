@@ -151,7 +151,7 @@ interface AuthState {
   // Actions
   setUser: (user: User | null) => void;
   setHasHydrated: (value: boolean) => void;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   /**
@@ -202,7 +202,7 @@ export const useAuthStore = create<AuthState>()(
         }),
 
       // Login
-      login: async (email, password) => {
+      login: async (email, password, rememberMe = true) => {
         set((state) => {
           state.isLoading = true;
           state.error = null;
@@ -213,7 +213,7 @@ export const useAuthStore = create<AuthState>()(
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify({ email, password, remember_me: rememberMe }),
           });
 
           if (!res.ok) {

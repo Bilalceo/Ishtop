@@ -173,12 +173,19 @@ class UserLogin(BaseModel):
         description="Password",
         examples=["StrongPass123!"]
     )
-    
+
+    remember_me: bool = Field(
+        default=True,
+        description="Keep me signed in for 30 days (persistent cookie). "
+                    "If false, the session ends when the browser closes.",
+    )
+
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "email": "john@example.com",
-                "password": "StrongPass123!"
+                "password": "StrongPass123!",
+                "remember_me": True
             }
         }
     )

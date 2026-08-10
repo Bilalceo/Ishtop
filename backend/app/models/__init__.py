@@ -167,6 +167,7 @@ from app.models.audit_log import AuditLog
 from app.models.admin_notification import AdminNotification
 from app.models.verification_audit_log import VerificationAuditLog
 from app.models.funnel_event import FunnelEvent
+from app.models.refresh_token import RefreshToken
 
 # =============================================================================
 # EXPORT ALL (for `from app.models import *`)
@@ -185,6 +186,7 @@ __all__ = [
     # User Model & Enums
     # -------------------------------------------------------------------------
     "User",                # Main user model
+    "RefreshToken",        # Rotating refresh-token sessions (one per device)
     "UserRole",            # STUDENT, COMPANY, ADMIN
     "AdminSubRole",        # SUPER_ADMIN, OPERATIONS_ADMIN, etc.
     "ADMIN_PERMISSION_MATRIX",

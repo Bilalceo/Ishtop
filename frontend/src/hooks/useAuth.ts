@@ -63,8 +63,8 @@ export function useAuth() {
   const updateProfile = useAuthStore((s) => s.updateProfile);
 
   const login = useCallback(
-    async (credentials: { email: string; password: string }, redirectTo?: string) => {
-      await storeLogin(credentials.email, credentials.password);
+    async (credentials: { email: string; password: string; rememberMe?: boolean }, redirectTo?: string) => {
+      await storeLogin(credentials.email, credentials.password, credentials.rememberMe);
       const role = useAuthStore.getState().user?.role;
       const roleRoot = role === "company" ? "/company" : role === "admin" ? "/admin" : "/student";
       router.push(redirectTo || roleRoot);

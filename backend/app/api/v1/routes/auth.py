@@ -84,9 +84,23 @@ def _resolve_cookie_secure(request: Request) -> bool:
     return request.url.scheme == "https" or forwarded_proto == "https"
 
 
-def _set_auth_cookies(response: Response, request: Request, token_response: TokenResponse) -> None:
+def _set_auth_cookies(
+    response: Response,
+    request: Request,
+    token_response: TokenResponse,
+    *,
+    raw_refresh: str | None = None,
+    remember_me: bool = True,
+) -> None:
     """
     Store access + refresh tokens in httpOnly cookies.
+
+    - Access cookie: always short-lived (ACCESS_TOKEN_EXPIRE_MINUTES).
+    - Refresh cookie: the opaque DB-backed token (`raw_refresh`). With
+      remember_me it is persistent (30-day Max-Age) so the session survives a
+      browser restart; without it, it is a session cookie that dies when the
+      browser fully closes. Falls back to the legacy JWT refresh token only if
+      no raw_refresh is supplied (kept for backward compatibility).
     """
     secure = _resolve_cookie_secure(request)
     domain = settings.AUTH_COOKIE_DOMAIN or None
@@ -105,12 +119,46 @@ def _set_auth_cookies(response: Response, request: Request, token_response: Toke
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         **common,
     )
+
+    refresh_value = raw_refresh if raw_refresh is not None else token_response.refresh_token
+    refresh_kwargs = dict(common)
+    if remember_me:
+        refresh_kwargs["max_age"] = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+    # remember_me is False -> omit max_age -> browser-session cookie.
     response.set_cookie(
         key=settings.AUTH_REFRESH_COOKIE_NAME,
-        value=token_response.refresh_token,
-        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
-        **common,
+        value=refresh_value,
+        **refresh_kwargs,
     )
+
+
+def _establish_session(
+    db: Session,
+    user: User,
+    response: Response,
+    request: Request,
+    *,
+    remember_me: bool = True,
+) -> TokenResponse:
+    """
+    Mint an access token + a DB-backed rotating refresh token for `user`,
+    set both httpOnly cookies, and return the TokenResponse body.
+
+    This is the single entry point used by login, register, and OAuth so every
+    sign-in path produces a revocable, per-device session.
+    """
+    from app.services.refresh_service import issue_refresh_token
+
+    token_response = create_token_response(user)
+    raw_refresh, _row = issue_refresh_token(
+        db, user.id, remember_me=remember_me, request=request
+    )
+    db.commit()
+    _set_auth_cookies(
+        response, request, token_response,
+        raw_refresh=raw_refresh, remember_me=remember_me,
+    )
+    return token_response
 
 
 def _clear_auth_cookies(response: Response, request: Request) -> None:
@@ -584,11 +632,10 @@ async def register(
         except Exception as e:
             logger.error(f"Failed to send welcome email: {e}")
         
-        # Return tokens + set secure cookies for browser clients
-        token_response = create_token_response(user)
-        _set_auth_cookies(response, request, token_response)
+        # Return tokens + set secure cookies for browser clients (DB-backed session)
+        token_response = _establish_session(db, user, response, request, remember_me=True)
         return token_response
-        
+
     except IntegrityError as e:
         db.rollback()
         logger.error(f"Registration integrity error: {e}")
@@ -763,8 +810,9 @@ async def login(
     except Exception as e:
         logger.error(f"Failed to send login notification: {e}")
     
-    token_response = create_token_response(user)
-    _set_auth_cookies(response, request, token_response)
+    token_response = _establish_session(
+        db, user, response, request, remember_me=credentials.remember_me
+    )
     return token_response
 
 
@@ -793,52 +841,49 @@ async def refresh_token(
     request: TokenRefreshRequest | None = None,
     db: Session = Depends(get_db)
 ):
-    """Refresh access token."""
-    
-    try:
-        refresh_token_value = (
-            request.refresh_token if request and request.refresh_token else None
-        ) or http_request.cookies.get(settings.AUTH_REFRESH_COOKIE_NAME)
-        if not refresh_token_value:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Refresh token missing"
-            )
+    """Refresh access token by rotating the DB-backed refresh token."""
+    from app.services.refresh_service import rotate
 
-        # Verify refresh token
-        payload = verify_token(
-            refresh_token_value,
-            expected_type=TokenType.REFRESH
-        )
-        
-        user_id = normalize_user_id(payload.user_id)
-
-        # Get user
-        user = db.query(User).filter(
-            User.id == user_id,
-            User.is_deleted == False,
-            User.is_active_account == True
-        ).first()
-        
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User not found"
-            )
-        
-        logger.info(f"Token refresh for user: {user.id}")
-        
-        token_response = create_token_response(user)
-        _set_auth_cookies(response, http_request, token_response)
-        return token_response
-        
-    except TokenError as e:
-        logger.warning(f"Token refresh failed: {e}")
+    raw = (
+        request.refresh_token if request and request.refresh_token else None
+    ) or http_request.cookies.get(settings.AUTH_REFRESH_COOKIE_NAME)
+    if not raw:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e),
+            detail="Refresh token missing",
+        )
+
+    # Rotate: validate + swap for a successor. Raises on unknown/expired/reused.
+    try:
+        new_raw, row = rotate(db, raw, request=http_request)
+    except TokenError as e:
+        logger.warning(f"Token refresh failed: {e}")
+        _clear_auth_cookies(response, http_request)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session expired, please sign in again",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    user = db.query(User).filter(
+        User.id == row.user_id,
+        User.is_deleted == False,
+        User.is_active_account == True,
+    ).first()
+    if not user:
+        _clear_auth_cookies(response, http_request)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+
+    logger.info(f"Token refresh (rotated) for user: {user.id}")
+    token_response = create_token_response(user)
+    _set_auth_cookies(
+        response, http_request, token_response,
+        raw_refresh=new_raw, remember_me=bool(row.remember_me),
+    )
+    return token_response
 
 
 @router.post(
@@ -858,8 +903,9 @@ async def logout(
     response: Response,
     body: LogoutRequest | None = None,
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
-    """Logout user by blacklisting token."""
+    """Logout this device: revoke its refresh token in the DB + clear cookies."""
 
     auth_header = request.headers.get("authorization") or request.headers.get("Authorization") or ""
     token = None
@@ -878,17 +924,95 @@ async def logout(
         except Exception as e:
             logger.warning(f"Failed to blacklist refresh token: {e}")
 
+    # Revoke the DB-backed refresh token for THIS device (other devices stay in).
     cookie_refresh = request.cookies.get(settings.AUTH_REFRESH_COOKIE_NAME)
     if cookie_refresh:
         try:
-            blacklist_token(cookie_refresh)
+            from app.services.refresh_service import revoke_one
+            revoke_one(db, cookie_refresh)
         except Exception as e:
-            logger.warning(f"Failed to blacklist cookie refresh token: {e}")
+            logger.warning(f"Failed to revoke refresh token: {e}")
 
     logger.info(f"Logout for user: {current_user.id}")
     _clear_auth_cookies(response, request)
 
     return MessageResponse(message="Successfully logged out", success=True)
+
+
+@router.post(
+    "/logout-all",
+    response_model=MessageResponse,
+    summary="Logout from all devices",
+    description="Revoke every active refresh token for the current user.",
+)
+async def logout_all(
+    request: Request,
+    response: Response,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Revoke all sessions everywhere (e.g. after suspected compromise)."""
+    from app.services.refresh_service import revoke_all_for_user
+    count = revoke_all_for_user(db, current_user.id)
+    _clear_auth_cookies(response, request)
+    logger.info(f"Logout-all for user {current_user.id}: revoked {count} session(s)")
+    return MessageResponse(message=f"Signed out of {count} device(s)", success=True)
+
+
+@router.get(
+    "/sessions",
+    summary="List active sessions",
+    description="List the current user's active sessions (one per device).",
+)
+async def list_sessions(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return active sessions for the 'your devices' screen."""
+    from app.services.refresh_service import list_active_sessions, _hash
+    current_hash = None
+    cookie_refresh = request.cookies.get(settings.AUTH_REFRESH_COOKIE_NAME)
+    if cookie_refresh:
+        current_hash = _hash(cookie_refresh)
+    rows = list_active_sessions(db, current_user.id)
+    return [
+        {
+            "id": str(r.id),
+            "device": r.device_label,
+            "ip_address": r.ip_address,
+            "created_at": r.created_at,
+            "expires_at": r.expires_at,
+            "current": (current_hash is not None and r.token_hash == current_hash),
+        }
+        for r in rows
+    ]
+
+
+@router.delete(
+    "/sessions/{session_id}",
+    response_model=MessageResponse,
+    summary="Revoke one session",
+    description="Revoke a specific device session by id.",
+)
+async def revoke_session(
+    session_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Revoke a single device session the current user owns."""
+    from app.models.refresh_token import RefreshToken
+    updated = (
+        db.query(RefreshToken)
+        .filter(RefreshToken.id == normalize_user_id(session_id),
+                RefreshToken.user_id == current_user.id,
+                RefreshToken.revoked_at.is_(None))
+        .update({"revoked_at": datetime.now(timezone.utc)})
+    )
+    db.commit()
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
+    return MessageResponse(message="Session revoked", success=True)
 
 
 @router.post(
@@ -1232,11 +1356,11 @@ async def google_oauth_callback(
         db.commit()
 
         # Redirect to frontend after setting secure auth cookies.
-        token_response = create_token_response(user)
         redirect_response = RedirectResponse(
             url=f"{settings.FRONTEND_URL}/oauth/callback#oauth=success"
         )
-        _set_auth_cookies(redirect_response, request, token_response)
+        # OAuth logins are persistent by nature -> Remember Me on.
+        _establish_session(db, user, redirect_response, request, remember_me=True)
         return redirect_response
         
     except ValueError as e:
@@ -1370,11 +1494,11 @@ async def linkedin_oauth_callback(
         user.last_login = datetime.now(timezone.utc)
         db.commit()
 
-        token_response = create_token_response(user)
         redirect_response = RedirectResponse(
             url=f"{settings.FRONTEND_URL}/oauth/callback#oauth=success"
         )
-        _set_auth_cookies(redirect_response, request, token_response)
+        # OAuth logins are persistent by nature -> Remember Me on.
+        _establish_session(db, user, redirect_response, request, remember_me=True)
         return redirect_response
         
     except ValueError as e:

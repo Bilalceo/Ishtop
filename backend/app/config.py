@@ -168,10 +168,14 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     
     # Access token lifetime in minutes (short for security)
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    
-    # Refresh token lifetime in days (longer, for convenience)
-    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+
+    # Refresh token lifetime in days when "Remember Me" is ON (persistent login)
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
+
+    # Refresh token lifetime in days when "Remember Me" is OFF.
+    # A short window so a shared-computer login effectively ends with the session.
+    SESSION_REFRESH_EXPIRE_DAYS: int = 1
 
     # Cookie-based auth settings (recommended for browser clients).
     AUTH_ACCESS_COOKIE_NAME: str = "access_token"
@@ -543,10 +547,10 @@ class Settings(BaseSettings):
 
         # Access-token TTL: bounds the unrevoked window when the Redis-backed
         # blacklist is degraded (logout fails open by design — see R3 docs).
-        # Hard cap at 10 minutes in production.
-        if self.ACCESS_TOKEN_EXPIRE_MINUTES > 10:
+        # Hard cap at 15 minutes in production.
+        if self.ACCESS_TOKEN_EXPIRE_MINUTES > 15:
             errors.append(
-                "ACCESS_TOKEN_EXPIRE_MINUTES must be <= 10 in production "
+                "ACCESS_TOKEN_EXPIRE_MINUTES must be <= 15 in production "
                 f"(currently {self.ACCESS_TOKEN_EXPIRE_MINUTES}). Long-lived "
                 "access tokens widen the window during a Redis outage when "
                 "token revocation cannot propagate across workers."

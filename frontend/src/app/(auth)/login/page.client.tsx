@@ -83,7 +83,7 @@ export default function LoginPageClient() {
     defaultValues: {
       email: "",
       password: "",
-      rememberMe: false,
+      rememberMe: true,
     },
   });
 
@@ -93,7 +93,7 @@ export default function LoginPageClient() {
     clearError();
     try {
       await login(
-        { email: data.email, password: data.password },
+        { email: data.email, password: data.password, rememberMe: data.rememberMe ?? true },
         redirectTo || undefined,
       );
       setIsSuccess(true);
