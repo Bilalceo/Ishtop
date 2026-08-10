@@ -74,18 +74,17 @@ export default function LoginPageClient() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // If the visitor is already signed in (session restored from cookie), skip
-  // the form entirely and send them to their dashboard.
+  // If the visitor is already signed in, skip the form and send them to their
+  // dashboard the instant the persisted session is known (no /auth/refresh wait).
   const router = useRouter();
-  const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const role = useAuthStore((s) => s.user?.role);
   useEffect(() => {
-    if (hasHydrated && isAuthenticated) {
+    if (isAuthenticated) {
       const dest = redirectTo || (role === "company" ? "/company" : role === "admin" ? "/admin" : "/student");
       router.replace(dest);
     }
-  }, [hasHydrated, isAuthenticated, role, redirectTo, router]);
+  }, [isAuthenticated, role, redirectTo, router]);
 
   const {
     register,

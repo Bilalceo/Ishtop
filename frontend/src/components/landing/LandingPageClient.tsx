@@ -13,7 +13,7 @@
 
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Nav } from "./sections/Nav";
@@ -65,19 +65,28 @@ export default function LandingPageClient({ cmsPayload, cmsPayloads }: LandingPa
   const { locale } = useTranslation();
 
   // Already-signed-in visitors shouldn't sit on the marketing page — send them
-  // to their dashboard, like HH/LinkedIn. Runs only after the session is
-  // restored from the cookie (hasHydrated) so we don't bounce logged-out users.
-  // SSR still renders the full landing for crawlers (they're never authed).
+  // straight to their dashboard, like HH/LinkedIn. We redirect the instant the
+  // persisted `isAuthenticated` is known (from localStorage) instead of waiting
+  // for the /auth/refresh round-trip, so there's no ~1s landing flash. `mounted`
+  // keeps SSR and the first client render identical (no hydration mismatch);
+  // crawlers are never authenticated, so they still get the full landing.
   const router = useRouter();
-  const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const role = useAuthStore((s) => s.user?.role);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   useEffect(() => {
-    if (hasHydrated && isAuthenticated) {
+    if (isAuthenticated) {
       const dest = role === "company" ? "/company" : role === "admin" ? "/admin" : "/student";
       router.replace(dest);
     }
-  }, [hasHydrated, isAuthenticated, role, router]);
+  }, [isAuthenticated, role, router]);
+
+  // While an authenticated visitor is being redirected, don't paint the
+  // marketing page underneath — show a minimal placeholder instead.
+  if (mounted && isAuthenticated) {
+    return <main className="silver-ground min-h-screen" aria-hidden />;
+  }
 
   // Prefer the per-locale payload so an RU visitor sees the RU CMS hero.
   // Fall back to the legacy single payload for callers that haven't been
