@@ -227,7 +227,7 @@ export default function AdminApplicationsPage() {
             </div>
           ) : (
             <div className="overflow-hidden rounded-2xl border border-surface-200 dark:border-surface-700">
-              <div className="grid grid-cols-[1.2fr_1.4fr_0.8fr_0.8fr_0.8fr] gap-3 border-b border-surface-200 bg-surface-50/80 px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-surface-500 dark:border-surface-700 dark:bg-surface-900/60 dark:text-surface-400">
+              <div className="hidden grid-cols-[1.2fr_1.4fr_0.8fr_0.8fr_0.8fr] gap-3 border-b border-surface-200 bg-surface-50/80 px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-surface-500 dark:border-surface-700 dark:bg-surface-900/60 dark:text-surface-400 lg:grid">
                 <span>Applicant</span>
                 <span>Job / Company</span>
                 <span>Status</span>
@@ -240,7 +240,7 @@ export default function AdminApplicationsPage() {
                   return (
                     <div
                       key={a.id}
-                      className="grid grid-cols-[1.2fr_1.4fr_0.8fr_0.8fr_0.8fr] items-start gap-3 px-4 py-3 text-sm transition-colors hover:bg-surface-50 dark:hover:bg-surface-900/40"
+                      className="flex flex-col gap-2 px-4 py-3 text-sm transition-colors hover:bg-surface-50 dark:hover:bg-surface-900/40 lg:grid lg:grid-cols-[1.2fr_1.4fr_0.8fr_0.8fr_0.8fr] lg:items-start lg:gap-3"
                     >
                       <div className="min-w-0">
                         <p className="truncate font-medium text-surface-900 dark:text-white">

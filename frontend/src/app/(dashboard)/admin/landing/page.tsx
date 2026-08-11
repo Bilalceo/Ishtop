@@ -391,7 +391,7 @@ export default function AdminLandingPage() {
             <Textarea readOnly value={payloadText} className="min-h-[220px] font-mono text-xs" />
           </section>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Button onClick={onSave} disabled={isLoading}>
               <Save className="mr-2 h-4 w-4" /> Save changes
             </Button>

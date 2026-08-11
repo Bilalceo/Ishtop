@@ -274,7 +274,7 @@ export default function CompanyJobsPage() {
                     </div>
 
                     {/* Stats */}
-                    <div className="mt-3 flex items-center gap-6">
+                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-x-6">
                       <div className="flex items-center gap-2 text-sm">
                         <Users className="h-4 w-4 text-surface-400" />
                         <span className="font-medium text-surface-900 dark:text-white">

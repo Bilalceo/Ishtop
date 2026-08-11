@@ -310,14 +310,14 @@ export default function AdminCompaniesPage() {
                   key={company.id}
                   className={`rounded-2xl border p-4 transition-colors ${isSelected ? "border-brand-400 bg-brand-50 dark:border-brand-500/60 dark:bg-brand-500/10" : "border-surface-200 hover:border-brand-200 dark:border-surface-700 dark:hover:border-brand-500/40"}`}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-start gap-3">
                     <input
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => toggleOne(company.id)}
                       className="mt-1 h-4 w-4 flex-shrink-0 rounded border-surface-300 accent-brand-500"
                     />
-                    <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex min-w-0 flex-1 items-start gap-3">
                       <UserAvatar name={company.company_name} size="md" />
                       <div className="min-w-0">
                         <p className="flex items-center gap-1.5 truncate font-semibold text-surface-900 dark:text-white">
@@ -334,6 +334,7 @@ export default function AdminCompaniesPage() {
                     <Button
                       variant={company.is_verified ? "outline" : "default"}
                       size="sm"
+                      className="w-full basis-full shrink-0 sm:w-auto sm:basis-auto"
                       disabled={busyId === company.id}
                       onClick={() => void toggleVerify(company)}
                     >
@@ -397,7 +398,7 @@ export default function AdminCompaniesPage() {
                     </div>
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between text-[11px] text-surface-500">
+                  <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-surface-500">
                     <span>
                       {t.registered}:{" "}
                       {company.created_at

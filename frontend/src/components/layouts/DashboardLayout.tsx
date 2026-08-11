@@ -405,24 +405,26 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top navbar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-surface-200 bg-white/80 px-4 backdrop-blur-xl dark:border-surface-800 dark:bg-surface-900/80 sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-2 border-b border-surface-200 bg-white/80 px-4 backdrop-blur-xl dark:border-surface-800 dark:bg-surface-900/80 sm:gap-4 sm:px-6">
           {/* Mobile menu button */}
-          <button type="button" className="lg:hidden" onClick={() => setIsSidebarOpen(true)}>
+          <button type="button" className="shrink-0 lg:hidden" onClick={() => setIsSidebarOpen(true)}>
             <Menu className="h-6 w-6 text-surface-600" />
           </button>
 
-          {/* Page title - shown on mobile */}
-          <div className="lg:hidden font-medium text-surface-900 dark:text-white">
+          {/* Page title — shown on mobile; truncates so it never pushes the
+              action cluster off the right edge on narrow phones. */}
+          <div className="min-w-0 flex-1 truncate font-medium text-surface-900 dark:text-white lg:hidden">
             {activeNavName}
           </div>
 
-          {/* Spacer */}
-          <div className="flex-1" />
+          {/* Spacer — only needed on desktop where the title is hidden */}
+          <div className="hidden flex-1 lg:block" />
 
           {/* Right side actions */}
-          <div className="flex items-center gap-3">
-            {/* Language Switcher */}
-            <LanguageSwitcher variant="minimal" />
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            {/* Language Switcher — compact single "UZ ▾" dropdown so the header
+                cluster fits on narrow phones (was two UZ/RU buttons). */}
+            <LanguageSwitcher variant="compact" />
 
             {/* Dark Mode Toggle */}
             <ThemeToggle />

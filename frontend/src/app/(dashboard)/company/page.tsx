@@ -401,10 +401,10 @@ export default function CompanyDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="lg:col-span-2"
+          className="min-w-0 lg:col-span-2"
         >
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-brand-500" />
                 {t("companyDashboard.recentApplications")}
@@ -478,6 +478,7 @@ export default function CompanyDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
+          className="min-w-0"
         >
           <Card>
             <CardHeader>
