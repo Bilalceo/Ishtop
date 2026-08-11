@@ -201,7 +201,7 @@ export function AiChatWidget({ audience = "student" }: { audience?: Audience }) 
         onClick={() => setOpen((o) => !o)}
         aria-label={t.open}
         aria-expanded={open}
-        className="fixed bottom-5 right-4 z-[60] grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-violet-600 text-white shadow-[0_12px_32px_-8px_rgba(111,155,240,0.6)] transition hover:scale-105 active:scale-95 sm:right-6"
+        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-[60] grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-violet-600 text-white shadow-[0_12px_32px_-8px_rgba(111,155,240,0.6)] transition hover:scale-105 active:scale-95 sm:right-6 lg:bottom-6"
       >
         <span className="absolute -right-0.5 -top-0.5 grid h-5 w-5 place-items-center rounded-full bg-[#7cc7a2] text-[9px] font-bold text-white ring-2 ring-white dark:ring-surface-900">
           AI
