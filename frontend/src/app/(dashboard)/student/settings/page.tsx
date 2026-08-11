@@ -37,6 +37,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TelegramAlertsCard } from "@/components/student/TelegramAlertsCard";
+import { ThemeSetting } from "@/components/settings/ThemeSetting";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -252,6 +253,9 @@ export default function SettingsPage() {
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
+            {/* Appearance / theme (moved here from the header) */}
+            <ThemeSetting />
+
             {/* Avatar Section */}
             <Card>
               <CardContent className="p-6">

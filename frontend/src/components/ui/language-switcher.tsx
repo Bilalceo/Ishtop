@@ -17,12 +17,17 @@ import { localeNames, localeFlags, type Locale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 interface LanguageSwitcherProps {
-  variant?: "default" | "minimal" | "dropdown";
+  variant?: "default" | "minimal" | "dropdown" | "compact";
   className?: string;
   /** Which edge the dropdown aligns to. Use "left" when the trigger sits near
    *  the left edge (e.g. the mobile menu) so the panel doesn't overflow. */
   align?: "left" | "right";
 }
+
+const shortLabels: Record<Locale, string> = {
+  uz: "UZ",
+  ru: "RU",
+};
 
 export function LanguageSwitcher({
   variant = "default",
@@ -45,12 +50,74 @@ export function LanguageSwitcher({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Compact variant — a single "🇺🇿 UZ ▾" button that opens the language
+  // dropdown. Replaces the two-button minimal layout so the header stays
+  // narrow on small phones (HH.ru shows only the current language).
+  if (variant === "compact") {
+    return (
+      <div ref={ref} className={cn("relative", className)}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "flex items-center gap-1.5 rounded-lg px-2 py-1.5 transition-colors",
+            "text-surface-600 hover:bg-surface-100 dark:text-surface-300 dark:hover:bg-surface-700",
+            isOpen && "bg-surface-100 dark:bg-surface-700",
+          )}
+          type="button"
+          aria-label="Switch language"
+          aria-haspopup="listbox"
+          aria-expanded={isOpen}
+        >
+          <span className="text-base leading-none">{localeFlags[locale]}</span>
+          <span className="text-xs font-semibold leading-none">{shortLabels[locale]}</span>
+          <ChevronDown
+            className={cn("h-3.5 w-3.5 text-surface-400 transition-transform", isOpen && "rotate-180")}
+          />
+        </button>
+
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.96 }}
+              transition={{ duration: 0.15 }}
+              role="listbox"
+              className={cn(
+                "absolute right-0 z-50 mt-2 w-36 overflow-hidden rounded-xl border py-1 shadow-lg",
+                "border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800",
+              )}
+            >
+              {locales.map((loc) => (
+                <button
+                  key={loc}
+                  role="option"
+                  aria-selected={locale === loc}
+                  onClick={() => {
+                    setLocale(loc);
+                    setIsOpen(false);
+                  }}
+                  className={cn(
+                    "flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors",
+                    locale === loc
+                      ? "bg-primary/5 font-medium text-primary"
+                      : "text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700",
+                  )}
+                >
+                  <span className="text-base">{localeFlags[loc]}</span>
+                  <span className="flex-1">{localeNames[loc]}</span>
+                  {locale === loc && <Check className="h-4 w-4 text-primary" />}
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
   // Minimal variant - just flags
   if (variant === "minimal") {
-    const shortLabels: Record<Locale, string> = {
-      uz: "UZ",
-      ru: "RU",
-    };
     return (
       <div className={cn("flex items-center gap-1", className)}>
         {locales.map((loc) => (

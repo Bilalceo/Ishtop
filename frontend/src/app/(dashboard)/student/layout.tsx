@@ -44,7 +44,6 @@ import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import MobileBottomNav from "@/components/pwa/MobileBottomNav";
 import { AiChatWidget } from "@/components/AiChatWidget";
 import { cn } from "@/lib/utils";
@@ -393,11 +392,9 @@ export default function StudentDashboardLayout({
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2">
-            {/* Language Switcher */}
-            <LanguageSwitcher variant="minimal" />
-
-            {/* Theme Toggle */}
-            <ThemeToggle />
+            {/* Language Switcher — single compact "UZ ▾" dropdown so the header
+                stays narrow on small phones (theme toggle moved to Settings). */}
+            <LanguageSwitcher variant="compact" />
 
             {/* Notifications */}
             <div className="relative">

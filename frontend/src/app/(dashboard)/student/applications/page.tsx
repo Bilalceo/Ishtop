@@ -405,8 +405,10 @@ export default function ApplicationsPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-1 gap-4">
-                <div className="relative flex-1 max-w-sm">
+              <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:gap-4">
+                {/* Search takes the full row on mobile; the status filter drops
+                    below it so the input never gets squeezed (HH.ru-style). */}
+                <div className="relative w-full min-w-0 sm:max-w-sm sm:flex-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-400" />
                   <Input
                     placeholder={t("applicationsPage.searchApplications")}
@@ -416,7 +418,7 @@ export default function ApplicationsPage() {
                   />
                 </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-full sm:w-40">
                     <Filter className="mr-2 h-4 w-4" />
                     <SelectValue
                       placeholder={t("applicationsPage.allStatus")}

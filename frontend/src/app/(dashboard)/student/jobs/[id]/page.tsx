@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   MapPin,
@@ -153,6 +153,37 @@ export default function JobDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+
+  // Mobile sticky "Apply" bar — shown only while neither the top apply button
+  // nor the bottom CTA is on screen, so the primary action is always reachable
+  // as the user scrolls the description (HH.ru-style), without duplicating a
+  // button that's already visible.
+  const topApplyRef = useRef<HTMLDivElement>(null);
+  const bottomCtaRef = useRef<HTMLDivElement>(null);
+  const [showStickyApply, setShowStickyApply] = useState(false);
+
+  useEffect(() => {
+    if (isLoading || error || !job) return;
+    const top = topApplyRef.current;
+    const bottom = bottomCtaRef.current;
+    if (!top && !bottom) return;
+    const visible = new WeakSet<Element>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) visible.add(e.target);
+          else visible.delete(e.target);
+        }
+        const anyVisible =
+          (top ? visible.has(top) : false) || (bottom ? visible.has(bottom) : false);
+        setShowStickyApply(!anyVisible);
+      },
+      { rootMargin: "0px 0px -80px 0px" },
+    );
+    if (top) io.observe(top);
+    if (bottom) io.observe(bottom);
+    return () => io.disconnect();
+  }, [isLoading, error, job]);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -363,7 +394,7 @@ export default function JobDetailPage() {
         </div>
 
         {/* Apply Button */}
-        <div className="mt-6 flex gap-3">
+        <div ref={topApplyRef} className="mt-6 flex gap-3">
           <Link href={`/student/jobs/${job.id}/apply`} className="flex-1">
             <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 py-3 text-base font-semibold shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40">
               <Sparkles className="mr-2 h-5 w-5" />
@@ -480,6 +511,7 @@ export default function JobDetailPage() {
 
       {/* Bottom Apply CTA */}
       <motion.div
+        ref={bottomCtaRef}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
@@ -502,6 +534,28 @@ export default function JobDetailPage() {
           </Link>
         </div>
       </motion.div>
+
+      {/* Mobile sticky apply bar — sits just above the bottom nav, only while
+          the top/bottom apply buttons are scrolled off screen. Hidden on lg+
+          (desktop keeps the inline CTAs). */}
+      <AnimatePresence>
+        {showStickyApply && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 380, damping: 32 }}
+            className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-40 border-t border-surface-200 bg-white/95 px-4 py-3 backdrop-blur-md dark:border-surface-700 dark:bg-surface-900/95 lg:hidden"
+          >
+            <Link href={`/student/jobs/${job.id}/apply`} className="block pr-16">
+              <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 py-3 text-base font-semibold shadow-lg shadow-brand-500/25">
+                <Sparkles className="mr-2 h-5 w-5" />
+                {c.applyButton}
+              </Button>
+            </Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
