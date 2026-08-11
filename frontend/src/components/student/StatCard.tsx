@@ -70,7 +70,7 @@ export function StatCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-xs font-medium text-surface-500 dark:text-white/55">
+          <p className="line-clamp-2 break-words text-xs font-medium leading-tight text-surface-500 dark:text-white/55">
             {label}
           </p>
           <p className="mt-2 font-display text-3xl font-semibold tracking-tight text-surface-900 dark:text-white">

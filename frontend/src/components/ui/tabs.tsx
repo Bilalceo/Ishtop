@@ -17,7 +17,11 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex h-11 items-center justify-center rounded-xl bg-surface-100 p-1 text-surface-500",
+      // max-w-full + overflow-x-auto so a wide tab row (e.g. 4 settings tabs on a
+      // ~390px phone) scrolls horizontally instead of being clipped off-screen by
+      // the page's overflow-x:clip — every tab stays reachable. no-scrollbar keeps
+      // it clean; on desktop the row fits so nothing scrolls.
+      "inline-flex h-11 max-w-full items-center overflow-x-auto rounded-xl bg-surface-100 p-1 text-surface-500 no-scrollbar",
       "dark:bg-surface-800 dark:text-surface-400",
       className
     )}
@@ -33,7 +37,7 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ring-offset-background transition-all",
+      "inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ring-offset-background transition-all",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
       "data-[state=active]:bg-white data-[state=active]:text-brand-600 data-[state=active]:shadow-sm",

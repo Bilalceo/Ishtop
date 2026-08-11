@@ -1000,7 +1000,7 @@ function RecCard({
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold text-surface-900 group-hover:text-brand-600 dark:text-white dark:group-hover:text-brand-300">
+            <p className="line-clamp-2 break-words font-semibold leading-snug text-surface-900 group-hover:text-brand-600 dark:text-white dark:group-hover:text-brand-300">
               {rec.job.title}
             </p>
             <p className="truncate text-sm text-surface-500 dark:text-white/55">
