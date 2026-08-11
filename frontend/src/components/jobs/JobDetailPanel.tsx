@@ -149,47 +149,76 @@ export function JobDetailPanel({
 
         {/* Employer contact from the source post. We deliberately do NOT link
             out to the aggregator channel — applications stay on IshTop, and the
-            only outbound option is the employer's own phone / HR Telegram. */}
-        {job.contact_info && (
-          <div className="mt-3 rounded-2xl bg-surface-50 px-4 py-3 text-sm dark:bg-surface-800/50">
-            <p className="mb-1.5 font-semibold text-surface-900 dark:text-white">
-              {isRu ? "Контакт работодателя" : "Ish beruvchi kontakti"}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {job.contact_info
-                .split(/[,\n]/)
-                .map((raw) => raw.trim())
-                .filter(Boolean)
-                .map((token, i) => {
-                  const isTg = token.startsWith("@");
-                  const isPhone = /^\+?\d[\d\s()-]{5,}$/.test(token);
-                  const href = isTg
-                    ? `https://t.me/${token.slice(1)}`
-                    : isPhone
-                    ? `tel:${token.replace(/[\s()-]/g, "")}`
-                    : undefined;
-                  const cls =
-                    "inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-brand-700 shadow-sm dark:bg-surface-700 dark:text-brand-300";
-                  return href ? (
+            only outbound option is the employer's own phone / HR Telegram. Raw
+            source/aggregator URLs (e.g. cloz.uz/...) are hidden entirely rather
+            than shown as ugly plain text. */}
+        {(() => {
+          if (!job.contact_info) return null;
+          const contacts = job.contact_info
+            .split(/[,\n]/)
+            .map((raw) => raw.trim())
+            .filter(Boolean)
+            .map((token) => {
+              const tgUrl = token.match(/^https?:\/\/(?:t\.me|telegram\.me)\/(.+)$/i);
+              const isTgHandle = token.startsWith("@");
+              const isPhone = /^\+?\d[\d\s()-]{5,}$/.test(token);
+              const isUrl =
+                /^(https?:\/\/|www\.)/i.test(token) ||
+                /^[a-z0-9.-]+\.[a-z]{2,}\/\S/i.test(token);
+              // Hide raw source/aggregator URLs (but keep t.me links as Telegram).
+              if (isUrl && !tgUrl) return null;
+              const tgHandle = isTgHandle
+                ? token.slice(1)
+                : tgUrl
+                ? tgUrl[1].replace(/\/+$/, "")
+                : null;
+              if (tgHandle)
+                return { kind: "tg" as const, href: `https://t.me/${tgHandle}`, label: `@${tgHandle}` };
+              if (isPhone)
+                return {
+                  kind: "phone" as const,
+                  href: `tel:${token.replace(/[\s()-]/g, "")}`,
+                  label: token,
+                };
+              return { kind: "text" as const, label: token };
+            })
+            .filter((c): c is NonNullable<typeof c> => c !== null);
+
+          if (contacts.length === 0) return null;
+          const cls =
+            "inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-brand-700 shadow-sm dark:bg-surface-700 dark:text-brand-300";
+          return (
+            <div className="mt-3 rounded-2xl bg-surface-50 px-4 py-3 text-sm dark:bg-surface-800/50">
+              <p className="mb-1.5 font-semibold text-surface-900 dark:text-white">
+                {isRu ? "Контакт работодателя" : "Ish beruvchi kontakti"}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {contacts.map((c, i) =>
+                  c.kind === "text" ? (
+                    <span key={i} className={`${cls} select-all`}>
+                      {c.label}
+                    </span>
+                  ) : (
                     <a
                       key={i}
-                      href={href}
-                      target={isTg ? "_blank" : undefined}
-                      rel={isTg ? "noopener noreferrer" : undefined}
+                      href={c.href}
+                      target={c.kind === "tg" ? "_blank" : undefined}
+                      rel={c.kind === "tg" ? "noopener noreferrer" : undefined}
                       className={`${cls} transition hover:bg-brand-50 dark:hover:bg-surface-600`}
                     >
-                      {isTg ? <Send className="h-3.5 w-3.5" /> : <span aria-hidden>📞</span>}
-                      {token}
+                      {c.kind === "tg" ? (
+                        <Send className="h-3.5 w-3.5" />
+                      ) : (
+                        <span aria-hidden>📞</span>
+                      )}
+                      {c.label}
                     </a>
-                  ) : (
-                    <span key={i} className={`${cls} select-all`}>
-                      {token}
-                    </span>
-                  );
-                })}
+                  ),
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Big CTA buttons — platform apply for every job */}
         <div className="mt-5 flex gap-3">
