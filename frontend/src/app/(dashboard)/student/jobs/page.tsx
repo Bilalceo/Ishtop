@@ -857,7 +857,12 @@ export default function JobsPage() {
         open={!!selectedJob && !showSplitView}
         onOpenChange={(open) => !open && setSelectedJob(null)}
       >
-        <DialogContent className="max-h-[90vh] max-w-lg overflow-hidden p-0">
+        {/* JobDetailPanel renders its own close button — suppress the built-in
+            one so mobile doesn't show two overlapping X's. */}
+        <DialogContent
+          className="max-h-[90vh] max-w-lg overflow-hidden p-0"
+          showCloseButton={false}
+        >
           {selectedJob && (
             <JobDetailPanel
               job={selectedJob}
