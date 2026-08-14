@@ -265,7 +265,7 @@ export default function AdminApplicationsPage() {
                         </span>
                       </div>
                       <div>
-                        {a.match_score && (
+                        {a.match_score != null && (
                           <span className="inline-flex items-center gap-1 rounded-md bg-brand-50 px-2 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
                             <Target className="h-3 w-3" /> {a.match_score}
                           </span>
