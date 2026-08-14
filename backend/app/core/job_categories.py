@@ -60,7 +60,7 @@ CATEGORIES = [
     ]),
     ("education", "📚", "Ta'lim", [
         "o'qituvchi","oqituvchi","ustoz","teacher","репетитор","repetitor","murabbiy","tutor","tarbiyachi","воспитатель",
-        "pedagog","педагог","mentor","trener","тренер","instruktor","ustaz","preподаватель","prepodavatel","o'qituvchisi",
+        "pedagog","педагог","mentor","trener","тренер","instruktor","ustaz","преподаватель","prepodavatel","o'qituvchisi",
     ]),
     ("medicine",  "🏥", "Tibbiyot · Go'zallik", [
         "hamshira","медсестра","shifokor","vrach","врач","doktor","kosmetolog","косметолог","stomatolog","стоматолог",
@@ -70,8 +70,9 @@ CATEGORIES = [
     ]),
     ("sales",     "🛒", "Savdo · Xizmat", [
         "sotuvchi","sotuv","savdo","продавец","продаж","konsultant","консультант","kassir","кассир","menejer",
-        "менеджер","supervayzer","супервайзер","agent","агент","realizator","tovarоved","merchandayzer","administrator",
+        "менеджер","supervayzer","супервайзер","agent","агент","merchandayzer","administrator",
         "администратор","xizmat","ресепшн","resepshn","reception","assistent","yordamchi","hr ","rekruter","рекрутер","ambassador",
+        "tovaroved","товаровед","realizator",
         "sales","supervisor","promouter","промоутер","promoter","tozalik","tozalovchi","farrosh","gornichnaya",
         "уборщиц","уборка","parkovka","парковка","xonalar tozalovchisi","klining","cleaning","kotib","sekretar","секретарь",
     ]),

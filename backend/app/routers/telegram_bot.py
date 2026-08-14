@@ -14,6 +14,7 @@ import re
 
 import httpx
 from fastapi import APIRouter, Depends, Request
+from starlette.concurrency import run_in_threadpool
 
 from app.config import settings
 # get_db MUST come from app.core.dependencies (the same one get_current_active_user
@@ -205,7 +206,9 @@ _EXP_LABELS = {
     "lead": "Lead / boshliq",
     "executive": "Rahbar",
 }
-_HANDLE_RE = re.compile(r"@([A-Za-z0-9_]{4,})")
+# A Telegram @handle: at a boundary (not an email local part), 5+ chars, and
+# NOT followed by a dot (which would make it an email domain like "@gmail.com").
+_HANDLE_RE = re.compile(r"(?:^|[\s:;,.·|(])@([A-Za-z0-9_]{4,})(?![\w.])")
 
 
 def _load_catalog(force: bool = False) -> dict:
@@ -217,6 +220,7 @@ def _load_catalog(force: bool = False) -> dict:
 
     by_cat: dict = {}
     jobs: dict = {}
+    ok = False
     db = SessionLocal()
     try:
         from app.models.job import Job
@@ -250,14 +254,17 @@ def _load_catalog(force: bool = False) -> dict:
             }
             by_cat.setdefault(cid, []).append(rec)
             jobs[rec["id"]] = rec
+        ok = True
     except Exception as exc:  # noqa: BLE001
         logger.warning("catalog load failed: %s", exc)
-        if _catalog_cache["jobs"]:
-            return _catalog_cache  # serve stale rather than nothing
     finally:
         db.close()
 
-    _catalog_cache.update({"ts": now, "by_cat": by_cat, "jobs": jobs})
+    # Only refresh the cache on a successful query (even if it's a genuine 0-job
+    # result). A transient failure must NOT poison the cache with empties for the
+    # whole TTL — we return whatever we had (possibly stale) and retry next tap.
+    if ok:
+        _catalog_cache.update({"ts": now, "by_cat": by_cat, "jobs": jobs})
     return _catalog_cache
 
 
@@ -280,11 +287,12 @@ def _fmt_salary(j: dict) -> str:
     def f(n: float) -> str:
         return f"{int(n):,}".replace(",", " ")
 
-    if lo and hi:
+    has_lo, has_hi = lo is not None, hi is not None
+    if has_lo and has_hi:
         return f"{f(lo)} {unit}" if lo == hi else f"{f(lo)}–{f(hi)} {unit}"
-    if lo:
+    if has_lo:
         return f"{f(lo)}+ {unit}"
-    if hi:
+    if has_hi:
         return f"{f(hi)} {unit}gacha"
     return "Kelishiladi"
 
@@ -434,11 +442,16 @@ async def _handle_callback(token: str, callback: dict) -> None:
     if not chat_id or not message_id:
         await _answer_cb(token, cb_id)
         return
+    frm = callback.get("from") or {}
+    locale = "ru" if (frm.get("language_code") or "").startswith("ru") else "uz"
     try:
+        # Prime the catalog off the event loop — the sync render helpers below
+        # then hit the warm cache instead of blocking on a DB query.
+        await run_in_threadpool(_load_catalog)
         if data == "home":
-            await _edit(token, chat_id, message_id, _menu_text("uz"), _main_menu_kb())
+            await _edit(token, chat_id, message_id, _menu_text(locale), _main_menu_kb())
         elif data == "cats":
-            await _edit(token, chat_id, message_id, _cats_text(), _categories_kb())
+            await _edit(token, chat_id, message_id, _cats_text(locale), _categories_kb())
         elif data.startswith("c:"):
             _, cid, page = data.split(":")
             text, kb = _category_view(cid, int(page))
@@ -509,6 +522,7 @@ async def telegram_webhook(secret: str, request: Request):
         return {"ok": True}
 
     if text.startswith("/jobs") or text.startswith("/katalog") or text.startswith("/vakansiya"):
+        await run_in_threadpool(_load_catalog)  # keep the sync DB read off the event loop
         await _send(token, chat_id, _cats_text(locale), _categories_kb())
         return {"ok": True}
 
