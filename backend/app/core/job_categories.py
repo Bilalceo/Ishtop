@@ -102,3 +102,58 @@ def category_meta(cid: str):
 
 
 ALL_IDS = [c[0] for c in CATEGORIES] + ["other"]
+
+
+# =============================================================================
+# CITY (shahar) classifier — same story as categories: the city_slug column is
+# ~50% empty and split across variants (tashkent / toshkent-shahri / ...), so we
+# normalize the free-text `location` field instead. classify_city(location) ->
+# city id. Remote is checked first; Tashkent district names fold into 'toshkent'.
+# =============================================================================
+CITIES = [
+    ("remote",   "🌐", "Masofaviy (Remote)", [
+        "masofaviy","remote","удал","удалён","удаленн","onlayn","online","онлайн","distant","gibrid","hybrid",
+    ]),
+    ("toshkent", "🏙", "Toshkent", [
+        "toshkent","tashkent","ташкент","тошкент","chilanzar","chilonzor","чиланзар","yunusobod","юнусабад",
+        "sergeli","сергели","yashnobod","яшнабад","olmazor","алмазар","bektemir","mirzo ulug","yalangoch",
+        "quyliq","куйлюк","minor","минор","olmaliq","алмалык","boka","бука","yangihayot","chirchiq","чирчик",
+        "yunusabad","mirobod","shayxontohur","uchtepa","yakkasaroy","qibray","кибрай","bog'ishamol","богишамол",
+        "alayskiy","алайск","zulfiya","зульфия","binokor","бинокор",
+    ]),
+    ("samarqand","🕌", "Samarqand", ["samarqand","samarkand","самарканд"]),
+    ("fargona",  "🌄", "Farg'ona", ["farg'ona","fargona","fergana","фергана","ферган"]),
+    ("qoqon",    "🏘", "Qo'qon", ["qo'qon","qoqon","kokand","коканд","қўқон"]),
+    ("namangan", "🏞", "Namangan", ["namangan","наманган"]),
+    ("andijon",  "🌅", "Andijon", ["andijon","andijan","андижан","андижон"]),
+    ("buxoro",   "🕌", "Buxoro", ["buxoro","bukhara","бухара","бухоро"]),
+    ("navoiy",   "⛏", "Navoiy", ["navoiy","navoi","навои","навоий"]),
+    ("qarshi",   "🏜", "Qarshi · Qashqadaryo", ["qarshi","karshi","карши","qashqadaryo","кашкадар"]),
+    ("termiz",   "☀️", "Termiz · Surxondaryo", ["termiz","termez","термез","surxondaryo","сурхандар"]),
+    ("urganch",  "🏝", "Urganch · Xorazm", ["urganch","urgench","ургенч","xorazm","khorezm","хорезм","xiva","khiva","хива"]),
+    ("jizzax",   "🌾", "Jizzax", ["jizzax","jizzakh","джизак"]),
+    ("guliston", "🌱", "Guliston · Sirdaryo", ["guliston","gulistan","гулистан","sirdaryo","сырдар"]),
+    ("nukus",    "🏔", "Nukus · Qoraqalpog'iston", ["nukus","нукус","qoraqalpog","каракалпак","karakalpak"]),
+]
+CITY_BY_ID = {c[0]: c for c in CITIES}
+OTHER_CITY = ("other", "📍", "Boshqa hudud", [])
+
+
+def classify_city(location: str) -> str:
+    """Return a city id from a free-text location. 'other' if none match."""
+    hay = _norm(location)
+    if not hay.strip():
+        return "other"
+    for cid, _emoji, _label, kws in CITIES:
+        for kw in kws:
+            if kw in hay:
+                return cid
+    return "other"
+
+
+def city_meta(cid: str):
+    c = CITY_BY_ID.get(cid, OTHER_CITY)
+    return {"id": c[0], "emoji": c[1], "label": c[2]}
+
+
+ALL_CITY_IDS = [c[0] for c in CITIES] + ["other"]

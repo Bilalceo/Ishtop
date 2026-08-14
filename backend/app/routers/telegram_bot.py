@@ -22,7 +22,10 @@ from app.config import settings
 # writes to current_user are committed on a different session and silently lost.
 from app.core.dependencies import get_current_active_user, get_db
 from app.core.telegram_link import consume_link_token, issue_link_token
-from app.core.job_categories import classify_job, CATEGORIES, category_meta
+from app.core.job_categories import (
+    classify_job, CATEGORIES, category_meta,
+    classify_city, CITIES, city_meta,
+)
 from app.database import SessionLocal
 
 logger = logging.getLogger(__name__)
@@ -196,7 +199,7 @@ def _welcome(locale: str) -> str:
 import time  # noqa: E402
 
 _CATALOG_TTL = 30.0  # seconds
-_catalog_cache: dict = {"ts": 0.0, "by_cat": {}, "jobs": {}}
+_catalog_cache: dict = {"ts": 0.0, "by_cat": {}, "by_city": {}, "jobs": {}}
 
 _EXP_LABELS = {
     "intern": "Tajriba shart emas",
@@ -219,6 +222,7 @@ def _load_catalog(force: bool = False) -> dict:
         return _catalog_cache
 
     by_cat: dict = {}
+    by_city: dict = {}
     jobs: dict = {}
     ok = False
     db = SessionLocal()
@@ -241,6 +245,7 @@ def _load_catalog(force: bool = False) -> dict:
         for r in rows:
             extra = f"{(r.description or '')[:200]} {(r.profession_slug or '').replace('-', ' ')}"
             cid = classify_job(r.title or "", extra)
+            city_id = classify_city(r.location or "")
             name = (r.company_name or r.full_name or "").strip()
             company = name if name and name != _IMPORT_COMPANY_PLACEHOLDER else None
             rec = {
@@ -250,9 +255,10 @@ def _load_catalog(force: bool = False) -> dict:
                 "location": (r.location or "").strip(),
                 "experience": r.experience_level or "",
                 "apply_url": (r.external_apply_url or "").strip(),
-                "contact": (r.contact_info or "").strip(), "cid": cid,
+                "contact": (r.contact_info or "").strip(), "cid": cid, "city_id": city_id,
             }
             by_cat.setdefault(cid, []).append(rec)
+            by_city.setdefault(city_id, []).append(rec)
             jobs[rec["id"]] = rec
         ok = True
     except Exception as exc:  # noqa: BLE001
@@ -264,7 +270,7 @@ def _load_catalog(force: bool = False) -> dict:
     # result). A transient failure must NOT poison the cache with empties for the
     # whole TTL — we return whatever we had (possibly stale) and retry next tap.
     if ok:
-        _catalog_cache.update({"ts": now, "by_cat": by_cat, "jobs": jobs})
+        _catalog_cache.update({"ts": now, "by_cat": by_cat, "by_city": by_city, "jobs": jobs})
     return _catalog_cache
 
 
@@ -330,7 +336,7 @@ def _cats_text(locale: str = "uz") -> str:
 
 def _main_menu_kb() -> dict:
     return _kb([
-        [_btn("🔍 Ish qidirish (katalog)", "cats")],
+        [_btn("🔍 Soha bo'yicha", "cats"), _btn("🏙 Shahar bo'yicha", "cities")],
         [_url_btn("📄 AI Rezyume", f"{SITE_URL}/student/resume"),
          _url_btn("🌐 Sayt", SITE_URL)],
         [_url_btn("📢 Kanal", f"https://t.me/{CHANNEL_USERNAME}")],
@@ -363,7 +369,7 @@ def _category_view(cid: str, page: int) -> tuple[str, dict]:
     if not jobs:
         return (
             f"{meta['emoji']} {meta['label']}\n\nHozircha bu sohada faol vakansiya yo'q.",
-            _kb([[_btn("🔙 Kategoriyalar", "cats")]]),
+            _kb([[_btn("🔙 Sohalar", "cats")]]),
         )
     pages = (len(jobs) + CATALOG_PAGE_SIZE - 1) // CATALOG_PAGE_SIZE
     page = max(0, min(page, pages - 1))
@@ -379,7 +385,8 @@ def _category_view(cid: str, page: int) -> tuple[str, dict]:
         lines.append("")
     lines.append("👇 Batafsil ko'rish uchun raqamni bosing:")
 
-    num_row = [_btn(str(i + 1), f"j:{chunk[i]['id']}:{cid}:{page}") for i in range(len(chunk))]
+    back = f"c:{cid}:{page}"
+    num_row = [_btn(str(i + 1), f"j:{chunk[i]['id']}:{back}") for i in range(len(chunk))]
     nav: list = []
     if page > 0:
         nav.append(_btn("⬅️ Oldingi", f"c:{cid}:{page - 1}"))
@@ -388,17 +395,83 @@ def _category_view(cid: str, page: int) -> tuple[str, dict]:
     rows = [num_row]
     if nav:
         rows.append(nav)
-    rows.append([_btn("🔙 Kategoriyalar", "cats"), _btn("🏠 Menyu", "home")])
+    rows.append([_btn("🔙 Sohalar", "cats"), _btn("🏠 Menyu", "home")])
     return "\n".join(lines), _kb(rows)
 
 
-def _job_detail(job_id: str, cid: str, page: int) -> tuple[str, dict]:
+def _cities_text(locale: str = "uz") -> str:
+    cat = _load_catalog()
+    total = len(cat["jobs"])
+    if locale == "ru":
+        return f"🏙 Вакансии по городам — {total} активных\n\nВыберите город:"
+    return f"🏙 Shahar bo'yicha vakansiyalar — {total} ta faol\n\nShaharni tanlang:"
+
+
+def _cities_kb() -> dict:
+    cat = _load_catalog()
+    by_city = cat.get("by_city", {})
+    rows: list = []
+    line: list = []
+    ordered = [(c[0], c[1], c[2]) for c in CITIES] + [("other", "📍", "Boshqa hudud")]
+    for cid, emoji, label in ordered:
+        n = len(by_city.get(cid, []))
+        if n == 0:
+            continue
+        line.append(_btn(f"{emoji} {label} ({n})", f"t:{cid}:0"))
+        if len(line) == 2:
+            rows.append(line)
+            line = []
+    if line:
+        rows.append(line)
+    rows.append([_btn("🏠 Bosh menyu", "home")])
+    return _kb(rows)
+
+
+def _city_view(cid: str, page: int) -> tuple[str, dict]:
+    cat = _load_catalog()
+    jobs = cat.get("by_city", {}).get(cid, [])
+    meta = city_meta(cid)
+    if not jobs:
+        return (
+            f"{meta['emoji']} {meta['label']}\n\nHozircha bu hududda faol vakansiya yo'q.",
+            _kb([[_btn("🔙 Shaharlar", "cities")]]),
+        )
+    pages = (len(jobs) + CATALOG_PAGE_SIZE - 1) // CATALOG_PAGE_SIZE
+    page = max(0, min(page, pages - 1))
+    chunk = jobs[page * CATALOG_PAGE_SIZE:(page + 1) * CATALOG_PAGE_SIZE]
+
+    lines = [f"{meta['emoji']} {meta['label']} — {len(jobs)} ta vakansiya",
+             f"Sahifa {page + 1}/{pages}", ""]
+    for idx, j in enumerate(chunk, 1):
+        cat_meta = category_meta(j["cid"])
+        lines.append(f"{idx}. {j['title']}")
+        sub = " · ".join(x for x in [cat_meta["label"], j["company"], _fmt_salary(j)] if x)
+        if sub:
+            lines.append(f"    {sub}")
+        lines.append("")
+    lines.append("👇 Batafsil ko'rish uchun raqamni bosing:")
+
+    back = f"t:{cid}:{page}"
+    num_row = [_btn(str(i + 1), f"j:{chunk[i]['id']}:{back}") for i in range(len(chunk))]
+    nav: list = []
+    if page > 0:
+        nav.append(_btn("⬅️ Oldingi", f"t:{cid}:{page - 1}"))
+    if page < pages - 1:
+        nav.append(_btn("Keyingi ➡️", f"t:{cid}:{page + 1}"))
+    rows = [num_row]
+    if nav:
+        rows.append(nav)
+    rows.append([_btn("🔙 Shaharlar", "cities"), _btn("🏠 Menyu", "home")])
+    return "\n".join(lines), _kb(rows)
+
+
+def _job_detail(job_id: str, back_cb: str) -> tuple[str, dict]:
     cat = _load_catalog()
     j = cat["jobs"].get(job_id)
     if not j:
         return (
             "Bu vakansiya endi mavjud emas yoki yopilgan.",
-            _kb([[_btn("🔙 Kategoriyalar", "cats"), _btn("🏠 Menyu", "home")]]),
+            _kb([[_btn("🔙 Orqaga", back_cb or "cats"), _btn("🏠 Menyu", "home")]]),
         )
     meta = category_meta(j["cid"])
     lines = [f"{meta['emoji']} {meta['label']}", "", f"📣 {j['title']}"]
@@ -427,7 +500,7 @@ def _job_detail(job_id: str, cid: str, page: int) -> tuple[str, dict]:
     rows: list = []
     if apply_btns:
         rows.append(apply_btns)
-    rows.append([_btn("🔙 Orqaga", f"c:{cid}:{page}"), _btn("🏠 Menyu", "home")])
+    rows.append([_btn("🔙 Orqaga", back_cb or "cats"), _btn("🏠 Menyu", "home")])
     return "\n".join(lines), _kb(rows)
 
 
@@ -452,13 +525,20 @@ async def _handle_callback(token: str, callback: dict) -> None:
             await _edit(token, chat_id, message_id, _menu_text(locale), _main_menu_kb())
         elif data == "cats":
             await _edit(token, chat_id, message_id, _cats_text(locale), _categories_kb())
+        elif data == "cities":
+            await _edit(token, chat_id, message_id, _cities_text(locale), _cities_kb())
         elif data.startswith("c:"):
             _, cid, page = data.split(":")
             text, kb = _category_view(cid, int(page))
             await _edit(token, chat_id, message_id, text, kb)
+        elif data.startswith("t:"):
+            _, cid, page = data.split(":")
+            text, kb = _city_view(cid, int(page))
+            await _edit(token, chat_id, message_id, text, kb)
         elif data.startswith("j:"):
-            _, jid, cid, page = data.split(":")
-            text, kb = _job_detail(jid, cid, int(page))
+            # j:<uuid>:<back_cb>  where back_cb is itself a callback like "c:it:0"
+            _, jid, back_cb = data.split(":", 2)
+            text, kb = _job_detail(jid, back_cb)
             await _edit(token, chat_id, message_id, text, kb)
         # "noop" and anything else: just acknowledge below.
     except Exception as exc:  # noqa: BLE001
