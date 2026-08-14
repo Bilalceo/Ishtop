@@ -217,8 +217,9 @@ _HANDLE_RE = re.compile(r"(?:^|[\s:;,.·|(])@([A-Za-z0-9_]{4,})(?![\w.])")
 def _load_catalog(force: bool = False) -> dict:
     """Return {'by_cat': {cid: [job,...]}, 'jobs': {id: job}} for active jobs."""
     now = time.time()
-    if (not force and _catalog_cache["jobs"]
-            and now - _catalog_cache["ts"] < _CATALOG_TTL):
+    # ts is set only after a successful load, so a positive ts means we hold a
+    # valid snapshot — even a legitimately empty one — worth serving for the TTL.
+    if not force and _catalog_cache["ts"] and now - _catalog_cache["ts"] < _CATALOG_TTL:
         return _catalog_cache
 
     by_cat: dict = {}
@@ -527,19 +528,23 @@ async def _handle_callback(token: str, callback: dict) -> None:
             await _edit(token, chat_id, message_id, _cats_text(locale), _categories_kb())
         elif data == "cities":
             await _edit(token, chat_id, message_id, _cities_text(locale), _cities_kb())
-        elif data.startswith("c:"):
-            _, cid, page = data.split(":")
-            text, kb = _category_view(cid, int(page))
-            await _edit(token, chat_id, message_id, text, kb)
-        elif data.startswith("t:"):
-            _, cid, page = data.split(":")
-            text, kb = _city_view(cid, int(page))
-            await _edit(token, chat_id, message_id, text, kb)
+        elif data.startswith("c:") or data.startswith("t:"):
+            parts = data.split(":")
+            if len(parts) == 3 and parts[2].isdigit():
+                kind, cid, page = parts
+                view = _category_view if kind == "c" else _city_view
+                text, kb = view(cid, int(page))
+                await _edit(token, chat_id, message_id, text, kb)
+            else:  # malformed / stale button — fall back to the top menu
+                await _edit(token, chat_id, message_id, _menu_text(locale), _main_menu_kb())
         elif data.startswith("j:"):
             # j:<uuid>:<back_cb>  where back_cb is itself a callback like "c:it:0"
-            _, jid, back_cb = data.split(":", 2)
-            text, kb = _job_detail(jid, back_cb)
-            await _edit(token, chat_id, message_id, text, kb)
+            parts = data.split(":", 2)
+            if len(parts) == 3:
+                text, kb = _job_detail(parts[1], parts[2])
+                await _edit(token, chat_id, message_id, text, kb)
+            else:
+                await _edit(token, chat_id, message_id, _menu_text(locale), _main_menu_kb())
         # "noop" and anything else: just acknowledge below.
     except Exception as exc:  # noqa: BLE001
         logger.warning("callback handling failed (data=%s): %s", data, exc)

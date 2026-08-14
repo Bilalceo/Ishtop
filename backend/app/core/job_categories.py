@@ -22,7 +22,7 @@ CATEGORIES = [
         "1c","1с","flutter","android","kotlin","react","vue","php","python","java","golang","node",
         "ai ","sun'iy intellekt","suniy intellekt","machine learning","ml ","data scientist","data analyst",
         "sysadmin","system administrator","tizim administrator","dba","database administrator",
-        "it-mutaxassis","it mutaxassis","it menejer","it-menejer","it specialist","ux","ui/ux","seo",
+        "it-mutaxassis","it mutaxassis","it menejer","it-menejer","it specialist","ui/ux","ux/ui","ux dizayn","seo",
         "telefon-programmist","telefon programmist","integrator","technical support engineer","support engineer",
         "product manager","prodaktolog","продакт","solution architect","system architect","scrum","product owner",
     ]),
@@ -35,16 +35,18 @@ CATEGORIES = [
         "restoran","kafe","bar ","barmen","бармен","oshxona","qassob","salatchi","posuda","kuxnya","fastfood","burger",
         "shashlik","shashlikchi","universal","hostes",
     ]),
+    # Marketing is checked BEFORE engineering so a "Video montajchi" resolves to
+    # Dizayn via "video montaj" instead of engineering's generic "montaj".
+    ("marketing", "🎨", "Marketing · Dizayn", [
+        "marketing","marketolog","маркетолог","smm","targetolog","таргетолог","dizayn","dizayner","дизайн","designer",
+        "grafik dizayn","videograf","видеограф","mobilograf","montajchi video","video montaj","video montajchi",
+        "kontent","content maker","kreativ","brand","reklama","copywriter","kopirayter","3d","animator","fotograf","vizualizator",
+    ]),
     ("engineering","🏭", "Ishlab chiqarish · Muhandislik", [
         "muhandis","injener","инженер","engineer","prorab","прораб","stanok","станок","operator stanok",
         "elektronik","elektrik","электрик","montaj","montajchi","mexanik","механик","texnolog","технолог",
-        "ishlab chiqarish","proizvodstvo","zavod","fabrika","svarshik","payvandchi",
+        "ishlab chiqarish","proizvodstvo","zavod","fabrika","svarshik","payvandchi","сварщик",
         "qoliplovchi","формовщик","qolip","liteyshik","frezerovshik","tokar","токарь",
-    ]),
-    ("marketing", "🎨", "Marketing · Dizayn", [
-        "marketing","marketolog","маркетолог","smm","targetolog","таргетолог","dizayn","dizayner","дизайн","designer",
-        "grafik dizayn","videograf","видеограф","mobilograf","montajchi video","video montaj","kontent","content maker",
-        "kreativ","brand","reklama","copywriter","kopirayter","3d","animator","fotograf","vizualizator",
     ]),
     ("call",      "📞", "Call-markaz · Operator", [
         "call","колл","call-markaz","call markaz","call-center","call center","operator-konsultant","dispetcher","диспетчер",
@@ -55,7 +57,7 @@ CATEGORIES = [
         "yetkazib beruvchi","ekspeditor","экспедитор","ombor","склад","logist","логист","logistika","gruzchik","yuk ortuvchi",
     ]),
     ("construction","🏗", "Qurilish · Ta'mirlash", [
-        "quruvchi","qurilish","стройка","santexnik","сантехник","payvandchi","сварщик","usta ","malyar","shtukatur",
+        "quruvchi","qurilish","стройка","santexnik","сантехник","usta ","malyar","shtukatur",
         "beton","g'isht teruvchi","otdelka","remont","ta'mirlash","plitkachi","gipsokarton",
     ]),
     ("education", "📚", "Ta'lim", [
@@ -86,13 +88,25 @@ def _norm(s: str) -> str:
     return re.sub(r"\s+", " ", s)
 
 
-def classify_job(title: str, extra: str = "") -> str:
-    """Return a category id. First matching category wins; 'other' if none."""
-    hay = _norm(title) + " || " + _norm(extra)
+def _match(hay: str) -> str:
     for cid, _emoji, _label, kws in CATEGORIES:
         for kw in kws:
             if kw in hay:
                 return cid
+    return "other"
+
+
+def classify_job(title: str, extra: str = "") -> str:
+    """Return a category id. Title is authoritative — the description is only a
+    fallback for titles that classify to 'other', so noisy body text (e.g. an
+    accountant post mentioning "1C") can't override a clear title. 'other' if
+    nothing matches."""
+    t = _norm(title)
+    cid = _match(t)
+    if cid != "other":
+        return cid
+    if extra:
+        return _match(f"{t} || {_norm(extra)}")
     return "other"
 
 
