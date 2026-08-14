@@ -21,6 +21,7 @@ from app.config import settings
 # writes to current_user are committed on a different session and silently lost.
 from app.core.dependencies import get_current_active_user, get_db
 from app.core.telegram_link import consume_link_token, issue_link_token
+from app.core.job_categories import classify_job, CATEGORIES, category_meta
 from app.database import SessionLocal
 
 logger = logging.getLogger(__name__)
@@ -33,6 +34,10 @@ router = APIRouter(prefix="/telegram", tags=["telegram-bot"])
 BOT_USERNAME = "ishtop_ariza_bot"
 CHANNEL_USERNAME = "ishtopuz_official"
 PRO_DAYS = 30  # free PRO granted per channel-subscription claim
+
+SITE_URL = "https://ishtopuz.uz"
+CATALOG_PAGE_SIZE = 5           # jobs shown per catalog page
+_IMPORT_COMPANY_PLACEHOLDER = "Ish beruvchi"  # aggregated jobs carry the real name in the title
 
 _CYRILLIC = re.compile(r"[а-яА-ЯёЁ]")
 
@@ -119,16 +124,46 @@ async def _ai_answer(question: str, locale: str) -> str:
     )
 
 
-async def _send(token: str, chat_id: int, text: str) -> None:
+async def _send(token: str, chat_id: int, text: str, reply_markup: dict | None = None) -> None:
     url = f"{settings.TELEGRAM_API_BASE_URL}/bot{token}/sendMessage"
+    payload = {"chat_id": chat_id, "text": text, "disable_web_page_preview": True}
+    if reply_markup is not None:
+        payload["reply_markup"] = reply_markup
     try:
         async with httpx.AsyncClient(timeout=10) as client:
-            await client.post(
-                url,
-                json={"chat_id": chat_id, "text": text, "disable_web_page_preview": True},
-            )
+            await client.post(url, json=payload)
     except Exception as exc:  # noqa: BLE001
         logger.warning("telegram send failed: %s", exc)
+
+
+async def _edit(token: str, chat_id: int, message_id: int, text: str,
+                reply_markup: dict | None = None) -> None:
+    """Edit a message in place — used for catalog navigation (no chat spam)."""
+    url = f"{settings.TELEGRAM_API_BASE_URL}/bot{token}/editMessageText"
+    payload = {
+        "chat_id": chat_id, "message_id": message_id, "text": text,
+        "disable_web_page_preview": True,
+    }
+    if reply_markup is not None:
+        payload["reply_markup"] = reply_markup
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            await client.post(url, json=payload)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("telegram edit failed: %s", exc)
+
+
+async def _answer_cb(token: str, callback_id: str, text: str | None = None) -> None:
+    """Acknowledge a button tap so Telegram stops the loading spinner."""
+    url = f"{settings.TELEGRAM_API_BASE_URL}/bot{token}/answerCallbackQuery"
+    payload: dict = {"callback_query_id": callback_id}
+    if text:
+        payload["text"] = text
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            await client.post(url, json=payload)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("telegram answerCallback failed: %s", exc)
 
 
 def _welcome(locale: str) -> str:
@@ -149,6 +184,275 @@ def _welcome(locale: str) -> str:
     )
 
 
+# =============================================================================
+# JOB CATALOG — browse active vacancies by category (soha) with inline buttons.
+# The bot runs inside the API process, so it reads the DB directly. Jobs are
+# grouped by classify_job() (title-based) because the table has no category
+# column and profession_slug is mostly empty. A short in-process cache keeps
+# button taps snappy without hammering the DB.
+# =============================================================================
+
+import time  # noqa: E402
+
+_CATALOG_TTL = 30.0  # seconds
+_catalog_cache: dict = {"ts": 0.0, "by_cat": {}, "jobs": {}}
+
+_EXP_LABELS = {
+    "intern": "Tajriba shart emas",
+    "junior": "Junior (0–2 yil)",
+    "mid": "Middle (2–5 yil)",
+    "senior": "Senior (5+ yil)",
+    "lead": "Lead / boshliq",
+    "executive": "Rahbar",
+}
+_HANDLE_RE = re.compile(r"@([A-Za-z0-9_]{4,})")
+
+
+def _load_catalog(force: bool = False) -> dict:
+    """Return {'by_cat': {cid: [job,...]}, 'jobs': {id: job}} for active jobs."""
+    now = time.time()
+    if (not force and _catalog_cache["jobs"]
+            and now - _catalog_cache["ts"] < _CATALOG_TTL):
+        return _catalog_cache
+
+    by_cat: dict = {}
+    jobs: dict = {}
+    db = SessionLocal()
+    try:
+        from app.models.job import Job
+        from app.models.user import User
+
+        rows = (
+            db.query(
+                Job.id, Job.title, Job.description, Job.profession_slug,
+                Job.salary_min, Job.salary_max, Job.salary_currency,
+                Job.location, Job.experience_level, Job.external_apply_url,
+                Job.contact_info, User.company_name, User.full_name,
+            )
+            .join(User, User.id == Job.company_id)
+            .filter(Job.status == "active", Job.is_deleted.is_(False))
+            .order_by(Job.created_at.desc())
+            .all()
+        )
+        for r in rows:
+            extra = f"{(r.description or '')[:200]} {(r.profession_slug or '').replace('-', ' ')}"
+            cid = classify_job(r.title or "", extra)
+            name = (r.company_name or r.full_name or "").strip()
+            company = name if name and name != _IMPORT_COMPANY_PLACEHOLDER else None
+            rec = {
+                "id": str(r.id), "title": (r.title or "Vakansiya").strip(),
+                "company": company, "salary_min": r.salary_min,
+                "salary_max": r.salary_max, "salary_currency": r.salary_currency or "UZS",
+                "location": (r.location or "").strip(),
+                "experience": r.experience_level or "",
+                "apply_url": (r.external_apply_url or "").strip(),
+                "contact": (r.contact_info or "").strip(), "cid": cid,
+            }
+            by_cat.setdefault(cid, []).append(rec)
+            jobs[rec["id"]] = rec
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("catalog load failed: %s", exc)
+        if _catalog_cache["jobs"]:
+            return _catalog_cache  # serve stale rather than nothing
+    finally:
+        db.close()
+
+    _catalog_cache.update({"ts": now, "by_cat": by_cat, "jobs": jobs})
+    return _catalog_cache
+
+
+def _kb(rows: list) -> dict:
+    return {"inline_keyboard": rows}
+
+
+def _btn(text: str, cb: str) -> dict:
+    return {"text": text, "callback_data": cb}
+
+
+def _url_btn(text: str, url: str) -> dict:
+    return {"text": text, "url": url}
+
+
+def _fmt_salary(j: dict) -> str:
+    lo, hi = j.get("salary_min"), j.get("salary_max")
+    unit = "so'm" if (j.get("salary_currency") or "UZS") == "UZS" else j["salary_currency"]
+
+    def f(n: float) -> str:
+        return f"{int(n):,}".replace(",", " ")
+
+    if lo and hi:
+        return f"{f(lo)} {unit}" if lo == hi else f"{f(lo)}–{f(hi)} {unit}"
+    if lo:
+        return f"{f(lo)}+ {unit}"
+    if hi:
+        return f"{f(hi)} {unit}gacha"
+    return "Kelishiladi"
+
+
+def _contact_url(contact: str) -> str | None:
+    """Best-effort clickable link from a contact string (t.me / @handle)."""
+    m = re.search(r"t\.me/([A-Za-z0-9_]+)", contact or "")
+    if m:
+        return f"https://t.me/{m.group(1)}"
+    m = _HANDLE_RE.search(contact or "")
+    if m:
+        return f"https://t.me/{m.group(1)}"
+    return None
+
+
+def _menu_text(locale: str) -> str:
+    if locale == "ru":
+        return (
+            "🏠 Главное меню IshTop\n\n"
+            "Выберите действие ниже. «🔍 Поиск работы» — каталог вакансий по сферам."
+        )
+    return (
+        "🏠 IshTop bosh menyu\n\n"
+        "Quyidan tanlang. «🔍 Ish qidirish» — sohalar bo'yicha vakansiyalar katalogi."
+    )
+
+
+def _cats_text(locale: str = "uz") -> str:
+    cat = _load_catalog()
+    total = len(cat["jobs"])
+    if locale == "ru":
+        return f"🔍 Каталог вакансий — {total} активных\n\nВыберите сферу:"
+    return f"🔍 Vakansiyalar katalogi — {total} ta faol\n\nSohani tanlang:"
+
+
+def _main_menu_kb() -> dict:
+    return _kb([
+        [_btn("🔍 Ish qidirish (katalog)", "cats")],
+        [_url_btn("📄 AI Rezyume", f"{SITE_URL}/student/resume"),
+         _url_btn("🌐 Sayt", SITE_URL)],
+        [_url_btn("📢 Kanal", f"https://t.me/{CHANNEL_USERNAME}")],
+    ])
+
+
+def _categories_kb() -> dict:
+    cat = _load_catalog()
+    rows: list = []
+    line: list = []
+    ordered = [(c[0], c[1], c[2]) for c in CATEGORIES] + [("other", "📁", "Boshqa")]
+    for cid, emoji, label in ordered:
+        n = len(cat["by_cat"].get(cid, []))
+        if n == 0:
+            continue
+        line.append(_btn(f"{emoji} {label} ({n})", f"c:{cid}:0"))
+        if len(line) == 2:
+            rows.append(line)
+            line = []
+    if line:
+        rows.append(line)
+    rows.append([_btn("🏠 Bosh menyu", "home")])
+    return _kb(rows)
+
+
+def _category_view(cid: str, page: int) -> tuple[str, dict]:
+    cat = _load_catalog()
+    jobs = cat["by_cat"].get(cid, [])
+    meta = category_meta(cid)
+    if not jobs:
+        return (
+            f"{meta['emoji']} {meta['label']}\n\nHozircha bu sohada faol vakansiya yo'q.",
+            _kb([[_btn("🔙 Kategoriyalar", "cats")]]),
+        )
+    pages = (len(jobs) + CATALOG_PAGE_SIZE - 1) // CATALOG_PAGE_SIZE
+    page = max(0, min(page, pages - 1))
+    chunk = jobs[page * CATALOG_PAGE_SIZE:(page + 1) * CATALOG_PAGE_SIZE]
+
+    lines = [f"{meta['emoji']} {meta['label']} — {len(jobs)} ta vakansiya",
+             f"Sahifa {page + 1}/{pages}", ""]
+    for idx, j in enumerate(chunk, 1):
+        lines.append(f"{idx}. {j['title']}")
+        sub = " · ".join(x for x in [j["company"], _fmt_salary(j), j["location"]] if x)
+        if sub:
+            lines.append(f"    {sub}")
+        lines.append("")
+    lines.append("👇 Batafsil ko'rish uchun raqamni bosing:")
+
+    num_row = [_btn(str(i + 1), f"j:{chunk[i]['id']}:{cid}:{page}") for i in range(len(chunk))]
+    nav: list = []
+    if page > 0:
+        nav.append(_btn("⬅️ Oldingi", f"c:{cid}:{page - 1}"))
+    if page < pages - 1:
+        nav.append(_btn("Keyingi ➡️", f"c:{cid}:{page + 1}"))
+    rows = [num_row]
+    if nav:
+        rows.append(nav)
+    rows.append([_btn("🔙 Kategoriyalar", "cats"), _btn("🏠 Menyu", "home")])
+    return "\n".join(lines), _kb(rows)
+
+
+def _job_detail(job_id: str, cid: str, page: int) -> tuple[str, dict]:
+    cat = _load_catalog()
+    j = cat["jobs"].get(job_id)
+    if not j:
+        return (
+            "Bu vakansiya endi mavjud emas yoki yopilgan.",
+            _kb([[_btn("🔙 Kategoriyalar", "cats"), _btn("🏠 Menyu", "home")]]),
+        )
+    meta = category_meta(j["cid"])
+    lines = [f"{meta['emoji']} {meta['label']}", "", f"📣 {j['title']}"]
+    if j["company"]:
+        lines.append(f"🏢 {j['company']}")
+    lines.append(f"💵 {_fmt_salary(j)}")
+    if j["location"]:
+        lines.append(f"📌 {j['location']}")
+    exp = _EXP_LABELS.get(j["experience"])
+    if exp:
+        lines.append(f"🕒 {exp}")
+    lines.append("")
+
+    apply_btns: list = []
+    if j["apply_url"]:
+        lines.append(f"☎️ Ariza: {j['apply_url']}")
+        apply_btns.append(_url_btn("🌐 Ariza berish", j["apply_url"]))
+    if j["contact"]:
+        lines.append(f"☎️ Aloqa: {j['contact']}")
+        curl = _contact_url(j["contact"])
+        if curl:
+            apply_btns.append(_url_btn("📞 Bog'lanish", curl))
+    if not j["apply_url"] and not j["contact"]:
+        lines.append("☎️ Ariza uchun ishtopuz.uz saytiga o'ting.")
+
+    rows: list = []
+    if apply_btns:
+        rows.append(apply_btns)
+    rows.append([_btn("🔙 Orqaga", f"c:{cid}:{page}"), _btn("🏠 Menyu", "home")])
+    return "\n".join(lines), _kb(rows)
+
+
+async def _handle_callback(token: str, callback: dict) -> None:
+    """Route an inline-button tap to the right catalog view (edits in place)."""
+    cb_id = callback.get("id")
+    data = (callback.get("data") or "").strip()
+    msg = callback.get("message") or {}
+    chat = msg.get("chat") or {}
+    chat_id = chat.get("id")
+    message_id = msg.get("message_id")
+    if not chat_id or not message_id:
+        await _answer_cb(token, cb_id)
+        return
+    try:
+        if data == "home":
+            await _edit(token, chat_id, message_id, _menu_text("uz"), _main_menu_kb())
+        elif data == "cats":
+            await _edit(token, chat_id, message_id, _cats_text(), _categories_kb())
+        elif data.startswith("c:"):
+            _, cid, page = data.split(":")
+            text, kb = _category_view(cid, int(page))
+            await _edit(token, chat_id, message_id, text, kb)
+        elif data.startswith("j:"):
+            _, jid, cid, page = data.split(":")
+            text, kb = _job_detail(jid, cid, int(page))
+            await _edit(token, chat_id, message_id, text, kb)
+        # "noop" and anything else: just acknowledge below.
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("callback handling failed (data=%s): %s", data, exc)
+    await _answer_cb(token, cb_id)
+
+
 @webhook_router.post("/webhook/{secret}")
 async def telegram_webhook(secret: str, request: Request):
     """Telegram calls this on every update. Always returns 200 quickly."""
@@ -163,6 +467,12 @@ async def telegram_webhook(secret: str, request: Request):
     try:
         update = await request.json()
     except Exception:  # noqa: BLE001
+        return {"ok": True}
+
+    # Inline-button taps (catalog navigation) arrive as callback_query updates.
+    callback = update.get("callback_query")
+    if isinstance(callback, dict):
+        await _handle_callback(token, callback)
         return {"ok": True}
 
     message = update.get("message") or update.get("edited_message")
@@ -191,11 +501,15 @@ async def telegram_webhook(secret: str, request: Request):
             else:
                 await _send(token, chat_id, _link_fail(locale))
             return {"ok": True}
-        await _send(token, chat_id, _welcome(locale))
+        await _send(token, chat_id, _welcome(locale), _main_menu_kb())
         return {"ok": True}
 
     if text.startswith("/help"):
-        await _send(token, chat_id, _help(locale))
+        await _send(token, chat_id, _help(locale), _main_menu_kb())
+        return {"ok": True}
+
+    if text.startswith("/jobs") or text.startswith("/katalog") or text.startswith("/vakansiya"):
+        await _send(token, chat_id, _cats_text(locale), _categories_kb())
         return {"ok": True}
 
     answer = await _ai_answer(text, locale)
