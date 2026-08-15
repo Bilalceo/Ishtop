@@ -338,6 +338,7 @@ def _cats_text(locale: str = "uz") -> str:
 def _main_menu_kb() -> dict:
     return _kb([
         [_btn("🔍 Soha bo'yicha", "cats"), _btn("🏙 Shahar bo'yicha", "cities")],
+        [_btn("🔎 Kalit so'z bilan qidirish", "search")],
         [_url_btn("📄 AI Rezyume", f"{SITE_URL}/student/resume"),
          _url_btn("🌐 Sayt", SITE_URL)],
         [_url_btn("📢 Kanal", f"https://t.me/{CHANNEL_USERNAME}")],
@@ -505,6 +506,63 @@ def _job_detail(job_id: str, back_cb: str) -> tuple[str, dict]:
     return "\n".join(lines), _kb(rows)
 
 
+SEARCH_LIMIT = 6  # results shown per keyword search (no pagination — refine instead)
+
+
+def _looks_like_search(q: str) -> bool:
+    """A short, keyword-ish message we should try as a job search before AI."""
+    q = q.strip()
+    if q.startswith("/"):
+        return False
+    return 1 <= len(q.split()) <= 4 and 2 <= len(q) <= 40
+
+
+def _search_jobs(query: str) -> list:
+    """Jobs whose title/company/location/soha contains ALL query tokens."""
+    cat = _load_catalog()
+    toks = [t for t in query.lower().replace("’", "'").split() if len(t) >= 2]
+    if not toks:
+        return []
+    out = []
+    for j in cat["jobs"].values():  # dict preserves created_at-desc insertion order
+        hay = (
+            f"{j['title']} {j['company'] or ''} {j['location']} "
+            f"{category_meta(j['cid'])['label']}"
+        ).lower()
+        if all(t in hay for t in toks):
+            out.append(j)
+    return out
+
+
+def _search_prompt(locale: str = "uz") -> str:
+    if locale == "ru":
+        return ("🔎 Напишите ключевое слово — должность, компанию или город.\n"
+                "Например: frontend, бухгалтер, Самарканд, Flutter")
+    return ("🔎 Kalit so'z yozing — lavozim, kompaniya yoki shahar.\n"
+            "Masalan: frontend, buxgalter, Samarqand, Flutter")
+
+
+def _search_view(query: str, results: list) -> tuple[str, dict]:
+    qs = query.replace(":", " ").strip()[:20]  # kept short & colon-free for callbacks
+    shown = results[:SEARCH_LIMIT]
+    lines = [f"🔎 «{query.strip()}» — {len(results)} ta topildi", ""]
+    for idx, j in enumerate(shown, 1):
+        meta = category_meta(j["cid"])
+        lines.append(f"{idx}. {j['title']}")
+        sub = " · ".join(x for x in [meta["label"], _fmt_salary(j), j["location"]] if x)
+        if sub:
+            lines.append(f"    {sub}")
+        lines.append("")
+    if len(results) > SEARCH_LIMIT:
+        lines.append(f"… yana {len(results) - SEARCH_LIMIT} ta. Aniqroq yozing (masalan shahar qo'shing).")
+    lines.append("👇 Batafsil ko'rish uchun raqamni bosing:")
+
+    num_row = [_btn(str(i + 1), f"j:{shown[i]['id']}:s:{qs}") for i in range(len(shown))]
+    rows = [num_row,
+            [_btn("🔍 Sohalar", "cats"), _btn("🏙 Shaharlar", "cities"), _btn("🏠 Menyu", "home")]]
+    return "\n".join(lines), _kb(rows)
+
+
 async def _handle_callback(token: str, callback: dict) -> None:
     """Route an inline-button tap to the right catalog view (edits in place)."""
     cb_id = callback.get("id")
@@ -528,6 +586,19 @@ async def _handle_callback(token: str, callback: dict) -> None:
             await _edit(token, chat_id, message_id, _cats_text(locale), _categories_kb())
         elif data == "cities":
             await _edit(token, chat_id, message_id, _cities_text(locale), _cities_kb())
+        elif data == "search":
+            await _edit(token, chat_id, message_id, _search_prompt(locale),
+                        _kb([[_btn("🏠 Bosh menyu", "home")]]))
+        elif data.startswith("s:"):
+            query = data.split(":", 1)[1]
+            results = _search_jobs(query)
+            if results:
+                text, kb = _search_view(query, results)
+                await _edit(token, chat_id, message_id, text, kb)
+            else:
+                await _edit(token, chat_id, message_id,
+                            f"🔎 «{query}» — hech narsa topilmadi.",
+                            _kb([[_btn("🔍 Sohalar", "cats"), _btn("🏠 Menyu", "home")]]))
         elif data.startswith("c:") or data.startswith("t:"):
             parts = data.split(":")
             if len(parts) == 3 and parts[2].isdigit():
@@ -610,6 +681,30 @@ async def telegram_webhook(secret: str, request: Request):
         await run_in_threadpool(_load_catalog)  # keep the sync DB read off the event loop
         await _send(token, chat_id, _cats_text(locale), _categories_kb())
         return {"ok": True}
+
+    if text.startswith("/search") or text.startswith("/qidiruv") or text.startswith("/qidir"):
+        parts = text.split(maxsplit=1)
+        if len(parts) > 1:
+            await run_in_threadpool(_load_catalog)
+            results = _search_jobs(parts[1])
+            if results:
+                body, kb = _search_view(parts[1], results)
+                await _send(token, chat_id, body, kb)
+            else:
+                await _send(token, chat_id, f"🔎 «{parts[1].strip()}» — hech narsa topilmadi.",
+                            _main_menu_kb())
+        else:
+            await _send(token, chat_id, _search_prompt(locale))
+        return {"ok": True}
+
+    # Plain text: try a keyword job search first; fall back to the AI assistant.
+    if _looks_like_search(text):
+        await run_in_threadpool(_load_catalog)
+        results = _search_jobs(text)
+        if results:
+            body, kb = _search_view(text, results)
+            await _send(token, chat_id, body, kb)
+            return {"ok": True}
 
     answer = await _ai_answer(text, locale)
     await _send(token, chat_id, answer)
