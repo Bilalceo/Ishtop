@@ -165,9 +165,13 @@ export default function ResetPasswordPageClient({
           {locale === "ru" ? "Сбросьте пароль" : "Parolingizni tiklang"}
         </h1>
         <p className="text-surface-500 dark:text-surface-400">
-          {locale === "ru"
-            ? "Используйте токен из письма, чтобы создать новый пароль. Если токен отсутствует, вставьте его вручную ниже."
-            : "Yangi parol yaratish uchun emaildagi tokendan foydalaning. Agar token bo'lmasa, uni quyida qo'lda kiriting."}
+          {initialToken
+            ? locale === "ru"
+              ? "Придумайте новый надёжный пароль для вашего аккаунта."
+              : "Akkauntingiz uchun yangi, ishonchli parol o'ylab toping."
+            : locale === "ru"
+              ? "Если токен отсутствует, вставьте его вручную ниже, чтобы создать новый пароль."
+              : "Agar token bo'lmasa, yangi parol yaratish uchun uni quyida qo'lda kiriting."}
         </p>
       </div>
 
@@ -188,22 +192,29 @@ export default function ResetPasswordPageClient({
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        <div className="space-y-2">
-          <Label htmlFor="token">{locale === "ru" ? "Токен сброса" : "Tiklash tokeni"}</Label>
-          <Input
-            id="token"
-            type="text"
-            placeholder={
-              locale === "ru"
-                ? "Вставьте токен из письма"
-                : "Email havolasidagi tokenni kiriting"
-            }
-            icon={<KeyRound className="h-5 w-5" />}
-            error={errors.token?.message}
-            autoComplete="off"
-            {...register("token")}
-          />
-        </div>
+        {initialToken ? (
+          // Normal flow: the token came from the email link — keep it in the
+          // form but out of sight so the user only deals with their password.
+          <input type="hidden" {...register("token")} />
+        ) : (
+          // Fallback only: no token in the URL, so let the user paste it.
+          <div className="space-y-2">
+            <Label htmlFor="token">{locale === "ru" ? "Токен сброса" : "Tiklash tokeni"}</Label>
+            <Input
+              id="token"
+              type="text"
+              placeholder={
+                locale === "ru"
+                  ? "Вставьте токен из письма"
+                  : "Email havolasidagi tokenni kiriting"
+              }
+              icon={<KeyRound className="h-5 w-5" />}
+              error={errors.token?.message}
+              autoComplete="off"
+              {...register("token")}
+            />
+          </div>
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="newPassword">{locale === "ru" ? "Новый пароль" : "Yangi parol"}</Label>
