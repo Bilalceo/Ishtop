@@ -6,7 +6,7 @@
  * -> summary (average score). Silver design, UZ/RU. Text-based MVP.
  */
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,8 +21,9 @@ import {
   RotateCcw,
   MessageSquare,
   Trophy,
+  FileText,
 } from "lucide-react";
-import { aiApi } from "@/lib/api";
+import { aiApi, resumeApi } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/hooks/useTranslation";
 import { toast } from "sonner";
@@ -87,6 +88,13 @@ function InterviewCoach() {
             behavioral: "Поведенческий",
             technical: "Технический",
             situational: "Ситуационный",
+            resumeLabel: "На основе резюме",
+            resumeNone: "Без резюме (по роли)",
+            resumeBadge: "✨ Вопросы персонализированы по вашему резюме",
+            noResumeTitle: "У вас пока нет резюме",
+            noResumeText: "Создайте резюме — и AI подготовит вопросы по вашему опыту, навыкам и проектам.",
+            noResumeCta: "Создать резюме",
+            roleOptional: "Не обязательно, если выбрано резюме",
           }
         : {
             title: "AI Suhbat murabbiyi",
@@ -119,6 +127,13 @@ function InterviewCoach() {
             behavioral: "Xulq-atvor",
             technical: "Texnik",
             situational: "Vaziyatli",
+            resumeLabel: "Rezyume asosida",
+            resumeNone: "Rezyumesiz (rol bo'yicha)",
+            resumeBadge: "✨ Savollar rezyumengiz asosida shaxsiylashtirildi",
+            noResumeTitle: "Hozircha rezyumengiz yo'q",
+            noResumeText: "Rezyume yarating — AI sizning tajribangiz, ko'nikmalaringiz va loyihalaringiz bo'yicha savol tayyorlaydi.",
+            noResumeCta: "Rezyume yaratish",
+            roleOptional: "Rezyume tanlansa, shart emas",
           },
     [ru],
   );
@@ -134,24 +149,67 @@ function InterviewCoach() {
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [scores, setScores] = useState<number[]>([]);
 
+  // Resume-based personalization.
+  type ResumeItem = { id: string; title?: string };
+  const [resumes, setResumes] = useState<ResumeItem[]>([]);
+  const [resumeId, setResumeId] = useState<string>("");
+  const [resolvedRole, setResolvedRole] = useState<string>("");
+
+  // Load the user's resumes once; default the selection to the ?resume= deep
+  // link if valid, otherwise the most recently updated resume.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const resp = await resumeApi.list({ page: 1, limit: 100 });
+        const payload = (resp as any)?.data?.data || (resp as any)?.data;
+        const list: ResumeItem[] = Array.isArray(payload?.resumes)
+          ? payload.resumes
+          : Array.isArray(payload)
+            ? payload
+            : [];
+        if (cancelled) return;
+        setResumes(list);
+        const wanted = params.get("resume");
+        if (wanted && list.some((r) => r.id === wanted)) {
+          setResumeId(wanted);
+        } else if (list.length > 0) {
+          setResumeId(list[0].id);
+        }
+      } catch {
+        /* resumes are optional — silently fall back to manual mode */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const typeLabel = (tp: string) =>
     tp === "behavioral" ? t.behavioral : tp === "technical" ? t.technical : tp === "situational" ? t.situational : "";
 
   const start = async () => {
-    if (!role.trim()) {
+    // A role is required only when no resume is selected — with a resume the
+    // backend derives the role from the candidate's most recent job title.
+    if (!resumeId && !role.trim()) {
       toast.error(t.needRole);
       return;
     }
     setLoading(true);
     try {
       const res = await aiApi.interviewQuestions({
-        role: role.trim(),
+        role: role.trim() || undefined,
         level,
         locale: ru ? "ru" : "uz",
         count: 5,
+        resume_id: resumeId || undefined,
       });
       const qs = (res.data?.data?.questions || []) as Question[];
       if (!qs.length) throw new Error("empty");
+      // Remember the role the backend actually used (possibly derived from the
+      // resume) so answer evaluation stays consistent.
+      setResolvedRole((res.data?.data?.role as string) || role.trim());
       setQuestions(qs);
       setIdx(0);
       setAnswer("");
@@ -173,10 +231,11 @@ function InterviewCoach() {
     setLoading(true);
     try {
       const res = await aiApi.interviewEvaluate({
-        role: role.trim(),
+        role: resolvedRole || role.trim() || "—",
         question: questions[idx].q,
         answer: answer.trim(),
         locale: ru ? "ru" : "uz",
+        resume_id: resumeId || undefined,
       });
       const fb = res.data?.data as Feedback;
       setFeedback(fb);
@@ -241,8 +300,56 @@ function InterviewCoach() {
           animate={{ opacity: 1, y: 0 }}
           className="rounded-3xl border border-surface-200/70 bg-white p-6 dark:border-white/[0.06] dark:bg-surface-900 sm:p-8"
         >
-          <label className="block text-sm font-semibold text-surface-800 dark:text-white">
+          {resumes.length > 0 ? (
+            <>
+              <label className="flex items-center gap-2 text-sm font-semibold text-surface-800 dark:text-white">
+                <FileText className="h-4 w-4 text-brand-500" />
+                {t.resumeLabel}
+              </label>
+              <select
+                value={resumeId}
+                onChange={(e) => setResumeId(e.target.value)}
+                className="mt-2 w-full rounded-xl border border-surface-200 bg-white px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-surface-700 dark:bg-surface-800"
+              >
+                {resumes.map((r, i) => (
+                  <option key={r.id} value={r.id}>
+                    {r.title?.trim() || `${t.resumeLabel} ${i + 1}`}
+                  </option>
+                ))}
+                <option value="">{t.resumeNone}</option>
+              </select>
+              {resumeId && (
+                <p className="mt-2 flex items-center gap-1.5 rounded-lg bg-brand-50 px-3 py-2 text-xs font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
+                  {t.resumeBadge}
+                </p>
+              )}
+            </>
+          ) : (
+            <div className="mb-5 rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-500/20 dark:bg-brand-500/10">
+              <p className="text-sm font-semibold text-brand-800 dark:text-brand-200">
+                {t.noResumeTitle}
+              </p>
+              <p className="mt-1 text-xs text-brand-700/90 dark:text-brand-300/90">
+                {t.noResumeText}
+              </p>
+              <Link
+                href="/student/resumes/create-ai"
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:text-brand-500"
+              >
+                <FileText className="h-4 w-4" />
+                {t.noResumeCta}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          )}
+
+          <label className="mt-5 block text-sm font-semibold text-surface-800 dark:text-white">
             {t.roleLabel}
+            {resumeId && (
+              <span className="ml-2 text-xs font-normal text-surface-400">
+                ({t.roleOptional})
+              </span>
+            )}
           </label>
           <input
             value={role}

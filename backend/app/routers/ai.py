@@ -944,11 +944,14 @@ import json as _json
 
 
 class InterviewQuestionsRequest(BaseModel):
-    role: str = Field(..., min_length=2, max_length=160, description="Target role / job title")
+    # role is optional WHEN resume_id is provided — the role is then derived from
+    # the resume's most recent job title.
+    role: str = Field(default="", max_length=160, description="Target role / job title (optional if resume_id given)")
     skills: List[str] = Field(default_factory=list, description="Candidate skills (optional)")
     level: str = Field(default="junior", max_length=40, description="intern | junior | mid")
     locale: str = Field(default="uz", description="uz | ru")
     count: int = Field(default=5, ge=3, le=8)
+    resume_id: Optional[str] = Field(default=None, description="If set, personalize questions from this resume")
 
 
 class InterviewEvaluateRequest(BaseModel):
@@ -956,6 +959,7 @@ class InterviewEvaluateRequest(BaseModel):
     question: str = Field(..., min_length=3, max_length=600)
     answer: str = Field(..., min_length=1, max_length=4000)
     locale: str = Field(default="uz", description="uz | ru")
+    resume_id: Optional[str] = Field(default=None, description="If set, feedback considers this resume's background")
 
 
 def _parse_ai_json(text: str) -> Any:
@@ -995,6 +999,91 @@ async def _ai_generate(system: str, prompt: str, operation: str) -> str:
     raise Exception("No AI generation method available")
 
 
+def _build_resume_profile(content: Any) -> Dict[str, Any]:
+    """Extract a compact, prompt-safe candidate profile from resume JSON content.
+
+    Returns {"text": <profile block or "">, "role": <derived role>, "skills": [...]}.
+    Everything is defensive (the JSONB shape can vary) and length-capped so we
+    never blow up the AI prompt with a huge resume.
+    """
+    empty = {"text": "", "role": "", "skills": []}
+    if not isinstance(content, dict):
+        return empty
+
+    lines: List[str] = []
+    role = ""
+    skills: List[str] = []
+
+    summ = content.get("professional_summary") or {}
+    if isinstance(summ, dict):
+        stext = str(summ.get("text") or "").strip()
+        if stext:
+            lines.append(f"Summary: {stext[:300]}")
+
+    exp = content.get("work_experience") or []
+    if isinstance(exp, list):
+        titles: List[str] = []
+        for e in exp[:3]:
+            if not isinstance(e, dict):
+                continue
+            jt = str(e.get("job_title") or "").strip()
+            co = str(e.get("company") or "").strip()
+            if jt:
+                if not role:
+                    role = jt  # most recent title becomes the target role
+                titles.append(f"{jt}{f' at {co}' if co else ''}")
+        if titles:
+            lines.append("Experience: " + "; ".join(titles))
+
+    sk = content.get("skills") or {}
+    if isinstance(sk, dict):
+        for cat in (sk.get("technical_skills") or []):
+            if isinstance(cat, dict):
+                for s in (cat.get("skills") or []):
+                    if str(s).strip():
+                        skills.append(str(s).strip())
+        for s in (sk.get("soft_skills") or []):
+            if str(s).strip():
+                skills.append(str(s).strip())
+    elif isinstance(sk, list):  # defensive: some resumes store a flat list
+        skills = [str(s).strip() for s in sk if str(s).strip()]
+    skills = list(dict.fromkeys(skills))[:15]  # dedupe, keep order, cap
+    if skills:
+        lines.append("Skills: " + ", ".join(skills))
+
+    projs = content.get("projects") or []
+    if isinstance(projs, list):
+        pnames: List[str] = []
+        for p in projs[:3]:
+            if not isinstance(p, dict):
+                continue
+            nm = str(p.get("name") or p.get("title") or "").strip()
+            tech = p.get("technologies") or p.get("tech") or []
+            techs = ", ".join(str(t).strip() for t in tech if str(t).strip()) if isinstance(tech, list) else str(tech).strip()
+            if nm:
+                pnames.append(f"{nm}{f' ({techs})' if techs else ''}")
+        if pnames:
+            lines.append("Projects: " + "; ".join(pnames))
+
+    text = "\n".join(lines).strip()[:1200]  # hard cap protects the token budget
+    return {"text": text, "role": role, "skills": skills}
+
+
+def _load_owned_resume(db: Session, user_id: Any, resume_id: Optional[str]):
+    """Fetch a resume by id ONLY if it belongs to the current user (security)."""
+    if not resume_id:
+        return None
+    try:
+        rid = UUID(str(resume_id))
+    except (ValueError, TypeError):
+        return None
+    return (
+        db.query(Resume)
+        .filter(Resume.id == rid, Resume.user_id == user_id, Resume.is_deleted.is_(False))
+        .first()
+    )
+
+
 @router.post(
     "/interview/questions",
     response_model=Dict[str, Any],
@@ -1003,14 +1092,37 @@ async def _ai_generate(system: str, prompt: str, operation: str) -> str:
 )
 async def interview_questions(
     request: InterviewQuestionsRequest,
-    _user=Depends(get_current_active_user),
+    current_user=Depends(get_current_active_user),
+    db: Session = Depends(get_db),
     _rl: None = Depends(rate_limit(max_requests=12, window_seconds=60)),
 ):
     locale = (request.locale or "uz").strip().lower()
     if locale not in {"uz", "ru"}:
         locale = "uz"
     lang = "Russian (Cyrillic)" if locale == "ru" else "Uzbek (Latin script)"
-    skills = ", ".join([s for s in request.skills if s][:12]) or "—"
+
+    role = (request.role or "").strip()
+    skills_list = [s for s in request.skills if s]
+    profile_text = ""
+    # Resume-aware personalization: load the user's own resume, derive the role
+    # and skills when the client didn't send them, and feed a compact profile
+    # into the prompt so questions reference the candidate's real background.
+    if request.resume_id:
+        resume = _load_owned_resume(db, current_user.id, request.resume_id)
+        if resume is not None:
+            prof = _build_resume_profile(resume.content)
+            profile_text = prof["text"]
+            if not role:
+                role = prof["role"]
+            if not skills_list:
+                skills_list = prof["skills"]
+
+    if not role:
+        raise HTTPException(
+            status_code=422,
+            detail="Provide a role or a resume_id to generate interview questions.",
+        )
+    skills = ", ".join(skills_list[:12]) or "—"
 
     system = (
         "You are IshTop Interview Coach, an experienced technical recruiter who "
@@ -1018,12 +1130,19 @@ async def interview_questions(
     )
     prompt = (
         f"Generate exactly {request.count} interview questions for the role "
-        f'"{request.role}" at {request.level} level. Candidate skills: {skills}.\n'
+        f'"{role}" at {request.level} level. Candidate skills: {skills}.\n'
         f"Write every question in {lang}. Mix the types: behavioral, technical "
         "and situational, appropriate for a junior. Keep each question one "
         "sentence, realistic and specific.\n"
         'Return ONLY JSON: {"questions":[{"q":"...","type":"behavioral|technical|situational"}]}'
     )
+    if profile_text:
+        prompt += (
+            "\n\nThe candidate's real resume profile is below. Make at least half "
+            "of the questions reference their actual experience, projects or "
+            "skills — ask them to elaborate on specifics or probe likely gaps. "
+            "Do NOT invent facts that aren't in the profile:\n" + profile_text
+        )
     try:
         text = await _ai_generate(system, prompt, "interview_questions")
         data = _parse_ai_json(text)
@@ -1036,7 +1155,9 @@ async def interview_questions(
                 questions.append({"q": it.strip(), "type": "general"})
         if not questions:
             raise Exception("empty questions")
-        return {"success": True, "data": {"questions": questions[: request.count], "locale": locale}}
+        # Return the resolved role (it may have been derived from the resume) so
+        # the client can reuse it when evaluating each answer.
+        return {"success": True, "data": {"questions": questions[: request.count], "locale": locale, "role": role}}
     except Exception as exc:
         logger.exception("interview_questions failed: %s", exc)
         raise HTTPException(status_code=503, detail="AI is busy, please try again.")
@@ -1050,13 +1171,20 @@ async def interview_questions(
 )
 async def interview_evaluate(
     request: InterviewEvaluateRequest,
-    _user=Depends(get_current_active_user),
+    current_user=Depends(get_current_active_user),
+    db: Session = Depends(get_db),
     _rl: None = Depends(rate_limit(max_requests=20, window_seconds=60)),
 ):
     locale = (request.locale or "uz").strip().lower()
     if locale not in {"uz", "ru"}:
         locale = "uz"
     lang = "Russian (Cyrillic)" if locale == "ru" else "Uzbek (Latin script)"
+
+    profile_text = ""
+    if request.resume_id:
+        resume = _load_owned_resume(db, current_user.id, request.resume_id)
+        if resume is not None:
+            profile_text = _build_resume_profile(resume.content)["text"]
 
     system = (
         "You are IshTop Interview Coach. Evaluate the candidate's answer fairly "
@@ -1071,6 +1199,12 @@ async def interview_evaluate(
         'Return ONLY JSON: {"score":<int>,"strengths":["..."],'
         '"improvements":["..."],"model_answer":"..."}'
     )
+    if profile_text:
+        prompt += (
+            "\n\nUse the candidate's resume background below to tailor your "
+            "feedback (e.g. connect improvements to their real skills/experience):\n"
+            + profile_text
+        )
     try:
         text = await _ai_generate(system, prompt, "interview_evaluate")
         data = _parse_ai_json(text)

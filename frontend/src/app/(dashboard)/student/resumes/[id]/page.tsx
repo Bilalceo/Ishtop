@@ -12,6 +12,7 @@ import {
   Sparkles,
   Loader2,
   AlertCircle,
+  Mic,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -60,6 +61,7 @@ export default function ResumeDetailPage() {
         backToResumes: "Назад к резюме",
         downloadPdf: "Скачать PDF",
         edit: "Редактировать",
+        prepareInterview: "Подготовка к собеседованию",
         aiGenerated: "Создано с помощью ИИ",
         manuallyCreated: "Создано вручную",
         atsScore: "ATS балл",
@@ -73,6 +75,7 @@ export default function ResumeDetailPage() {
         backToResumes: "Resumelarga qaytish",
         downloadPdf: "PDF yuklash",
         edit: "Tahrirlash",
+        prepareInterview: "Suhbatga tayyorlanish",
         aiGenerated: "AI bilan yaratilgan",
         manuallyCreated: "Qo'lda yaratilgan",
         atsScore: "ATS ball",
@@ -179,6 +182,12 @@ export default function ResumeDetailPage() {
             )}
             {c.downloadPdf}
           </Button>
+          <Link href={`/student/interview?resume=${resumeId}`}>
+            <Button variant="outline" className="gap-2">
+              <Mic className="h-4 w-4" />
+              {c.prepareInterview}
+            </Button>
+          </Link>
           <Link href={`/student/resumes/${resumeId}/edit`}>
             <Button className="bg-gradient-to-r from-brand-500 to-violet-600">
               <Edit className="mr-2 h-4 w-4" />

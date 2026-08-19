@@ -578,11 +578,12 @@ export const aiApi = {
   }) => api.post("/ai/help-assistant", data),
 
   interviewQuestions: (data: {
-    role: string;
+    role?: string;
     skills?: string[];
     level?: string;
     locale?: "uz" | "ru";
     count?: number;
+    resume_id?: string;
   }) => api.post("/ai/interview/questions", data),
 
   interviewEvaluate: (data: {
@@ -590,6 +591,7 @@ export const aiApi = {
     question: string;
     answer: string;
     locale?: "uz" | "ru";
+    resume_id?: string;
   }) => api.post("/ai/interview/evaluate", data),
 };
 
