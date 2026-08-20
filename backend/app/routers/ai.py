@@ -755,21 +755,32 @@ async def ai_hr_job_description(
     return {"success": True, "data": data}
 
 
-def _resume_payload(resume: Optional[Resume]) -> Dict[str, Any]:
-    if not resume:
-        return {"title": None, "skills": []}
-    content = resume.content or {}
+def _flatten_resume_skills(content: Any) -> List[str]:
+    """Flatten a resume's skills (technical + soft, or a flat list) to strings.
+
+    Single source of truth shared by resume-match and interview features so the
+    JSONB shape handling never diverges between them.
+    """
+    if not isinstance(content, dict):
+        return []
     skills_section = content.get("skills") or {}
-    flat_skills: List[str] = []
+    flat: List[str] = []
     if isinstance(skills_section, dict):
         for entry in skills_section.get("technical_skills", []) or []:
             if isinstance(entry, dict):
-                flat_skills.extend(entry.get("skills", []) or [])
+                flat.extend(str(s).strip() for s in (entry.get("skills") or []) if str(s).strip())
         for s in skills_section.get("soft_skills", []) or []:
-            flat_skills.append(s)
+            if str(s).strip():
+                flat.append(str(s).strip())
     elif isinstance(skills_section, list):
-        flat_skills.extend([str(s) for s in skills_section])
-    return {"title": resume.title, "skills": flat_skills[:30]}
+        flat.extend(str(s).strip() for s in skills_section if str(s).strip())
+    return list(dict.fromkeys(flat))  # dedupe, preserve order
+
+
+def _resume_payload(resume: Optional[Resume]) -> Dict[str, Any]:
+    if not resume:
+        return {"title": None, "skills": []}
+    return {"title": resume.title, "skills": _flatten_resume_skills(resume.content)[:30]}
 
 
 def _job_payload(job: Optional[Job]) -> Dict[str, Any]:
@@ -955,7 +966,9 @@ class InterviewQuestionsRequest(BaseModel):
 
 
 class InterviewEvaluateRequest(BaseModel):
-    role: str = Field(..., min_length=2, max_length=160)
+    # Optional/short-tolerant: /interview/questions may run resume-only (no role),
+    # so evaluation must accept an empty or 1-char role without a 422.
+    role: str = Field(default="", max_length=160)
     question: str = Field(..., min_length=3, max_length=600)
     answer: str = Field(..., min_length=1, max_length=4000)
     locale: str = Field(default="uz", description="uz | ru")
@@ -1022,32 +1035,24 @@ def _build_resume_profile(content: Any) -> Dict[str, Any]:
 
     exp = content.get("work_experience") or []
     if isinstance(exp, list):
+        # The JSONB order isn't guaranteed, so surface any entry explicitly
+        # marked current first; the derived role should be the current title.
+        ordered = sorted(
+            [e for e in exp if isinstance(e, dict)],
+            key=lambda e: 0 if (e.get("is_current") or e.get("current")) else 1,
+        )
         titles: List[str] = []
-        for e in exp[:3]:
-            if not isinstance(e, dict):
-                continue
+        for e in ordered[:3]:
             jt = str(e.get("job_title") or "").strip()
             co = str(e.get("company") or "").strip()
             if jt:
                 if not role:
-                    role = jt  # most recent title becomes the target role
+                    role = jt
                 titles.append(f"{jt}{f' at {co}' if co else ''}")
         if titles:
             lines.append("Experience: " + "; ".join(titles))
 
-    sk = content.get("skills") or {}
-    if isinstance(sk, dict):
-        for cat in (sk.get("technical_skills") or []):
-            if isinstance(cat, dict):
-                for s in (cat.get("skills") or []):
-                    if str(s).strip():
-                        skills.append(str(s).strip())
-        for s in (sk.get("soft_skills") or []):
-            if str(s).strip():
-                skills.append(str(s).strip())
-    elif isinstance(sk, list):  # defensive: some resumes store a flat list
-        skills = [str(s).strip() for s in sk if str(s).strip()]
-    skills = list(dict.fromkeys(skills))[:15]  # dedupe, keep order, cap
+    skills = _flatten_resume_skills(content)[:15]
     if skills:
         lines.append("Skills: " + ", ".join(skills))
 
@@ -1104,12 +1109,14 @@ async def interview_questions(
     role = (request.role or "").strip()
     skills_list = [s for s in request.skills if s]
     profile_text = ""
+    resume_loaded = False
     # Resume-aware personalization: load the user's own resume, derive the role
     # and skills when the client didn't send them, and feed a compact profile
     # into the prompt so questions reference the candidate's real background.
     if request.resume_id:
         resume = _load_owned_resume(db, current_user.id, request.resume_id)
         if resume is not None:
+            resume_loaded = True
             prof = _build_resume_profile(resume.content)
             profile_text = prof["text"]
             if not role:
@@ -1117,6 +1124,12 @@ async def interview_questions(
             if not skills_list:
                 skills_list = prof["skills"]
 
+    # A student resume may have no work_experience (hence no derivable job
+    # title). The UI presents the role as optional once a resume is chosen, so
+    # never hard-fail there — fall back to a neutral role and let the injected
+    # resume profile (skills/projects) drive the personalization instead.
+    if not role and resume_loaded:
+        role = "Специалист" if locale == "ru" else "Mutaxassis"
     if not role:
         raise HTTPException(
             status_code=422,
@@ -1186,12 +1199,13 @@ async def interview_evaluate(
         if resume is not None:
             profile_text = _build_resume_profile(resume.content)["text"]
 
+    role_str = (request.role or "").strip() or ("Специалист" if locale == "ru" else "Mutaxassis")
     system = (
         "You are IshTop Interview Coach. Evaluate the candidate's answer fairly "
         "and constructively, at a junior level. Be encouraging but honest."
     )
     prompt = (
-        f'Role: "{request.role}".\nQuestion: "{request.question}".\n'
+        f'Role: "{role_str}".\nQuestion: "{request.question}".\n'
         f'Candidate answer: "{request.answer}".\n\n'
         f"Write all text fields in {lang}. Give a score 0-100, 1-3 concrete "
         "strengths, 1-3 concrete improvements, and a short model answer (3-5 "

@@ -231,7 +231,9 @@ function InterviewCoach() {
     setLoading(true);
     try {
       const res = await aiApi.interviewEvaluate({
-        role: resolvedRole || role.trim() || "—",
+        // Empty is fine — the backend tolerates it (resume-only sessions) and
+        // fills a neutral role. Never send a sub-2-char placeholder.
+        role: resolvedRole || role.trim() || "",
         question: questions[idx].q,
         answer: answer.trim(),
         locale: ru ? "ru" : "uz",

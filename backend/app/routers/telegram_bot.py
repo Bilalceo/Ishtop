@@ -543,7 +543,13 @@ def _search_prompt(locale: str = "uz") -> str:
 
 
 def _search_view(query: str, results: list) -> tuple[str, dict]:
-    qs = query.replace(":", " ").strip()[:20]  # kept short & colon-free for callbacks
+    # Kept short & colon-free for the 64-byte callback limit. Trim at a word
+    # boundary so a truncated multi-word query re-runs on whole tokens (a
+    # superset) instead of a broken half-token that could yield "not found".
+    raw = query.replace(":", " ").strip()
+    qs = raw[:20]
+    if len(raw) > 20 and " " in qs:
+        qs = qs.rsplit(" ", 1)[0]
     shown = results[:SEARCH_LIMIT]
     lines = [f"🔎 «{query.strip()}» — {len(results)} ta topildi", ""]
     for idx, j in enumerate(shown, 1):
