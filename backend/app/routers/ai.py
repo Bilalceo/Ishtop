@@ -766,6 +766,12 @@ def _flatten_resume_skills(content: Any) -> List[str]:
     skills_section = content.get("skills") or {}
     flat: List[str] = []
     if isinstance(skills_section, dict):
+        # Production shape: {"technical": [...], "soft": [...]} (flat lists).
+        for key in ("technical", "soft"):
+            val = skills_section.get(key)
+            if isinstance(val, list):
+                flat.extend(str(s).strip() for s in val if str(s).strip())
+        # Schema shape: {"technical_skills": [{"category","skills":[...]}], "soft_skills":[...]}.
         for entry in skills_section.get("technical_skills", []) or []:
             if isinstance(entry, dict):
                 flat.extend(str(s).strip() for s in (entry.get("skills") or []) if str(s).strip())
@@ -1027,23 +1033,32 @@ def _build_resume_profile(content: Any) -> Dict[str, Any]:
     role = ""
     skills: List[str] = []
 
-    summ = content.get("professional_summary") or {}
+    # Summary — production stores a plain string under "summary"; the schema
+    # uses professional_summary.text. Support both.
+    summ = content.get("professional_summary")
+    if summ is None:
+        summ = content.get("summary")
     if isinstance(summ, dict):
         stext = str(summ.get("text") or "").strip()
-        if stext:
-            lines.append(f"Summary: {stext[:300]}")
+    elif isinstance(summ, str):
+        stext = summ.strip()
+    else:
+        stext = ""
+    if stext:
+        lines.append(f"Summary: {stext[:300]}")
 
-    exp = content.get("work_experience") or []
+    # Experience — production key is "experience" with a "position" field; the
+    # schema uses "work_experience" with "job_title". The JSONB order isn't
+    # guaranteed, so surface any entry marked current first and take its title.
+    exp = content.get("work_experience") or content.get("experience") or []
     if isinstance(exp, list):
-        # The JSONB order isn't guaranteed, so surface any entry explicitly
-        # marked current first; the derived role should be the current title.
         ordered = sorted(
             [e for e in exp if isinstance(e, dict)],
             key=lambda e: 0 if (e.get("is_current") or e.get("current")) else 1,
         )
         titles: List[str] = []
         for e in ordered[:3]:
-            jt = str(e.get("job_title") or "").strip()
+            jt = str(e.get("job_title") or e.get("position") or "").strip()
             co = str(e.get("company") or "").strip()
             if jt:
                 if not role:
@@ -1055,6 +1070,23 @@ def _build_resume_profile(content: Any) -> Dict[str, Any]:
     skills = _flatten_resume_skills(content)[:15]
     if skills:
         lines.append("Skills: " + ", ".join(skills))
+
+    # Education — important for students who have no work experience yet, so the
+    # coach can still ask about their studies/field.
+    edu = content.get("education") or []
+    if isinstance(edu, list):
+        degrees: List[str] = []
+        for ed in edu[:2]:
+            if not isinstance(ed, dict):
+                continue
+            deg = str(ed.get("degree") or "").strip()
+            fld = str(ed.get("field") or ed.get("field_of_study") or "").strip()
+            inst = str(ed.get("institution") or ed.get("school") or "").strip()
+            part = ", ".join(x for x in [deg, fld, inst] if x)
+            if part:
+                degrees.append(part)
+        if degrees:
+            lines.append("Education: " + "; ".join(degrees))
 
     projs = content.get("projects") or []
     if isinstance(projs, list):
