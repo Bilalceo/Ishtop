@@ -512,6 +512,7 @@ def application_to_data(
     include_applicant: bool = False,
     include_notes: bool = False,
     include_breakdown: bool = False,
+    include_resume_content: bool = False,
 ) -> ApplicationData:
     """Convert Application model to ApplicationData."""
     
@@ -538,6 +539,11 @@ def application_to_data(
             "title": app.resume.title,
             "ats_score": app.resume.ats_score,
         }
+        # Full resume content is only attached on the single-application detail
+        # view (not on list endpoints, to keep those light). This is what lets a
+        # company actually read the candidate's resume (skills, experience, …).
+        if include_resume_content:
+            resume_data["content"] = app.resume.content or {}
     
     applicant_data = None
     if include_applicant and app.user:
@@ -1108,6 +1114,7 @@ async def get_application(
         application,
         include_job=True,
         include_resume=True,
+        include_resume_content=True,  # detail view: let the viewer read the full resume
         include_applicant=include_applicant,
         include_notes=include_notes,
         include_breakdown=include_breakdown,

@@ -1720,6 +1720,18 @@ export default function ApplicantDetailPage() {
                 </div>
               )}
 
+              {/* Summary */}
+              {resume.content?.summary && (
+                <div className="mb-4">
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-surface-400">
+                    Qisqacha
+                  </p>
+                  <p className="text-sm leading-relaxed text-surface-600">
+                    {resume.content.summary}
+                  </p>
+                </div>
+              )}
+
               {/* Skills */}
               {resume.content?.skills?.technical && (
                 <div className="mb-4">
