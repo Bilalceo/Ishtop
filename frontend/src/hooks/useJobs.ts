@@ -30,11 +30,14 @@ interface JobsState {
 interface JobFilters {
   search?: string;
   location?: string;
-  job_type?: string[];
-  experience_level?: string[];
+  /** Single value or a list — the API takes one, so the first entry is sent. */
+  job_type?: string | string[];
+  experience_level?: string | string[];
   salary_min?: number;
   salary_max?: number;
-  sort_by?: "created_at" | "salary" | "relevance";
+  is_remote?: boolean;
+  sort_by?: "created_at" | "salary" | "relevance" | "views" | "applications";
+  sort_order?: "asc" | "desc";
 }
 
 interface JobMatchApiItem {
@@ -67,55 +70,86 @@ export function useJobs() {
   const filtersRef = useRef<JobFilters>({});
 
   // Fetch jobs
-  const fetchJobs = useCallback(async (newFilters?: JobFilters, page: number = 1, append: boolean = false) => {
-    // On append (infinite scroll) keep the current list visible instead of
-    // flipping the full-page loading state.
-    setState((prev) => ({ ...prev, isLoading: append ? prev.isLoading : true, error: null }));
+  const fetchJobs = useCallback(
+    async (
+      newFilters?: JobFilters,
+      page: number = 1,
+      append: boolean = false,
+    ) => {
+      // On append (infinite scroll) keep the current list visible instead of
+      // flipping the full-page loading state.
+      setState((prev) => ({
+        ...prev,
+        isLoading: append ? prev.isLoading : true,
+        error: null,
+      }));
 
-    try {
-      // Merge and persist filters via ref (avoids recreating the callback)
-      const merged = newFilters !== undefined
-        ? { ...filtersRef.current, ...newFilters }
-        : filtersRef.current;
+      try {
+        // Merge and persist filters via ref (avoids recreating the callback)
+        const merged =
+          newFilters !== undefined
+            ? { ...filtersRef.current, ...newFilters }
+            : filtersRef.current;
 
-      if (newFilters !== undefined) {
-        filtersRef.current = merged;
-        setFilters(merged);
+        if (newFilters !== undefined) {
+          filtersRef.current = merged;
+          setFilters(merged);
+        }
+
+        // GET /jobs takes `query` (not `search`) and single-valued job_type /
+        // experience_level. Sending the raw filter object meant search and the
+        // list filters never reached the server at all.
+        const first = (v: string | string[] | undefined) =>
+          Array.isArray(v) ? v[0] : v;
+        const params: Record<string, unknown> = { page };
+        const q = (merged.search || "").trim();
+        if (q.length >= 2) params.query = q;
+        if (merged.location) params.location = merged.location;
+        if (first(merged.job_type)) params.job_type = first(merged.job_type);
+        if (first(merged.experience_level))
+          params.experience_level = first(merged.experience_level);
+        if (typeof merged.salary_min === "number" && merged.salary_min > 0)
+          params.salary_min = merged.salary_min;
+        if (typeof merged.salary_max === "number" && merged.salary_max > 0)
+          params.salary_max = merged.salary_max;
+        if (typeof merged.is_remote === "boolean")
+          params.is_remote = merged.is_remote;
+        if (merged.sort_by) params.sort_by = merged.sort_by;
+        if (merged.sort_order) params.sort_order = merged.sort_order;
+
+        const response = await jobApi.list(params);
+        const data = response.data as {
+          jobs?: Job[];
+          items?: Job[];
+          total?: number;
+          page?: number;
+          page_size?: number;
+          total_pages?: number;
+          pages?: number;
+        };
+
+        const jobList = data.jobs || data.items || [];
+
+        setState((prev) => ({
+          ...prev,
+          jobs: append ? [...prev.jobs, ...jobList] : jobList,
+          isLoading: false,
+          totalCount: data.total ?? jobList.length,
+          currentPage: data.page ?? page,
+          totalPages: data.total_pages ?? data.pages ?? 1,
+        }));
+      } catch (error) {
+        const message = getErrorMessage(error);
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: message,
+        }));
+        toast.error(message);
       }
-
-      const params: any = { page, ...merged };
-
-      const response = await jobApi.list(params);
-      const data = response.data as {
-        jobs?: Job[];
-        items?: Job[];
-        total?: number;
-        page?: number;
-        page_size?: number;
-        total_pages?: number;
-        pages?: number;
-      };
-
-      const jobList = data.jobs || data.items || [];
-
-      setState((prev) => ({
-        ...prev,
-        jobs: append ? [...prev.jobs, ...jobList] : jobList,
-        isLoading: false,
-        totalCount: data.total ?? jobList.length,
-        currentPage: data.page ?? page,
-        totalPages: data.total_pages ?? data.pages ?? 1,
-      }));
-    } catch (error) {
-      const message = getErrorMessage(error);
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: message,
-      }));
-      toast.error(message);
-    }
-  }, []); // stable — no deps, uses filtersRef internally
+    },
+    [],
+  ); // stable — no deps, uses filtersRef internally
 
   // Fetch single job
   const fetchJob = useCallback(async (id: string) => {
@@ -124,7 +158,7 @@ export function useJobs() {
     try {
       const response = await jobApi.get(id);
       const job = response.data as Job;
-      
+
       setState((prev) => ({
         ...prev,
         currentJob: job,
@@ -144,14 +178,20 @@ export function useJobs() {
   }, []);
 
   // Search jobs
-  const searchJobs = useCallback(async (query: string) => {
-    return fetchJobs({ ...filtersRef.current, search: query });
-  }, [fetchJobs]);
+  const searchJobs = useCallback(
+    async (query: string) => {
+      return fetchJobs({ ...filtersRef.current, search: query });
+    },
+    [fetchJobs],
+  );
 
   // Apply filters
-  const applyFilters = useCallback(async (newFilters: JobFilters) => {
-    return fetchJobs({ ...filtersRef.current, ...newFilters });
-  }, [fetchJobs]);
+  const applyFilters = useCallback(
+    async (newFilters: JobFilters) => {
+      return fetchJobs({ ...filtersRef.current, ...newFilters });
+    },
+    [fetchJobs],
+  );
 
   // Clear filters
   const clearFilters = useCallback(async () => {
@@ -167,7 +207,9 @@ export function useJobs() {
     try {
       const response = await jobApi.match(resumeId);
       const data = response.data as JobMatchApiResponse;
-      const matchedJobs: (Job & { matchScore?: number })[] = (data.matches || []).map((m) => ({
+      const matchedJobs: (Job & { matchScore?: number })[] = (
+        data.matches || []
+      ).map((m) => ({
         ...m.job,
         matchScore: m.match_score,
         explainability: m.explainability,
@@ -230,7 +272,9 @@ export function useJobs() {
       await jobApi.publish(jobId);
       setState((prev) => ({
         ...prev,
-        jobs: prev.jobs.map((j) => j.id === jobId ? { ...j, status: "active" } : j),
+        jobs: prev.jobs.map((j) =>
+          j.id === jobId ? { ...j, status: "active" } : j,
+        ),
       }));
       toast.success("Vakansiya nashr etildi");
     } catch (error) {
@@ -245,7 +289,9 @@ export function useJobs() {
       await jobApi.pause(jobId);
       setState((prev) => ({
         ...prev,
-        jobs: prev.jobs.map((j) => j.id === jobId ? { ...j, status: "paused" } : j),
+        jobs: prev.jobs.map((j) =>
+          j.id === jobId ? { ...j, status: "paused" } : j,
+        ),
       }));
       toast.success("Vakansiya pauzaga qo'yildi");
     } catch (error) {
@@ -260,7 +306,16 @@ export function useJobs() {
       await jobApi.reopen(jobId);
       setState((prev) => ({
         ...prev,
-        jobs: prev.jobs.map((j) => j.id === jobId ? { ...j, status: "active", close_reason_code: undefined, close_reason_note: undefined } : j),
+        jobs: prev.jobs.map((j) =>
+          j.id === jobId
+            ? {
+                ...j,
+                status: "active",
+                close_reason_code: undefined,
+                close_reason_note: undefined,
+              }
+            : j,
+        ),
       }));
       toast.success("Vakansiya qayta ochildi");
     } catch (error) {
@@ -270,19 +325,34 @@ export function useJobs() {
   }, []);
 
   // Close a job
-  const closeJob = useCallback(async (jobId: string, reason?: { reason_code?: "hired" | "other"; reason_note?: string }) => {
-    try {
-      await jobApi.close(jobId, reason);
-      setState((prev) => ({
-        ...prev,
-        jobs: prev.jobs.map((j) => j.id === jobId ? { ...j, status: "closed", close_reason_code: reason?.reason_code, close_reason_note: reason?.reason_note } : j),
-      }));
-      toast.success("Vakansiya yopildi");
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-      throw error;
-    }
-  }, []);
+  const closeJob = useCallback(
+    async (
+      jobId: string,
+      reason?: { reason_code?: "hired" | "other"; reason_note?: string },
+    ) => {
+      try {
+        await jobApi.close(jobId, reason);
+        setState((prev) => ({
+          ...prev,
+          jobs: prev.jobs.map((j) =>
+            j.id === jobId
+              ? {
+                  ...j,
+                  status: "closed",
+                  close_reason_code: reason?.reason_code,
+                  close_reason_note: reason?.reason_note,
+                }
+              : j,
+          ),
+        }));
+        toast.success("Vakansiya yopildi");
+      } catch (error) {
+        toast.error(getErrorMessage(error));
+        throw error;
+      }
+    },
+    [],
+  );
 
   // Delete a job
   const deleteJob = useCallback(async (jobId: string) => {

@@ -10,7 +10,11 @@
  * - Request/response logging
  */
 
-import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+} from "axios";
 import { useAuthStore } from "@/store/authStore";
 import { getApiBaseUrl } from "@/lib/runtime-config";
 import type {
@@ -80,7 +84,7 @@ api.interceptors.request.use(
   (error) => {
     console.error("❌ [API] Request error:", error);
     return Promise.reject(error);
-  }
+  },
 );
 
 // =============================================================================
@@ -178,7 +182,7 @@ api.interceptors.response.use(
 
     // Handle other errors
     return Promise.reject(error);
-  }
+  },
 );
 
 // =============================================================================
@@ -189,7 +193,7 @@ api.interceptors.response.use(
 export const authApi = {
   login: (email: string, password: string) =>
     api.post("/auth/login", { email, password }),
-  
+
   register: (data: {
     email: string;
     password: string;
@@ -197,17 +201,17 @@ export const authApi = {
     phone?: string;
     role?: string;
   }) => api.post("/auth/register", data),
-  
+
   logout: () => api.post("/auth/logout"),
-  
+
   refreshToken: () => api.post("/auth/refresh"),
-  
+
   forgotPassword: (email: string) =>
     api.post("/auth/forgot-password", { email }),
-  
+
   resetPassword: (token: string, password: string) =>
     api.post("/auth/reset-password", { token, new_password: password }),
-  
+
   me: () => api.get("/auth/me"),
 };
 
@@ -215,18 +219,21 @@ export const authApi = {
 export const resumeApi = {
   list: (params?: { page?: number; limit?: number; status?: string }) =>
     api.get("/resumes", { params }),
-  
+
   get: (id: string) => api.get(`/resumes/${id}`),
-  
+
   create: (data: { title: string; content: object }) =>
     api.post("/resumes/create", data),
-  
+
   generateAI: (data: {
     user_data: object;
     template?: string;
     tone?: string;
     language?: "uz" | "ru" | "en";
-    skill_verifications?: Record<string, "verified" | "learning" | "unverified">;
+    skill_verifications?: Record<
+      string,
+      "verified" | "learning" | "unverified"
+    >;
   }) => api.post("/resumes/generate-ai", data),
 
   // Lightweight AI helper for the manual builder — generates a short summary.
@@ -236,44 +243,53 @@ export const resumeApi = {
     experience?: { position?: string; company?: string }[];
     locale?: "uz" | "ru";
   }) => api.post("/resumes/ai/summary", data),
-  
-  update: (id: string, data: Partial<{ title: string; content: object; status: string }>) =>
-    api.put(`/resumes/${id}`, data),
-  
+
+  update: (
+    id: string,
+    data: Partial<{ title: string; content: object; status: string }>,
+  ) => api.put(`/resumes/${id}`, data),
+
   delete: (id: string) => api.delete(`/resumes/${id}`),
-  
+
   publish: (id: string) => api.post(`/resumes/${id}/publish`),
-  
+
   archive: (id: string) => api.post(`/resumes/${id}/archive`),
-  
+
   download: (id: string) =>
     api.get(`/resumes/${id}/pdf`, { responseType: "blob" }),
-  
+
   analytics: (id: string) => api.get(`/resumes/${id}/analytics`),
 };
 
 // Job endpoints
 export const jobApi = {
   list: (params?: {
-    search?: string;
+    /** Backend param is `query`; `search` is not read by GET /jobs. */
+    query?: string;
     location?: string;
     job_type?: string;
     experience_level?: string;
     salary_min?: number;
     salary_max?: number;
+    is_remote?: boolean;
     page?: number;
     limit?: number;
     sort_by?: string;
+    sort_order?: string;
   }) => api.get("/jobs", { params }),
-  
+
   get: (id: string) => api.get(`/jobs/${id}`),
-  
+
+  /** How the caller's latest resume scores against ONE job (no AI call).
+   *  Distinct from `match(resumeId)`, which returns the matched feed. */
+  matchOne: (id: string) => api.get(`/jobs/${id}/match`),
+
   create: (data: object) => api.post("/jobs", data),
-  
+
   update: (id: string, data: object) => api.put(`/jobs/${id}`, data),
-  
+
   delete: (id: string) => api.delete(`/jobs/${id}`),
-  
+
   myJobs: (params?: { status?: string; page?: number; limit?: number }) =>
     api.get("/jobs/my", { params }),
 
@@ -283,13 +299,14 @@ export const jobApi = {
 
   reopen: (id: string) => api.post(`/jobs/${id}/reopen`),
 
-  close: (id: string, data?: { reason_code?: "hired" | "other"; reason_note?: string }) =>
-    api.post(`/jobs/${id}/close`, data || {}),
+  close: (
+    id: string,
+    data?: { reason_code?: "hired" | "other"; reason_note?: string },
+  ) => api.post(`/jobs/${id}/close`, data || {}),
 
   clone: (id: string) => api.post(`/jobs/${id}/clone`),
 
-  match: (resumeId: string) =>
-    api.post("/jobs/match", { resume_id: resumeId }),
+  match: (resumeId: string) => api.post("/jobs/match", { resume_id: resumeId }),
 
   recommended: (params?: { limit?: number; remote_only?: boolean }) =>
     api.get("/jobs/recommended", { params }),
@@ -303,78 +320,108 @@ export const jobApi = {
   savedJobs: (params?: { page?: number; limit?: number }) =>
     api.get("/jobs/saved", { params }),
 
-  submitCompanyVerification: (data: { notes?: string; requested_badges?: string[] }) =>
-    api.post("/jobs/company/verification/submit", data),
+  submitCompanyVerification: (data: {
+    notes?: string;
+    requested_badges?: string[];
+  }) => api.post("/jobs/company/verification/submit", data),
 
   discoveryCity: (slug: string, params?: { page?: number; limit?: number }) =>
     api.get(`/jobs/discovery/cities/${slug}`, { params }),
 
-  discoveryProfession: (slug: string, params?: { page?: number; limit?: number }) =>
-    api.get(`/jobs/discovery/professions/${slug}`, { params }),
+  discoveryProfession: (
+    slug: string,
+    params?: { page?: number; limit?: number },
+  ) => api.get(`/jobs/discovery/professions/${slug}`, { params }),
 
-  discoveryCompany: (slug: string, params?: { page?: number; limit?: number }) =>
-    api.get(`/jobs/discovery/companies/${slug}`, { params }),
+  discoveryCompany: (
+    slug: string,
+    params?: { page?: number; limit?: number },
+  ) => api.get(`/jobs/discovery/companies/${slug}`, { params }),
 
-  trackEvent: (data: { event_name: string; job_id?: string; source?: string; metadata?: Record<string, unknown> }) =>
-    api.post("/jobs/events", data),
+  trackEvent: (data: {
+    event_name: string;
+    job_id?: string;
+    source?: string;
+    metadata?: Record<string, unknown>;
+  }) => api.post("/jobs/events", data),
 };
 
 // Application endpoints
 export const applicationApi = {
   list: (params?: { status?: string; page?: number; limit?: number }) =>
     api.get("/applications/my-applications", { params }),
-  
+
   get: (id: string) => api.get(`/applications/${id}`),
-  
-  apply: (data: {
-    job_id: string;
-    resume_id: string;
-    cover_letter?: string;
-  }) => api.post("/applications/apply", data),
-  
+
+  apply: (data: { job_id: string; resume_id: string; cover_letter?: string }) =>
+    api.post("/applications/apply", data),
+
   withdraw: (id: string) => api.post(`/applications/${id}/withdraw`),
-  
+
   updateStatus: (id: string, data: ApplicationStatusUpdateRequest) =>
     api.put(`/applications/${id}/status`, data),
-  
+
   autoApply: (data: AutoApplyRequest) =>
     api.post("/applications/auto-apply", data),
 
   hiringFunnel: (params?: { days?: number }) =>
     api.get("/applications/analytics/funnel", { params }),
 
-  companyDashboardAnalytics: (params?: { days?: number; start_date?: string; end_date?: string }) =>
-    api.get("/applications/analytics/company-dashboard", { params }),
+  companyDashboardAnalytics: (params?: {
+    days?: number;
+    start_date?: string;
+    end_date?: string;
+  }) => api.get("/applications/analytics/company-dashboard", { params }),
 
-  jobAnalytics: (jobId: string, params?: { days?: number; start_date?: string; end_date?: string }) =>
-    api.get(`/applications/analytics/job/${jobId}`, { params }),
+  jobAnalytics: (
+    jobId: string,
+    params?: { days?: number; start_date?: string; end_date?: string },
+  ) => api.get(`/applications/analytics/job/${jobId}`, { params }),
 
-  dashboardActions: () =>
-    api.get("/applications/analytics/dashboard-actions"),
+  dashboardActions: () => api.get("/applications/analytics/dashboard-actions"),
 
   upcomingInterviews: (params?: { days?: number }) =>
     api.get("/applications/interviews/upcoming", { params }),
 
-  companyList: (params?: { job_id?: string; status?: string; search?: string; tag?: string; page?: number; page_size?: number }) =>
-    api.get("/applications/company/list", { params }),
+  companyList: (params?: {
+    job_id?: string;
+    status?: string;
+    search?: string;
+    tag?: string;
+    page?: number;
+    page_size?: number;
+  }) => api.get("/applications/company/list", { params }),
 
-  bulkStatusUpdate: (data: { application_ids: string[]; status: string; notes?: string }) =>
-    api.post("/applications/company/bulk-status", data),
+  bulkStatusUpdate: (data: {
+    application_ids: string[];
+    status: string;
+    notes?: string;
+  }) => api.post("/applications/company/bulk-status", data),
 
-  bulkSendEmail: (data: { application_ids: string[]; subject: string; body: string; template_key?: string }) =>
-    api.post("/applications/company/bulk-email", data),
+  bulkSendEmail: (data: {
+    application_ids: string[];
+    subject: string;
+    body: string;
+    template_key?: string;
+  }) => api.post("/applications/company/bulk-email", data),
 
-  updateNotesTags: (applicationId: string, data: { notes?: string; tags: string[] }) =>
-    api.put(`/applications/${applicationId}/notes-tags`, data),
+  updateNotesTags: (
+    applicationId: string,
+    data: { notes?: string; tags: string[] },
+  ) => api.put(`/applications/${applicationId}/notes-tags`, data),
 
   getMessages: (applicationId: string) =>
     api.get(`/applications/${applicationId}/messages`),
 
-  sendMessage: (applicationId: string, data: { subject: string; body: string; template_key?: string }) =>
-    api.post(`/applications/${applicationId}/messages/send`, data),
+  sendMessage: (
+    applicationId: string,
+    data: { subject: string; body: string; template_key?: string },
+  ) => api.post(`/applications/${applicationId}/messages/send`, data),
 
-  topCandidatesForJob: (jobId: string, params?: { limit?: number; pool?: "applicants" | "all" }) =>
-    api.get(`/applications/jobs/${jobId}/top-candidates`, { params }),
+  topCandidatesForJob: (
+    jobId: string,
+    params?: { limit?: number; pool?: "applicants" | "all" },
+  ) => api.get(`/applications/jobs/${jobId}/top-candidates`, { params }),
 
   listScorecards: (applicationId: string) =>
     api.get(`/applications/${applicationId}/scorecards`),
@@ -396,35 +443,63 @@ export const applicationApi = {
 // Admin endpoints
 export const adminApi = {
   dashboard: () => api.get<AdminDashboardResponse>("/admin/dashboard"),
-  systemHealth: () => api.get<AdminSystemHealthResponse>("/admin/system/health"),
+  systemHealth: () =>
+    api.get<AdminSystemHealthResponse>("/admin/system/health"),
   userStats: () => api.get<AdminUserStatsResponse>("/admin/users/stats"),
-  listUsers: (params?: { role?: "student" | "company" | "admin"; is_active?: boolean; search?: string; limit?: number; offset?: number }) =>
-    api.get<AdminManagedUsersResponse>("/admin/users", { params }),
+  listUsers: (params?: {
+    role?: "student" | "company" | "admin";
+    is_active?: boolean;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }) => api.get<AdminManagedUsersResponse>("/admin/users", { params }),
   updateUserStatus: (userId: string, data: AdminUpdateUserStatusRequest) =>
     api.patch(`/admin/users/${userId}/status`, data),
-  errors: (params?: { limit?: number; offset?: number; resolved?: boolean; hours?: number }) =>
-    api.get<AdminErrorListResponse>("/admin/errors", { params }),
-  errorStats: (hours = 24) => api.get<AdminErrorStatsResponse>("/admin/errors/stats", { params: { hours } }),
+  errors: (params?: {
+    limit?: number;
+    offset?: number;
+    resolved?: boolean;
+    hours?: number;
+  }) => api.get<AdminErrorListResponse>("/admin/errors", { params }),
+  errorStats: (hours = 24) =>
+    api.get<AdminErrorStatsResponse>("/admin/errors/stats", {
+      params: { hours },
+    }),
   resolveError: (errorId: string, data: AdminResolveErrorRequest = {}) =>
-    api.post<AdminResolveErrorResponse>(`/admin/errors/${errorId}/resolve`, data),
+    api.post<AdminResolveErrorResponse>(
+      `/admin/errors/${errorId}/resolve`,
+      data,
+    ),
   bulkResolveErrors: (errorIds: string[], resolution_notes?: string) =>
     api.post<AdminBulkResolveResponse>("/admin/errors/bulk-resolve", {
       error_ids: errorIds,
       resolution_notes,
     }),
-  roleMatrix: () => api.get<AdminRoleMatrixResponse>("/admin/access/roles-matrix"),
-  adminUsers: () => api.get<AdminAccessUsersResponse>("/admin/access/admin-users"),
+  roleMatrix: () =>
+    api.get<AdminRoleMatrixResponse>("/admin/access/roles-matrix"),
+  adminUsers: () =>
+    api.get<AdminAccessUsersResponse>("/admin/access/admin-users"),
   updateAdminRole: (userId: string, data: AdminUpdateAdminRoleRequest) =>
-    api.patch<AdminUpdateAdminRoleResponse>(`/admin/access/admin-users/${userId}/role`, data),
+    api.patch<AdminUpdateAdminRoleResponse>(
+      `/admin/access/admin-users/${userId}/role`,
+      data,
+    ),
 
   // Platform moderation
-  listJobs: (params?: { search?: string; status?: string; offset?: number; limit?: number }) =>
-    api.get("/admin/jobs", { params }),
+  listJobs: (params?: {
+    search?: string;
+    status?: string;
+    offset?: number;
+    limit?: number;
+  }) => api.get("/admin/jobs", { params }),
   updateJobStatus: (jobId: string, status: string) =>
     api.patch(`/admin/jobs/${jobId}/status`, { status }),
 
-  listCompanyVerification: (params?: { state?: string; limit?: number; offset?: number }) =>
-    api.get("/admin/companies/verification", { params }),
+  listCompanyVerification: (params?: {
+    state?: string;
+    limit?: number;
+    offset?: number;
+  }) => api.get("/admin/companies/verification", { params }),
 
   reviewCompanyVerification: (
     companyId: string,
@@ -432,32 +507,63 @@ export const adminApi = {
   ) => api.post(`/admin/companies/${companyId}/verification/review`, data),
   deleteJob: (jobId: string) => api.delete(`/admin/jobs/${jobId}`),
 
-  listCompanies: (params?: { search?: string; is_verified?: boolean; offset?: number; limit?: number }) =>
-    api.get("/admin/companies", { params }),
+  listCompanies: (params?: {
+    search?: string;
+    is_verified?: boolean;
+    offset?: number;
+    limit?: number;
+  }) => api.get("/admin/companies", { params }),
   verifyCompany: (companyId: string, is_verified: boolean) =>
     api.patch(`/admin/companies/${companyId}/verify`, { is_verified }),
 
   bulkUsers: (ids: string[], action: string) =>
-    api.post<{ success: boolean; affected: number; action: string }>("/admin/users/bulk-action", { ids, action }),
+    api.post<{ success: boolean; affected: number; action: string }>(
+      "/admin/users/bulk-action",
+      { ids, action },
+    ),
   bulkJobs: (ids: string[], action: string) =>
-    api.post<{ success: boolean; affected: number; action: string }>("/admin/jobs/bulk-action", { ids, action }),
+    api.post<{ success: boolean; affected: number; action: string }>(
+      "/admin/jobs/bulk-action",
+      { ids, action },
+    ),
   bulkCompanies: (ids: string[], action: string) =>
-    api.post<{ success: boolean; affected: number; action: string }>("/admin/companies/bulk-action", { ids, action }),
-
-  listApplications: (params?: { status?: string; search?: string; offset?: number; limit?: number }) =>
-    api.get("/admin/applications", { params }),
-
-  timeseries: (metric: "users" | "jobs" | "applications", days = 30) =>
-    api.get<{ success: boolean; metric: string; days: number; data: { date: string; value: number }[] }>(
-      `/admin/stats/timeseries?metric=${metric}&days=${days}`
+    api.post<{ success: boolean; affected: number; action: string }>(
+      "/admin/companies/bulk-action",
+      { ids, action },
     ),
 
-  getLandingContent: (locale: "uz" | "ru") => api.get<LandingContentResponse>(`/landing/admin/content?locale=${locale}`),
-  upsertLandingContent: (data: { locale: "uz" | "ru"; payload: Record<string, unknown>; is_published: boolean }) =>
-    api.put<LandingContentResponse>("/landing/admin/content", data),
-  deleteLandingContent: (locale: "uz" | "ru") => api.delete(`/landing/admin/content?locale=${locale}`),
+  listApplications: (params?: {
+    status?: string;
+    search?: string;
+    offset?: number;
+    limit?: number;
+  }) => api.get("/admin/applications", { params }),
 
-  auditLogs: (params?: { admin_id?: string; action?: string; from_date?: string; to_date?: string; page?: number }) =>
+  timeseries: (metric: "users" | "jobs" | "applications", days = 30) =>
+    api.get<{
+      success: boolean;
+      metric: string;
+      days: number;
+      data: { date: string; value: number }[];
+    }>(`/admin/stats/timeseries?metric=${metric}&days=${days}`),
+
+  getLandingContent: (locale: "uz" | "ru") =>
+    api.get<LandingContentResponse>(`/landing/admin/content?locale=${locale}`),
+  upsertLandingContent: (data: {
+    locale: "uz" | "ru";
+    payload: Record<string, unknown>;
+    is_published: boolean;
+  }) => api.put<LandingContentResponse>("/landing/admin/content", data),
+  deleteLandingContent: (locale: "uz" | "ru") =>
+    api.delete(`/landing/admin/content?locale=${locale}`),
+
+  auditLogs: (params?: {
+    admin_id?: string;
+    action?: string;
+    from_date?: string;
+    to_date?: string;
+    page?: number;
+  }) =>
     api.get<{
       success: boolean;
       total: number;
@@ -495,24 +601,25 @@ export const adminApi = {
 };
 
 export const landingApi = {
-  getPublicContent: (locale: "uz" | "ru") => api.get<LandingContentResponse>(`/landing/content?locale=${locale}`),
+  getPublicContent: (locale: "uz" | "ru") =>
+    api.get<LandingContentResponse>(`/landing/content?locale=${locale}`),
 };
 
 // User endpoints
 export const userApi = {
   getProfile: () => api.get("/users/me"),
-  
-  updateProfile: (data: Partial<{
-    full_name: string;
-    phone: string;
-    avatar_url: string;
-  }>) => api.put("/users/me", data),
-  
-  changePassword: (data: {
-    old_password: string;
-    new_password: string;
-  }) => api.post("/auth/change-password", data),
-  
+
+  updateProfile: (
+    data: Partial<{
+      full_name: string;
+      phone: string;
+      avatar_url: string;
+    }>,
+  ) => api.put("/users/me", data),
+
+  changePassword: (data: { old_password: string; new_password: string }) =>
+    api.post("/auth/change-password", data),
+
   uploadAvatar: (file: File) => {
     const form = new FormData();
     form.append("file", file);
@@ -526,9 +633,8 @@ export const userApi = {
 
 // AI endpoints
 export const aiApi = {
-  generateResume: (data: object) =>
-    api.post("/ai/generate-resume", data),
-  
+  generateResume: (data: object) => api.post("/ai/generate-resume", data),
+
   generateCoverLetter: (data: {
     resume_text: string;
     job_description: string;
@@ -536,10 +642,10 @@ export const aiApi = {
     hiring_manager?: string;
     tone?: string;
   }) => api.post("/ai/generate-cover-letter", data),
-  
+
   analyzeResume: (resumeId: string) =>
     api.post("/ai/analyze-resume", { resume_id: resumeId }),
-  
+
   matchJob: (resumeId: string, jobId: string) =>
     api.post("/ai/match-job", { resume_id: resumeId, job_id: jobId }),
 
@@ -558,17 +664,24 @@ export const aiApi = {
     api.post(`/ai/hr/applications/${applicationId}/summary?locale=${locale}`),
 
   hrInterviewQuestions: (applicationId: string, count = 8, locale = "uz") =>
-    api.post(`/ai/hr/applications/${applicationId}/questions?count=${count}&locale=${locale}`),
+    api.post(
+      `/ai/hr/applications/${applicationId}/questions?count=${count}&locale=${locale}`,
+    ),
 
-  hrEmailTemplate: (applicationId: string, data: {
-    action: "interview" | "reject" | "offer" | "shortlist" | "follow_up";
-    interview_at?: string;
-    meeting_link?: string;
-    locale?: string;
-  }) => api.post(`/ai/hr/applications/${applicationId}/email`, data),
+  hrEmailTemplate: (
+    applicationId: string,
+    data: {
+      action: "interview" | "reject" | "offer" | "shortlist" | "follow_up";
+      interview_at?: string;
+      meeting_link?: string;
+      locale?: string;
+    },
+  ) => api.post(`/ai/hr/applications/${applicationId}/email`, data),
 
-  hrEmailSend: (applicationId: string, data: { subject: string; body: string }) =>
-    api.post(`/ai/hr/applications/${applicationId}/email/send`, data),
+  hrEmailSend: (
+    applicationId: string,
+    data: { subject: string; body: string },
+  ) => api.post(`/ai/hr/applications/${applicationId}/email/send`, data),
 
   projectHelp: (data: {
     question: string;
@@ -676,7 +789,9 @@ export function formatValidationDetails(value: unknown): string | undefined {
         if (typeof item === "object") {
           const o = item as Record<string, unknown>;
           const field =
-            (Array.isArray(o.loc) ? o.loc.filter((p) => p !== "body").join(".") : undefined) ||
+            (Array.isArray(o.loc)
+              ? o.loc.filter((p) => p !== "body").join(".")
+              : undefined) ||
             (typeof o.field === "string" ? o.field : undefined) ||
             (typeof o.name === "string" ? o.name : undefined);
           const msg =
@@ -697,7 +812,9 @@ export function formatValidationDetails(value: unknown): string | undefined {
       .map(([field, errors]) => {
         if (Array.isArray(errors)) {
           const inner = errors
-            .map((e) => (typeof e === "string" ? e : formatValidationDetails(e)))
+            .map((e) =>
+              typeof e === "string" ? e : formatValidationDetails(e),
+            )
             .filter(Boolean)
             .join(", ");
           return inner ? `${field}: ${inner}` : "";
@@ -733,7 +850,10 @@ function getActiveLocale(): UiLocale {
 }
 
 /** Localized fallback message tables for known HTTP statuses. */
-const STATUS_MESSAGES: Record<UiLocale, Record<number | "generic" | "non_axios", string>> = {
+const STATUS_MESSAGES: Record<
+  UiLocale,
+  Record<number | "generic" | "non_axios", string>
+> = {
   uz: {
     400: "Noto'g'ri so'rov. Iltimos, ma'lumotlarni tekshirib qayta urinib ko'ring.",
     401: "Tizimga kirishingiz kerak.",
@@ -761,7 +881,11 @@ const STATUS_MESSAGES: Record<UiLocale, Record<number | "generic" | "non_axios",
 };
 
 /** "Upgrade at …" copy for 402/Premium gate, localized. */
-function premiumGateText(locale: UiLocale, baseMessage: string, upgradeUrl: string): string {
+function premiumGateText(
+  locale: UiLocale,
+  baseMessage: string,
+  upgradeUrl: string,
+): string {
   if (locale === "ru") {
     return `${baseMessage} Перейдите по ссылке ${upgradeUrl}, чтобы продолжить.`;
   }
@@ -785,14 +909,16 @@ export function getApiErrorInfo(error: unknown): ApiErrorInfo {
   }
 
   const status = error.response?.status;
-  const data = error.response?.data as {
-    detail?: unknown;
-    details?: unknown;
-    error?: { message?: string; details?: unknown };
-    errors?: unknown;
-    message?: string;
-    detail_message?: string;
-  } | undefined;
+  const data = error.response?.data as
+    | {
+        detail?: unknown;
+        details?: unknown;
+        error?: { message?: string; details?: unknown };
+        errors?: unknown;
+        message?: string;
+        detail_message?: string;
+      }
+    | undefined;
 
   // Project envelope: { error: { details: [...] | {...} } }
   const envelopeDetails = formatValidationDetails(data?.error?.details);
@@ -855,7 +981,7 @@ type AnyFunction = (...args: unknown[]) => unknown;
 
 export function debounce<T extends AnyFunction>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let timeout: ReturnType<typeof setTimeout>;
   return (...args: Parameters<T>) => {

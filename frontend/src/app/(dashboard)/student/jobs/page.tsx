@@ -9,7 +9,7 @@
 
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -19,7 +19,6 @@ import {
   Wallet,
   Target,
   RotateCcw,
-  Filter,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -35,12 +34,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { jobApi, resumeApi } from "@/lib/api";
 import { toast } from "sonner";
@@ -49,7 +42,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { JobCard } from "@/components/jobs/JobCard";
 import { FilterPillBar } from "@/components/jobs/FilterPillBar";
 import { TelegramFollowBanner } from "@/components/TelegramFollowBanner";
-import { SalarySlider, SALARY_MAX } from "@/components/jobs/SalarySlider";
+import { SALARY_MAX } from "@/components/jobs/SalarySlider";
 
 // =============================================================================
 // SEARCH SUGGESTIONS
@@ -111,7 +104,6 @@ export default function JobsPage() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [sortBy, setSortBy] = useState("relevance");
   const [isLoadingPage, setIsLoadingPage] = useState(false);
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [loadTimedOut, setLoadTimedOut] = useState(false);
   // True until the initial feed (matched-first, else all) has resolved — keeps
   // the skeleton up so we never flash an empty/all view before matches load.
@@ -128,6 +120,7 @@ export default function JobsPage() {
     salaryRange: [0, SALARY_MAX] as [number, number],
     companies: [] as string[],
     datePosted: "all",
+    isRemote: false,
   });
 
   // -------------------------------------------------------------------------
@@ -292,72 +285,107 @@ export default function JobsPage() {
       salaryRange: [0, SALARY_MAX],
       companies: [],
       datePosted: "all",
+      isRemote: false,
     });
   };
 
-  const activeFiltersCount =
-    filters.locations.length +
-    filters.jobTypes.length +
-    filters.experienceLevels.length +
-    filters.companies.length +
-    (filters.salaryRange[0] > 0 || filters.salaryRange[1] < SALARY_MAX
-      ? 1
-      : 0) +
-    (filters.datePosted !== "all" ? 1 : 0);
+  // The "all" feed is filtered, searched and sorted by the server: it is paged,
+  // so filtering the page in the browser would only ever search the 20 rows in
+  // front of the user. The matched feed arrives complete, so it stays local.
+  const isServerFiltered = feedMode === "all";
 
-  const filteredJobs = localJobs.filter((job) => {
-    const matchesSearch =
-      !searchQuery ||
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.company?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.requirements?.some((skill) =>
-        skill.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
+  const apiFilters = useMemo(
+    () => ({
+      search: searchQuery.trim(),
+      location: filters.locations[0],
+      job_type: filters.isRemote ? "remote" : filters.jobTypes[0],
+      experience_level: filters.experienceLevels[0],
+      salary_min:
+        filters.salaryRange[0] > 0 ? filters.salaryRange[0] : undefined,
+      salary_max:
+        filters.salaryRange[1] < SALARY_MAX
+          ? filters.salaryRange[1]
+          : undefined,
+      sort_by:
+        sortBy === "date"
+          ? ("created_at" as const)
+          : sortBy === "salary"
+            ? ("salary" as const)
+            : ("relevance" as const),
+    }),
+    [searchQuery, filters, sortBy],
+  );
 
-    const matchesLocation =
-      filters.locations.length === 0 ||
-      filters.locations.some((loc) =>
-        (job.location || "").toLowerCase().includes(loc.toLowerCase()),
-      );
+  // Push filter changes to the server (debounced so typing doesn't spam it).
+  useEffect(() => {
+    if (!isServerFiltered || isInitializing) return;
+    const t = window.setTimeout(() => {
+      void fetchJobs(apiFilters, 1);
+    }, 350);
+    return () => window.clearTimeout(t);
+    // fetchJobs is stable (useCallback with a ref); re-running on it would loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiFilters, isServerFiltered, isInitializing]);
 
-    const matchesJobType =
-      filters.jobTypes.length === 0 || filters.jobTypes.includes(job.job_type);
+  const clientFiltered = isServerFiltered
+    ? localJobs
+    : localJobs.filter((job) => {
+        const q = searchQuery.trim().toLowerCase();
+        const matchesSearch =
+          !q ||
+          job.title.toLowerCase().includes(q) ||
+          job.company?.name?.toLowerCase().includes(q) ||
+          job.requirements?.some((skill) => skill.toLowerCase().includes(q));
 
-    const matchesExperience =
-      filters.experienceLevels.length === 0 ||
-      filters.experienceLevels.includes(job.experience_level);
+        const matchesLocation =
+          filters.locations.length === 0 ||
+          filters.locations.some((loc) =>
+            (job.location || "").toLowerCase().includes(loc.toLowerCase()),
+          );
 
-    const matchesSalary =
-      (job.salary_max || 0) >= filters.salaryRange[0] &&
-      (job.salary_min || 0) <= filters.salaryRange[1];
+        const matchesJobType =
+          filters.jobTypes.length === 0 ||
+          filters.jobTypes.includes(job.job_type);
 
-    const matchesCompany =
-      filters.companies.length === 0 ||
-      filters.companies.includes(job.company?.name || "");
+        const matchesRemote =
+          !filters.isRemote ||
+          job.job_type === "remote" ||
+          job.job_type === "hybrid";
 
-    return (
-      matchesSearch &&
-      matchesLocation &&
-      matchesJobType &&
-      matchesExperience &&
-      matchesSalary &&
-      matchesCompany
-    );
-  });
+        const matchesExperience =
+          filters.experienceLevels.length === 0 ||
+          filters.experienceLevels.includes(job.experience_level);
 
-  const sortedJobs = [...filteredJobs].sort((a, b) => {
-    switch (sortBy) {
-      case "salary":
-        return (b.salary_max || 0) - (a.salary_max || 0);
-      case "date":
+        const matchesSalary =
+          (job.salary_max || 0) >= filters.salaryRange[0] &&
+          (job.salary_min || 0) <= filters.salaryRange[1];
+
         return (
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          matchesSearch &&
+          matchesLocation &&
+          matchesJobType &&
+          matchesRemote &&
+          matchesExperience &&
+          matchesSalary
         );
-      case "relevance":
-      default:
-        return (b.matchScore || 0) - (a.matchScore || 0);
-    }
-  });
+      });
+
+  const sortedJobs = isServerFiltered
+    ? clientFiltered
+    : [...clientFiltered].sort((a, b) => {
+        switch (sortBy) {
+          case "salary":
+            return (b.salary_max || 0) - (a.salary_max || 0);
+          case "date":
+            return (
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+            );
+          case "relevance":
+          default:
+            return (b.matchScore || 0) - (a.matchScore || 0);
+        }
+      });
 
   const isMatchedEmpty =
     feedMode === "matched" &&
@@ -569,22 +597,6 @@ export default function JobsPage() {
             </Button>
           </div>
 
-          {/* Mobile filter button */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="lg:hidden"
-            onClick={() => setShowMobileFilters(true)}
-          >
-            <Filter className="mr-1 h-4 w-4" />
-            {isRu ? "Фильтры" : "Filtrlar"}
-            {activeFiltersCount > 0 && (
-              <Badge variant="default" className="ml-1">
-                {activeFiltersCount}
-              </Badge>
-            )}
-          </Button>
-
           {/* Sort */}
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-44 shrink-0">
@@ -613,8 +625,8 @@ export default function JobsPage() {
           </Select>
         </div>
 
-        {/* Row 2: filter pills (hidden on mobile — they use the Dialog) */}
-        <div className="mt-3 hidden lg:block">
+        {/* Row 2: quick filter pills */}
+        <div className="mt-3">
           <FilterPillBar filters={filters} onChange={setFilters} isRu={isRu} />
         </div>
 
@@ -824,152 +836,6 @@ export default function JobsPage() {
 
       {/* ------------------------------------------------------------------ */}
       {/* MOBILE: filters dialog                                              */}
-      {/* ------------------------------------------------------------------ */}
-      <Dialog open={showMobileFilters} onOpenChange={setShowMobileFilters}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{isRu ? "Фильтры" : "Filtrlar"}</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-5 pt-2">
-            {/* Location */}
-            <div>
-              <p className="mb-2 text-sm font-medium">
-                {isRu ? "Локация" : "Joylashuv"}
-              </p>
-              {[
-                { value: "tashkent", label: isRu ? "Ташкент" : "Toshkent" },
-                { value: "samarkand", label: isRu ? "Самарканд" : "Samarqand" },
-                { value: "bukhara", label: isRu ? "Бухара" : "Buxoro" },
-                { value: "remote", label: isRu ? "Удалённо" : "Masofaviy" },
-                { value: "hybrid", label: isRu ? "Гибрид" : "Aralash" },
-              ].map((opt) => (
-                <label
-                  key={opt.value}
-                  className="flex cursor-pointer items-center gap-3 py-1"
-                >
-                  <input
-                    type="checkbox"
-                    checked={filters.locations.includes(opt.value)}
-                    onChange={() => {
-                      const next = filters.locations.includes(opt.value)
-                        ? filters.locations.filter((v) => v !== opt.value)
-                        : [...filters.locations, opt.value];
-                      setFilters((prev) => ({ ...prev, locations: next }));
-                    }}
-                    className="h-4 w-4 rounded border-surface-300 text-brand-600"
-                  />
-                  <span className="text-sm">{opt.label}</span>
-                </label>
-              ))}
-            </div>
-
-            {/* Job Type */}
-            <div>
-              <p className="mb-2 text-sm font-medium">
-                {isRu ? "Тип работы" : "Ish turi"}
-              </p>
-              {[
-                {
-                  value: "full_time",
-                  label: isRu ? "Полная занятость" : "To'liq ish kuni",
-                },
-                {
-                  value: "part_time",
-                  label: isRu ? "Частичная занятость" : "Yarim kunlik",
-                },
-                {
-                  value: "internship",
-                  label: isRu ? "Стажировка" : "Amaliyot",
-                },
-                { value: "remote", label: isRu ? "Удалённо" : "Masofaviy" },
-                { value: "hybrid", label: isRu ? "Гибрид" : "Aralash" },
-                { value: "contract", label: isRu ? "Контракт" : "Shartnoma" },
-              ].map((opt) => (
-                <label
-                  key={opt.value}
-                  className="flex cursor-pointer items-center gap-3 py-1"
-                >
-                  <input
-                    type="checkbox"
-                    checked={filters.jobTypes.includes(opt.value)}
-                    onChange={() => {
-                      const next = filters.jobTypes.includes(opt.value)
-                        ? filters.jobTypes.filter((v) => v !== opt.value)
-                        : [...filters.jobTypes, opt.value];
-                      setFilters((prev) => ({ ...prev, jobTypes: next }));
-                    }}
-                    className="h-4 w-4 rounded border-surface-300 text-brand-600"
-                  />
-                  <span className="text-sm">{opt.label}</span>
-                </label>
-              ))}
-            </div>
-
-            {/* Experience */}
-            <div>
-              <p className="mb-2 text-sm font-medium">
-                {isRu ? "Опыт" : "Tajriba"}
-              </p>
-              {[
-                { value: "intern", label: isRu ? "Стажёр" : "Amaliyotchi" },
-                { value: "junior", label: isRu ? "Начинающий" : "Boshlovchi" },
-                { value: "mid", label: isRu ? "Средний" : "O'rta" },
-                { value: "senior", label: isRu ? "Старший" : "Katta" },
-                { value: "lead", label: isRu ? "Руководитель" : "Rahbar" },
-              ].map((opt) => (
-                <label
-                  key={opt.value}
-                  className="flex cursor-pointer items-center gap-3 py-1"
-                >
-                  <input
-                    type="checkbox"
-                    checked={filters.experienceLevels.includes(opt.value)}
-                    onChange={() => {
-                      const next = filters.experienceLevels.includes(opt.value)
-                        ? filters.experienceLevels.filter(
-                            (v) => v !== opt.value,
-                          )
-                        : [...filters.experienceLevels, opt.value];
-                      setFilters((prev) => ({
-                        ...prev,
-                        experienceLevels: next,
-                      }));
-                    }}
-                    className="h-4 w-4 rounded border-surface-300 text-brand-600"
-                  />
-                  <span className="text-sm">{opt.label}</span>
-                </label>
-              ))}
-            </div>
-
-            {/* Salary */}
-            <div>
-              <p className="mb-2 text-sm font-medium">
-                {isRu ? "Диапазон зарплаты" : "Maosh oralig'i"}
-              </p>
-              <SalarySlider
-                value={filters.salaryRange}
-                onChange={(val) =>
-                  setFilters((prev) => ({ ...prev, salaryRange: val }))
-                }
-              />
-            </div>
-          </div>
-
-          <div className="mt-6 flex gap-3">
-            <Button variant="outline" onClick={resetFilters} className="flex-1">
-              {isRu ? "Сброс" : "Tozalash"}
-            </Button>
-            <Button
-              onClick={() => setShowMobileFilters(false)}
-              className="flex-1 bg-gradient-to-r from-brand-500 to-violet-600"
-            >
-              {isRu ? "Применить" : "Qo'llash"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

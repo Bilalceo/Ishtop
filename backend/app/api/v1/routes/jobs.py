@@ -2106,3 +2106,56 @@ async def clone_job(
 
     logger.info(f"Job cloned: source={source_job.id}, clone={cloned_job.id}")
     return job_to_response(cloned_job)
+
+
+@router.get(
+    "/{job_id}/match",
+    response_model=Dict[str, Any],
+    summary="How well this job matches the current user's resume",
+    description=(
+        "Scores the caller's most recent resume against one vacancy. Deliberately "
+        "a separate call from GET /jobs/{job_id}: the job page stays fast and "
+        "cacheable, and this loads alongside it. Deterministic (no AI call), and "
+        "it reuses the same scorer as the matched feed so the number a candidate "
+        "saw in the list is the number they see on the job."
+    ),
+)
+async def get_job_match(
+    job_id: UUID,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    job = db.query(Job).filter(Job.id == job_id, Job.is_deleted == False).first()  # noqa: E712
+    if not job:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+
+    is_owner = job.company_id == current_user.id
+    is_admin = current_user.role == UserRole.ADMIN
+    if not is_owner and not is_admin and job.status != JobStatus.ACTIVE.value:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+
+    resume = (
+        db.query(Resume)
+        .filter(Resume.user_id == current_user.id, Resume.is_deleted == False)  # noqa: E712
+        .order_by(Resume.updated_at.desc())
+        .first()
+    )
+    if resume is None or not resume.content:
+        # Not an error: the UI turns this into a "create a resume" prompt.
+        return {"success": True, "data": {"has_resume": False}}
+
+    breakdown = job_matching.score_resume_against_job(resume.content, job)
+    explainability = breakdown.get("explainability") or {}
+    return {
+        "success": True,
+        "data": {
+            "has_resume": True,
+            "resume_id": str(resume.id),
+            "score": breakdown.get("score", 0),
+            "matched_skills": breakdown.get("matched_skills", [])[:12],
+            "missing_skills": breakdown.get("missing_skills", [])[:8],
+            "fit_reasons": (explainability.get("fit_reasons") or breakdown.get("reasons") or [])[:5],
+            "missing_items": (explainability.get("missing_items") or [])[:5],
+            "confidence": explainability.get("confidence"),
+        },
+    }

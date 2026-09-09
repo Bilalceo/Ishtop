@@ -1,15 +1,26 @@
 "use client";
 
+/**
+ * One-line quick filters for the job search, mirroring the agreed mockup:
+ * a row of toggle pills plus a "Ko'proq" dialog for the long tail
+ * (salary range and experience level).
+ *
+ * Every pill maps to a parameter GET /jobs already understands, so the list is
+ * filtered by the server across the whole dataset rather than inside the page
+ * the user happens to be on.
+ */
+
 import { useState } from "react";
-import { SlidersHorizontal, RotateCcw, Wallet } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Briefcase,
+  MapPin,
+  GraduationCap,
+  Signal,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -17,15 +28,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SalarySlider, SALARY_MAX } from "@/components/jobs/SalarySlider";
+import { experienceOptions } from "@/lib/jobLabels";
 import { cn } from "@/lib/utils";
 
-type Filters = {
+export type Filters = {
   locations: string[];
   jobTypes: string[];
   experienceLevels: string[];
   salaryRange: [number, number];
   companies: string[];
   datePosted: string;
+  isRemote: boolean;
 };
 
 type FilterPillBarProps = {
@@ -34,193 +47,108 @@ type FilterPillBarProps = {
   isRu: boolean;
 };
 
-const companyOptions = [
-  "EPAM Systems",
-  "Uzum Market",
-  "Click.uz",
-  "Payme",
-  "MyTaxi",
-  "Korzinka",
-];
-
-const pillActive =
-  "bg-brand-100 border-brand-300 text-brand-700 dark:bg-brand-500/20 dark:border-brand-400 dark:text-brand-300";
-const pillBase =
-  "bg-white border-surface-200 text-surface-700 dark:bg-surface-800 dark:border-surface-600 dark:text-surface-300";
+const PILL_BASE =
+  "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors";
+const PILL_OFF =
+  "border-surface-200 bg-white text-surface-700 hover:bg-surface-50 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300 dark:hover:bg-surface-800";
+const PILL_ON =
+  "border-transparent bg-gradient-to-r from-brand-500 to-violet-600 text-white shadow-sm shadow-brand-500/25";
 
 export function FilterPillBar({ filters, onChange, isRu }: FilterPillBarProps) {
-  const [salaryOpen, setSalaryOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
 
-  const salaryActive =
-    filters.salaryRange[0] > 0 || filters.salaryRange[1] < SALARY_MAX;
-  const locationActive = filters.locations.length > 0;
-  const jobTypeActive = filters.jobTypes.length > 0;
-  const expActive = filters.experienceLevels.length > 0;
-  const dateActive = filters.datePosted !== "all";
-  const companiesActive = filters.companies.length > 0;
+  const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
 
-  const anyActive =
-    locationActive ||
-    jobTypeActive ||
-    expActive ||
-    salaryActive ||
-    dateActive ||
-    companiesActive;
+  const hasQuickFilter =
+    filters.isRemote ||
+    filters.jobTypes.length > 0 ||
+    filters.locations.length > 0;
+  const moreCount =
+    filters.experienceLevels.length +
+    (filters.salaryRange[0] > 0 || filters.salaryRange[1] < SALARY_MAX ? 1 : 0);
 
-  const salaryUnit = isRu ? "сум" : "so'm";
-  const salaryLabel = salaryActive
-    ? `${filters.salaryRange[0].toLocaleString()} – ${filters.salaryRange[1].toLocaleString()} ${salaryUnit}`
-    : isRu
-    ? "Зарплата"
-    : "Maosh";
+  const toggleJobType = (value: string) =>
+    set({
+      jobTypes: filters.jobTypes.includes(value) ? [] : [value],
+      isRemote: false,
+    });
+
+  const toggleLocation = (value: string) =>
+    set({ locations: filters.locations.includes(value) ? [] : [value] });
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-1">
-      {/* Location */}
-      <Select
-        value={filters.locations[0] || "all"}
-        onValueChange={(val) =>
-          onChange({
-            ...filters,
-            locations: val === "all" ? [] : [val],
-          })
-        }
+    <div className="flex flex-wrap items-center gap-2">
+      {/* All jobs — clears the quick filters */}
+      <button
+        type="button"
+        onClick={() => set({ isRemote: false, jobTypes: [], locations: [] })}
+        className={cn(PILL_BASE, hasQuickFilter ? PILL_OFF : PILL_ON)}
       >
-        <SelectTrigger
-          className={cn(
-            "h-9 w-[150px] shrink-0 rounded-xl border px-3 text-xs font-medium transition-colors focus:ring-0",
-            locationActive ? pillActive : pillBase
-          )}
-        >
-          <SelectValue placeholder={isRu ? "Локация" : "Joylashuv"} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{isRu ? "Все места" : "Barcha joylar"}</SelectItem>
-          <SelectItem value="tashkent">{isRu ? "Ташкент" : "Toshkent"}</SelectItem>
-          <SelectItem value="samarkand">{isRu ? "Самарканд" : "Samarqand"}</SelectItem>
-          <SelectItem value="bukhara">{isRu ? "Бухара" : "Buxoro"}</SelectItem>
-          <SelectItem value="remote">{isRu ? "Удалённо" : "Masofaviy"}</SelectItem>
-          <SelectItem value="hybrid">{isRu ? "Гибрид" : "Aralash"}</SelectItem>
-        </SelectContent>
-      </Select>
+        <Briefcase className="h-4 w-4" />
+        {isRu ? "Все вакансии" : "Barcha ishlar"}
+      </button>
 
-      {/* Job type */}
-      <Select
-        value={filters.jobTypes[0] || "all"}
-        onValueChange={(val) =>
-          onChange({
-            ...filters,
-            jobTypes: val === "all" ? [] : [val],
-          })
-        }
+      <button
+        type="button"
+        onClick={() => set({ isRemote: !filters.isRemote, jobTypes: [] })}
+        className={cn(PILL_BASE, filters.isRemote ? PILL_ON : PILL_OFF)}
       >
-        <SelectTrigger
-          className={cn(
-            "h-9 w-[150px] shrink-0 rounded-xl border px-3 text-xs font-medium transition-colors focus:ring-0",
-            jobTypeActive ? pillActive : pillBase
-          )}
-        >
-          <SelectValue placeholder={isRu ? "Тип работы" : "Ish turi"} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{isRu ? "Все типы" : "Barcha turlar"}</SelectItem>
-          <SelectItem value="full_time">{isRu ? "Полная занятость" : "To'liq ish kuni"}</SelectItem>
-          <SelectItem value="part_time">{isRu ? "Частичная занятость" : "Yarim kunlik"}</SelectItem>
-          <SelectItem value="internship">{isRu ? "Стажировка" : "Amaliyot"}</SelectItem>
-          <SelectItem value="contract">{isRu ? "Контракт" : "Shartnoma"}</SelectItem>
-          <SelectItem value="remote">{isRu ? "Удалённо" : "Masofaviy"}</SelectItem>
-          <SelectItem value="hybrid">{isRu ? "Гибрид" : "Aralash"}</SelectItem>
-        </SelectContent>
-      </Select>
+        <Signal className="h-4 w-4" />
+        {isRu ? "Удалённо" : "Masofadan"}
+      </button>
 
-      {/* Experience */}
-      <Select
-        value={filters.experienceLevels[0] || "all"}
-        onValueChange={(val) =>
-          onChange({
-            ...filters,
-            experienceLevels: val === "all" ? [] : [val],
-          })
-        }
-      >
-        <SelectTrigger
-          className={cn(
-            "h-9 w-[150px] shrink-0 rounded-xl border px-3 text-xs font-medium transition-colors focus:ring-0",
-            expActive ? pillActive : pillBase
-          )}
-        >
-          <SelectValue placeholder={isRu ? "Опыт" : "Tajriba"} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{isRu ? "Любой уровень" : "Har qanday daraja"}</SelectItem>
-          <SelectItem value="intern">{isRu ? "Стажёр" : "Amaliyotchi"}</SelectItem>
-          <SelectItem value="junior">{isRu ? "Начинающий" : "Boshlovchi"}</SelectItem>
-          <SelectItem value="mid">{isRu ? "Средний" : "O'rta"}</SelectItem>
-          <SelectItem value="senior">{isRu ? "Старший" : "Katta"}</SelectItem>
-          <SelectItem value="lead">{isRu ? "Руководитель" : "Rahbar"}</SelectItem>
-        </SelectContent>
-      </Select>
-
-      {/* Salary — opens Dialog */}
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setSalaryOpen(true)}
+      <button
+        type="button"
+        onClick={() => toggleLocation("Toshkent")}
         className={cn(
-          "h-9 shrink-0 rounded-xl border px-3 text-xs font-medium transition-colors",
-          salaryActive ? pillActive : pillBase
+          PILL_BASE,
+          filters.locations.includes("Toshkent") ? PILL_ON : PILL_OFF,
         )}
       >
-        <Wallet className="mr-1 h-3 w-3" />
-        {salaryLabel}
-      </Button>
+        <MapPin className="h-4 w-4" />
+        Toshkent
+      </button>
 
-      {/* Date posted */}
-      <Select
-        value={filters.datePosted}
-        onValueChange={(val) => onChange({ ...filters, datePosted: val })}
+      <button
+        type="button"
+        onClick={() => toggleJobType("full_time")}
+        className={cn(
+          PILL_BASE,
+          filters.jobTypes.includes("full_time") ? PILL_ON : PILL_OFF,
+        )}
       >
-        <SelectTrigger
-          className={cn(
-            "h-9 w-[150px] shrink-0 rounded-xl border px-3 text-xs font-medium transition-colors focus:ring-0",
-            dateActive ? pillActive : pillBase
-          )}
-        >
-          <SelectValue placeholder={isRu ? "Дата" : "Sana"} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{isRu ? "Любое время" : "Istalgan vaqt"}</SelectItem>
-          <SelectItem value="24h">{isRu ? "Последние 24 часа" : "Oxirgi 24 soat"}</SelectItem>
-          <SelectItem value="7d">{isRu ? "Последние 7 дней" : "Oxirgi 7 kun"}</SelectItem>
-          <SelectItem value="30d">{isRu ? "Последние 30 дней" : "Oxirgi 30 kun"}</SelectItem>
-        </SelectContent>
-      </Select>
+        {isRu ? "Полная занятость" : "To'liq stavka"}
+      </button>
 
-      {/* More filters (companies) */}
-      <Button
-        variant="outline"
-        size="sm"
+      <button
+        type="button"
+        onClick={() => toggleJobType("internship")}
+        className={cn(
+          PILL_BASE,
+          filters.jobTypes.includes("internship") ? PILL_ON : PILL_OFF,
+        )}
+      >
+        <GraduationCap className="h-4 w-4" />
+        {isRu ? "Стажировка" : "Amaliyot"}
+      </button>
+
+      <button
+        type="button"
         onClick={() => setMoreOpen(true)}
-        className={cn(
-          "h-9 shrink-0 rounded-xl border px-3 text-xs font-medium transition-colors",
-          companiesActive ? pillActive : pillBase
-        )}
+        className={cn(PILL_BASE, moreCount > 0 ? PILL_ON : PILL_OFF)}
       >
-        <SlidersHorizontal className="mr-1 h-3 w-3" />
-        {isRu ? "Больше фильтров" : "Ko'proq filtrlar"}
-        {companiesActive && (
-          <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-500 text-[10px] text-white">
-            {filters.companies.length}
-          </span>
+        <SlidersHorizontal className="h-4 w-4" />
+        {isRu ? "Ещё" : "Ko'proq"}
+        {moreCount > 0 && (
+          <Badge variant="secondary" className="ml-0.5 bg-white/20 text-white">
+            {moreCount}
+          </Badge>
         )}
-      </Button>
+      </button>
 
-      {/* Clear — only when active */}
-      {anyActive && (
-        <Button
-          variant="ghost"
-          size="sm"
+      {(hasQuickFilter || moreCount > 0) && (
+        <button
+          type="button"
           onClick={() =>
             onChange({
               locations: [],
@@ -229,72 +157,72 @@ export function FilterPillBar({ filters, onChange, isRu }: FilterPillBarProps) {
               salaryRange: [0, SALARY_MAX],
               companies: [],
               datePosted: "all",
+              isRemote: false,
             })
           }
-          className="h-9 shrink-0 rounded-xl px-3 text-xs text-surface-500 hover:text-surface-700 dark:text-surface-400"
+          className="inline-flex items-center gap-1 px-2 text-sm font-medium text-surface-500 hover:text-surface-800 dark:hover:text-surface-200"
         >
-          <RotateCcw className="mr-1 h-3 w-3" />
-          {isRu ? "Очистить" : "Tozalash"}
-        </Button>
+          <X className="h-3.5 w-3.5" />
+          {isRu ? "Сбросить" : "Tozalash"}
+        </button>
       )}
 
-      {/* Salary Dialog */}
-      <Dialog open={salaryOpen} onOpenChange={setSalaryOpen}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>{isRu ? "Диапазон зарплаты" : "Maosh oralig'i"}</DialogTitle>
-          </DialogHeader>
-          <div className="mt-2">
-            <SalarySlider
-              value={filters.salaryRange}
-              onChange={(val) => onChange({ ...filters, salaryRange: val })}
-            />
-          </div>
-          <Button
-            className="mt-4 w-full bg-gradient-to-r from-brand-500 to-violet-600"
-            onClick={() => setSalaryOpen(false)}
-          >
-            {isRu ? "Применить" : "Qo'llash"}
-          </Button>
-        </DialogContent>
-      </Dialog>
-
-      {/* More Filters Dialog (companies) */}
+      {/* Long-tail filters */}
       <Dialog open={moreOpen} onOpenChange={setMoreOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{isRu ? "Компании" : "Kompaniyalar"}</DialogTitle>
+            <DialogTitle>
+              {isRu ? "Больше фильтров" : "Ko'proq filtrlar"}
+            </DialogTitle>
           </DialogHeader>
-          <div className="mt-2 space-y-2">
-            {companyOptions.map((company) => (
-              <label
-                key={company}
-                className="flex cursor-pointer items-center gap-3 rounded-lg p-2 hover:bg-surface-50 dark:hover:bg-surface-700"
-              >
-                <input
-                  type="checkbox"
-                  checked={filters.companies.includes(company)}
-                  onChange={() => {
-                    const current = filters.companies;
-                    const next = current.includes(company)
-                      ? current.filter((c) => c !== company)
-                      : [...current, company];
-                    onChange({ ...filters, companies: next });
-                  }}
-                  className="h-4 w-4 rounded border-surface-300 text-brand-600 focus:ring-brand-500"
-                />
-                <span className="text-sm text-surface-700 dark:text-surface-300">
-                  {company}
-                </span>
-              </label>
-            ))}
+
+          <div className="space-y-6 pt-2">
+            <div>
+              <p className="mb-3 text-sm font-semibold text-surface-800 dark:text-surface-200">
+                {isRu ? "Опыт" : "Tajriba"}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {experienceOptions(isRu).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() =>
+                      set({
+                        experienceLevels: filters.experienceLevels.includes(
+                          opt.value,
+                        )
+                          ? []
+                          : [opt.value],
+                      })
+                    }
+                    className={cn(
+                      PILL_BASE,
+                      "px-3 py-1.5 text-xs",
+                      filters.experienceLevels.includes(opt.value)
+                        ? PILL_ON
+                        : PILL_OFF,
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-3 text-sm font-semibold text-surface-800 dark:text-surface-200">
+                {isRu ? "Зарплата" : "Maosh"}
+              </p>
+              <SalarySlider
+                value={filters.salaryRange}
+                onChange={(salaryRange) => set({ salaryRange })}
+              />
+            </div>
+
+            <Button className="w-full" onClick={() => setMoreOpen(false)}>
+              {isRu ? "Показать результаты" : "Natijalarni ko'rsatish"}
+            </Button>
           </div>
-          <Button
-            className="mt-4 w-full bg-gradient-to-r from-brand-500 to-violet-600"
-            onClick={() => setMoreOpen(false)}
-          >
-            {isRu ? "Готово" : "Tayyor"}
-          </Button>
         </DialogContent>
       </Dialog>
     </div>

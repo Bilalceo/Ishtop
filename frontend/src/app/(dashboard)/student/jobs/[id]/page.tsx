@@ -131,6 +131,12 @@ export default function JobDetailPage() {
         jobTypeLabel: "Тип занятости",
         locationLabel: "Локация",
         posted: "Опубликовано",
+        matchTitle: "Соответствие вашему резюме",
+        matchedSkills: "Совпало",
+        missingSkills: "Не хватает",
+        noResumeMatch:
+          "Создайте резюме, чтобы увидеть, насколько эта вакансия вам подходит.",
+        createResume: "Создать резюме",
       }
     : {
         notFound: "Ish topilmadi yoki xatolik yuz berdi.",
@@ -176,6 +182,12 @@ export default function JobDetailPage() {
         jobTypeLabel: "Ish turi",
         locationLabel: "Joylashuv",
         posted: "E'lon qilingan",
+        matchTitle: "Rezyumengizga mosligi",
+        matchedSkills: "Mos keldi",
+        missingSkills: "Yetishmayapti",
+        noResumeMatch:
+          "Bu ish sizga qanchalik mos kelishini ko'rish uchun rezyume yarating.",
+        createResume: "Rezyume yaratish",
       };
   const jobTypeLabels = getJobTypeLabels(isRu);
   const experienceLevelLabels = getExperienceLevelLabels(isRu);
@@ -186,6 +198,13 @@ export default function JobDetailPage() {
   const [isSaved, setIsSaved] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  // Resume↔job match, fetched separately so the job itself renders immediately.
+  const [match, setMatch] = useState<{
+    has_resume: boolean;
+    score?: number;
+    matched_skills?: string[];
+    missing_skills?: string[];
+  } | null>(null);
 
   // Mobile sticky "Apply" bar — shown only while neither the top apply button
   // nor the bottom CTA is on screen, so the primary action is always reachable
@@ -234,6 +253,23 @@ export default function JobDetailPage() {
     if (jobId) fetchJob();
     // c is recomputed each render; only id should drive a refetch.
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobId]);
+
+  useEffect(() => {
+    if (!jobId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await jobApi.matchOne(jobId);
+        const data = res.data?.data ?? res.data;
+        if (!cancelled) setMatch(data);
+      } catch {
+        /* match is a bonus — a failure just hides the card */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [jobId]);
 
   const handleShare = () => {
@@ -672,6 +708,91 @@ export default function JobDetailPage() {
                 {c.viewOnMap}
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
+            </div>
+          )}
+
+          {match && (
+            <div className="rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-50 to-violet-50 p-5 dark:border-brand-500/20 dark:from-brand-500/10 dark:to-violet-500/10">
+              <h2 className="flex items-center gap-2 text-sm font-bold text-surface-900 dark:text-white">
+                <Target className="h-4 w-4 text-brand-500" />
+                {c.matchTitle}
+              </h2>
+
+              {match.has_resume && typeof match.score === "number" ? (
+                <>
+                  <div className="mt-4 flex items-center gap-4">
+                    <div className="text-3xl font-extrabold text-brand-600 dark:text-brand-300">
+                      {Math.round(match.score)}%
+                    </div>
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/70 dark:bg-surface-900/50">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-brand-500 to-violet-600"
+                        style={{
+                          width: `${Math.min(100, Math.max(0, match.score))}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Concrete skills, not the scorer's internal wording. */}
+                  {match.matched_skills && match.matched_skills.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-surface-500">
+                        {c.matchedSkills}
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {match.matched_skills.slice(0, 8).map((skill) => (
+                          <span
+                            key={skill}
+                            className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {match.missing_skills && match.missing_skills.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-surface-500">
+                        {c.missingSkills}
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {match.missing_skills.slice(0, 6).map((skill) => (
+                          <span
+                            key={skill}
+                            className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <Link
+                    href={`/student/interview?job=${job.id}`}
+                    className="mt-4 flex items-center justify-center gap-1.5 rounded-xl bg-white py-2.5 text-sm font-semibold text-brand-600 shadow-sm transition-colors hover:bg-brand-50 dark:bg-surface-900 dark:hover:bg-surface-800"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    {c.prepareInterview}
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <p className="mt-3 text-sm text-surface-600 dark:text-surface-300">
+                    {c.noResumeMatch}
+                  </p>
+                  <Link
+                    href="/student/resumes/create-ai"
+                    className="mt-4 flex items-center justify-center gap-1.5 rounded-xl bg-white py-2.5 text-sm font-semibold text-brand-600 shadow-sm transition-colors hover:bg-brand-50 dark:bg-surface-900 dark:hover:bg-surface-800"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    {c.createResume}
+                  </Link>
+                </>
+              )}
             </div>
           )}
         </aside>
