@@ -31,7 +31,11 @@ const EXPERIENCE: Record<string, Pair> = {
   executive: ["Direktor", "Директор"],
 };
 
-function pick(map: Record<string, Pair>, value: string | undefined | null, isRu: boolean): string {
+function pick(
+  map: Record<string, Pair>,
+  value: string | undefined | null,
+  isRu: boolean,
+): string {
   if (!value) return "";
   const pair = map[value];
   if (pair) return isRu ? pair[1] : pair[0];
@@ -39,11 +43,17 @@ function pick(map: Record<string, Pair>, value: string | undefined | null, isRu:
   return value.replace(/_/g, " ");
 }
 
-export function jobTypeLabel(value: string | undefined | null, isRu: boolean): string {
+export function jobTypeLabel(
+  value: string | undefined | null,
+  isRu: boolean,
+): string {
   return pick(JOB_TYPE, value, isRu);
 }
 
-export function experienceLabel(value: string | undefined | null, isRu: boolean): string {
+export function experienceLabel(
+  value: string | undefined | null,
+  isRu: boolean,
+): string {
   return pick(EXPERIENCE, value, isRu);
 }
 
@@ -68,33 +78,79 @@ const PLACEHOLDER_COMPANIES = new Set([
 export function jobDisplayIdentity(
   title: string | undefined | null,
   companyName: string | undefined | null,
-): { title: string; company: string } {
+): { title: string; company: string; companyIsReal: boolean } {
   const rawTitle = (title || "").trim();
   const rawCompany = (companyName || "").trim();
-  const companyIsReal = rawCompany !== "" && !PLACEHOLDER_COMPANIES.has(rawCompany.toLowerCase());
-  if (companyIsReal) return { title: rawTitle, company: rawCompany };
+  const companyIsReal =
+    rawCompany !== "" && !PLACEHOLDER_COMPANIES.has(rawCompany.toLowerCase());
+  if (companyIsReal)
+    return { title: rawTitle, company: rawCompany, companyIsReal: true };
 
-  // Only treat a trailing "(...)" as the employer when it looks like a name,
-  // not a qualifier such as "(Junior)" or "(React)".
-  const m = rawTitle.match(/^(.*\S)\s*\(([^()]{3,60})\)\s*$/);
-  if (m) {
-    const inner = m[2].trim();
-    const isQualifier = /^(junior|middle|mid|senior|intern|remote|masofaviy|part[- ]?time|full[- ]?time)$/i.test(inner);
-    if (!isQualifier && /\s|[A-ZА-Я]/.test(inner)) {
-      return { title: m[1].trim(), company: inner };
+  // Take the trailing parenthesised group, matching brackets from the end so a
+  // nested name survives: "Savdo vakili (Nishon Group (go'sht))" -> "Nishon Group (go'sht)".
+  if (rawTitle.endsWith(")")) {
+    let depth = 0;
+    let open = -1;
+    for (let i = rawTitle.length - 1; i >= 0; i -= 1) {
+      const ch = rawTitle[i];
+      if (ch === ")") depth += 1;
+      else if (ch === "(") {
+        depth -= 1;
+        if (depth === 0) {
+          open = i;
+          break;
+        }
+      }
+    }
+    if (open > 0) {
+      const inner = rawTitle.slice(open + 1, -1).trim();
+      const head = rawTitle.slice(0, open).trim();
+      // Ignore qualifiers like "(Junior)" — they describe the role, not the employer.
+      const isQualifier =
+        /^(junior|middle|mid|senior|intern|remote|masofaviy|part[- ]?time|full[- ]?time)$/i.test(
+          inner,
+        );
+      if (
+        head &&
+        inner.length >= 3 &&
+        inner.length <= 70 &&
+        !isQualifier &&
+        /\s|[A-ZА-Я]/.test(inner)
+      ) {
+        // The employer name is real, but its verification belongs to the import
+        // account rather than this employer — so companyIsReal stays false.
+        return { title: head, company: inner, companyIsReal: false };
+      }
     }
   }
-  return { title: rawTitle, company: rawCompany };
+  // Nothing usable: report no company at all rather than echoing a
+  // placeholder like "Ish beruvchi" on every listing.
+  return {
+    title: rawTitle,
+    company: companyIsReal ? rawCompany : "",
+    companyIsReal,
+  };
 }
 
 /** Filter option lists — order roughly mirrors the local market (entry-first). */
-export function jobTypeOptions(isRu: boolean): { value: string; label: string }[] {
-  return (["full_time", "part_time", "internship", "remote", "hybrid", "contract"] as const).map(
-    (v) => ({ value: v, label: jobTypeLabel(v, isRu) }),
-  );
+export function jobTypeOptions(
+  isRu: boolean,
+): { value: string; label: string }[] {
+  return (
+    [
+      "full_time",
+      "part_time",
+      "internship",
+      "remote",
+      "hybrid",
+      "contract",
+    ] as const
+  ).map((v) => ({ value: v, label: jobTypeLabel(v, isRu) }));
 }
 
-export function experienceOptions(isRu: boolean): { value: string; label: string }[] {
+export function experienceOptions(
+  isRu: boolean,
+): { value: string; label: string }[] {
   return (["intern", "junior", "mid", "senior", "lead"] as const).map((v) => ({
     value: v,
     label: experienceLabel(v, isRu),

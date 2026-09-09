@@ -215,7 +215,11 @@ export interface Job {
   company_id: string;
   title: string;
   description: string;
-  requirements: JobRequirements;
+  /** The API always flattens requirements to a list (see job_to_response._as_list),
+   *  even when a company stored them as {skills, education, experience}. */
+  requirements: string[];
+  responsibilities?: string[];
+  benefits?: string[];
   salary_min?: number;
   salary_max?: number;
   salary_currency?: string;

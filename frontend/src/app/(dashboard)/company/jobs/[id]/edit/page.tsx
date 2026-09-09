@@ -102,9 +102,9 @@ export default function EditJobPage() {
         setSalaryMax(data.salary_max?.toString() || "");
         const normalizedCurrency = String(data.salary_currency || "").toUpperCase();
         setSalaryCurrency(normalizedCurrency === "USD" ? "USD" : "UZS");
-        setSkills(data.requirements?.skills || []);
-        setEducation(data.requirements?.education || "");
-        setExperience(data.requirements?.experience || "");
+        // The API flattens requirements to a list, so prefill the skills chips
+        // from it; education/experience are re-entered if the employer wants them.
+        setSkills(data.requirements || []);
       } catch {
         setError("Ish topilmadi.");
       } finally {

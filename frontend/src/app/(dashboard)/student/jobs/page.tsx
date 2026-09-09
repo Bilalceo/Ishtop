@@ -309,7 +309,7 @@ export default function JobsPage() {
       !searchQuery ||
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.company?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.requirements?.skills?.some((skill) =>
+      job.requirements?.some((skill) =>
         skill.toLowerCase().includes(searchQuery.toLowerCase()),
       );
 

@@ -217,7 +217,7 @@ function buildJobDescription(job: Job): string {
     `Location: ${job.location || ""}`,
     `Salary: ${formatSalaryRange(job.salary_min, job.salary_max, "uz", job.salary_currency || "USD")}`,
     `Description: ${truncateText(job.description || "", 2500)}`,
-    asListLine((job.requirements?.skills || []).slice(0, 40), "Requirements"),
+    asListLine((job.requirements || []).slice(0, 40), "Requirements"),
     asListLine((extendedJob.responsibilities || []).slice(0, 30), "Responsibilities"),
   ].filter(Boolean);
 
@@ -1303,7 +1303,7 @@ export default function ApplyPage() {
                   resumes={resumes}
                   selectedId={selectedResumeId}
                   onSelect={setSelectedResumeId}
-                  jobRequirements={job.requirements.skills}
+                  jobRequirements={job.requirements}
                 />
               </motion.div>
             )}

@@ -13,23 +13,30 @@ import {
   Building2,
   Users,
   Eye,
-  Calendar,
   CheckCircle,
   Sparkles,
   Share2,
   Bookmark,
   BookmarkCheck,
   ExternalLink,
-  Globe,
+  BadgeCheck,
+  ShieldCheck,
+  MessageSquare,
   Target,
-  Loader2,
   AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { jobApi } from "@/lib/api";
-import { formatRelativeTime, formatSalaryRange, cn, sanitizeRichTextHtml, stripHtmlTags } from "@/lib/utils";
+import {
+  formatRelativeTime,
+  formatSalaryRange,
+  cn,
+  sanitizeRichTextHtml,
+  stripHtmlTags,
+} from "@/lib/utils";
+import { jobDisplayIdentity } from "@/lib/jobLabels";
 import type { Job } from "@/types/api";
 import { useTranslation } from "@/contexts/TranslationContext";
 
@@ -73,15 +80,6 @@ function getExperienceLevelLabels(isRu: boolean): Record<string, string> {
       };
 }
 
-const jobTypeColors: Record<string, string> = {
-  full_time: "bg-green-100 text-green-700",
-  part_time: "bg-blue-100 text-blue-700",
-  remote: "bg-brand-100 text-brand-700",
-  hybrid: "bg-cyan-100 text-cyan-700",
-  contract: "bg-orange-100 text-orange-700",
-  internship: "bg-pink-100 text-pink-700",
-};
-
 export default function JobDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -116,6 +114,23 @@ export default function JobDetailPage() {
         certifications: "Сертификаты",
         fitCta: "Эта вакансия вам подходит?",
         fitCtaSub: "Откликнитесь прямо сейчас и попробуйте свои силы!",
+        responsibilities: "Обязанности",
+        tabOverview: "Обзор",
+        tabAi: "AI-анализ",
+        trust: "доверие",
+        prepareInterview: "Подготовка к собеседованию (AI)",
+        freeToApply: "Отклик полностью бесплатный",
+        aboutCompany: "О компании",
+        viewCompany: "Профиль компании",
+        viewOnMap: "Посмотреть на карте",
+        aiOpinion: "Мнение AI",
+        aiMatchNote: "Рассчитано по вашему резюме и навыкам.",
+        whyFits: "Почему подходит",
+        whatsMissing: "Чего не хватает",
+        moreInfo: "Дополнительно",
+        jobTypeLabel: "Тип занятости",
+        locationLabel: "Локация",
+        posted: "Опубликовано",
       }
     : {
         notFound: "Ish topilmadi yoki xatolik yuz berdi.",
@@ -144,6 +159,23 @@ export default function JobDetailPage() {
         certifications: "Sertifikatlar",
         fitCta: "Ushbu ish sizga mos keladi?",
         fitCtaSub: "Hoziroq ariza bering va imkoningizni sinab ko'ring!",
+        responsibilities: "Asosiy vazifalar",
+        tabOverview: "Umumiy",
+        tabAi: "AI tahlili",
+        trust: "ishonch",
+        prepareInterview: "AI bilan suhbatga tayyorlanish",
+        freeToApply: "Ariza berish mutlaqo bepul",
+        aboutCompany: "Kompaniya haqida",
+        viewCompany: "Kompaniya profili",
+        viewOnMap: "Xaritada ko'rish",
+        aiOpinion: "AI fikri",
+        aiMatchNote: "Rezyume va ko'nikmalaringiz asosida hisoblangan.",
+        whyFits: "Nega mos keladi",
+        whatsMissing: "Nima yetishmayapti",
+        moreInfo: "Qo'shimcha ma'lumotlar",
+        jobTypeLabel: "Ish turi",
+        locationLabel: "Joylashuv",
+        posted: "E'lon qilingan",
       };
   const jobTypeLabels = getJobTypeLabels(isRu);
   const experienceLevelLabels = getExperienceLevelLabels(isRu);
@@ -153,6 +185,7 @@ export default function JobDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
 
   // Mobile sticky "Apply" bar — shown only while neither the top apply button
   // nor the bottom CTA is on screen, so the primary action is always reachable
@@ -175,7 +208,8 @@ export default function JobDetailPage() {
           else visible.delete(e.target);
         }
         const anyVisible =
-          (top ? visible.has(top) : false) || (bottom ? visible.has(bottom) : false);
+          (top ? visible.has(top) : false) ||
+          (bottom ? visible.has(bottom) : false);
         setShowStickyApply(!anyVisible);
       },
       { rootMargin: "0px 0px -80px 0px" },
@@ -248,296 +282,487 @@ export default function JobDetailPage() {
     );
   }
 
-  const companyName = job.company?.name || c.companyFallback;
-  const companyLetter = companyName[0]?.toUpperCase() || "K";
+  const {
+    title: displayTitle,
+    company: resolvedCompany,
+    companyIsReal,
+  } = jobDisplayIdentity(job.title, job.company?.name);
+  const companyName = resolvedCompany;
+  const companyLetter = (companyName || displayTitle)[0]?.toUpperCase() || "?";
   const safeDescriptionHtml = sanitizeRichTextHtml(job.description || "");
   const hasDescription = stripHtmlTags(job.description || "").length > 0;
+  const requirements = job.requirements ?? [];
+  const responsibilities = job.responsibilities ?? [];
+  const isVerified =
+    job.verification_state === "approved" || job.company?.is_verified;
+  const matchScore =
+    typeof job.matchScore === "number" ? Math.round(job.matchScore) : null;
+  const salaryText =
+    formatSalaryRange(
+      job.salary_min,
+      job.salary_max,
+      isRu ? "ru" : "uz",
+      job.salary_currency || "UZS",
+    ) || c.notSpecified;
+  const applyHref = `/student/jobs/${job.id}/apply`;
+
+  // Only offer tabs that actually have content — an empty "Talablar" tab is worse
+  // than no tab at all (aggregated listings often carry no structured lists).
+  const tabs: { id: string; label: string }[] = [
+    { id: "overview", label: c.tabOverview },
+    ...(requirements.length
+      ? [{ id: "requirements", label: c.requirements }]
+      : []),
+    ...(responsibilities.length
+      ? [{ id: "responsibilities", label: c.responsibilities }]
+      : []),
+    ...(matchScore !== null || job.explainability
+      ? [{ id: "ai", label: c.tabAi }]
+      : []),
+  ];
+  const tab = tabs.some((t) => t.id === activeTab) ? activeTab : "overview";
+
+  const BulletList = ({ items }: { items: string[] }) => (
+    <ul className="mt-3 space-y-2.5">
+      {items.map((item, i) => (
+        <li
+          key={i}
+          className="flex gap-2.5 text-[15px] leading-relaxed text-surface-600 dark:text-surface-300"
+        >
+          <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  );
+
+  const Section = ({
+    title,
+    children,
+  }: {
+    title: string;
+    children: React.ReactNode;
+  }) => (
+    <section className="rounded-2xl border border-surface-200 bg-white p-5 dark:border-surface-700 dark:bg-surface-900 sm:p-6">
+      <h2 className="text-lg font-bold text-surface-900 dark:text-white">
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-4 md:p-6">
-      {/* Back Button */}
-      <motion.div
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-      >
+    <div className="mx-auto w-full max-w-[1200px] px-4 pb-16 pt-5 lg:px-6">
+      {/* Back + secondary actions */}
+      <div className="flex items-center justify-between gap-3">
         <Button
           variant="ghost"
           onClick={() => router.back()}
-          className="gap-2 text-surface-600 hover:text-surface-900"
+          className="gap-2 px-2 text-surface-600 hover:text-surface-900"
         >
           <ArrowLeft className="h-4 w-4" />
           {c.backToJobs}
         </Button>
-      </motion.div>
-
-      {/* Main Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl border border-surface-200 bg-white p-6 dark:border-surface-700 dark:bg-surface-800 shadow-sm dark:border-surface-700 dark:bg-surface-800"
-      >
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
-            {/* Company Logo */}
-            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-violet-600 text-2xl font-bold text-white shadow-lg">
-              {companyLetter}
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-surface-900">
-                {job.title}
-              </h1>
-              <div className="mt-1 flex items-center gap-2 text-surface-600">
-                <Building2 className="h-4 w-4" />
-                <span className="font-medium">{companyName}</span>
-                {job.verification_state === "approved" && (
-                  <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-700">
-                    {c.verifiedCompany}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsSaved(!isSaved)}
-              className={isSaved ? "text-brand-600" : "text-surface-400"}
-              title={isSaved ? c.removeFromSaved : c.saveJob}
-              aria-label={isSaved ? c.removeFromSaved : c.saveJob}
-            >
-              {isSaved ? (
-                <BookmarkCheck className="h-5 w-5" />
-              ) : (
-                <Bookmark className="h-5 w-5" />
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleShare}
-              className="text-surface-400"
-              title={c.shareJob}
-              aria-label={c.shareJob}
-            >
-              <Share2 className="h-5 w-5" />
-            </Button>
-            {isCopied && (
-              <span className="self-center text-xs text-green-600">
-                {c.copied}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Tags */}
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Badge
-            className={cn(
-              "rounded-full px-3 py-1 text-sm font-medium",
-              jobTypeColors[job.job_type] || "bg-surface-100 text-surface-700",
-            )}
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsSaved(!isSaved)}
+            className="gap-2"
+            aria-label={isSaved ? c.removeFromSaved : c.saveJob}
           >
-            {jobTypeLabels[job.job_type] || job.job_type}
-          </Badge>
-          <Badge className="rounded-full bg-surface-100 px-3 py-1 text-sm font-medium text-surface-700">
-            {experienceLevelLabels[job.experience_level] ||
-              job.experience_level}
-          </Badge>
-          {job.matchScore && (
-            <Badge className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
-              <Target className="mr-1 h-3 w-3" />
-              {job.matchScore}% {c.match}
-            </Badge>
-          )}
-        </div>
-
-        {/* Info Grid */}
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <div className="flex items-center gap-2 text-surface-600">
-            <MapPin className="h-4 w-4 text-surface-400" />
-            <span className="text-sm">{job.location || c.notSpecified}</span>
-          </div>
-          {(job.salary_min || job.salary_max) && (
-            <div className="flex items-center gap-2 text-surface-600">
-              <Wallet className="h-4 w-4 text-surface-400" />
-              <span className="text-sm font-medium text-green-600">
-                {formatSalaryRange(job.salary_min, job.salary_max, locale, job.salary_currency || "USD")}
-              </span>
-            </div>
-          )}
-          <div className="flex items-center gap-2 text-surface-600">
-            <Eye className="h-4 w-4 text-surface-400" />
-            <span className="text-sm">{job.views_count || 0} {c.views}</span>
-          </div>
-          <div className="flex items-center gap-2 text-surface-600">
-            <Users className="h-4 w-4 text-surface-400" />
-            <span className="text-sm">{job.applications_count || 0} {c.applicationsCount}</span>
-          </div>
-          <div className="flex items-center gap-2 text-surface-600">
-            <Clock className="h-4 w-4 text-surface-400" />
-            <span className="text-sm">
-              {formatRelativeTime(job.created_at, locale)}
+            {isSaved ? (
+              <BookmarkCheck className="h-4 w-4 text-brand-600" />
+            ) : (
+              <Bookmark className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">{c.saveJob}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShare}
+            className="gap-2"
+            aria-label={c.shareJob}
+          >
+            <Share2 className="h-4 w-4" />
+            <span className="hidden sm:inline">
+              {isCopied ? c.copied : c.shareJob}
             </span>
-          </div>
-          {job.expires_at && (
-            <div className="flex items-center gap-2 text-surface-600">
-              <Calendar className="h-4 w-4 text-surface-400" />
-              <span className="text-sm">
-                {c.deadline}: {new Date(job.expires_at).toLocaleDateString(isRu ? "ru-RU" : "uz-UZ")}
-              </span>
-            </div>
-          )}
+          </Button>
         </div>
+      </div>
 
-        {/* Apply Button */}
-        <div ref={topApplyRef} className="mt-6 flex gap-3">
-          <Link href={`/student/jobs/${job.id}/apply`} className="flex-1">
-            <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 py-3 text-base font-semibold shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40">
-              <Sparkles className="mr-2 h-5 w-5" />
-              {c.applyButton}
-            </Button>
-          </Link>
-          {job.company?.logo_url && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-12 w-12"
-              title={c.companyWebsite}
-              aria-label={c.companyWebsite}
-            >
-              <Globe className="h-5 w-5" />
-            </Button>
-          )}
-        </div>
-      </motion.div>
-
-      {/* Description */}
+      {/* ---------------------------------------------------------------- */}
+      {/* HEADER: identity + key facts, with the apply actions alongside     */}
+      {/* ---------------------------------------------------------------- */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="rounded-2xl border border-surface-200 bg-white p-6 dark:border-surface-700 dark:bg-surface-800 shadow-sm dark:border-surface-700 dark:bg-surface-800"
+        className="mt-3 rounded-2xl border border-surface-200 bg-white p-5 dark:border-surface-700 dark:bg-surface-900 sm:p-6"
       >
-        <h2 className="mb-4 text-lg font-bold text-surface-900">{c.jobDescription}</h2>
-        {hasDescription ? (
-          <div
-            className="prose prose-sm max-w-none text-surface-600 dark:prose-invert dark:text-surface-300"
-            dangerouslySetInnerHTML={{ __html: safeDescriptionHtml }}
-          />
-        ) : (
-          <p className="text-surface-600 dark:text-surface-300">{c.noDescription}</p>
-        )}
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-violet-600 text-xl font-bold text-white shadow-sm">
+                {companyLetter}
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-[22px] font-bold leading-tight text-surface-900 dark:text-white sm:text-2xl">
+                  {displayTitle}
+                </h1>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  <span className="font-medium text-surface-600 dark:text-surface-300">
+                    {companyName}
+                  </span>
+                  {isVerified && (
+                    <>
+                      <BadgeCheck className="h-4 w-4 text-brand-500" />
+                      <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
+                        {c.verifiedCompany}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Signal chips */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              {matchScore !== null && (
+                <Badge
+                  variant={
+                    matchScore >= 80
+                      ? "success"
+                      : matchScore >= 60
+                        ? "warning"
+                        : "secondary"
+                  }
+                  className="gap-1"
+                >
+                  <Target className="h-3.5 w-3.5" />
+                  {matchScore}% {c.match}
+                </Badge>
+              )}
+              {typeof job.trust_score === "number" && (
+                <Badge
+                  variant={
+                    job.trust_score >= 75
+                      ? "success"
+                      : job.trust_score >= 50
+                        ? "warning"
+                        : "secondary"
+                  }
+                  className="gap-1"
+                >
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  {Math.round(job.trust_score)} {c.trust}
+                </Badge>
+              )}
+              <Badge variant="secondary" className="gap-1">
+                <Briefcase className="h-3.5 w-3.5" />
+                {jobTypeLabels[job.job_type] || job.job_type}
+              </Badge>
+            </div>
+
+            {/* Key facts */}
+            <div className="mt-5 grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-300">
+                <MapPin className="h-4 w-4 shrink-0 text-surface-400" />
+                <span className="truncate">
+                  {job.location || c.notSpecified}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+                <Wallet className="h-4 w-4 shrink-0 text-emerald-500" />
+                <span className="truncate">{salaryText}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-300">
+                <Sparkles className="h-4 w-4 shrink-0 text-surface-400" />
+                <span className="truncate">
+                  {experienceLevelLabels[job.experience_level] ||
+                    job.experience_level}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-300">
+                <Clock className="h-4 w-4 shrink-0 text-surface-400" />
+                <span>
+                  {formatRelativeTime(job.created_at, isRu ? "ru" : "uz")}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-300">
+                <Users className="h-4 w-4 shrink-0 text-surface-400" />
+                <span>
+                  {job.applications_count} {c.applicationsCount}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-300">
+                <Eye className="h-4 w-4 shrink-0 text-surface-400" />
+                <span>
+                  {job.views_count} {c.views}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Primary actions */}
+          <div ref={topApplyRef} className="w-full shrink-0 lg:w-[300px]">
+            <Link href={applyHref} className="block">
+              <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 py-6 text-base font-semibold shadow-lg shadow-brand-500/25">
+                <Sparkles className="mr-2 h-5 w-5" />
+                {c.applyButton}
+              </Button>
+            </Link>
+            <Link
+              href={`/student/interview?job=${job.id}`}
+              className="mt-3 block"
+            >
+              <Button
+                variant="outline"
+                className="w-full gap-2 py-6 text-sm font-semibold"
+              >
+                <MessageSquare className="h-4 w-4" />
+                {c.prepareInterview}
+              </Button>
+            </Link>
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-surface-500">
+              <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
+              {c.freeToApply}
+            </p>
+          </div>
+        </div>
       </motion.div>
 
-      {/* Requirements */}
-      {job.requirements && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="rounded-2xl border border-surface-200 bg-white p-6 dark:border-surface-700 dark:bg-surface-800 shadow-sm dark:border-surface-700 dark:bg-surface-800"
-        >
-          <h2 className="mb-4 text-lg font-bold text-surface-900">{c.requirements}</h2>
-          <div className="space-y-4">
-            {job.requirements.skills && job.requirements.skills.length > 0 && (
-              <div>
-                <h3 className="mb-2 text-sm font-semibold text-surface-700">
-                  {c.technicalSkills}
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {job.requirements.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
+      {/* Tabs */}
+      {tabs.length > 1 && (
+        <div className="mt-5 flex gap-6 overflow-x-auto border-b border-surface-200 dark:border-surface-700">
+          {tabs.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setActiveTab(t.id)}
+              className={cn(
+                "whitespace-nowrap border-b-2 px-1 pb-3 text-sm font-semibold transition-colors",
+                t.id === tab
+                  ? "border-brand-500 text-brand-600 dark:text-brand-300"
+                  : "border-transparent text-surface-500 hover:text-surface-800 dark:hover:text-surface-200",
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ---------------------------------------------------------------- */}
+      {/* BODY: content + sidebar                                           */}
+      {/* ---------------------------------------------------------------- */}
+      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div className="space-y-5">
+          {(tab === "overview" || tab === "requirements") &&
+            requirements.length > 0 && (
+              <Section title={c.requirements}>
+                <BulletList items={requirements} />
+              </Section>
             )}
-            {job.requirements.experience && (
-              <div className="flex items-start gap-3">
-                <Briefcase className="mt-0.5 h-5 w-5 flex-shrink-0 text-surface-400" />
-                <div>
-                  <p className="text-sm font-semibold text-surface-700">
-                    {c.experience}
-                  </p>
-                  <p className="text-sm text-surface-600">
-                    {job.requirements.experience}
+
+          {(tab === "overview" || tab === "responsibilities") &&
+            responsibilities.length > 0 && (
+              <Section title={c.responsibilities}>
+                <BulletList items={responsibilities} />
+              </Section>
+            )}
+
+          {tab === "overview" && (
+            <Section title={c.jobDescription}>
+              {hasDescription ? (
+                <div
+                  className="prose prose-sm mt-3 max-w-none text-surface-600 dark:prose-invert dark:text-surface-300"
+                  dangerouslySetInnerHTML={{ __html: safeDescriptionHtml }}
+                />
+              ) : (
+                <p className="mt-3 text-sm text-surface-500">
+                  {c.noDescription}
+                </p>
+              )}
+            </Section>
+          )}
+
+          {tab === "ai" && (
+            <Section title={c.tabAi}>
+              {matchScore !== null && (
+                <div className="mt-4 flex items-center gap-4">
+                  <div className="text-3xl font-extrabold text-brand-600 dark:text-brand-300">
+                    {matchScore}%
+                  </div>
+                  <p className="text-sm text-surface-600 dark:text-surface-300">
+                    {c.aiMatchNote}
                   </p>
                 </div>
-              </div>
-            )}
-            {job.requirements.education && (
-              <div className="flex items-start gap-3">
-                <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-surface-400" />
-                <div>
-                  <p className="text-sm font-semibold text-surface-700">
-                    {c.education}
-                  </p>
-                  <p className="text-sm text-surface-600">
-                    {job.requirements.education}
-                  </p>
-                </div>
-              </div>
-            )}
-            {job.requirements.certifications &&
-              job.requirements.certifications.length > 0 && (
-                <div>
-                  <h3 className="mb-2 text-sm font-semibold text-surface-700">
-                    {c.certifications}
+              )}
+              {job.explainability?.fit_reasons?.length ? (
+                <>
+                  <h3 className="mt-5 text-sm font-bold text-surface-900 dark:text-white">
+                    {c.whyFits}
                   </h3>
-                  <ul className="space-y-1">
-                    {job.requirements.certifications.map((cert) => (
+                  <BulletList items={job.explainability.fit_reasons} />
+                </>
+              ) : null}
+              {job.explainability?.missing_items?.length ? (
+                <>
+                  <h3 className="mt-5 text-sm font-bold text-surface-900 dark:text-white">
+                    {c.whatsMissing}
+                  </h3>
+                  <ul className="mt-3 space-y-2.5">
+                    {job.explainability.missing_items.map((item, i) => (
                       <li
-                        key={cert}
-                        className="flex items-center gap-2 text-sm text-surface-600"
+                        key={i}
+                        className="flex gap-2.5 text-[15px] leading-relaxed text-surface-600 dark:text-surface-300"
                       >
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        {cert}
+                        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                        <span>{item}</span>
                       </li>
                     ))}
                   </ul>
-                </div>
-              )}
-          </div>
-        </motion.div>
-      )}
+                </>
+              ) : null}
+            </Section>
+          )}
 
-      {/* Bottom Apply CTA */}
-      <motion.div
-        ref={bottomCtaRef}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="rounded-2xl border border-brand-100 bg-gradient-to-r from-brand-50 to-violet-50 p-6"
-      >
-        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-          <div>
-            <h3 className="font-bold text-surface-900">
-              {c.fitCta}
-            </h3>
-            <p className="mt-1 text-sm text-surface-500">
-              {c.fitCtaSub}
-            </p>
-          </div>
-          <Link href={`/student/jobs/${job.id}/apply`}>
-            <Button className="whitespace-nowrap bg-gradient-to-r from-brand-500 to-violet-600 shadow-lg shadow-brand-500/25">
-              <Sparkles className="mr-2 h-4 w-4" />
-              {c.applyButton}
-            </Button>
-          </Link>
+          {tab === "overview" && (
+            <Section title={c.moreInfo}>
+              <dl className="mt-3 divide-y divide-surface-100 dark:divide-surface-700/60">
+                {[
+                  [c.jobTypeLabel, jobTypeLabels[job.job_type] || job.job_type],
+                  [
+                    c.experience,
+                    experienceLevelLabels[job.experience_level] ||
+                      job.experience_level,
+                  ],
+                  [c.locationLabel, job.location || c.notSpecified],
+                  [
+                    c.posted,
+                    formatRelativeTime(job.created_at, isRu ? "ru" : "uz"),
+                  ],
+                  [c.views, String(job.views_count)],
+                ].map(([k, v]) => (
+                  <div
+                    key={k}
+                    className="flex items-center justify-between gap-4 py-2.5 text-sm"
+                  >
+                    <dt className="text-surface-500">{k}</dt>
+                    <dd className="text-right font-semibold text-surface-900 dark:text-white">
+                      {v}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </Section>
+          )}
         </div>
-      </motion.div>
 
-      {/* Mobile sticky apply bar — sits just above the bottom nav, only while
-          the top/bottom apply buttons are scrolled off screen. Hidden on lg+
-          (desktop keeps the inline CTAs). */}
+        {/* SIDEBAR */}
+        <aside className="space-y-5 lg:sticky lg:top-5">
+          <div className="rounded-2xl border border-surface-200 bg-white p-5 dark:border-surface-700 dark:bg-surface-900">
+            <h2 className="flex items-center gap-2 text-sm font-bold text-surface-900 dark:text-white">
+              <Building2 className="h-4 w-4 text-brand-500" />
+              {c.aboutCompany}
+            </h2>
+            <div className="mt-4 flex items-center gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-violet-600 text-base font-bold text-white">
+                {companyLetter}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate font-semibold text-surface-900 dark:text-white">
+                  {companyName}
+                </p>
+                {isVerified && (
+                  <p className="text-xs text-brand-600 dark:text-brand-300">
+                    {c.verifiedCompany}
+                  </p>
+                )}
+              </div>
+            </div>
+            {job.company_slug && (
+              <Link
+                href={`/jobs/company/${job.company_slug}`}
+                className="mt-4 flex items-center justify-center gap-1.5 rounded-xl border border-surface-200 py-2.5 text-sm font-semibold text-brand-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:hover:bg-surface-800"
+              >
+                {c.viewCompany}
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
+            )}
+          </div>
+
+          {job.location && (
+            <div className="rounded-2xl border border-surface-200 bg-white p-5 dark:border-surface-700 dark:bg-surface-900">
+              <h2 className="flex items-center gap-2 text-sm font-bold text-surface-900 dark:text-white">
+                <MapPin className="h-4 w-4 text-brand-500" />
+                {c.locationLabel}
+              </h2>
+              <p className="mt-3 text-sm text-surface-600 dark:text-surface-300">
+                {job.location}
+              </p>
+              <a
+                href={`https://www.google.com/maps/search/${encodeURIComponent(job.location)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-surface-200 py-2.5 text-sm font-semibold text-brand-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:hover:bg-surface-800"
+              >
+                {c.viewOnMap}
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          )}
+
+          {matchScore !== null && (
+            <div className="rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-50 to-violet-50 p-5 dark:border-brand-500/20 dark:from-brand-500/10 dark:to-violet-500/10">
+              <h2 className="flex items-center gap-2 text-sm font-bold text-surface-900 dark:text-white">
+                <Sparkles className="h-4 w-4 text-brand-500" />
+                {c.aiOpinion}
+              </h2>
+              <div className="mt-4 flex items-center gap-4">
+                <div className="text-3xl font-extrabold text-brand-600 dark:text-brand-300">
+                  {matchScore}%
+                </div>
+                <p className="text-xs leading-relaxed text-surface-600 dark:text-surface-300">
+                  {c.aiMatchNote}
+                </p>
+              </div>
+              <Link
+                href={`/student/interview?job=${job.id}`}
+                className="mt-4 flex items-center justify-center gap-1.5 rounded-xl bg-white py-2.5 text-sm font-semibold text-brand-600 shadow-sm transition-colors hover:bg-brand-50 dark:bg-surface-900 dark:hover:bg-surface-800"
+              >
+                <MessageSquare className="h-4 w-4" />
+                {c.prepareInterview}
+              </Link>
+            </div>
+          )}
+        </aside>
+      </div>
+
+      {/* Bottom CTA */}
+      <div
+        ref={bottomCtaRef}
+        className="mt-6 flex flex-col items-center justify-between gap-4 rounded-2xl border border-brand-200 bg-gradient-to-r from-brand-50 to-violet-50 p-6 dark:border-brand-500/20 dark:from-brand-500/10 dark:to-violet-500/10 sm:flex-row"
+      >
+        <div>
+          <h3 className="font-bold text-surface-900 dark:text-white">
+            {c.fitCta}
+          </h3>
+          <p className="mt-1 text-sm text-surface-600 dark:text-surface-300">
+            {c.fitCtaSub}
+          </p>
+        </div>
+        <Link href={applyHref} className="w-full sm:w-auto">
+          <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 px-8 font-semibold shadow-lg shadow-brand-500/25 sm:w-auto">
+            <Sparkles className="mr-2 h-4 w-4" />
+            {c.applyButton}
+          </Button>
+        </Link>
+      </div>
+
+      {/* Mobile sticky apply bar — only while the inline CTAs are off screen. */}
       <AnimatePresence>
         {showStickyApply && (
           <motion.div
@@ -547,7 +772,7 @@ export default function JobDetailPage() {
             transition={{ type: "spring", stiffness: 380, damping: 32 }}
             className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-40 border-t border-surface-200 bg-white/95 px-4 py-3 backdrop-blur-md dark:border-surface-700 dark:bg-surface-900/95 lg:hidden"
           >
-            <Link href={`/student/jobs/${job.id}/apply`} className="block pr-16">
+            <Link href={applyHref} className="block pr-16">
               <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 py-3 text-base font-semibold shadow-lg shadow-brand-500/25">
                 <Sparkles className="mr-2 h-5 w-5" />
                 {c.applyButton}

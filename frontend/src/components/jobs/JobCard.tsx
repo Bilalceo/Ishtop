@@ -61,7 +61,7 @@ export function JobCard({
       <div className="flex items-start gap-3">
         {/* Logo */}
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-100 to-violet-100 text-base font-bold text-brand-700 dark:from-brand-900/50 dark:to-violet-900/50 dark:text-brand-300">
-          {company?.charAt(0)?.toUpperCase() || "C"}
+          {(company || displayTitle)?.charAt(0)?.toUpperCase() || "?"}
         </div>
 
         {/* Title, company, meta and chips */}
