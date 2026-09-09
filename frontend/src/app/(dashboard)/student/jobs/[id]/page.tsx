@@ -293,8 +293,12 @@ export default function JobDetailPage() {
   const hasDescription = stripHtmlTags(job.description || "").length > 0;
   const requirements = job.requirements ?? [];
   const responsibilities = job.responsibilities ?? [];
+  // Aggregated listings all sit under one approved import account, so its
+  // "verified" flag says nothing about the actual employer. Only badge a
+  // company that identifies itself rather than one parsed out of the title.
   const isVerified =
-    job.verification_state === "approved" || job.company?.is_verified;
+    companyIsReal &&
+    (job.verification_state === "approved" || !!job.company?.is_verified);
   const matchScore =
     typeof job.matchScore === "number" ? Math.round(job.matchScore) : null;
   const salaryText =
