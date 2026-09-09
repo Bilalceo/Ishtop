@@ -298,7 +298,10 @@ export default function JobsPage() {
     () => ({
       search: searchQuery.trim(),
       location: filters.locations[0],
-      job_type: filters.isRemote ? "remote" : filters.jobTypes[0],
+      job_type: filters.jobTypes[0],
+      // is_remote covers is_remote_allowed OR job_type='remote'; aggregated
+      // listings are all stored as full_time, so job_type alone finds nothing.
+      is_remote: filters.isRemote || undefined,
       experience_level: filters.experienceLevels[0],
       salary_min:
         filters.salaryRange[0] > 0 ? filters.salaryRange[0] : undefined,

@@ -132,8 +132,7 @@ export default function JobDetailPage() {
         locationLabel: "Локация",
         posted: "Опубликовано",
         matchTitle: "Соответствие вашему резюме",
-        matchedSkills: "Совпало",
-        missingSkills: "Не хватает",
+        matchCoverage: "Требования покрыты",
         noResumeMatch:
           "Создайте резюме, чтобы увидеть, насколько эта вакансия вам подходит.",
         createResume: "Создать резюме",
@@ -183,8 +182,7 @@ export default function JobDetailPage() {
         locationLabel: "Joylashuv",
         posted: "E'lon qilingan",
         matchTitle: "Rezyumengizga mosligi",
-        matchedSkills: "Mos keldi",
-        missingSkills: "Yetishmayapti",
+        matchCoverage: "Talablar qamrovi",
         noResumeMatch:
           "Bu ish sizga qanchalik mos kelishini ko'rish uchun rezyume yarating.",
         createResume: "Rezyume yaratish",
@@ -202,8 +200,9 @@ export default function JobDetailPage() {
   const [match, setMatch] = useState<{
     has_resume: boolean;
     score?: number;
-    matched_skills?: string[];
-    missing_skills?: string[];
+    requirement_matches?: { text: string; matched: boolean }[];
+    matched_count?: number;
+    requirement_count?: number;
   } | null>(null);
 
   // Mobile sticky "Apply" bar — shown only while neither the top apply button
@@ -734,42 +733,40 @@ export default function JobDetailPage() {
                     </div>
                   </div>
 
-                  {/* Concrete skills, not the scorer's internal wording. */}
-                  {match.matched_skills && match.matched_skills.length > 0 && (
-                    <div className="mt-4">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-surface-500">
-                        {c.matchedSkills}
-                      </p>
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {match.matched_skills.slice(0, 8).map((skill) => (
-                          <span
-                            key={skill}
-                            className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
-                          >
-                            {skill}
-                          </span>
-                        ))}
+                  {/* Coverage per requirement line: the scorer's own tokens are
+                      fragments of Uzbek sentences and unreadable as chips. */}
+                  {match.requirement_matches &&
+                    match.requirement_matches.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-surface-500">
+                          {c.matchCoverage}: {match.matched_count}/
+                          {match.requirement_count}
+                        </p>
+                        <ul className="mt-2 space-y-1.5">
+                          {match.requirement_matches.map((r, i) => (
+                            <li
+                              key={i}
+                              className="flex gap-2 text-xs leading-relaxed"
+                            >
+                              {r.matched ? (
+                                <CheckCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                              ) : (
+                                <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
+                              )}
+                              <span
+                                className={
+                                  r.matched
+                                    ? "text-surface-700 dark:text-surface-200"
+                                    : "text-surface-500"
+                                }
+                              >
+                                {r.text}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                    </div>
-                  )}
-
-                  {match.missing_skills && match.missing_skills.length > 0 && (
-                    <div className="mt-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-surface-500">
-                        {c.missingSkills}
-                      </p>
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {match.missing_skills.slice(0, 6).map((skill) => (
-                          <span
-                            key={skill}
-                            className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                    )}
 
                   <Link
                     href={`/student/interview?job=${job.id}`}

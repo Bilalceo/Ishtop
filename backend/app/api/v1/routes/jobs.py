@@ -2145,17 +2145,41 @@ async def get_job_match(
         return {"success": True, "data": {"has_resume": False}}
 
     breakdown = job_matching.score_resume_against_job(resume.content, job)
-    explainability = breakdown.get("explainability") or {}
+
+    # The scorer works on normalized tokens, which for free-text Uzbek
+    # requirements come out as fragments ("ko", "nalganlik") — useless to show.
+    # Report coverage per requirement LINE instead: readable, and it answers the
+    # question the candidate actually has ("which of these do I already meet?").
+    resume_terms = set(job_matching.extract_skills_from_resume(resume.content))
+    resume_terms |= set(job_matching.extract_keywords(resume.content))
+    def _covers(token: str) -> bool:
+        # Uzbek is agglutinative ("sotuv" vs "sotuvda"), so compare on stems as
+        # well as exact tokens, otherwise real overlaps read as gaps.
+        if token in resume_terms:
+            return True
+        if len(token) < 4:
+            return False
+        return any(
+            term.startswith(token) or token.startswith(term)
+            for term in resume_terms
+            if len(term) >= 4
+        )
+
+    requirement_matches = []
+    for line in job_to_response(job, include_company=False).requirements[:8]:
+        tokens = [t for t in job_matching.tokenize_text(line) if len(t) > 2]
+        requirement_matches.append(
+            {"text": line, "matched": any(_covers(t) for t in tokens)}
+        )
+
     return {
         "success": True,
         "data": {
             "has_resume": True,
             "resume_id": str(resume.id),
             "score": breakdown.get("score", 0),
-            "matched_skills": breakdown.get("matched_skills", [])[:12],
-            "missing_skills": breakdown.get("missing_skills", [])[:8],
-            "fit_reasons": (explainability.get("fit_reasons") or breakdown.get("reasons") or [])[:5],
-            "missing_items": (explainability.get("missing_items") or [])[:5],
-            "confidence": explainability.get("confidence"),
+            "requirement_matches": requirement_matches,
+            "matched_count": sum(1 for r in requirement_matches if r["matched"]),
+            "requirement_count": len(requirement_matches),
         },
     }
