@@ -47,6 +47,46 @@ export function experienceLabel(value: string | undefined | null, isRu: boolean)
   return pick(EXPERIENCE, value, isRu);
 }
 
+/** Company names that carry no information and should be treated as missing. */
+const PLACEHOLDER_COMPANIES = new Set([
+  "ish beruvchi",
+  "xususiy korxona",
+  "kompaniya",
+  "работодатель",
+  "частная компания",
+]);
+
+/**
+ * Split a listing into a clean title and a real company name.
+ *
+ * Aggregated vacancies are stored under one import account whose name is the
+ * placeholder "Ish beruvchi", with the real employer appended to the title —
+ * e.g. "Frontend Dasturchi (I TECH IT GROUP)". Showing that verbatim gives every
+ * card the same meaningless company line, so pull the employer out of the
+ * trailing parentheses and drop it from the title.
+ */
+export function jobDisplayIdentity(
+  title: string | undefined | null,
+  companyName: string | undefined | null,
+): { title: string; company: string } {
+  const rawTitle = (title || "").trim();
+  const rawCompany = (companyName || "").trim();
+  const companyIsReal = rawCompany !== "" && !PLACEHOLDER_COMPANIES.has(rawCompany.toLowerCase());
+  if (companyIsReal) return { title: rawTitle, company: rawCompany };
+
+  // Only treat a trailing "(...)" as the employer when it looks like a name,
+  // not a qualifier such as "(Junior)" or "(React)".
+  const m = rawTitle.match(/^(.*\S)\s*\(([^()]{3,60})\)\s*$/);
+  if (m) {
+    const inner = m[2].trim();
+    const isQualifier = /^(junior|middle|mid|senior|intern|remote|masofaviy|part[- ]?time|full[- ]?time)$/i.test(inner);
+    if (!isQualifier && /\s|[A-ZА-Я]/.test(inner)) {
+      return { title: m[1].trim(), company: inner };
+    }
+  }
+  return { title: rawTitle, company: rawCompany };
+}
+
 /** Filter option lists — order roughly mirrors the local market (entry-first). */
 export function jobTypeOptions(isRu: boolean): { value: string; label: string }[] {
   return (["full_time", "part_time", "internship", "remote", "hybrid", "contract"] as const).map(

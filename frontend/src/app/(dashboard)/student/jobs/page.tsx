@@ -792,6 +792,7 @@ export default function JobsPage() {
                     onSelect={() => setSelectedJob(job)}
                     onToggleSave={() => toggleSaveJob(job.id)}
                     onQuickApply={() => handleApply(job)}
+                    narrow={showSplitView}
                   />
                 ))}
               </AnimatePresence>
