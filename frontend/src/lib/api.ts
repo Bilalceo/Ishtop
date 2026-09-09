@@ -584,6 +584,7 @@ export const aiApi = {
     locale?: "uz" | "ru";
     count?: number;
     resume_id?: string;
+    job_id?: string;
   }) => api.post("/ai/interview/questions", data),
 
   interviewEvaluate: (data: {
@@ -592,6 +593,7 @@ export const aiApi = {
     answer: string;
     locale?: "uz" | "ru";
     resume_id?: string;
+    job_id?: string;
   }) => api.post("/ai/interview/evaluate", data),
 };
 

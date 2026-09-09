@@ -22,8 +22,9 @@ import {
   MessageSquare,
   Trophy,
   FileText,
+  Briefcase,
 } from "lucide-react";
-import { aiApi, resumeApi } from "@/lib/api";
+import { aiApi, jobApi, resumeApi } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/hooks/useTranslation";
 import { toast } from "sonner";
@@ -95,6 +96,10 @@ function InterviewCoach() {
             noResumeText: "Создайте резюме — и AI подготовит вопросы по вашему опыту, навыкам и проектам.",
             noResumeCta: "Создать резюме",
             roleOptional: "Не обязательно, если выбрано резюме",
+            jobLabel: "Вакансия",
+            jobBadge: "🎯 Вопросы по требованиям этой вакансии",
+            jobResumeBadge: "✨ По вашему резюме + требованиям вакансии",
+            jobClear: "Убрать вакансию",
           }
         : {
             title: "AI Suhbat murabbiyi",
@@ -134,6 +139,10 @@ function InterviewCoach() {
             noResumeText: "Rezyume yarating — AI sizning tajribangiz, ko'nikmalaringiz va loyihalaringiz bo'yicha savol tayyorlaydi.",
             noResumeCta: "Rezyume yaratish",
             roleOptional: "Rezyume tanlansa, shart emas",
+            jobLabel: "Vakansiya",
+            jobBadge: "🎯 Savollar shu vakansiya talablari bo'yicha",
+            jobResumeBadge: "✨ Rezyumengiz + vakansiya talablari bo'yicha",
+            jobClear: "Vakansiyani olib tashlash",
           },
     [ru],
   );
@@ -154,6 +163,10 @@ function InterviewCoach() {
   const [resumes, setResumes] = useState<ResumeItem[]>([]);
   const [resumeId, setResumeId] = useState<string>("");
   const [resolvedRole, setResolvedRole] = useState<string>("");
+
+  // Job-based targeting (?job=<id>): questions test this vacancy's requirements.
+  type JobItem = { id: string; title: string; company?: string; experience_level?: string };
+  const [job, setJob] = useState<JobItem | null>(null);
 
   // Load the user's resumes once; default the selection to the ?resume= deep
   // link if valid, otherwise the most recently updated resume.
@@ -186,13 +199,45 @@ function InterviewCoach() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Job-based targeting: ?job=<id> (from a vacancy's "prepare for interview"
+  // link). Loading it lets the AI test that vacancy's actual requirements.
+  useEffect(() => {
+    const wanted = params.get("job");
+    if (!wanted) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const resp = await jobApi.get(wanted);
+        const j = (resp as any)?.data?.data || (resp as any)?.data;
+        if (cancelled || !j?.id) return;
+        setJob({
+          id: j.id,
+          title: j.title || "",
+          company: j.company?.company_name || j.company_name || "",
+          experience_level: j.experience_level || "",
+        });
+        // The vacancy title is the interview role unless the user typed one.
+        setRole((cur) => cur || j.title || "");
+        const lvl = String(j.experience_level || "").toLowerCase();
+        if (lvl === "intern" || lvl === "junior") setLevel(lvl);
+        else if (lvl) setLevel("mid"); // mid/senior/lead/executive -> mid
+      } catch {
+        /* job is optional — silently fall back to role/resume mode */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const typeLabel = (tp: string) =>
     tp === "behavioral" ? t.behavioral : tp === "technical" ? t.technical : tp === "situational" ? t.situational : "";
 
   const start = async () => {
-    // A role is required only when no resume is selected — with a resume the
-    // backend derives the role from the candidate's most recent job title.
-    if (!resumeId && !role.trim()) {
+    // A role is required only when neither a resume nor a job is selected —
+    // with those the backend derives the role (job title wins over resume).
+    if (!resumeId && !job && !role.trim()) {
       toast.error(t.needRole);
       return;
     }
@@ -204,6 +249,7 @@ function InterviewCoach() {
         locale: ru ? "ru" : "uz",
         count: 5,
         resume_id: resumeId || undefined,
+        job_id: job?.id,
       });
       const qs = (res.data?.data?.questions || []) as Question[];
       if (!qs.length) throw new Error("empty");
@@ -238,6 +284,7 @@ function InterviewCoach() {
         answer: answer.trim(),
         locale: ru ? "ru" : "uz",
         resume_id: resumeId || undefined,
+        job_id: job?.id,
       });
       const fb = res.data?.data as Feedback;
       setFeedback(fb);
@@ -302,6 +349,36 @@ function InterviewCoach() {
           animate={{ opacity: 1, y: 0 }}
           className="rounded-3xl border border-surface-200/70 bg-white p-6 dark:border-white/[0.06] dark:bg-surface-900 sm:p-8"
         >
+          {/* Targeted vacancy (from a job's "prepare for interview" link) */}
+          {job && (
+            <div className="mb-5 rounded-xl border border-brand-200 bg-gradient-to-r from-brand-50 to-violet-50 p-4 dark:border-brand-500/20 dark:from-brand-500/10 dark:to-violet-500/10">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-300">
+                    <Briefcase className="h-3.5 w-3.5" />
+                    {t.jobLabel}
+                  </p>
+                  <p className="mt-1 truncate text-sm font-bold text-surface-900 dark:text-white">
+                    {job.title}
+                  </p>
+                  {job.company && (
+                    <p className="truncate text-xs text-surface-500">{job.company}</p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setJob(null)}
+                  className="shrink-0 text-xs font-medium text-surface-400 underline-offset-2 hover:text-surface-600 hover:underline dark:hover:text-surface-200"
+                >
+                  {t.jobClear}
+                </button>
+              </div>
+              <p className="mt-3 rounded-lg bg-white/70 px-3 py-2 text-xs font-medium text-brand-700 dark:bg-surface-900/40 dark:text-brand-300">
+                {resumeId ? t.jobResumeBadge : t.jobBadge}
+              </p>
+            </div>
+          )}
+
           {resumes.length > 0 ? (
             <>
               <label className="flex items-center gap-2 text-sm font-semibold text-surface-800 dark:text-white">
@@ -320,7 +397,9 @@ function InterviewCoach() {
                 ))}
                 <option value="">{t.resumeNone}</option>
               </select>
-              {resumeId && (
+              {/* When a vacancy is targeted, its banner already states the
+                  combined mode — don't repeat a second badge here. */}
+              {resumeId && !job && (
                 <p className="mt-2 flex items-center gap-1.5 rounded-lg bg-brand-50 px-3 py-2 text-xs font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
                   {t.resumeBadge}
                 </p>
@@ -347,7 +426,7 @@ function InterviewCoach() {
 
           <label className="mt-5 block text-sm font-semibold text-surface-800 dark:text-white">
             {t.roleLabel}
-            {resumeId && (
+            {(resumeId || job) && (
               <span className="ml-2 text-xs font-normal text-surface-400">
                 ({t.roleOptional})
               </span>

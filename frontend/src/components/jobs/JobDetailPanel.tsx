@@ -256,7 +256,7 @@ export function JobDetailPanel({
 
         {/* Prepare for this interview with the AI coach */}
         <Link
-          href={`/student/interview?role=${encodeURIComponent(job.title || "")}`}
+          href={`/student/interview?job=${encodeURIComponent(job.id)}&role=${encodeURIComponent(job.title || "")}`}
           className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 transition hover:text-brand-700 dark:text-brand-300"
         >
           <MessageSquare className="h-4 w-4" />

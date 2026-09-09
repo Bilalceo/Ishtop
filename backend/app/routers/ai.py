@@ -961,14 +961,15 @@ import json as _json
 
 
 class InterviewQuestionsRequest(BaseModel):
-    # role is optional WHEN resume_id is provided — the role is then derived from
-    # the resume's most recent job title.
-    role: str = Field(default="", max_length=160, description="Target role / job title (optional if resume_id given)")
+    # role is optional WHEN resume_id or job_id is provided — it is then derived
+    # from the job's title (preferred) or the resume's most recent job title.
+    role: str = Field(default="", max_length=160, description="Target role / job title (optional if resume_id/job_id given)")
     skills: List[str] = Field(default_factory=list, description="Candidate skills (optional)")
     level: str = Field(default="junior", max_length=40, description="intern | junior | mid")
     locale: str = Field(default="uz", description="uz | ru")
     count: int = Field(default=5, ge=3, le=8)
     resume_id: Optional[str] = Field(default=None, description="If set, personalize questions from this resume")
+    job_id: Optional[str] = Field(default=None, description="If set, target questions at this vacancy's requirements")
 
 
 class InterviewEvaluateRequest(BaseModel):
@@ -979,6 +980,7 @@ class InterviewEvaluateRequest(BaseModel):
     answer: str = Field(..., min_length=1, max_length=4000)
     locale: str = Field(default="uz", description="uz | ru")
     resume_id: Optional[str] = Field(default=None, description="If set, feedback considers this resume's background")
+    job_id: Optional[str] = Field(default=None, description="If set, feedback considers this vacancy's requirements")
 
 
 def _parse_ai_json(text: str) -> Any:
@@ -1121,6 +1123,67 @@ def _load_owned_resume(db: Session, user_id: Any, resume_id: Optional[str]):
     )
 
 
+def _load_job(db: Session, job_id: Optional[str]):
+    """Fetch a vacancy for interview prep. Jobs are public entities, so unlike
+    resumes there is NO ownership check — but invalid ids short-circuit without
+    a DB hit, and soft-deleted jobs are excluded. An expired/closed job is still
+    allowed: prepping for a vacancy that just closed is harmless."""
+    if not job_id:
+        return None
+    try:
+        jid = UUID(str(job_id))
+    except (ValueError, TypeError):
+        return None
+    return db.query(Job).filter(Job.id == jid, Job.is_deleted.is_(False)).first()
+
+
+def _job_items(value: Any, cap: int = 6) -> List[str]:
+    """Normalize a jobs JSONB list/dict/str field into a list of short strings."""
+    items: List[str] = []
+    if isinstance(value, list):
+        items = [str(x).strip() for x in value if str(x).strip()]
+    elif isinstance(value, dict):  # legacy shape: {"section": [...]}
+        for v in value.values():
+            if isinstance(v, list):
+                items.extend(str(x).strip() for x in v if str(x).strip())
+            elif isinstance(v, str) and v.strip():
+                items.append(v.strip())
+    elif isinstance(value, str) and value.strip():
+        items = [value.strip()]
+    return items[:cap]
+
+
+def _build_job_profile(job) -> str:
+    """Compact, prompt-safe description of the vacancy the candidate targets.
+
+    Aggregated (Telegram-import) jobs usually have EMPTY requirements — in that
+    case we tell the model to infer typical requirements from the title and
+    description, so job-based prep works for every vacancy, not only
+    company-posted ones. Hard length cap protects the token budget.
+    """
+    if job is None:
+        return ""
+    lines: List[str] = [f"Vacancy: {str(job.title or '').strip()}"]
+    lvl = str(getattr(job, "experience_level", "") or "").strip()
+    if lvl:
+        lines.append(f"Level: {lvl}")
+    reqs = _job_items(getattr(job, "requirements", None))
+    if reqs:
+        lines.append("Requirements: " + "; ".join(reqs))
+    resp = _job_items(getattr(job, "responsibilities", None), cap=4)
+    if resp:
+        lines.append("Responsibilities: " + "; ".join(resp))
+    desc = str(getattr(job, "description", "") or "").strip()
+    if desc:
+        lines.append(f"Description: {desc[:300]}")
+    if not reqs:
+        lines.append(
+            "(No explicit requirements listed — infer the typical requirements "
+            "for this role from the title and description.)"
+        )
+    return "\n".join(lines)[:900]
+
+
 @router.post(
     "/interview/questions",
     response_model=Dict[str, Any],
@@ -1151,21 +1214,33 @@ async def interview_questions(
             resume_loaded = True
             prof = _build_resume_profile(resume.content)
             profile_text = prof["text"]
-            if not role:
-                role = prof["role"]
             if not skills_list:
                 skills_list = prof["skills"]
 
-    # A student resume may have no work_experience (hence no derivable job
-    # title). The UI presents the role as optional once a resume is chosen, so
-    # never hard-fail there — fall back to a neutral role and let the injected
-    # resume profile (skills/projects) drive the personalization instead.
+    # Job-aware targeting: when the candidate preps for a specific vacancy, its
+    # title is the interview role (it wins over the resume-derived title — the
+    # user is interviewing FOR this job, not for their previous one).
+    job_profile = ""
+    if request.job_id:
+        job = _load_job(db, request.job_id)
+        if job is not None:
+            job_profile = _build_job_profile(job)
+            if not role:
+                role = str(job.title or "").strip()
+
+    # Role priority: explicit input > job title (above) > resume-derived title.
     if not role and resume_loaded:
+        role = prof["role"]
+    # A student resume may have no work_experience (hence no derivable job
+    # title). The UI presents the role as optional once a resume/job is chosen,
+    # so never hard-fail there — fall back to a neutral role and let the
+    # injected profiles drive the personalization instead.
+    if not role and (resume_loaded or job_profile):
         role = "Специалист" if locale == "ru" else "Mutaxassis"
     if not role:
         raise HTTPException(
             status_code=422,
-            detail="Provide a role or a resume_id to generate interview questions.",
+            detail="Provide a role, a resume_id or a job_id to generate interview questions.",
         )
     skills = ", ".join(skills_list[:12]) or "—"
 
@@ -1181,12 +1256,25 @@ async def interview_questions(
         "sentence, realistic and specific.\n"
         'Return ONLY JSON: {"questions":[{"q":"...","type":"behavioral|technical|situational"}]}'
     )
+    if job_profile:
+        prompt += (
+            "\n\nThe candidate is preparing for THIS specific vacancy. Make at "
+            "least half of the questions test its concrete requirements and "
+            "responsibilities, the way this employer's interviewer would:\n"
+            + job_profile
+        )
     if profile_text:
         prompt += (
-            "\n\nThe candidate's real resume profile is below. Make at least half "
-            "of the questions reference their actual experience, projects or "
-            "skills — ask them to elaborate on specifics or probe likely gaps. "
-            "Do NOT invent facts that aren't in the profile:\n" + profile_text
+            "\n\nThe candidate's real resume profile is below. Reference their "
+            "actual experience, projects or skills — ask them to elaborate on "
+            "specifics or probe likely gaps. Do NOT invent facts that aren't in "
+            "the profile:\n" + profile_text
+        )
+    if job_profile and profile_text:
+        prompt += (
+            "\n\nGap analysis: compare the vacancy's requirements with the "
+            "candidate's profile and include 1-2 questions specifically about "
+            "skills the job asks for that the resume does not clearly show."
         )
     try:
         text = await _ai_generate(system, prompt, "interview_questions")
@@ -1231,7 +1319,19 @@ async def interview_evaluate(
         if resume is not None:
             profile_text = _build_resume_profile(resume.content)["text"]
 
-    role_str = (request.role or "").strip() or ("Специалист" if locale == "ru" else "Mutaxassis")
+    job_profile = ""
+    job_title = ""
+    if request.job_id:
+        job = _load_job(db, request.job_id)
+        if job is not None:
+            job_profile = _build_job_profile(job)
+            job_title = str(job.title or "").strip()
+
+    role_str = (
+        (request.role or "").strip()
+        or job_title
+        or ("Специалист" if locale == "ru" else "Mutaxassis")
+    )
     system = (
         "You are IshTop Interview Coach. Evaluate the candidate's answer fairly "
         "and constructively, at a junior level. Be encouraging but honest."
@@ -1245,6 +1345,11 @@ async def interview_evaluate(
         'Return ONLY JSON: {"score":<int>,"strengths":["..."],'
         '"improvements":["..."],"model_answer":"..."}'
     )
+    if job_profile:
+        prompt += (
+            "\n\nThe candidate is interviewing for THIS vacancy — judge the "
+            "answer against its requirements and expectations:\n" + job_profile
+        )
     if profile_text:
         prompt += (
             "\n\nUse the candidate's resume background below to tailor your "
