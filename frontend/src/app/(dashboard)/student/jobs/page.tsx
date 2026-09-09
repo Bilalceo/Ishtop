@@ -2,7 +2,8 @@
  * =============================================================================
  * STUDENT DASHBOARD - Job Search Page
  * =============================================================================
- * Layout: horizontal FilterPillBar + 2-column (list | detail)
+ * Layout: title + filter pills + one full-width, paginated job list.
+ * Job details open on their own page (/student/jobs/[id]).
  * Components extracted to /components/jobs/
  */
 
@@ -17,9 +18,10 @@ import {
   Clock,
   Wallet,
   Target,
-  Loader2,
   RotateCcw,
   Filter,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useJobs } from "@/hooks/useJobs";
 import { Button } from "@/components/ui/button";
@@ -45,7 +47,6 @@ import { toast } from "sonner";
 import type { Job } from "@/types/api";
 import { useTranslation } from "@/hooks/useTranslation";
 import { JobCard } from "@/components/jobs/JobCard";
-import { JobDetailPanel } from "@/components/jobs/JobDetailPanel";
 import { FilterPillBar } from "@/components/jobs/FilterPillBar";
 import { TelegramFollowBanner } from "@/components/TelegramFollowBanner";
 import { SalarySlider, SALARY_MAX } from "@/components/jobs/SalarySlider";
@@ -82,30 +83,6 @@ const getSearchSuggestions = (isRu: boolean): string[] =>
       ];
 
 // =============================================================================
-// EMPTY STATE (right panel when no job selected)
-// =============================================================================
-
-function EmptyDetailState({ isRu }: { isRu: boolean }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="flex h-full flex-col items-center justify-center p-8 text-center"
-    >
-      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-surface-100 dark:bg-surface-700">
-        <Briefcase className="h-10 w-10 text-surface-400" />
-      </div>
-      <h3 className="text-lg font-semibold text-surface-900 dark:text-white">
-        {isRu ? "Выберите вакансию" : "Ishni tanlang"}
-      </h3>
-      <p className="mt-2 text-sm text-surface-500">
-        {isRu ? "Подробности появятся здесь" : "Tafsilotlar bu yerda ko'rinadi"}
-      </p>
-    </motion.div>
-  );
-}
-
-// =============================================================================
 // MAIN COMPONENT
 // =============================================================================
 
@@ -125,9 +102,6 @@ export default function JobsPage() {
   const [localJobs, setLocalJobs] = useState<(Job & { matchScore?: number })[]>(
     [],
   );
-  const [selectedJob, setSelectedJob] = useState<
-    (Job & { matchScore?: number }) | null
-  >(null);
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
   const [feedMode, setFeedMode] = useState<"matched" | "all">("all");
   const [hasPublishedResume, setHasPublishedResume] = useState(false);
@@ -135,9 +109,8 @@ export default function JobsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [sortBy, setSortBy] = useState("relevance");
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isLoadingPage, setIsLoadingPage] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [showSplitView, setShowSplitView] = useState(false);
   const [loadTimedOut, setLoadTimedOut] = useState(false);
   // True until the initial feed (matched-first, else all) has resolved — keeps
   // the skeleton up so we never flash an empty/all view before matches load.
@@ -145,7 +118,6 @@ export default function JobsPage() {
   // Set once the user picks a tab, so the initial matched-first default never
   // overrides an explicit choice made while the first load was still running.
   const manualFeedChoiceRef = useRef(false);
-  const explainabilityViewedRef = useRef<Set<string>>(new Set());
 
   // Filters
   const [filters, setFilters] = useState({
@@ -156,9 +128,6 @@ export default function JobsPage() {
     companies: [] as string[],
     datePosted: "all",
   });
-
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // -------------------------------------------------------------------------
   // Data loading
@@ -266,13 +235,6 @@ export default function JobsPage() {
   }, [loadInitialFeed]);
 
   useEffect(() => {
-    const updateViewport = () => setShowSplitView(window.innerWidth >= 1500);
-    updateViewport();
-    window.addEventListener("resize", updateViewport);
-    return () => window.removeEventListener("resize", updateViewport);
-  }, []);
-
-  useEffect(() => {
     setLocalJobs(jobs as (Job & { matchScore?: number })[]);
   }, [jobs]);
 
@@ -337,7 +299,9 @@ export default function JobsPage() {
     filters.jobTypes.length +
     filters.experienceLevels.length +
     filters.companies.length +
-    (filters.salaryRange[0] > 0 || filters.salaryRange[1] < SALARY_MAX ? 1 : 0) +
+    (filters.salaryRange[0] > 0 || filters.salaryRange[1] < SALARY_MAX
+      ? 1
+      : 0) +
     (filters.datePosted !== "all" ? 1 : 0);
 
   const filteredJobs = localJobs.filter((job) => {
@@ -395,7 +359,10 @@ export default function JobsPage() {
   });
 
   const isMatchedEmpty =
-    feedMode === "matched" && !isLoading && !isInitializing && sortedJobs.length === 0;
+    feedMode === "matched" &&
+    !isLoading &&
+    !isInitializing &&
+    sortedJobs.length === 0;
 
   // -------------------------------------------------------------------------
   // Actions
@@ -445,7 +412,8 @@ export default function JobsPage() {
           event_name: eventName,
           source: "student_jobs_page",
           metadata: payload,
-          job_id: typeof payload.job_id === "string" ? payload.job_id : undefined,
+          job_id:
+            typeof payload.job_id === "string" ? payload.job_id : undefined,
         });
       } catch {
         // Intentionally non-blocking
@@ -466,65 +434,62 @@ export default function JobsPage() {
   };
 
   // -------------------------------------------------------------------------
-  // Infinite scroll
+  // Pagination
   // -------------------------------------------------------------------------
 
-  // Load the next page of jobs (infinite scroll). Only paginates the "all
-  // jobs" feed — the matched feed is fetched in full via matchJobs.
-  const loadMore = useCallback(async () => {
-    if (feedMode !== "all" || isLoading || isLoadingMore) return;
-    if (currentPage >= totalPages) return;
-    setIsLoadingMore(true);
-    try {
-      await fetchJobs(undefined, currentPage + 1, true);
-    } finally {
-      setIsLoadingMore(false);
+  // Paged navigation keeps only one page of cards mounted, so long searches
+  // stay responsive (infinite scroll grew the DOM until the page stuttered).
+  const goToPage = useCallback(
+    async (page: number) => {
+      if (feedMode !== "all" || isLoading || isLoadingPage) return;
+      if (page < 1 || page > totalPages || page === currentPage) return;
+      setIsLoadingPage(true);
+      try {
+        await fetchJobs(undefined, page);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } finally {
+        setIsLoadingPage(false);
+      }
+    },
+    [feedMode, isLoading, isLoadingPage, totalPages, currentPage, fetchJobs],
+  );
+
+  // First, last and the pages around the current one; "gap" renders an ellipsis.
+  const pageItems: (number | "gap")[] = (() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
-  }, [feedMode, isLoading, isLoadingMore, currentPage, totalPages, fetchJobs]);
-
-  useEffect(() => {
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) void loadMore();
-      },
-      { threshold: 0.1, rootMargin: "400px" },
-    );
-    if (loadMoreRef.current) observerRef.current.observe(loadMoreRef.current);
-    return () => observerRef.current?.disconnect();
-  }, [loadMore]);
-
-  // Auto-select first job on desktop
-  useEffect(() => {
-    if (sortedJobs.length > 0 && !selectedJob && showSplitView) {
-      setSelectedJob(sortedJobs[0]);
-    }
-  }, [sortedJobs, showSplitView, selectedJob]);
-
-  useEffect(() => {
-    if (!selectedJob?.id || !selectedJob.explainability) return;
-    if (explainabilityViewedRef.current.has(selectedJob.id)) return;
-    explainabilityViewedRef.current.add(selectedJob.id);
-    void trackFunnelEvent("view_explainability", {
-      job_id: selectedJob.id,
-      confidence: selectedJob.explainability.confidence,
-      missing_count: selectedJob.explainability.missing_items.length,
-    });
-  }, [selectedJob, trackFunnelEvent]);
+    const items: (number | "gap")[] = [1];
+    const from = Math.max(2, currentPage - 1);
+    const to = Math.min(totalPages - 1, currentPage + 1);
+    if (from > 2) items.push("gap");
+    for (let i = from; i <= to; i += 1) items.push(i);
+    if (to < totalPages - 1) items.push("gap");
+    items.push(totalPages);
+    return items;
+  })();
 
   // =========================================================================
   // RENDER
   // =========================================================================
 
   return (
-    <div className="flex h-[calc(100vh-64px)] min-w-0 flex-col bg-surface-50/60 dark:bg-surface-950">
-      {/* Accessible page title — keeps a single H1 for SEO + screen readers without altering the visible search-led layout. */}
-      <h1 className="sr-only">{isRu ? "Поиск вакансий" : "Ish o'rinlari"}</h1>
+    <div className="min-w-0 bg-surface-50/60 pb-10 dark:bg-surface-950">
       {/* ------------------------------------------------------------------ */}
-      {/* TOP HEADER: search + sort + filter pills                            */}
+      {/* HEADER: title + search + sort + filter pills                        */}
       {/* ------------------------------------------------------------------ */}
-      <header className="shrink-0 border-b border-surface-200/80 bg-white/95 px-4 py-3 backdrop-blur dark:border-surface-700 dark:bg-surface-900/95 lg:px-6">
+      <header className="mx-auto w-full max-w-[1200px] px-4 pt-6 lg:px-6">
+        <h1 className="font-display text-2xl font-bold text-surface-900 dark:text-white sm:text-3xl">
+          {isRu ? "Найдите подходящую работу" : "O'zingizga mos ishni toping"}
+        </h1>
+        <p className="mt-1 text-sm text-surface-500 dark:text-surface-400">
+          {isRu
+            ? "Сотни возможностей ждут вас. AI подберёт самые подходящие вакансии."
+            : "Yuzlab imkoniyatlar sizni kutmoqda. AI sizga eng mos ishlarni tavsiya qiladi."}
+        </p>
+
         {/* Row 1: search + feed tabs + sort */}
-        <div className="flex flex-wrap items-center gap-3 lg:flex-nowrap">
+        <div className="mt-5 flex flex-wrap items-center gap-3 lg:flex-nowrap">
           {/* Search */}
           <div className="relative min-w-[260px] flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-400" />
@@ -655,11 +620,11 @@ export default function JobsPage() {
         {/* Row 3: results count + badges */}
         <div className="mt-2 flex items-center gap-3 text-xs text-surface-500">
           <span>
-            {isRu ? "Найдено" : "Ko'rsatilmoqda"}:{" "}
-            <span className="font-medium text-surface-900 dark:text-white">
+            {isRu ? "Найдено вакансий" : "Topilgan ishlar"}:{" "}
+            <span className="font-semibold text-surface-900 dark:text-white">
               {sortedJobs.length}
             </span>{" "}
-            {isRu ? "вакансий" : "ta ish"}
+            {isRu ? "" : "ta"}
           </span>
           {feedMode === "matched" && (
             <Badge variant="success" className="gap-1 text-xs">
@@ -676,7 +641,7 @@ export default function JobsPage() {
       </header>
 
       {loadTimedOut && (
-        <div className="mx-3 mt-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-100 lg:mx-4">
+        <div className="mx-auto mt-3 w-full max-w-[1200px] rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-100 lg:mx-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p>
               {isRu
@@ -697,194 +662,156 @@ export default function JobsPage() {
       )}
 
       {/* Follow-on-Telegram nudge — job seekers get daily jobs in the channel */}
-      <div className="mx-3 mt-3 lg:mx-4">
+      <div className="mx-auto mt-4 w-full max-w-[1200px] px-4 lg:px-6">
         <TelegramFollowBanner storageKey="tg_follow_jobs" />
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* BODY: 2-column                                                      */}
+      {/* BODY: one full-width list (details open on their own page)          */}
       {/* ------------------------------------------------------------------ */}
-      <div className="flex min-w-0 flex-1 gap-4 overflow-hidden p-3 lg:p-4">
-        {/* LEFT: job list */}
-        <div
-          className={cn(
-            "w-full overflow-y-auto rounded-2xl border border-surface-200 bg-white shadow-sm dark:border-surface-700 dark:bg-surface-900",
-            showSplitView && "lg:w-[420px] lg:shrink-0 xl:w-[460px]",
-          )}
-        >
-          {isLoading || isInitializing ? (
-            <div className="space-y-3 p-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={i}
-                  className="rounded-xl border border-surface-200 bg-white p-4 dark:border-surface-700 dark:bg-surface-800"
-                >
-                  <div className="flex gap-3">
-                    <Skeleton className="h-10 w-10 rounded-lg" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-40" />
-                      <Skeleton className="h-3 w-28" />
-                      <div className="flex gap-3">
-                        <Skeleton className="h-3 w-20" />
-                        <Skeleton className="h-3 w-20" />
-                      </div>
+      <div className="mx-auto mt-4 w-full max-w-[1200px] px-4 lg:px-6">
+        {isLoading || isInitializing ? (
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-surface-200 bg-white p-4 dark:border-surface-700 dark:bg-surface-900"
+              >
+                <div className="flex gap-3">
+                  <Skeleton className="h-11 w-11 rounded-xl" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-56" />
+                    <Skeleton className="h-3 w-32" />
+                    <div className="flex gap-3">
+                      <Skeleton className="h-3 w-24" />
+                      <Skeleton className="h-3 w-24" />
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : sortedJobs.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-100 dark:bg-surface-700">
-                <Briefcase className="h-8 w-8 text-surface-400" />
               </div>
-              <h3 className="font-semibold text-surface-900 dark:text-white">
-                {isMatchedEmpty
-                  ? isRu
-                    ? "Подходящие вакансии пока не найдены"
-                    : "Mos ishlar hozircha topilmadi"
-                  : isRu
-                    ? "Вакансии не найдены"
-                    : "Ishlar topilmadi"}
-              </h3>
-              <p className="mt-2 text-sm text-surface-500">
-                {isMatchedEmpty
-                  ? isRu
-                    ? "Рекомендации зависят от вашего резюме. Посмотрите все вакансии или обновите резюме."
-                    : "Tavsiyalar rezyumengizga bog'liq. Barcha ishlarni ko'ring yoki rezyumeni yangilang."
-                  : isRu
-                    ? "Попробуйте изменить фильтры или поиск."
-                    : "Filtrlar yoki qidiruvni o'zgartiring."}
-              </p>
-              {isMatchedEmpty ? (
-                <Button
-                  variant="outline"
-                  onClick={() => void switchToAllJobs()}
-                  className="mt-4"
-                  size="sm"
-                >
-                  <Briefcase className="mr-2 h-4 w-4" />
-                  {isRu
-                    ? "Показать все вакансии"
-                    : "Barcha ishlarni ko'rsatish"}
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  onClick={resetFilters}
-                  className="mt-4"
-                  size="sm"
-                >
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  {isRu ? "Сбросить фильтры" : "Filtrlarni tozalash"}
-                </Button>
-              )}
+            ))}
+          </div>
+        ) : sortedJobs.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-surface-200 bg-white px-4 py-16 text-center dark:border-surface-700 dark:bg-surface-900">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-100 dark:bg-surface-700">
+              <Briefcase className="h-8 w-8 text-surface-400" />
             </div>
-          ) : (
-            <div className="space-y-3 p-3">
+            <h3 className="font-semibold text-surface-900 dark:text-white">
+              {isMatchedEmpty
+                ? isRu
+                  ? "Подходящие вакансии пока не найдены"
+                  : "Mos ishlar hozircha topilmadi"
+                : isRu
+                  ? "Вакансии не найдены"
+                  : "Ishlar topilmadi"}
+            </h3>
+            <p className="mt-2 text-sm text-surface-500">
+              {isMatchedEmpty
+                ? isRu
+                  ? "Рекомендации зависят от вашего резюме. Посмотрите все вакансии или обновите резюме."
+                  : "Tavsiyalar rezyumengizga bog'liq. Barcha ishlarni ko'ring yoki rezyumeni yangilang."
+                : isRu
+                  ? "Попробуйте изменить фильтры или поиск."
+                  : "Filtrlar yoki qidiruvni o'zgartiring."}
+            </p>
+            {isMatchedEmpty ? (
+              <Button
+                variant="outline"
+                onClick={() => void switchToAllJobs()}
+                className="mt-4"
+                size="sm"
+              >
+                <Briefcase className="mr-2 h-4 w-4" />
+                {isRu ? "Показать все вакансии" : "Barcha ishlarni ko'rsatish"}
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={resetFilters}
+                className="mt-4"
+                size="sm"
+              >
+                <RotateCcw className="mr-2 h-4 w-4" />
+                {isRu ? "Сбросить фильтры" : "Filtrlarni tozalash"}
+              </Button>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="space-y-3">
               <AnimatePresence>
                 {sortedJobs.map((job) => (
                   <JobCard
                     key={job.id}
                     job={job}
-                    isSelected={selectedJob?.id === job.id}
+                    isSelected={false}
                     isSaved={savedJobs.has(job.id)}
-                    onSelect={() => setSelectedJob(job)}
+                    onSelect={() => router.push(`/student/jobs/${job.id}`)}
                     onToggleSave={() => toggleSaveJob(job.id)}
                     onQuickApply={() => handleApply(job)}
-                    narrow={showSplitView}
                   />
                 ))}
               </AnimatePresence>
-
-              {/* Infinite scroll trigger + explicit "load more" fallback.
-                  The observer auto-loads when the sentinel nears view; the
-                  button guarantees pagination works regardless of the inner
-                  scroll-container layout. */}
-              <div ref={loadMoreRef} className="py-4 text-center">
-                {isLoadingMore ? (
-                  <div className="flex items-center justify-center gap-2 text-sm text-surface-500">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {isRu ? "Загружаем..." : "Yuklanmoqda..."}
-                  </div>
-                ) : feedMode === "all" && currentPage < totalPages ? (
-                  <Button variant="outline" onClick={() => void loadMore()}>
-                    {isRu ? "Показать ещё" : "Yana ko'rsatish"}
-                  </Button>
-                ) : null}
-              </div>
             </div>
-          )}
-        </div>
 
-        {/* RIGHT: detail panel — hidden below lg */}
-        <div
-          className={cn(
-            "hidden min-w-0 flex-1 overflow-hidden rounded-2xl border border-surface-200 bg-white shadow-sm dark:border-surface-700 dark:bg-surface-900",
-            showSplitView && "block",
-          )}
-        >
-          <AnimatePresence mode="wait">
-            {selectedJob ? (
-              <JobDetailPanel
-                key={selectedJob.id}
-                job={selectedJob}
-                isSaved={savedJobs.has(selectedJob.id)}
-                onClose={() => setSelectedJob(null)}
-                onToggleSave={() => toggleSaveJob(selectedJob.id)}
-                onApply={() => handleApply(selectedJob)}
-                onShare={() => {
-                  navigator.clipboard.writeText(
-                    `${window.location.origin}/jobs/${selectedJob.id}`,
-                  );
-                  toast.success(
-                    isRu
-                      ? "Ссылка на вакансию скопирована."
-                      : "Vakansiya havolasi nusxalandi.",
-                  );
-                }}
-              />
-            ) : (
-              <EmptyDetailState key="empty" isRu={isRu} />
+            {/* Pagination — paged instead of infinite scroll so the DOM stays
+                small and the page keeps scrolling smoothly on long searches.
+                The matched feed arrives complete, so it needs no pages. */}
+            {feedMode === "all" && totalPages > 1 && (
+              <nav
+                className="mt-6 flex flex-wrap items-center justify-center gap-1.5"
+                aria-label={isRu ? "Постраничная навигация" : "Sahifalar"}
+              >
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 w-9 p-0"
+                  disabled={currentPage <= 1 || isLoadingPage}
+                  onClick={() => void goToPage(currentPage - 1)}
+                  aria-label={isRu ? "Предыдущая" : "Oldingi"}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+
+                {pageItems.map((it, i) =>
+                  it === "gap" ? (
+                    <span key={`gap-${i}`} className="px-1 text-surface-400">
+                      …
+                    </span>
+                  ) : (
+                    <Button
+                      key={it}
+                      variant={it === currentPage ? "default" : "outline"}
+                      size="sm"
+                      className={cn(
+                        "h-9 w-9 p-0",
+                        it === currentPage &&
+                          "bg-gradient-to-r from-brand-500 to-violet-600",
+                      )}
+                      disabled={isLoadingPage}
+                      onClick={() => void goToPage(it)}
+                      aria-current={it === currentPage ? "page" : undefined}
+                    >
+                      {it}
+                    </Button>
+                  ),
+                )}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 w-9 p-0"
+                  disabled={currentPage >= totalPages || isLoadingPage}
+                  onClick={() => void goToPage(currentPage + 1)}
+                  aria-label={isRu ? "Следующая" : "Keyingi"}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </nav>
             )}
-          </AnimatePresence>
-        </div>
+          </>
+        )}
       </div>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* MOBILE: job detail dialog (< lg)                                   */}
-      {/* ------------------------------------------------------------------ */}
-      <Dialog
-        open={!!selectedJob && !showSplitView}
-        onOpenChange={(open) => !open && setSelectedJob(null)}
-      >
-        {/* JobDetailPanel renders its own close button — suppress the built-in
-            one so mobile doesn't show two overlapping X's. */}
-        <DialogContent
-          className="max-h-[90vh] max-w-lg overflow-hidden p-0"
-          showCloseButton={false}
-        >
-          {selectedJob && (
-            <JobDetailPanel
-              job={selectedJob}
-              isSaved={savedJobs.has(selectedJob.id)}
-              onClose={() => setSelectedJob(null)}
-              onToggleSave={() => toggleSaveJob(selectedJob.id)}
-              onApply={() => handleApply(selectedJob)}
-              onShare={() => {
-                navigator.clipboard.writeText(
-                  `${window.location.origin}/jobs/${selectedJob.id}`,
-                );
-                toast.success(
-                  isRu
-                    ? "Ссылка на вакансию скопирована."
-                    : "Vakansiya havolasi nusxalandi.",
-                );
-              }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* ------------------------------------------------------------------ */}
       {/* MOBILE: filters dialog                                              */}
@@ -942,7 +869,10 @@ export default function JobsPage() {
                   value: "part_time",
                   label: isRu ? "Частичная занятость" : "Yarim kunlik",
                 },
-                { value: "internship", label: isRu ? "Стажировка" : "Amaliyot" },
+                {
+                  value: "internship",
+                  label: isRu ? "Стажировка" : "Amaliyot",
+                },
                 { value: "remote", label: isRu ? "Удалённо" : "Masofaviy" },
                 { value: "hybrid", label: isRu ? "Гибрид" : "Aralash" },
                 { value: "contract", label: isRu ? "Контракт" : "Shartnoma" },

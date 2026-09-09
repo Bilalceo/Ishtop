@@ -27,7 +27,6 @@ export function JobCard({
   onSelect,
   onToggleSave,
   onQuickApply,
-  narrow = false,
 }: {
   job: Job & { matchScore?: number };
   isSelected: boolean;
@@ -35,15 +34,14 @@ export function JobCard({
   onSelect: () => void;
   onToggleSave: () => void;
   onQuickApply: () => void;
-  /** True when rendered inside the split-view's narrow list column: actions
-   *  drop below the content instead of sitting beside it, so the text keeps
-   *  the full width instead of wrapping onto many lines. */
-  narrow?: boolean;
 }) {
   const { locale } = useTranslation();
   const isRu = locale === "ru";
   // Aggregated listings hide the real employer inside the title; surface it.
-  const { title: displayTitle, company } = jobDisplayIdentity(job.title, job.company?.name);
+  const { title: displayTitle, company } = jobDisplayIdentity(
+    job.title,
+    job.company?.name,
+  );
 
   return (
     <motion.div
@@ -87,8 +85,12 @@ export function JobCard({
             )}
             <span className="flex items-center gap-1">
               <Wallet className="h-3 w-3" />
-              {formatSalaryRange(job.salary_min, job.salary_max, isRu ? "ru" : "uz", job.salary_currency || "UZS") ||
-                (isRu ? "Зарплата не указана" : "Maosh ko'rsatilmagan")}
+              {formatSalaryRange(
+                job.salary_min,
+                job.salary_max,
+                isRu ? "ru" : "uz",
+                job.salary_currency || "UZS",
+              ) || (isRu ? "Зарплата не указана" : "Maosh ko'rsatilmagan")}
             </span>
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
@@ -101,7 +103,11 @@ export function JobCard({
             {job.matchScore ? (
               <Badge
                 variant={
-                  job.matchScore >= 80 ? "success" : job.matchScore >= 60 ? "warning" : "secondary"
+                  job.matchScore >= 80
+                    ? "success"
+                    : job.matchScore >= 60
+                      ? "warning"
+                      : "secondary"
                 }
                 className="gap-1"
               >
@@ -111,7 +117,13 @@ export function JobCard({
             ) : null}
             {typeof job.trust_score === "number" ? (
               <Badge
-                variant={job.trust_score >= 75 ? "success" : job.trust_score >= 50 ? "warning" : "secondary"}
+                variant={
+                  job.trust_score >= 75
+                    ? "success"
+                    : job.trust_score >= 50
+                      ? "warning"
+                      : "secondary"
+                }
                 className="gap-1"
               >
                 {job.trust_score >= 50 ? (
@@ -131,44 +143,44 @@ export function JobCard({
           </div>
         </div>
 
-        {/* Actions — beside the content when wide, below it when narrow */}
-        <div className={cn("flex shrink-0 items-center gap-2", narrow && "hidden")}>
+        {/* Actions — bookmark + quick apply on the right (mockup layout) */}
+        <div className="flex shrink-0 items-center gap-2">
           <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleSave();
-        }}
-        title={
-          isSaved
-            ? isRu
-              ? "Снять из сохранённых"
-              : "Saqlanganlardan olib tashlash"
-            : isRu
-              ? "Сохранить вакансию"
-              : "Ishni saqlash"
-        }
-        aria-label={
-          isSaved
-            ? isRu
-              ? "Снять из сохранённых"
-              : "Saqlanganlardan olib tashlash"
-            : isRu
-              ? "Сохранить вакансию"
-              : "Ishni saqlash"
-        }
-        className={cn(
-          "rounded-xl border p-2 transition-colors",
-          isSaved
-            ? "border-brand-200 bg-brand-100 text-brand-600 dark:border-brand-500/30 dark:bg-brand-500/15"
-            : "border-surface-200 text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:border-surface-700 dark:hover:bg-surface-800",
-        )}
-      >
-        {isSaved ? (
-          <BookmarkCheck className="h-4 w-4" />
-        ) : (
-          <Bookmark className="h-4 w-4" />
-        )}
-      </button>
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSave();
+            }}
+            title={
+              isSaved
+                ? isRu
+                  ? "Снять из сохранённых"
+                  : "Saqlanganlardan olib tashlash"
+                : isRu
+                  ? "Сохранить вакансию"
+                  : "Ishni saqlash"
+            }
+            aria-label={
+              isSaved
+                ? isRu
+                  ? "Снять из сохранённых"
+                  : "Saqlanganlardan olib tashlash"
+                : isRu
+                  ? "Сохранить вакансию"
+                  : "Ishni saqlash"
+            }
+            className={cn(
+              "rounded-xl border p-2 transition-colors",
+              isSaved
+                ? "border-brand-200 bg-brand-100 text-brand-600 dark:border-brand-500/30 dark:bg-brand-500/15"
+                : "border-surface-200 text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:border-surface-700 dark:hover:bg-surface-800",
+            )}
+          >
+            {isSaved ? (
+              <BookmarkCheck className="h-4 w-4" />
+            ) : (
+              <Bookmark className="h-4 w-4" />
+            )}
+          </button>
 
           <Button
             size="sm"
@@ -183,38 +195,6 @@ export function JobCard({
           </Button>
         </div>
       </div>
-
-      {/* Narrow (split-view) actions: full-width row under the content. */}
-      {narrow && (
-        <div className="mt-3 flex items-center justify-end gap-2">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleSave();
-            }}
-            aria-label={isSaved ? (isRu ? "Снять из сохранённых" : "Saqlanganlardan olib tashlash") : (isRu ? "Сохранить вакансию" : "Ishni saqlash")}
-            className={cn(
-              "rounded-xl border p-2 transition-colors",
-              isSaved
-                ? "border-brand-200 bg-brand-100 text-brand-600 dark:border-brand-500/30 dark:bg-brand-500/15"
-                : "border-surface-200 text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:border-surface-700 dark:hover:bg-surface-800",
-            )}
-          >
-            {isSaved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
-          </button>
-          <Button
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onQuickApply();
-            }}
-            className="rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 px-4 text-xs shadow-sm shadow-brand-500/30"
-          >
-            <Zap className="mr-1 h-3 w-3" />
-            {isRu ? "Быстрый отклик" : "Tezkor ariza"}
-          </Button>
-        </div>
-      )}
     </motion.div>
   );
 }
