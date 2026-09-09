@@ -105,9 +105,17 @@ export function jobDisplayIdentity(
     if (open > 0) {
       const inner = rawTitle.slice(open + 1, -1).trim();
       const head = rawTitle.slice(0, open).trim();
-      // Ignore qualifiers like "(Junior)" — they describe the role, not the employer.
+      // Ignore parentheticals that describe the ROLE or the posting rather than
+      // the employer: seniority, work format, districts/cities, and shift notes
+      // are all common in these titles ("Oshpaz (Yunusobod tumani)").
       const isQualifier =
-        /^(junior|middle|mid|senior|intern|remote|masofaviy|part[- ]?time|full[- ]?time)$/i.test(
+        /^(junior|middle|mid|senior|intern|remote|masofaviy|gibrid|hybrid|part[- ]?time|full[- ]?time|to'liq stavka|yarim stavka)$/i.test(
+          inner,
+        ) ||
+        /(tuman|shahar|viloyat|ko'chasi|metro|smena|smenali|grafik|\d\s*\/\s*\d)/i.test(
+          inner,
+        ) ||
+        /^(toshkent|samarqand|buxoro|andijon|farg'ona|namangan|navoiy|qarshi|termiz|urganch|jizzax|nukus|guliston)\b/i.test(
           inner,
         );
       if (

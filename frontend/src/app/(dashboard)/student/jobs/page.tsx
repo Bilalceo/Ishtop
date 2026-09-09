@@ -97,6 +97,7 @@ export default function JobsPage() {
     matchJobs,
     currentPage = 1,
     totalPages = 1,
+    totalCount = 0,
   } = useJobs();
 
   const [localJobs, setLocalJobs] = useState<(Job & { matchScore?: number })[]>(
@@ -622,9 +623,17 @@ export default function JobsPage() {
           <span>
             {isRu ? "Найдено вакансий" : "Topilgan ishlar"}:{" "}
             <span className="font-semibold text-surface-900 dark:text-white">
-              {sortedJobs.length}
+              {feedMode === "all" && totalPages > 1
+                ? totalCount
+                : sortedJobs.length}
             </span>{" "}
             {isRu ? "" : "ta"}
+            {feedMode === "all" && totalPages > 1 && (
+              <span className="text-surface-400">
+                {" "}
+                ({isRu ? "на странице" : "shu sahifada"}: {sortedJobs.length})
+              </span>
+            )}
           </span>
           {feedMode === "matched" && (
             <Badge variant="success" className="gap-1 text-xs">
@@ -753,63 +762,63 @@ export default function JobsPage() {
                 ))}
               </AnimatePresence>
             </div>
-
-            {/* Pagination — paged instead of infinite scroll so the DOM stays
-                small and the page keeps scrolling smoothly on long searches.
-                The matched feed arrives complete, so it needs no pages. */}
-            {feedMode === "all" && totalPages > 1 && (
-              <nav
-                className="mt-6 flex flex-wrap items-center justify-center gap-1.5"
-                aria-label={isRu ? "Постраничная навигация" : "Sahifalar"}
-              >
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 w-9 p-0"
-                  disabled={currentPage <= 1 || isLoadingPage}
-                  onClick={() => void goToPage(currentPage - 1)}
-                  aria-label={isRu ? "Предыдущая" : "Oldingi"}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-
-                {pageItems.map((it, i) =>
-                  it === "gap" ? (
-                    <span key={`gap-${i}`} className="px-1 text-surface-400">
-                      …
-                    </span>
-                  ) : (
-                    <Button
-                      key={it}
-                      variant={it === currentPage ? "default" : "outline"}
-                      size="sm"
-                      className={cn(
-                        "h-9 w-9 p-0",
-                        it === currentPage &&
-                          "bg-gradient-to-r from-brand-500 to-violet-600",
-                      )}
-                      disabled={isLoadingPage}
-                      onClick={() => void goToPage(it)}
-                      aria-current={it === currentPage ? "page" : undefined}
-                    >
-                      {it}
-                    </Button>
-                  ),
-                )}
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 w-9 p-0"
-                  disabled={currentPage >= totalPages || isLoadingPage}
-                  onClick={() => void goToPage(currentPage + 1)}
-                  aria-label={isRu ? "Следующая" : "Keyingi"}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </nav>
-            )}
           </>
+        )}
+
+        {/* Pagination — paged instead of infinite scroll so the DOM stays
+              small and the page keeps scrolling smoothly on long searches.
+              The matched feed arrives complete, so it needs no pages. */}
+        {feedMode === "all" && totalPages > 1 && (
+          <nav
+            className="mt-6 flex flex-wrap items-center justify-center gap-1.5"
+            aria-label={isRu ? "Постраничная навигация" : "Sahifalar"}
+          >
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 w-9 p-0"
+              disabled={currentPage <= 1 || isLoadingPage}
+              onClick={() => void goToPage(currentPage - 1)}
+              aria-label={isRu ? "Предыдущая" : "Oldingi"}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            {pageItems.map((it, i) =>
+              it === "gap" ? (
+                <span key={`gap-${i}`} className="px-1 text-surface-400">
+                  …
+                </span>
+              ) : (
+                <Button
+                  key={it}
+                  variant={it === currentPage ? "default" : "outline"}
+                  size="sm"
+                  className={cn(
+                    "h-9 w-9 p-0",
+                    it === currentPage &&
+                      "bg-gradient-to-r from-brand-500 to-violet-600",
+                  )}
+                  disabled={isLoadingPage}
+                  onClick={() => void goToPage(it)}
+                  aria-current={it === currentPage ? "page" : undefined}
+                >
+                  {it}
+                </Button>
+              ),
+            )}
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 w-9 p-0"
+              disabled={currentPage >= totalPages || isLoadingPage}
+              onClick={() => void goToPage(currentPage + 1)}
+              aria-label={isRu ? "Следующая" : "Keyingi"}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </nav>
         )}
       </div>
 

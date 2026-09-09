@@ -100,7 +100,9 @@ export default function EditJobPage() {
         setExperienceLevel(data.experience_level || "junior");
         setSalaryMin(data.salary_min?.toString() || "");
         setSalaryMax(data.salary_max?.toString() || "");
-        const normalizedCurrency = String(data.salary_currency || "").toUpperCase();
+        const normalizedCurrency = String(
+          data.salary_currency || "",
+        ).toUpperCase();
         setSalaryCurrency(normalizedCurrency === "USD" ? "USD" : "UZS");
         // The API flattens requirements to a list, so prefill the skills chips
         // from it; education/experience are re-entered if the employer wants them.
@@ -119,7 +121,9 @@ export default function EditJobPage() {
     api
       .get("/users/me/notification-preferences")
       .then((res) => {
-        const preferred = String(res.data?.data?.preferred_salary_currency || "UZS").toUpperCase();
+        const preferred = String(
+          res.data?.data?.preferred_salary_currency || "UZS",
+        ).toUpperCase();
         setSalaryCurrency(preferred === "USD" ? "USD" : "UZS");
       })
       .catch(() => {});
@@ -130,7 +134,9 @@ export default function EditJobPage() {
       if (!jobId) return;
       try {
         setAnalyticsLoading(true);
-        const response = await applicationApi.jobAnalytics(jobId, { days: analyticsDays });
+        const response = await applicationApi.jobAnalytics(jobId, {
+          days: analyticsDays,
+        });
         const payload = response.data as { data?: JobAnalytics };
         setAnalytics(payload.data || null);
       } catch {
@@ -170,11 +176,14 @@ export default function EditJobPage() {
         salary_min: salaryMin ? Number(salaryMin) : undefined,
         salary_max: salaryMax ? Number(salaryMax) : undefined,
         salary_currency: salaryCurrency,
-        requirements: {
-          skills,
-          education: education || undefined,
-          experience: experience || undefined,
-        },
+        // The API stores requirements as a flat list (JobUpdate.requirements is
+        // List[str]); posting the old {skills, education, experience} object
+        // failed validation, so every save from this page returned 422.
+        requirements: [
+          ...skills,
+          ...(education ? [education] : []),
+          ...(experience ? [experience] : []),
+        ],
       });
       toast.success("Ish e'loni yangilandi!");
       router.push("/company/jobs");
@@ -190,7 +199,9 @@ export default function EditJobPage() {
       <div className="mx-auto max-w-3xl space-y-6 p-6">
         <Skeleton className="h-8 w-32" />
         <div className="space-y-4">
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-12 w-full rounded-xl" />)}
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-12 w-full rounded-xl" />
+          ))}
         </div>
       </div>
     );
@@ -201,7 +212,11 @@ export default function EditJobPage() {
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <AlertCircle className="h-16 w-16 text-red-400" />
         <h2 className="mt-4 text-xl font-bold">{error || "Ish topilmadi"}</h2>
-        <Button className="mt-6" onClick={() => router.back()} variant="outline">
+        <Button
+          className="mt-6"
+          onClick={() => router.back()}
+          variant="outline"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" /> Orqaga
         </Button>
       </div>
@@ -216,20 +231,30 @@ export default function EditJobPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center justify-between"
       >
-        <Button variant="ghost" onClick={() => router.back()} className="gap-2 text-surface-600">
+        <Button
+          variant="ghost"
+          onClick={() => router.back()}
+          className="gap-2 text-surface-600"
+        >
           <ArrowLeft className="h-4 w-4" />
           Orqaga
         </Button>
         <div className="flex items-center gap-2">
           <Briefcase className="h-5 w-5 text-brand-600" />
-          <h1 className="font-bold text-surface-900">Ish e'lonini tahrirlash</h1>
+          <h1 className="font-bold text-surface-900">
+            Ish e'lonini tahrirlash
+          </h1>
         </div>
         <Button
           onClick={handleSave}
           disabled={isSaving}
           className="bg-gradient-to-r from-brand-500 to-violet-600"
         >
-          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+          {isSaving ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 h-4 w-4" />
+          )}
           Saqlash
         </Button>
       </motion.div>
@@ -279,7 +304,10 @@ export default function EditJobPage() {
             </div>
             <div>
               <Label>Tajriba darajasi</Label>
-              <Select value={experienceLevel} onValueChange={setExperienceLevel}>
+              <Select
+                value={experienceLevel}
+                onValueChange={setExperienceLevel}
+              >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
@@ -303,7 +331,9 @@ export default function EditJobPage() {
               <Label>Valyuta</Label>
               <Select
                 value={salaryCurrency}
-                onValueChange={(value) => setSalaryCurrency(value === "USD" ? "USD" : "UZS")}
+                onValueChange={(value) =>
+                  setSalaryCurrency(value === "USD" ? "USD" : "UZS")
+                }
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
@@ -358,7 +388,9 @@ export default function EditJobPage() {
               <Input
                 value={skillInput}
                 onChange={(e) => setSkillInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())}
+                onKeyDown={(e) =>
+                  e.key === "Enter" && (e.preventDefault(), addSkill())
+                }
                 placeholder="Ko'nikma qo'shing..."
               />
               <Button type="button" variant="outline" onClick={addSkill}>
@@ -408,7 +440,11 @@ export default function EditJobPage() {
           size="lg"
           className="bg-gradient-to-r from-brand-500 to-violet-600"
         >
-          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+          {isSaving ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 h-4 w-4" />
+          )}
           O'zgarishlarni saqlash
         </Button>
       </div>
@@ -445,18 +481,24 @@ export default function EditJobPage() {
             <p className="text-xs text-surface-500">Ko'rishlar soni</p>
             <p className="mt-1 flex items-center gap-2 text-2xl font-bold">
               <Eye className="h-5 w-5 text-surface-400" />
-              {analyticsLoading ? "..." : analytics?.summary.views ?? 0}
+              {analyticsLoading ? "..." : (analytics?.summary.views ?? 0)}
             </p>
           </div>
           <div className="rounded-xl border border-surface-200 p-3 dark:border-surface-700">
             <p className="text-xs text-surface-500">Arizalar soni</p>
-            <p className="mt-1 text-2xl font-bold">{analyticsLoading ? "..." : analytics?.summary.applications ?? 0}</p>
+            <p className="mt-1 text-2xl font-bold">
+              {analyticsLoading
+                ? "..."
+                : (analytics?.summary.applications ?? 0)}
+            </p>
           </div>
           <div className="rounded-xl border border-surface-200 p-3 dark:border-surface-700">
             <p className="text-xs text-surface-500">Konversiya</p>
             <p className="mt-1 flex items-center gap-2 text-2xl font-bold">
               <TrendingUp className="h-5 w-5 text-surface-400" />
-              {analyticsLoading ? "..." : `${analytics?.summary.conversion_pct ?? 0}%`}
+              {analyticsLoading
+                ? "..."
+                : `${analytics?.summary.conversion_pct ?? 0}%`}
             </p>
           </div>
         </div>
@@ -478,7 +520,13 @@ export default function EditJobPage() {
                     <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip />
-                    <Line type="monotone" dataKey="value" stroke="#a08de0" strokeWidth={2} dot={false} />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#a08de0"
+                      strokeWidth={2}
+                      dot={false}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -494,7 +542,13 @@ export default function EditJobPage() {
                     <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip />
-                    <Line type="monotone" dataKey="value" stroke="#6F9BF0" strokeWidth={2} dot={false} />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#6F9BF0"
+                      strokeWidth={2}
+                      dot={false}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -505,7 +559,10 @@ export default function EditJobPage() {
                 <BarChart
                   data={[
                     { name: "Views", value: analytics.funnel.views },
-                    { name: "Applications", value: analytics.funnel.applications },
+                    {
+                      name: "Applications",
+                      value: analytics.funnel.applications,
+                    },
                     { name: "Screened", value: analytics.funnel.screened },
                     { name: "Interview", value: analytics.funnel.interview },
                     { name: "Hired", value: analytics.funnel.hired },
@@ -521,12 +578,19 @@ export default function EditJobPage() {
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-surface-900">Source breakdown</p>
+              <p className="text-sm font-semibold text-surface-900">
+                Source breakdown
+              </p>
               {analytics.source_breakdown.length === 0 ? (
-                <p className="text-sm text-surface-500">Source ma'lumoti topilmadi</p>
+                <p className="text-sm text-surface-500">
+                  Source ma'lumoti topilmadi
+                </p>
               ) : (
                 analytics.source_breakdown.map((item) => (
-                  <div key={item.source} className="flex items-center justify-between rounded-lg border border-surface-200 px-3 py-2 dark:border-surface-700">
+                  <div
+                    key={item.source}
+                    className="flex items-center justify-between rounded-lg border border-surface-200 px-3 py-2 dark:border-surface-700"
+                  >
                     <span className="text-sm">{item.source}</span>
                     <span className="text-sm font-semibold">
                       {item.count} ({item.share_pct}%)
@@ -537,7 +601,9 @@ export default function EditJobPage() {
             </div>
           </>
         ) : (
-          <p className="text-sm text-surface-500">Analitika ma'lumotlari mavjud emas.</p>
+          <p className="text-sm text-surface-500">
+            Analitika ma'lumotlari mavjud emas.
+          </p>
         )}
       </motion.div>
     </div>

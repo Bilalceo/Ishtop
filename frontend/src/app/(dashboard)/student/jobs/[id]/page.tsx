@@ -287,7 +287,7 @@ export default function JobDetailPage() {
     company: resolvedCompany,
     companyIsReal,
   } = jobDisplayIdentity(job.title, job.company?.name);
-  const companyName = resolvedCompany;
+  const companyName = resolvedCompany || c.companyFallback;
   const companyLetter = (companyName || displayTitle)[0]?.toUpperCase() || "?";
   const safeDescriptionHtml = sanitizeRichTextHtml(job.description || "");
   const hasDescription = stripHtmlTags(job.description || "").length > 0;
@@ -319,9 +319,6 @@ export default function JobDetailPage() {
       : []),
     ...(responsibilities.length
       ? [{ id: "responsibilities", label: c.responsibilities }]
-      : []),
-    ...(matchScore !== null || job.explainability
-      ? [{ id: "ai", label: c.tabAi }]
       : []),
   ];
   const tab = tabs.some((t) => t.id === activeTab) ? activeTab : "overview";
@@ -592,47 +589,6 @@ export default function JobDetailPage() {
             </Section>
           )}
 
-          {tab === "ai" && (
-            <Section title={c.tabAi}>
-              {matchScore !== null && (
-                <div className="mt-4 flex items-center gap-4">
-                  <div className="text-3xl font-extrabold text-brand-600 dark:text-brand-300">
-                    {matchScore}%
-                  </div>
-                  <p className="text-sm text-surface-600 dark:text-surface-300">
-                    {c.aiMatchNote}
-                  </p>
-                </div>
-              )}
-              {job.explainability?.fit_reasons?.length ? (
-                <>
-                  <h3 className="mt-5 text-sm font-bold text-surface-900 dark:text-white">
-                    {c.whyFits}
-                  </h3>
-                  <BulletList items={job.explainability.fit_reasons} />
-                </>
-              ) : null}
-              {job.explainability?.missing_items?.length ? (
-                <>
-                  <h3 className="mt-5 text-sm font-bold text-surface-900 dark:text-white">
-                    {c.whatsMissing}
-                  </h3>
-                  <ul className="mt-3 space-y-2.5">
-                    {job.explainability.missing_items.map((item, i) => (
-                      <li
-                        key={i}
-                        className="flex gap-2.5 text-[15px] leading-relaxed text-surface-600 dark:text-surface-300"
-                      >
-                        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : null}
-            </Section>
-          )}
-
           {tab === "overview" && (
             <Section title={c.moreInfo}>
               <dl className="mt-3 divide-y divide-surface-100 dark:divide-surface-700/60">
@@ -716,30 +672,6 @@ export default function JobDetailPage() {
                 {c.viewOnMap}
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
-            </div>
-          )}
-
-          {matchScore !== null && (
-            <div className="rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-50 to-violet-50 p-5 dark:border-brand-500/20 dark:from-brand-500/10 dark:to-violet-500/10">
-              <h2 className="flex items-center gap-2 text-sm font-bold text-surface-900 dark:text-white">
-                <Sparkles className="h-4 w-4 text-brand-500" />
-                {c.aiOpinion}
-              </h2>
-              <div className="mt-4 flex items-center gap-4">
-                <div className="text-3xl font-extrabold text-brand-600 dark:text-brand-300">
-                  {matchScore}%
-                </div>
-                <p className="text-xs leading-relaxed text-surface-600 dark:text-surface-300">
-                  {c.aiMatchNote}
-                </p>
-              </div>
-              <Link
-                href={`/student/interview?job=${job.id}`}
-                className="mt-4 flex items-center justify-center gap-1.5 rounded-xl bg-white py-2.5 text-sm font-semibold text-brand-600 shadow-sm transition-colors hover:bg-brand-50 dark:bg-surface-900 dark:hover:bg-surface-800"
-              >
-                <MessageSquare className="h-4 w-4" />
-                {c.prepareInterview}
-              </Link>
             </div>
           )}
         </aside>

@@ -104,6 +104,26 @@ SessionLocal = sessionmaker(
 
 _T = TypeVar("_T")
 
+# Postgres says "the database system is starting up" (57P03) while it recovers,
+# and psycopg2 reports a dropped socket as a connection failure. Those clear on
+# their own within seconds; anything else should surface immediately.
+_TRANSIENT_DB_MARKERS = (
+    "starting up",
+    "shutting down",
+    "server closed the connection",
+    "connection refused",
+    "could not connect",
+    "terminating connection",
+    "57p03",
+)
+
+
+def _is_transient_db_error(exc: BaseException) -> bool:
+    text = str(exc).lower()
+    if "queuepool limit" in text or "timeout" in text:
+        return False  # pool exhaustion — retrying makes the pile-up worse
+    return any(marker in text for marker in _TRANSIENT_DB_MARKERS)
+
 
 def run_with_db_retry(
     fn: Callable[[], _T],
@@ -130,6 +150,11 @@ def run_with_db_retry(
         try:
             return fn()
         except OperationalError as exc:
+            # Only a connection-level blip is worth retrying. Bad credentials, a
+            # missing database or an exhausted pool are also OperationalError,
+            # and retrying those just burns threadpool slots during an outage.
+            if not _is_transient_db_error(exc):
+                raise
             last_exc = exc
             if db is not None:
                 try:
