@@ -29,10 +29,12 @@ VERSION: 1.0.0
 # IMPORTS
 # =============================================================================
 
-from typing import Generator
+from typing import Callable, Generator, TypeVar
 import logging
+import time
 
 from sqlalchemy import create_engine, text
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import QueuePool
 
@@ -72,6 +74,11 @@ else:
         max_overflow=10,
         pool_timeout=30,
         pool_recycle=1800,  # 30 minutes
+        # Test a pooled connection with a lightweight ping before handing it out.
+        # After the DB restarts (Railway maintenance / "the database system is
+        # starting up"), the pool's old connections are dead; pre-ping discards
+        # them and opens a fresh one instead of erroring the request.
+        pool_pre_ping=True,
         echo=settings.DEBUG,  # Log SQL in debug mode
     )
 
@@ -90,6 +97,47 @@ SessionLocal = sessionmaker(
     autoflush=False,    # Don't auto-flush before queries
     bind=engine
 )
+
+# =============================================================================
+# TRANSIENT-ERROR RETRY
+# =============================================================================
+
+_T = TypeVar("_T")
+
+
+def run_with_db_retry(
+    fn: Callable[[], _T],
+    db: Session | None = None,
+    *,
+    attempts: int = 3,
+    base_delay: float = 0.5,
+) -> _T:
+    """Run ``fn`` and retry briefly on transient DB connection failures.
+
+    Covers the short window when Railway's Postgres is restarting and rejects
+    connections with "the database system is starting up". Together with
+    ``pool_pre_ping`` this makes that blip invisible to the user instead of a
+    hard error. The session is rolled back between attempts so it isn't reused
+    in a failed state. Non-transient errors are re-raised immediately.
+    """
+    last_exc: OperationalError | None = None
+    for i in range(attempts):
+        try:
+            return fn()
+        except OperationalError as exc:
+            last_exc = exc
+            if db is not None:
+                try:
+                    db.rollback()
+                except Exception:  # noqa: BLE001 — best effort before retry
+                    pass
+            if i < attempts - 1:
+                time.sleep(base_delay * (i + 1))  # 0.5s, then 1s
+                logger = logging.getLogger(__name__)
+                logger.warning("Transient DB error, retrying (%d/%d): %s", i + 1, attempts, exc)
+    assert last_exc is not None
+    raise last_exc
+
 
 # =============================================================================
 # DEPENDENCY INJECTION
