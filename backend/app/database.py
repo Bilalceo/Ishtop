@@ -119,8 +119,13 @@ def run_with_db_retry(
     ``pool_pre_ping`` this makes that blip invisible to the user instead of a
     hard error. The session is rolled back between attempts so it isn't reused
     in a failed state. Non-transient errors are re-raised immediately.
+
+    NOTE: this sleeps between attempts, so it is BLOCKING. From an ``async``
+    endpoint call it via ``run_in_threadpool`` — sleeping inline would park the
+    event loop and stall every other request.
     """
     last_exc: OperationalError | None = None
+    attempts = max(1, attempts)  # never skip the call (and never hit the assert)
     for i in range(attempts):
         try:
             return fn()

@@ -844,6 +844,7 @@ async def refresh_token(
     """Refresh access token by rotating the DB-backed refresh token."""
     from app.services.refresh_service import rotate
     from app.database import run_with_db_retry
+    from starlette.concurrency import run_in_threadpool
 
     raw = (
         request.refresh_token if request and request.refresh_token else None
@@ -857,9 +858,12 @@ async def refresh_token(
     # Rotate: validate + swap for a successor. Raises on unknown/expired/reused.
     # Wrapped in a short retry so a transient DB blip (e.g. Postgres restarting)
     # doesn't bounce a logged-in user on this hot, every-page-load endpoint.
+    # It runs in a threadpool because the retry sleeps between attempts — doing
+    # that inline would park the event loop and stall the API for ALL users
+    # during exactly the blip we're smoothing over.
     try:
-        new_raw, row = run_with_db_retry(
-            lambda: rotate(db, raw, request=http_request), db=db
+        new_raw, row = await run_in_threadpool(
+            run_with_db_retry, lambda: rotate(db, raw, request=http_request), db
         )
     except TokenError as e:
         logger.warning(f"Token refresh failed: {e}")

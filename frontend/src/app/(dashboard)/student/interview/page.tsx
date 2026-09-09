@@ -6,7 +6,7 @@
  * -> summary (average score). Silver design, UZ/RU. Text-based MVP.
  */
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -167,6 +167,8 @@ function InterviewCoach() {
   // Job-based targeting (?job=<id>): questions test this vacancy's requirements.
   type JobItem = { id: string; title: string; company?: string; experience_level?: string };
   const [job, setJob] = useState<JobItem | null>(null);
+  // Once the user picks a level themselves, a late job fetch must not override it.
+  const levelTouched = useRef(false);
 
   // Load the user's resumes once; default the selection to the ?resume= deep
   // link if valid, otherwise the most recently updated resume.
@@ -212,15 +214,19 @@ function InterviewCoach() {
         if (cancelled || !j?.id) return;
         setJob({
           id: j.id,
+          // JobResponse nests CompanyInfo with a `name` field.
           title: j.title || "",
-          company: j.company?.company_name || j.company_name || "",
+          company: j.company?.name || "",
           experience_level: j.experience_level || "",
         });
         // The vacancy title is the interview role unless the user typed one.
         setRole((cur) => cur || j.title || "");
-        const lvl = String(j.experience_level || "").toLowerCase();
-        if (lvl === "intern" || lvl === "junior") setLevel(lvl);
-        else if (lvl) setLevel("mid"); // mid/senior/lead/executive -> mid
+        // Don't clobber a level the user already picked while this was loading.
+        if (!levelTouched.current) {
+          const lvl = String(j.experience_level || "").toLowerCase();
+          if (lvl === "intern" || lvl === "junior") setLevel(lvl);
+          else if (lvl) setLevel("mid"); // mid/senior/lead/executive -> mid
+        }
       } catch {
         /* job is optional — silently fall back to role/resume mode */
       }
@@ -447,7 +453,7 @@ function InterviewCoach() {
               <button
                 key={lv}
                 type="button"
-                onClick={() => setLevel(lv)}
+                onClick={() => { levelTouched.current = true; setLevel(lv); }}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                   level === lv
                     ? "bg-brand-500 text-white"
