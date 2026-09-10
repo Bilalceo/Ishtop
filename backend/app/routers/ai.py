@@ -661,10 +661,25 @@ async def get_usage(_user=Depends(get_current_active_user)):
     """
     service = get_ai_service()
     
+    # Only the OpenAI service keeps a usage tracker; the Gemini client does not,
+    # so calling get_usage_summary() on it raised AttributeError and this
+    # endpoint returned 500 on every request in production.
+    summary = getattr(service, "get_usage_summary", None)
+    if summary is None:
+        return {
+            "success": True,
+            "data": {
+                "tracked": False,
+                "provider": AI_PROVIDER,
+                "reason": "This provider does not report token usage.",
+            },
+            "message": "Usage tracking is not available for the active AI provider",
+        }
+
     return {
         "success": True,
-        "data": service.get_usage_summary(),
-        "message": "Usage statistics retrieved"
+        "data": {"tracked": True, "provider": AI_PROVIDER, **(summary() or {})},
+        "message": "Usage statistics retrieved",
     }
 
 

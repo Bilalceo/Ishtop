@@ -31,6 +31,7 @@ VERSION: 1.0.0
 
 from typing import Callable, Generator, TypeVar
 import logging
+import os
 import time
 
 from sqlalchemy import create_engine, text
@@ -67,12 +68,17 @@ if settings.DATABASE_URL.startswith("sqlite"):
         echo=settings.DEBUG,
     )
 else:
+    # Sized from env so capacity can be tuned without a code deploy.
+    # Budget check before raising these: workers x (pool_size + max_overflow)
+    # must stay well under Postgres max_connections (500 on this instance).
+    _pool_size = int(os.getenv("DB_POOL_SIZE", "20"))
+    _max_overflow = int(os.getenv("DB_MAX_OVERFLOW", "20"))
     engine = create_engine(
         settings.DATABASE_URL,
         poolclass=QueuePool,
-        pool_size=5,
-        max_overflow=10,
-        pool_timeout=30,
+        pool_size=_pool_size,
+        max_overflow=_max_overflow,
+        pool_timeout=int(os.getenv("DB_POOL_TIMEOUT", "10")),
         pool_recycle=1800,  # 30 minutes
         # Test a pooled connection with a lightweight ping before handing it out.
         # After the DB restarts (Railway maintenance / "the database system is

@@ -31,6 +31,8 @@ from time import time
 from typing import Optional
 from uuid import UUID
 
+from fastapi.exceptions import RequestValidationError
+from pydantic import ValidationError as PydanticValidationError
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Request, Query, Response
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
@@ -273,7 +275,20 @@ async def parse_login_credentials(request: Request) -> UserLogin:
     if "email" not in payload and "username" in payload:
         payload["email"] = payload["username"]
 
-    return UserLogin.model_validate(payload)
+    if not isinstance(payload, dict):
+        # A JSON body that parses to a list/string would blow up model_validate
+        # with a non-ValidationError; treat it as an empty payload instead.
+        payload = {}
+
+    try:
+        return UserLogin.model_validate(payload)
+    except PydanticValidationError as exc:
+        # model_validate raises Pydantic's ValidationError, which FastAPI does
+        # NOT map to 422 — it fell through to the catch-all handler, so every
+        # malformed login (missing field, bad email, truncated JSON) returned a
+        # 500 and filled Sentry with noise. Re-raise as the request-level error
+        # FastAPI knows how to render.
+        raise RequestValidationError(exc.errors()) from exc
 
 
 def normalize_user_id(user_id: str) -> UUID | str:

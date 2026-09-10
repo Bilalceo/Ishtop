@@ -241,6 +241,10 @@ class RateLimiter:
 # GLOBAL INSTANCE
 # =============================================================================
 
+# NOTE: this instance is per-process. Gunicorn worker count is env-tunable
+# (WEB_CONCURRENCY, default 1) — do NOT raise it above 1 until Redis is enabled
+# (REDIS_ENABLED / RATE_LIMIT_USE_REDIS), because every extra worker keeps its
+# own counters and multiplies how many login attempts an attacker gets.
 rate_limiter = RateLimiter()
 
 
