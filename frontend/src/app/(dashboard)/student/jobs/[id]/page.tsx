@@ -136,7 +136,8 @@ export default function JobDetailPage() {
         applyExternalNote: "Отклик оформляется на странице работодателя",
         contactTitle: "Связаться",
         contactOpen: "Открыть канал",
-        applyClosed: "По этой вакансии отклик не принимается",
+        applyClosed: "Чтобы откликнуться, свяжитесь с работодателем напрямую",
+        applyViaContact: "Контакты — в панели справа",
         matchTitle: "Соответствие вашему резюме",
         matchCoverage: "Требования покрыты",
         noResumeMatch:
@@ -191,7 +192,9 @@ export default function JobDetailPage() {
         applyExternalNote: "Ariza ish beruvchining o'z sahifasida beriladi",
         contactTitle: "Bog'lanish",
         contactOpen: "Kanalni ochish",
-        applyClosed: "Bu e'lon uchun ariza qabul qilinmaydi",
+        applyClosed:
+          "Ariza berish uchun ish beruvchi bilan bevosita bog'laning",
+        applyViaContact: "Bog'lanish ma'lumoti o'ng tomonda",
         matchTitle: "Rezyumengizga mosligi",
         matchCoverage: "Talablar qamrovi",
         noResumeMatch:
@@ -604,7 +607,11 @@ export default function JobDetailPage() {
             </Link>
             <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-surface-500">
               <CheckCircle className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-              {applyIsExternal ? c.applyExternalNote : c.freeToApply}
+              {!applyIsExternal
+                ? c.freeToApply
+                : applyUrl
+                  ? c.applyExternalNote
+                  : c.applyViaContact}
             </p>
           </div>
         </div>
