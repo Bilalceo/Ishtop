@@ -186,6 +186,17 @@ export default function ApplicationsPage() {
   const isRu = locale === "ru";
   const { applications, stats, fetchMyApplications, isLoading } =
     useApplications();
+
+  // The API's `pending` total counts a 1-day wait and a 94-day one alike, which
+  // contradicts the per-card "Javob kelmadi" right below. Split it here so the
+  // tile and the cards tell the same story.
+  const silentCount = applications.filter(
+    (a) => applicationWaitStage(a) === "silent",
+  ).length;
+  const stillPending = Math.max(
+    0,
+    (typeof stats.pending === "number" ? stats.pending : 0) - silentCount,
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState("applied_at");
@@ -270,11 +281,16 @@ export default function ApplicationsPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-surface-900">
-                {renderStatValue(stats.pending)}
+                {renderStatValue(stillPending)}
               </p>
               <p className="text-xs text-surface-500">
                 {t("applicationsPage.pending")}
               </p>
+              {silentCount > 0 && (
+                <p className="mt-0.5 text-xs font-medium text-surface-500">
+                  +{silentCount} {isRu ? "без ответа" : "javobsiz"}
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
