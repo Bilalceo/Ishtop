@@ -579,7 +579,7 @@ def application_to_response(
     - `page_size`: Items per page (default: 20, max: 100)
     """
 )
-async def search_jobs(
+def search_jobs(
     # Pagination
     pagination: PaginationParams = Depends(),
     
@@ -825,7 +825,7 @@ async def list_my_jobs(
 
 
 @router.post("/{job_id}/save", summary="Save a job")
-async def save_job(
+def save_job(
     job_id: UUID,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
@@ -850,7 +850,7 @@ async def save_job(
 
 
 @router.delete("/{job_id}/save", summary="Unsave a job")
-async def unsave_job(
+def unsave_job(
     job_id: UUID,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
@@ -870,7 +870,7 @@ async def unsave_job(
 
 
 @router.get("/saved", summary="Get saved jobs")
-async def get_saved_jobs(
+def get_saved_jobs(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1),
@@ -934,7 +934,7 @@ async def get_saved_jobs(
       user has no resume yet, so the client can render a CTA instead of an error.
     """,
 )
-async def recommended_jobs(
+def recommended_jobs(
     limit: int = Query(10, ge=1, le=50, description="Maximum number of recommendations"),
     remote_only: bool = Query(False, description="Only include remote-friendly roles"),
     current_user: User = Depends(get_current_active_user),
@@ -1064,7 +1064,7 @@ async def recommended_jobs(
     response_model=VerificationAuditResponse,
     summary="Submit company verification request",
 )
-async def submit_company_verification(
+def submit_company_verification(
     request: CompanyVerificationSubmitRequest,
     company: User = Depends(get_current_company),
     db: Session = Depends(get_db),
@@ -1108,7 +1108,7 @@ async def submit_company_verification(
     response_model=JobListResponse,
     summary="City discovery landing",
 )
-async def discovery_city_jobs(
+def discovery_city_jobs(
     city_slug: str,
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
@@ -1144,7 +1144,7 @@ async def discovery_city_jobs(
     response_model=JobListResponse,
     summary="Profession discovery landing",
 )
-async def discovery_profession_jobs(
+def discovery_profession_jobs(
     profession_slug: str,
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
@@ -1180,7 +1180,7 @@ async def discovery_profession_jobs(
     response_model=DiscoveryCompanyResponse,
     summary="Company discovery landing",
 )
-async def discovery_company_jobs(
+def discovery_company_jobs(
     company_slug: str,
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
@@ -1252,7 +1252,7 @@ async def discovery_company_jobs(
     "/events",
     summary="Track candidate funnel events",
 )
-async def track_job_event(
+def track_job_event(
     request: AnalyticsEventRequest,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
@@ -1304,7 +1304,7 @@ async def track_job_event(
     **Note:** This endpoint increments the view count (unless you're the owner).
     """
 )
-async def get_job(
+def get_job(
     job_id: str,
     current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db)
@@ -1368,7 +1368,7 @@ async def get_job(
     Jobs are created as **active** by default.
     """
 )
-async def create_job(
+def create_job(
     job_data: JobCreate,
     company: User = Depends(get_current_company),
     db: Session = Depends(get_db)
@@ -1450,7 +1450,7 @@ async def create_job(
     **Note:** Partial updates are supported (only send fields to update).
     """
 )
-async def update_job(
+def update_job(
     job_id: UUID,
     update_data: JobUpdate,
     current_user: User = Depends(get_current_company),
@@ -1545,7 +1545,7 @@ async def update_job(
     **Note:** This also affects all applications for this job.
     """
 )
-async def delete_job(
+def delete_job(
     job_id: UUID,
     current_user: User = Depends(get_current_company),
     db: Session = Depends(get_db)
@@ -1599,7 +1599,7 @@ async def delete_job(
     - Internal notes
     """
 )
-async def get_job_applications(
+def get_job_applications(
     job_id: UUID,
     pagination: PaginationParams = Depends(),
     status_filter: Optional[str] = Query(None, alias="status"),
@@ -1716,7 +1716,7 @@ async def get_job_applications(
     - Reasons for the match
     """
 )
-async def match_jobs(
+def match_jobs(
     request: JobMatchRequest,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -1885,7 +1885,7 @@ async def match_jobs(
     **Access:** Only the owner company can publish.
     """
 )
-async def publish_job(
+def publish_job(
     job_id: UUID,
     current_user: User = Depends(get_current_company),
     db: Session = Depends(get_db)
@@ -1923,7 +1923,7 @@ async def publish_job(
     **Access:** Only the owner company can close.
     """
 )
-async def close_job(
+def close_job(
     job_id: UUID,
     request: Optional[CloseJobRequest] = None,
     current_user: User = Depends(get_current_company),
@@ -1970,7 +1970,7 @@ async def close_job(
     **Access:** Only the owner company can pause.
     """,
 )
-async def pause_job(
+def pause_job(
     job_id: UUID,
     current_user: User = Depends(get_current_company),
     db: Session = Depends(get_db),
@@ -2011,7 +2011,7 @@ async def pause_job(
     **Access:** Only the owner company can reopen.
     """,
 )
-async def reopen_job(
+def reopen_job(
     job_id: UUID,
     current_user: User = Depends(get_current_company),
     db: Session = Depends(get_db),
@@ -2052,7 +2052,7 @@ async def reopen_job(
     **Access:** Only the owner company can clone.
     """,
 )
-async def clone_job(
+def clone_job(
     job_id: UUID,
     current_user: User = Depends(get_current_company),
     db: Session = Depends(get_db),
@@ -2120,7 +2120,7 @@ async def clone_job(
         "saw in the list is the number they see on the job."
     ),
 )
-async def get_job_match(
+def get_job_match(
     job_id: UUID,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
