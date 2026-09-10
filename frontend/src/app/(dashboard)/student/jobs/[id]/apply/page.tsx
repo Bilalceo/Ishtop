@@ -1427,11 +1427,6 @@ export default function ApplyPage() {
             ? "Пока такие отклики идут через бота — мы работаем над тем, чтобы это можно было делать прямо здесь."
             : "Hozircha bunday arizalar bot orqali beriladi — buni tez orada shu yerning o'zida qilish ustida ishlayapmiz."}
         </p>
-        {!!(job.contact_info || "").trim() && (
-          <p className="mt-3 break-words rounded-xl bg-surface-100 px-4 py-2 text-sm text-surface-600 dark:bg-surface-800 dark:text-surface-300">
-            {job.contact_info}
-          </p>
-        )}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           {url && (
             <a href={url} target="_blank" rel="noopener noreferrer nofollow">

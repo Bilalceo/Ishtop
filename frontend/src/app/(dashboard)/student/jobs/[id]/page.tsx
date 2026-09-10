@@ -134,10 +134,6 @@ export default function JobDetailPage() {
         posted: "Опубликовано",
         applyExternal: "Откликнуться в Telegram",
         applyExternalNote: "Вакансия откроется в нашем Telegram-боте",
-        contactTitle: "Связаться",
-        contactOpen: "Открыть канал",
-        applyClosed: "Чтобы откликнуться, свяжитесь с работодателем напрямую",
-        applyViaContact: "Контакты — в панели справа",
         matchTitle: "Соответствие вашему резюме",
         matchCoverage: "Требования покрыты",
         noResumeMatch:
@@ -190,11 +186,7 @@ export default function JobDetailPage() {
         posted: "E'lon qilingan",
         applyExternal: "Telegramda ariza berish",
         applyExternalNote: "Vakansiya Telegram botimizda ochiladi",
-        contactTitle: "Bog'lanish",
-        contactOpen: "Kanalni ochish",
-        applyClosed:
-          "Ariza berish uchun ish beruvchi bilan bevosita bog'laning",
-        applyViaContact: "Bog'lanish ma'lumoti o'ng tomonda",
+        applyClosed: "Bu e'lon uchun ariza vaqtincha qabul qilinmayapti",
         matchTitle: "Rezyumengizga mosligi",
         matchCoverage: "Talablar qamrovi",
         noResumeMatch:
@@ -602,11 +594,7 @@ export default function JobDetailPage() {
             </Link>
             <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-surface-500">
               <CheckCircle className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-              {!applyIsExternal
-                ? c.freeToApply
-                : applyUrl
-                  ? c.applyExternalNote
-                  : c.applyViaContact}
+              {applyIsExternal ? c.applyExternalNote : c.freeToApply}
             </p>
           </div>
         </div>
@@ -731,29 +719,6 @@ export default function JobDetailPage() {
               </Link>
             )}
           </div>
-
-          {!!(job.contact_info || "").trim() && (
-            <div className="rounded-2xl border border-surface-200 bg-white p-5 dark:border-surface-700 dark:bg-surface-900">
-              <h2 className="flex items-center gap-2 text-sm font-bold text-surface-900 dark:text-white">
-                <ExternalLink className="h-4 w-4 text-brand-500" />
-                {c.contactTitle}
-              </h2>
-              <p className="mt-3 break-words text-sm text-surface-600 dark:text-surface-300">
-                {job.contact_info}
-              </p>
-              {applyUrl && (
-                <a
-                  href={applyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
-                  className="mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-surface-200 py-2.5 text-sm font-semibold text-brand-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:hover:bg-surface-800"
-                >
-                  {c.contactOpen}
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </a>
-              )}
-            </div>
-          )}
 
           {job.location && (
             <div className="rounded-2xl border border-surface-200 bg-white p-5 dark:border-surface-700 dark:bg-surface-900">

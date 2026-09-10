@@ -488,30 +488,14 @@ def _job_detail(job_id: str, back_cb: str) -> tuple[str, dict]:
         lines.append(f"🕒 {exp}")
     lines.append("")
 
-    apply_btns: list = []
-    # Prefer the employer's own contact over the source post. Both routes reach
-    # the employer, but the post also drops the candidate into someone else's
-    # job channel — 179 of 274 aggregated listings carry a contact, so for most
-    # of them we never need to send anyone there.
-    if j["contact"]:
-        lines.append(f"☎️ Aloqa: {j['contact']}")
-        curl = _contact_url(j["contact"])
-        if curl:
-            apply_btns.append(_url_btn("📞 Bog'lanish", curl))
-    elif j["apply_url"]:
-        lines.append(f"☎️ Ariza: {j['apply_url']}")
-        apply_btns.append(_url_btn("🌐 Ariza berish", j["apply_url"]))
-    # No external route means this job belongs to a company on the platform —
-    # the bot can take the application itself instead of sending them away.
-    is_platform_job = not j["apply_url"] and not j["contact"]
-    if is_platform_job:
-        lines.append("📝 Ariza berish uchun quyidagi tugmani bosing.")
+    # Applying always happens inside the bot, for every listing. Handing over the
+    # source post — or even the employer's own contact — drops the candidate into
+    # someone else's channel and we lose them. An aggregated application is
+    # relayed to our own team instead (see _apply_submit).
+    lines.append("📝 Ariza berish uchun quyidagi tugmani bosing.")
 
-    rows: list = []
-    if is_platform_job:
-        rows.append([_btn("📝 Ariza berish", f"apply:{job_id}:{back_cb or 'cats'}")])
-    if apply_btns:
-        rows.append(apply_btns)
+    rows: list = [[_btn("📝 Ariza berish", f"apply:{job_id}:{back_cb or 'cats'}")]]
+
     rows.append([_btn("🔙 Orqaga", back_cb or "cats"), _btn("🏠 Menyu", "home")])
     return "\n".join(lines), _kb(rows)
 
@@ -622,6 +606,44 @@ def _apply_start(job_id: str, chat_id: str, back_cb: str) -> tuple[str, dict]:
         db.close()
 
 
+def _relay_external_application(job, user, resume) -> None:
+    """Tell our own team about an application to an aggregated listing.
+
+    These jobs have no employer account here, so nobody would ever see the
+    application. Rather than send the candidate off to the source channel, we
+    take the application and hand the details to the internal group, which can
+    forward them to the employer. Best-effort: the application is already saved.
+    """
+    token = (settings.TELEGRAM_APPS_BOT_TOKEN or "").strip()
+    chat_id = (settings.TELEGRAM_APPS_CHAT_ID or "").strip()
+    if not token or not chat_id:
+        return
+    parts = [
+        "📥 <b>Yangi ariza</b> (tashqi manba)",
+        f"💼 {job.title}" + (f" · {job.location}" if job.location else ""),
+        "",
+        f"👤 <b>{user.full_name or 'Nomzod'}</b>",
+    ]
+    contact = " · ".join(x for x in [user.phone or "", user.email or ""] if x)
+    if contact:
+        parts.append(f"📞 {contact}")
+    if resume is not None and getattr(resume, "title", None):
+        parts.append(f"📄 {resume.title}")
+    if getattr(job, "contact_info", None):
+        parts.append(f"🏢 Ish beruvchi: {job.contact_info}")
+    if getattr(job, "external_apply_url", None):
+        parts.append(f"🔗 Manba: {job.external_apply_url}")
+    try:
+        with httpx.Client(timeout=8) as client:
+            client.post(
+                f"{settings.TELEGRAM_API_BASE_URL.rstrip('/')}/bot{token}/sendMessage",
+                json={"chat_id": chat_id, "text": "\n".join(parts),
+                      "parse_mode": "HTML", "disable_web_page_preview": True},
+            )
+    except Exception:  # noqa: BLE001 — advisory
+        logger.warning("could not relay external application for job %s", job.id, exc_info=True)
+
+
 def _apply_submit(job_id: str, resume_id: str, chat_id: str) -> tuple[str, dict]:
     """Create the application, exactly as the website would."""
     db = SessionLocal()
@@ -679,27 +701,38 @@ def _apply_submit(job_id: str, resume_id: str, chat_id: str) -> tuple[str, dict]
         job.applications_count = (job.applications_count or 0) + 1
         db.commit()
 
-        # Same courtesy the site now extends: the employer hears about it.
-        try:
-            db.add(
-                Notification(
-                    user_id=job.company_id,
-                    title="Yangi ariza",
-                    message=f"«{job.title}» e'loniga Telegram orqali yangi ariza keldi.",
-                    type="info",
-                    link="/company/applicants",
+        # Who actually reads this application decides who we tell.
+        is_aggregated = bool(
+            (job.external_apply_url or "").strip() or (job.contact_info or "").strip()
+        )
+        if is_aggregated:
+            _relay_external_application(job, user, resume)
+        else:
+            try:
+                db.add(
+                    Notification(
+                        user_id=job.company_id,
+                        title="Yangi ariza",
+                        message=f"«{job.title}» e'loniga Telegram orqali yangi ariza keldi.",
+                        type="info",
+                        link="/company/applicants",
+                    )
                 )
-            )
-            db.commit()
-        except Exception:  # noqa: BLE001 — advisory
-            db.rollback()
+                db.commit()
+            except Exception:  # noqa: BLE001 — advisory
+                db.rollback()
 
         site = settings.FRONTEND_URL.rstrip("/")
+        tail = (
+            "Jamoamiz arizangizni ish beruvchiga yetkazadi va siz bilan bog'lanadi."
+            if is_aggregated
+            else "Ish beruvchiga xabar berildi."
+        )
         return (
-            f"✅ Arizangiz yuborildi!\n\n"
+            f"✅ Arizangiz qabul qilindi!\n\n"
             f"📣 {job.title}\n"
             f"📄 {resume.title or 'Rezyume'}\n\n"
-            "Ish beruvchiga xabar berildi. Holatini «Arizalarim»da kuzating.",
+            f"{tail} Holatini «Arizalarim»da kuzating.",
             _kb([[_url_btn("📋 Arizalarim", f"{site}/student/applications")],
                  [_btn("🔍 Boshqa ishlar", "cats"), _btn("🏠 Menyu", "home")]]),
         )
