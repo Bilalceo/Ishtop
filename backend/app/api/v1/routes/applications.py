@@ -59,7 +59,8 @@ from app.core.dependencies import (
 from app.core.premium import get_premium_user, get_feature_limit
 from app.models import (
     User, Job, Resume, Application,
-    ApplicationStatus, JobStatus, UserRole, ResumeStatus, FunnelEvent
+    ApplicationStatus, JobStatus, UserRole, ResumeStatus, FunnelEvent,
+    Notification
 )
 from app.services import job_matching
 from app.services.telegram_service import send_company_telegram_notification
@@ -675,6 +676,33 @@ def _resolve_interview_type(
 # ENDPOINTS
 # =============================================================================
 
+def _notify_employer_of_application(db: Session, job: Job, request_id: str) -> None:
+    """Tell the employer an application arrived.
+
+    Nothing did this before: no company account had ever received a single
+    notification, so applications simply accumulated unseen — ten of them went
+    unanswered for up to 94 days. Best effort by design; a failure here must
+    never cost the candidate their application, which is already committed.
+    """
+    try:
+        db.add(
+            Notification(
+                user_id=job.company_id,
+                title="Yangi ariza",
+                message=f"«{job.title}» e'loniga yangi ariza keldi. Nomzodni ko'rib chiqing.",
+                type="info",
+                link="/company/applicants",
+            )
+        )
+        db.commit()
+    except Exception:  # noqa: BLE001 — advisory only
+        db.rollback()
+        logging.getLogger(__name__).warning(
+            "[%s] Could not notify employer %s about a new application",
+            request_id, job.company_id, exc_info=True,
+        )
+
+
 @router.post(
     "/apply",
     response_model=StandardResponse,
@@ -855,6 +883,10 @@ async def apply_to_job(
             )
 
         logger.info(f"[{request_id}] Application created: {application.id}")
+
+        # After the application is safely committed — an IntegrityError from
+        # this must not be mistaken for the apply race handled above.
+        _notify_employer_of_application(db, job, request_id)
 
         company_prefs = (job.company.notification_preferences or {}) if job.company else {}
         should_send_telegram = (
