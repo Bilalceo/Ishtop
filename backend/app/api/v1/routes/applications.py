@@ -941,7 +941,7 @@ async def apply_to_job(
     - Pagination info
     """
 )
-async def get_my_applications(
+def get_my_applications(
     pagination: PaginationParams = Depends(),
     status_filter: Optional[str] = Query(
         None, 
@@ -1018,7 +1018,7 @@ async def get_my_applications(
     summary="Get application stats",
     description="Get application counts for the current user.",
 )
-async def get_application_stats(
+def get_application_stats(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -1073,7 +1073,7 @@ async def get_application_stats(
     - Admin can view any application
     """
 )
-async def get_application(
+def get_application(
     application_id: UUID,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -1244,7 +1244,7 @@ async def update_application_status(
     **Note:** Cannot withdraw applications that have already been decided (accepted/rejected).
     """
 )
-async def withdraw_application(
+def withdraw_application(
     application_id: UUID,
     student: User = Depends(get_current_student),
     db: Session = Depends(get_db)
@@ -1303,7 +1303,7 @@ async def withdraw_application(
     **Access:** Company users only.
     """,
 )
-async def hiring_funnel_analytics(
+def hiring_funnel_analytics(
     days: int = Query(30, ge=1, le=365, description="Window for 'recent' metrics"),
     company: User = Depends(get_current_company),
     db: Session = Depends(get_db),
@@ -1521,7 +1521,7 @@ async def hiring_funnel_analytics(
     summary="Per-vacancy analytics",
     description="Detailed analytics for a single company vacancy including daily trends and funnel.",
 )
-async def vacancy_analytics(
+def vacancy_analytics(
     job_id: UUID,
     days: int = Query(30, ge=1, le=365),
     start_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
@@ -1668,7 +1668,7 @@ async def vacancy_analytics(
     summary="Company-level analytics dashboard",
     description="Aggregated analytics across all company vacancies with custom date range support.",
 )
-async def company_dashboard_analytics(
+def company_dashboard_analytics(
     days: int = Query(30, ge=1, le=365),
     start_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
     end_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
@@ -1928,7 +1928,7 @@ async def company_dashboard_analytics(
     - Which were skipped (already applied, etc.)
     """
 )
-async def auto_apply(
+def auto_apply(
     request: AutoApplyRequest,
     student: User = Depends(get_current_student),
     _premium_user: User = Depends(get_premium_user),
@@ -2241,7 +2241,7 @@ async def auto_apply(
     Owner-company only.
     """,
 )
-async def top_candidates_for_job(
+def top_candidates_for_job(
     job_id: UUID,
     limit: int = Query(10, ge=1, le=50),
     pool: str = Query(
@@ -2365,7 +2365,7 @@ async def top_candidates_for_job(
     response_model=StandardResponse,
     summary="List company applications (optionally by job)",
 )
-async def list_company_applications(
+def list_company_applications(
     job_id: Optional[str] = Query(None),
     status_filter: Optional[str] = Query(None, alias="status"),
     search: Optional[str] = Query(None),
@@ -2472,7 +2472,7 @@ def _company_scoped_applications(
     response_model=StandardResponse,
     summary="Bulk update candidate status",
 )
-async def company_bulk_status_update(
+def company_bulk_status_update(
     request: BulkStatusUpdateRequest,
     company: User = Depends(get_current_company),
     db: Session = Depends(get_db),
@@ -2600,7 +2600,7 @@ async def company_bulk_email_send(
     response_model=StandardResponse,
     summary="Update private notes and tags for an application",
 )
-async def update_notes_and_tags(
+def update_notes_and_tags(
     application_id: UUID,
     request: NotesTagsUpdateRequest,
     company: User = Depends(get_current_company),
@@ -2637,7 +2637,7 @@ async def update_notes_and_tags(
     response_model=StandardResponse,
     summary="Get sent message history for an application",
 )
-async def get_application_messages(
+def get_application_messages(
     application_id: UUID,
     company: User = Depends(get_current_company),
     db: Session = Depends(get_db),
@@ -2817,7 +2817,7 @@ def _apply_status_transition(application: Application, request: StatusUpdateRequ
     response_model=StandardResponse,
     summary="List interview scorecards for an application",
 )
-async def list_scorecards(
+def list_scorecards(
     application_id: UUID,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
@@ -2851,7 +2851,7 @@ async def list_scorecards(
         "an auto-computed overall_score (average of provided criteria)."
     ),
 )
-async def create_scorecard(
+def create_scorecard(
     application_id: UUID,
     payload: ScorecardSubmit,
     current_user: User = Depends(get_current_active_user),
@@ -2903,7 +2903,7 @@ async def create_scorecard(
     response_model=StandardResponse,
     summary="Action item counters for the company HR dashboard",
 )
-async def dashboard_actions(
+def dashboard_actions(
     company: User = Depends(get_current_company),
     db: Session = Depends(get_db),
 ):
@@ -2976,7 +2976,7 @@ async def dashboard_actions(
     response_model=StandardResponse,
     summary="Upcoming interviews for the company within the next N days",
 )
-async def upcoming_interviews(
+def upcoming_interviews(
     days: int = Query(7, ge=1, le=30),
     company: User = Depends(get_current_company),
     db: Session = Depends(get_db),

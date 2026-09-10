@@ -63,7 +63,7 @@ class SavedSearchListResponse(BaseModel):
 # =============================================================================
 
 @router.get("", response_model=SavedSearchListResponse)
-async def list_saved_searches(
+def list_saved_searches(
     search_type: Literal["jobs"] | None = None,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -88,7 +88,7 @@ async def list_saved_searches(
 
 
 @router.post("", response_model=SavedSearchResponse)
-async def create_saved_search(
+def create_saved_search(
     data: SavedSearchCreate,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -128,7 +128,7 @@ async def create_saved_search(
 
 
 @router.put("/{search_id}", response_model=SavedSearchResponse)
-async def update_saved_search(
+def update_saved_search(
     search_id: str,
     data: SavedSearchUpdate,
     current_user: User = Depends(get_current_active_user),
@@ -173,7 +173,7 @@ async def update_saved_search(
 
 
 @router.delete("/{search_id}")
-async def delete_saved_search(
+def delete_saved_search(
     search_id: str,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -198,7 +198,7 @@ async def delete_saved_search(
 
 
 @router.post("/{search_id}/use")
-async def use_saved_search(
+def use_saved_search(
     search_id: str,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)

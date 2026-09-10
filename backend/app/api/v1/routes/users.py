@@ -67,7 +67,7 @@ class PasswordChangeRequest(BaseModel):
     response_model=UserProfileResponse,
     summary="Get current user profile"
 )
-async def get_my_profile(
+def get_my_profile(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -121,7 +121,7 @@ async def get_my_profile(
     response_model=UserProfileResponse,
     summary="Update current user profile"
 )
-async def update_my_profile(
+def update_my_profile(
     update_data: UserUpdate,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -194,7 +194,7 @@ async def update_my_profile(
     response_model=MessageResponse,
     summary="Delete current user account"
 )
-async def delete_my_account(
+def delete_my_account(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -216,7 +216,7 @@ async def delete_my_account(
     response_model=UserProfileResponse,
     summary="Get user by ID"
 )
-async def get_user(
+def get_user(
     user_id: UUID,
     db: Session = Depends(get_db)
 ):
@@ -271,7 +271,7 @@ async def get_user(
     response_model=UserListResponse,
     summary="List users (admin only)"
 )
-async def list_users(
+def list_users(
     pagination: PaginationParams = Depends(),
     role: Optional[str] = Query(None, description="Filter by role"),
     search: Optional[str] = Query(None, description="Search by name/email"),
@@ -501,7 +501,7 @@ async def upload_avatar(
     response_model=MessageResponse,
     summary="Delete avatar"
 )
-async def delete_avatar(
+def delete_avatar(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -703,7 +703,7 @@ async def get_notification_preferences(
 
 
 @router.put("/me/notification-preferences", summary="Update notification preferences")
-async def update_notification_preferences(
+def update_notification_preferences(
     prefs: NotificationPreferences,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -724,7 +724,7 @@ async def update_notification_preferences(
     response_model=OnboardingChecklistResponse,
     summary="Get company onboarding checklist state",
 )
-async def get_company_onboarding_checklist(
+def get_company_onboarding_checklist(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -758,7 +758,7 @@ async def get_company_onboarding_checklist(
     "/me/company-onboarding-checklist/dismiss",
     summary="Dismiss company onboarding checklist when fully complete",
 )
-async def dismiss_company_onboarding_checklist(
+def dismiss_company_onboarding_checklist(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -814,7 +814,7 @@ async def get_privacy_settings(
 
 
 @router.put("/me/privacy-settings", summary="Update privacy settings")
-async def update_privacy_settings(
+def update_privacy_settings(
     settings_data: PrivacySettings,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)

@@ -1488,7 +1488,7 @@ class PDFDownloadResponse(BaseModel):
     - List of resumes with pagination info
     """
 )
-async def list_resumes(
+def list_resumes(
     pagination: PaginationParams = Depends(),
     status_filter: Optional[str] = Query(
         None, 
@@ -1540,7 +1540,7 @@ async def list_resumes(
     Only the owner can access their resumes.
     """
 )
-async def get_resume(
+def get_resume(
     resume_id: str,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -1596,7 +1596,7 @@ async def get_resume(
     ```
     """
 )
-async def create_resume(
+def create_resume(
     resume_data: ResumeCreate,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -2070,7 +2070,7 @@ async def generate_ai_resume(
     Partial updates are supported (only send fields to update).
     """
 )
-async def update_resume(
+def update_resume(
     resume_id: UUID,
     update_data: ResumeUpdate,
     current_user: User = Depends(get_current_active_user),
@@ -2118,7 +2118,7 @@ async def update_resume(
     It can be restored by an admin if needed.
     """
 )
-async def delete_resume(
+def delete_resume(
     resume_id: UUID,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -2158,7 +2158,7 @@ async def delete_resume(
     Only published resumes can be used in job applications.
     """
 )
-async def publish_resume(
+def publish_resume(
     resume_id: UUID,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -2196,7 +2196,7 @@ async def publish_resume(
     Archived resumes are kept for history but can't be used in new applications.
     """
 )
-async def archive_resume(
+def archive_resume(
     resume_id: UUID,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -2237,7 +2237,7 @@ async def archive_resume(
     **Note:** For direct PDF streaming, use the `/pdf` endpoint.
     """
 )
-async def download_resume_pdf(
+def download_resume_pdf(
     resume_id: str,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -2298,7 +2298,7 @@ async def get_resume_download(
     summary="Download resume PDF file",
     description="Stream a generated PDF version of the resume."
 )
-async def get_resume_pdf(
+def get_resume_pdf(
     resume_id: str,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -2351,7 +2351,7 @@ async def get_resume_pdf(
     - ATS information
     """
 )
-async def get_resume_analytics(
+def get_resume_analytics(
     resume_id: str,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)

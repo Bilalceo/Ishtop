@@ -55,7 +55,7 @@ class NotificationListResponse(BaseModel):
 # =============================================================================
 
 @router.get("", response_model=NotificationListResponse)
-async def list_notifications(
+def list_notifications(
     skip: int = 0,
     limit: int = 50,
     unread_only: bool = False,
@@ -92,7 +92,7 @@ async def list_notifications(
 
 
 @router.post("/{notification_id}/read")
-async def mark_notification_read(
+def mark_notification_read(
     notification_id: str,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -116,7 +116,7 @@ async def mark_notification_read(
 
 
 @router.post("/read-all")
-async def mark_all_read(
+def mark_all_read(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -136,7 +136,7 @@ async def mark_all_read(
 
 
 @router.delete("/{notification_id}")
-async def delete_notification(
+def delete_notification(
     notification_id: str,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
