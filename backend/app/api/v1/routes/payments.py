@@ -257,7 +257,7 @@ async def stripe_webhook(
     summary="Get payment history",
     description="Get current user's payment history"
 )
-async def get_my_payments(
+def get_my_payments(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):

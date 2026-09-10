@@ -286,7 +286,7 @@ async def get_admin_roles_matrix(
     summary="List admin users and sub-roles",
     description="Return all admin users with effective admin sub-role.",
 )
-async def list_admin_users_access(
+def list_admin_users_access(
     admin: User = Depends(require_admin_permission("admin.access.read")),
     db: Session = Depends(get_db),
 ):
@@ -319,7 +319,7 @@ async def list_admin_users_access(
     summary="Update admin sub-role",
     description="Assign admin sub-role to an admin user. Super admin only.",
 )
-async def update_admin_user_role(
+def update_admin_user_role(
     user_id: UUID,
     request: UpdateAdminRoleRequest,
     super_admin: User = Depends(get_current_super_admin),
@@ -532,7 +532,7 @@ async def bulk_resolve_errors(
     summary="🏥 Tizim holati",
     description="Barcha tizim komponentlari holati",
 )
-async def get_system_health(
+def get_system_health(
     admin: User = Depends(require_admin_permission("admin.system.read")),
     db: Session = Depends(get_db),
 ):
@@ -614,7 +614,7 @@ async def get_system_health(
     summary="👥 User statistikasi",
     description="Foydalanuvchilar statistikasi",
 )
-async def get_user_statistics(
+def get_user_statistics(
     admin: User = Depends(require_admin_permission("admin.users.read")),
     db: Session = Depends(get_db),
 ):
@@ -731,7 +731,7 @@ def _funnel_conversions(counts: Dict[str, int]) -> Dict[str, float]:
     summary="Candidate funnel KPI summary",
     description="Daily funnel event counts and conversion ratios for the last N days.",
 )
-async def get_funnel_kpis(
+def get_funnel_kpis(
     days: int = Query(7, ge=1, le=90, description="Number of trailing days to include"),
     admin: User = Depends(require_admin_permission("admin.dashboard.read")),
     db: Session = Depends(get_db),
@@ -793,7 +793,7 @@ async def get_funnel_kpis(
     summary="📊 Admin Dashboard",
     description="Admin uchun umumiy dashboard ma'lumotlari",
 )
-async def get_admin_dashboard(
+def get_admin_dashboard(
     admin: User = Depends(require_admin_permission("admin.dashboard.read")),
     db: Session = Depends(get_db),
 ):
@@ -859,7 +859,7 @@ async def get_admin_dashboard(
     summary="👥 Foydalanuvchilar ro'yxati",
     description="Tizimdagi barcha foydalanuvchilarni boshqarish uchun olish",
 )
-async def list_users_for_admin(
+def list_users_for_admin(
     admin: User = Depends(require_admin_permission("admin.users.read")),
     db: Session = Depends(get_db),
     role: Optional[UserRole] = Query(None, description="Role bo'yicha filter"),
@@ -909,7 +909,7 @@ async def list_users_for_admin(
     summary="🚫 Foydalanuvchi holatini o'zgartirish",
     description="Foydalanuvchini bloklash yoki faollashtirish",
 )
-async def update_user_status(
+def update_user_status(
     user_id: UUID,
     request: UpdateUserStatusRequest,
     admin: User = Depends(require_admin_permission("admin.users.write")),
@@ -949,7 +949,7 @@ async def update_user_status(
     summary="List company verification submissions",
     description="Review company verification queue with optional state filter.",
 )
-async def list_company_verification_submissions(
+def list_company_verification_submissions(
     state: Optional[str] = Query(None, description="unverified|pending|approved|rejected"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
@@ -994,7 +994,7 @@ async def list_company_verification_submissions(
     "/companies/{company_id}/verification/review",
     summary="Approve/reject company verification",
 )
-async def review_company_verification(
+def review_company_verification(
     company_id: UUID,
     request: CompanyVerificationReviewRequest,
     admin: User = Depends(require_admin_permission("admin.users.write")),
@@ -1080,7 +1080,7 @@ class AdminJobUpdate(BaseModel):
     summary="List all jobs across companies (admin)",
     description="Platform-wide job moderation list with filters and search.",
 )
-async def admin_list_jobs(
+def admin_list_jobs(
     search: Optional[str] = Query(None, description="Search by title or company name"),
     status_filter: Optional[str] = Query(None, alias="status",
                                          description="Filter by job status"),
@@ -1155,7 +1155,7 @@ async def admin_list_jobs(
     "/jobs/{job_id}/status",
     summary="Update job status (admin moderation)",
 )
-async def admin_update_job_status(
+def admin_update_job_status(
     job_id: UUID,
     payload: AdminJobUpdate,
     admin: User = Depends(get_current_super_admin),
@@ -1186,7 +1186,7 @@ async def admin_update_job_status(
     "/jobs/{job_id}",
     summary="Soft-delete a job (admin moderation)",
 )
-async def admin_delete_job(
+def admin_delete_job(
     job_id: UUID,
     admin: User = Depends(get_current_super_admin),
     db: Session = Depends(get_db),
@@ -1224,7 +1224,7 @@ class AdminVerifyCompany(BaseModel):
     summary="List all companies (admin)",
     description="Platform-wide company list with hiring activity per company.",
 )
-async def admin_list_companies(
+def admin_list_companies(
     search: Optional[str] = Query(None),
     is_verified: Optional[bool] = Query(None),
     offset: int = Query(0, ge=0),
@@ -1305,7 +1305,7 @@ async def admin_list_companies(
     "/companies/{company_id}/verify",
     summary="Toggle company verified status (admin)",
 )
-async def admin_verify_company(
+def admin_verify_company(
     company_id: UUID,
     payload: AdminVerifyCompany,
     admin: User = Depends(get_current_super_admin),
@@ -1350,7 +1350,7 @@ async def admin_verify_company(
     "/applications",
     summary="List all applications across the platform (admin)",
 )
-async def admin_list_applications(
+def admin_list_applications(
     status_filter: Optional[str] = Query(None, alias="status"),
     search: Optional[str] = Query(None, description="Search by applicant email or job title"),
     offset: int = Query(0, ge=0),
@@ -1422,7 +1422,7 @@ async def admin_list_applications(
 
 
 @router.get("/stats/timeseries")
-async def get_stats_timeseries(
+def get_stats_timeseries(
     metric: str = Query(..., pattern="^(users|jobs|applications)$"),
     days: int = Query(30, ge=7, le=90),
     db: Session = Depends(get_db),
@@ -1473,7 +1473,7 @@ class BulkActionRequest(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.post("/users/bulk-action")
-async def bulk_action_users(
+def bulk_action_users(
     payload: BulkActionRequest,
     db: Session = Depends(get_db),
     current_admin: User = Depends(require_admin_permission("admin.users.write")),
@@ -1498,7 +1498,7 @@ async def bulk_action_users(
 
 
 @router.post("/jobs/bulk-action")
-async def bulk_action_jobs(
+def bulk_action_jobs(
     payload: BulkActionRequest,
     db: Session = Depends(get_db),
     current_admin: User = Depends(require_admin_permission("admin.jobs.write")),
@@ -1529,7 +1529,7 @@ async def bulk_action_jobs(
 
 
 @router.post("/companies/bulk-action")
-async def bulk_action_companies(
+def bulk_action_companies(
     payload: BulkActionRequest,
     db: Session = Depends(get_db),
     current_admin: User = Depends(require_admin_permission("admin.companies.write")),
@@ -1565,7 +1565,7 @@ async def bulk_action_companies(
 # =============================================================================
 
 @router.get("/audit-logs")
-async def list_audit_logs(
+def list_audit_logs(
     admin_id: Optional[str] = Query(None),
     action: Optional[str] = Query(None),
     from_date: Optional[str] = Query(None),
@@ -1622,7 +1622,7 @@ async def list_audit_logs(
 # =============================================================================
 
 @router.get("/admin-notifications")
-async def list_admin_notifications(
+def list_admin_notifications(
     unread: bool = Query(False),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -1675,7 +1675,7 @@ async def list_admin_notifications(
 
 
 @router.post("/admin-notifications/read-all")
-async def mark_all_notifications_read(
+def mark_all_notifications_read(
     db: Session = Depends(get_db),
     current_admin: User = Depends(get_current_super_admin),
 ):
@@ -1692,7 +1692,7 @@ async def mark_all_notifications_read(
 
 
 @router.post("/admin-notifications/{notification_id}/read")
-async def mark_notification_read(
+def mark_notification_read(
     notification_id: str,
     db: Session = Depends(get_db),
     current_admin: User = Depends(get_current_super_admin),

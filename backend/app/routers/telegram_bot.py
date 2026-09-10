@@ -799,7 +799,7 @@ async def telegram_link(current_user=Depends(get_current_active_user), db=Depend
 
 
 @router.post("/unlink")
-async def telegram_unlink(current_user=Depends(get_current_active_user), db=Depends(get_db)):
+def telegram_unlink(current_user=Depends(get_current_active_user), db=Depends(get_db)):
     """Disconnect Telegram alerts for the current user."""
     current_user.telegram_chat_id = None
     db.commit()

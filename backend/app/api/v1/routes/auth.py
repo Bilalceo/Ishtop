@@ -1019,7 +1019,7 @@ async def list_sessions(
     summary="Revoke one session",
     description="Revoke a specific device session by id.",
 )
-async def revoke_session(
+def revoke_session(
     session_id: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -1053,7 +1053,7 @@ async def revoke_session(
     - `email`: Email address
     """
 )
-async def forgot_password(
+def forgot_password(
     request: ForgotPasswordRequest,
     background_tasks: BackgroundTasks,
     http_request: Request,
@@ -1120,7 +1120,7 @@ async def forgot_password(
     - 422: Weak password
     """
 )
-async def reset_password(
+def reset_password(
     request: ResetPasswordRequest,
     db: Session = Depends(get_db)
 ):
@@ -1184,7 +1184,7 @@ async def reset_password(
     - 422: New password too weak
     """
 )
-async def change_password(
+def change_password(
     request: ChangePasswordRequest,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)

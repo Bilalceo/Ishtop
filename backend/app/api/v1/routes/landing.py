@@ -110,7 +110,7 @@ class LandingContentPayload(BaseModel):
 
 
 @router.get("/content")
-async def get_public_landing_content(
+def get_public_landing_content(
     locale: Locale = Query("uz"),
     db: Session = Depends(get_db),
 ):
@@ -137,7 +137,7 @@ async def get_public_landing_content(
 
 
 @router.get("/admin/content")
-async def get_admin_landing_content(
+def get_admin_landing_content(
     locale: Locale = Query("uz"),
     admin: User = Depends(require_admin_permission("admin.dashboard.read")),
     db: Session = Depends(get_db),
@@ -166,7 +166,7 @@ async def get_admin_landing_content(
 
 
 @router.put("/admin/content")
-async def upsert_admin_landing_content(
+def upsert_admin_landing_content(
     body: LandingContentPayload,
     admin: User = Depends(require_admin_permission("admin.dashboard.read")),
     db: Session = Depends(get_db),
@@ -197,7 +197,7 @@ async def upsert_admin_landing_content(
 
 
 @router.delete("/admin/content")
-async def delete_admin_landing_content(
+def delete_admin_landing_content(
     locale: Locale = Query("uz"),
     admin: User = Depends(require_admin_permission("admin.dashboard.read")),
     db: Session = Depends(get_db),

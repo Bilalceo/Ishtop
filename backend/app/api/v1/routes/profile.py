@@ -84,7 +84,7 @@ async def upload_avatar(
 
 
 @router.delete("/avatar")
-async def delete_avatar(
+def delete_avatar(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
