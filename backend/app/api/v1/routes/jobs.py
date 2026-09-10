@@ -77,6 +77,7 @@ from app.schemas.application import (
 from app.schemas.auth import MessageResponse
 from app.config import settings
 from app.services import job_matching
+from app.services.channel_publisher import publish_job_to_channel
 from app.services.discovery import normalize_discovery_labels, normalize_discovery_slug
 from app.services.trust_engine import (
     calculate_job_trust,
@@ -1435,6 +1436,13 @@ def create_job(
     
     logger.info(f"Job created: {job.id} by company: {company.id}")
     
+
+    # New jobs are created active, so mirror them to the public channel the
+    # same way publish_job does. Best-effort; never fails the create.
+    if job.status == JobStatus.ACTIVE.value:
+        publish_job_to_channel(
+            job, company.company_name or company.full_name or "IshTop"
+        )
     return job_to_response(job)
 
 
@@ -1909,7 +1917,16 @@ def publish_job(
     db.refresh(job)
     
     logger.info(f"Job published: {job.id}")
-    
+
+    # Mirror the listing to the public Telegram channel. Nearly every job on the
+    # site was imported *from* Telegram; ones posted here never went back out, so
+    # the channel audience never saw them. Best-effort — a Telegram failure must
+    # not undo a publish that already succeeded.
+    company_name = (
+        current_user.company_name or current_user.full_name or "IshTop"
+    )
+    publish_job_to_channel(job, company_name)
+
     return job_to_response(job)
 
 

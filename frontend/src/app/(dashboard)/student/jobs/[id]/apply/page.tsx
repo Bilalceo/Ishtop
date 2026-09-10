@@ -1427,6 +1427,11 @@ export default function ApplyPage() {
             ? "Эта вакансия опубликована из внешнего канала, поэтому отклик оформляется на странице работодателя."
             : "Bu e'lon tashqi kanaldan olingan, shuning uchun ariza ish beruvchining o'z sahifasida beriladi."}
         </p>
+        <p className="mt-3 rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900 dark:bg-amber-900/20 dark:text-amber-100">
+          {isRu
+            ? "Пока отклик на такие вакансии оформляется у источника — мы работаем над тем, чтобы это можно было делать прямо здесь."
+            : "Hozircha bunday e'lonlarga ariza manba orqali beriladi — buni tez orada shu yerning o'zida qilish ustida ishlayapmiz."}
+        </p>
         {applyRoute.kind === "contact" && (
           <p className="mt-3 break-words rounded-xl bg-surface-100 px-4 py-2 text-sm text-surface-600 dark:bg-surface-800 dark:text-surface-300">
             {applyRoute.text}
