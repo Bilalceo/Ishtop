@@ -50,6 +50,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatRelativeTime, formatDate } from "@/lib/utils";
+import {
+  applicationWaitStage,
+  waitDays,
+  SILENT_AFTER_DAYS,
+} from "@/lib/applicationWait";
+import { jobApplyRoute } from "@/lib/jobApply";
 import type { ApplicationStatus } from "@/types/api";
 
 // =============================================================================
@@ -483,6 +489,18 @@ export default function ApplicationsPage() {
             const status =
               statusConfig[application.status] ?? fallbackStatusConfig;
             const StatusIcon = status.icon;
+            // "pending" alone can't tell a 1-day wait from a 90-day one.
+            const waitStage = applicationWaitStage(application);
+            const waited = waitDays(application);
+            const applyRoute = application.job
+              ? jobApplyRoute(application.job)
+              : null;
+            const sourceUrl =
+              applyRoute?.kind === "external"
+                ? applyRoute.url
+                : applyRoute?.kind === "contact"
+                  ? applyRoute.url
+                  : undefined;
 
             return (
               <motion.div key={application.id} variants={itemVariants} layout>
@@ -502,12 +520,24 @@ export default function ApplicationsPage() {
                               {application.job?.title ??
                                 (isRu ? "Без названия" : "Nomsiz vakansiya")}
                             </h3>
-                            <Badge
-                              className={`gap-1 ${status.bgColor} ${status.color}`}
-                            >
-                              <StatusIcon className="h-3 w-3" />
-                              {t(status.labelKey)}
-                            </Badge>
+                            {waitStage === "silent" ? (
+                              <Badge className="gap-1 bg-surface-200 text-surface-700 dark:bg-surface-700 dark:text-surface-200">
+                                <Clock className="h-3 w-3" />
+                                {isRu ? "Ответа нет" : "Javob kelmadi"}
+                              </Badge>
+                            ) : (
+                              <Badge
+                                className={`gap-1 ${status.bgColor} ${status.color}`}
+                              >
+                                <StatusIcon className="h-3 w-3" />
+                                {t(status.labelKey)}
+                                {waitStage === "waiting" && (
+                                  <span className="opacity-75">
+                                    · {waited} {isRu ? "дн." : "kun"}
+                                  </span>
+                                )}
+                              </Badge>
+                            )}
                           </div>
                           <p className="text-surface-600">
                             {application.job?.company?.name ?? ""}
@@ -708,6 +738,44 @@ export default function ApplicationsPage() {
                         </span>
                       </div>
                     </div>
+
+                    {waitStage === "silent" && (
+                      <div className="mt-4 rounded-xl border border-surface-200 bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800/60">
+                        <p className="text-sm font-semibold text-surface-800 dark:text-surface-100">
+                          {isRu
+                            ? `Работодатель не ответил за ${waited} дн.`
+                            : `Ish beruvchi ${waited} kun ichida javob bermadi`}
+                        </p>
+                        <p className="mt-1 text-sm text-surface-600 dark:text-surface-300">
+                          {sourceUrl
+                            ? isRu
+                              ? "Эта вакансия опубликована из внешнего канала — напишите работодателю напрямую."
+                              : "Bu e'lon tashqi kanaldan olingan — ish beruvchiga to'g'ridan-to'g'ri yozing."
+                            : isRu
+                              ? "Не ждите дальше — посмотрите похожие вакансии."
+                              : "Kutib o'tirmang — o'xshash ishlarni ko'rib chiqing."}
+                        </p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {sourceUrl && (
+                            <a
+                              href={sourceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer nofollow"
+                            >
+                              <Button size="sm" variant="outline">
+                                <ExternalLink className="mr-2 h-3.5 w-3.5" />
+                                {isRu ? "Написать напрямую" : "Bevosita yozish"}
+                              </Button>
+                            </a>
+                          )}
+                          <Link href="/student/jobs">
+                            <Button size="sm" variant="outline">
+                              {isRu ? "Похожие вакансии" : "O'xshash ishlar"}
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>

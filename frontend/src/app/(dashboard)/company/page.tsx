@@ -47,6 +47,8 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useJobs } from "@/hooks/useJobs";
+import { applicationApi } from "@/lib/api";
+import { applicationWaitStage, waitDays } from "@/lib/applicationWait";
 import ActionItemsPanel from "@/components/company/ActionItemsPanel";
 import UpcomingInterviewsPanel from "@/components/company/UpcomingInterviewsPanel";
 import { Button } from "@/components/ui/button";
@@ -106,7 +108,12 @@ const StatsCard = ({
             </p>
           )}
         </div>
-        <div className={cn("flex h-12 w-12 items-center justify-center rounded-xl", color)}>
+        <div
+          className={cn(
+            "flex h-12 w-12 items-center justify-center rounded-xl",
+            color,
+          )}
+        >
           <Icon className="h-6 w-6" />
         </div>
       </div>
@@ -116,18 +123,44 @@ const StatsCard = ({
 
 const StatusBadge = ({ status }: { status: string }) => {
   const { t } = useTranslation();
-  const configs: Record<string, { label: string; variant: string; icon: any }> = {
-    new: { label: t("companyDashboard.new"), variant: "bg-blue-100 text-blue-700", icon: Clock },
-    reviewing: { label: t("companyDashboard.reviewing"), variant: "bg-yellow-100 text-yellow-700", icon: Eye },
-    interview: { label: t("companyDashboard.interview"), variant: "bg-brand-100 text-brand-700", icon: Calendar },
-    offered: { label: t("companyDashboard.offered"), variant: "bg-green-100 text-green-700", icon: CheckCircle },
-    rejected: { label: t("companyDashboard.rejected"), variant: "bg-red-100 text-red-700", icon: XCircle },
-  };
+  const configs: Record<string, { label: string; variant: string; icon: any }> =
+    {
+      new: {
+        label: t("companyDashboard.new"),
+        variant: "bg-blue-100 text-blue-700",
+        icon: Clock,
+      },
+      reviewing: {
+        label: t("companyDashboard.reviewing"),
+        variant: "bg-yellow-100 text-yellow-700",
+        icon: Eye,
+      },
+      interview: {
+        label: t("companyDashboard.interview"),
+        variant: "bg-brand-100 text-brand-700",
+        icon: Calendar,
+      },
+      offered: {
+        label: t("companyDashboard.offered"),
+        variant: "bg-green-100 text-green-700",
+        icon: CheckCircle,
+      },
+      rejected: {
+        label: t("companyDashboard.rejected"),
+        variant: "bg-red-100 text-red-700",
+        icon: XCircle,
+      },
+    };
 
   const config = configs[status] || configs.new;
 
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium", config.variant)}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium",
+        config.variant,
+      )}
+    >
       <config.icon className="h-3 w-3" />
       {config.label}
     </span>
@@ -143,7 +176,9 @@ export default function CompanyDashboardPage() {
   const { t, locale } = useTranslation();
   const { jobs, isLoading: jobsLoading, fetchMyJobs } = useJobs();
   const [profileCompletion, setProfileCompletion] = useState(100);
-  const [onboarding, setOnboarding] = useState<OnboardingChecklist | null>(null);
+  const [onboarding, setOnboarding] = useState<OnboardingChecklist | null>(
+    null,
+  );
   const [onboardingLoading, setOnboardingLoading] = useState(true);
   const [dismissingChecklist, setDismissingChecklist] = useState(false);
 
@@ -166,7 +201,9 @@ export default function CompanyDashboardPage() {
           Boolean(user?.location?.trim()),
           Boolean(user?.bio?.trim()),
         ];
-        const percent = Math.round((checks.filter(Boolean).length / checks.length) * 100);
+        const percent = Math.round(
+          (checks.filter(Boolean).length / checks.length) * 100,
+        );
         setProfileCompletion(percent);
       } catch {
         // keep default value
@@ -211,8 +248,54 @@ export default function CompanyDashboardPage() {
 
   // Compute stats from real job data
   const activeJobs = jobs.filter((j) => j.status === "active");
-  const totalApplications = jobs.reduce((s, j) => s + (j.applications_count ?? 0), 0);
+  const totalApplications = jobs.reduce(
+    (s, j) => s + (j.applications_count ?? 0),
+    0,
+  );
   const totalViews = jobs.reduce((s, j) => s + (j.views_count ?? 0), 0);
+
+  // Applications nobody has opened. Three sat unanswered for 94 days because the
+  // dashboard only ever showed a total, never that anyone was still waiting.
+  const [waiting, setWaiting] = useState<{ count: number; oldestDays: number }>(
+    {
+      count: 0,
+      oldestDays: 0,
+    },
+  );
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await applicationApi.companyList({
+          status: "pending",
+          page_size: 100,
+        });
+        const payload = res.data?.data ?? res.data;
+        const items = payload?.applications ?? payload?.items ?? [];
+        const stale = items.filter(
+          (a: {
+            status: string;
+            reviewed_at?: string | null;
+            days_since_applied?: number;
+          }) => applicationWaitStage(a) !== null,
+        );
+        if (cancelled) return;
+        setWaiting({
+          count: stale.length,
+          oldestDays: stale.reduce(
+            (m: number, a: { days_since_applied?: number }) =>
+              Math.max(m, waitDays(a)),
+            0,
+          ),
+        });
+      } catch {
+        /* the banner is advisory — a failure just hides it */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -240,7 +323,9 @@ export default function CompanyDashboardPage() {
             <h1 className="font-display text-2xl font-bold tracking-[-0.01em] text-surface-900 dark:text-white sm:text-3xl">
               {t("companyDashboard.welcome")},{" "}
               <span className="relative inline-block">
-                <span className="relative z-10">{user?.company_name || t("common.company")}</span>
+                <span className="relative z-10">
+                  {user?.company_name || t("common.company")}
+                </span>
                 <span
                   aria-hidden
                   className="absolute inset-x-[-3px] bottom-[0.08em] z-0 h-[0.32em] rounded-md bg-gradient-to-r from-[#d7e7ff] via-[#e3ddff] to-[#ffe9d6] dark:from-brand-500/30 dark:via-violet-500/30 dark:to-brand-500/30"
@@ -251,12 +336,43 @@ export default function CompanyDashboardPage() {
               {t("companyDashboard.subtitle")}
             </p>
           </div>
-          <Link href="/company/jobs/new" className="btn-silver-primary focus-ring shrink-0">
+          <Link
+            href="/company/jobs/new"
+            className="btn-silver-primary focus-ring shrink-0"
+          >
             <PlusCircle className="h-4 w-4" />
             {t("companyDashboard.newJob")}
           </Link>
         </div>
       </motion.div>
+
+      {waiting.count > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl border border-amber-300 bg-amber-50 p-5 dark:border-amber-700/50 dark:bg-amber-900/20"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="font-semibold text-amber-900 dark:text-amber-100">
+                {locale === "ru"
+                  ? `${waiting.count} ${waiting.count === 1 ? "кандидат ждёт" : "кандидатов ждут"} вашего ответа`
+                  : `${waiting.count} ta nomzod javobingizni kutmoqda`}
+              </p>
+              <p className="mt-1 text-sm text-amber-800 dark:text-amber-200">
+                {locale === "ru"
+                  ? `Самая давняя заявка — ${waiting.oldestDays} дн. назад. Кандидаты видят, сколько ждут.`
+                  : `Eng eski ariza — ${waiting.oldestDays} kun oldin. Nomzodlar qancha kutganini ko'rib turishadi.`}
+              </p>
+            </div>
+            <Link href="/company/applicants">
+              <Button className="bg-amber-600 hover:bg-amber-700">
+                {locale === "ru" ? "Посмотреть заявки" : "Arizalarni ko'rish"}
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
+      )}
 
       {profileCompletion < 80 && (
         <motion.div
@@ -302,9 +418,13 @@ export default function CompanyDashboardPage() {
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-surface-900 dark:text-white">
-                {locale === "ru" ? "Чек-лист онбординга компании" : "Kompaniya onboarding checklist"}
+                {locale === "ru"
+                  ? "Чек-лист онбординга компании"
+                  : "Kompaniya onboarding checklist"}
               </p>
-              <p className="text-xs text-surface-500 dark:text-surface-400">{onboarding.progress}</p>
+              <p className="text-xs text-surface-500 dark:text-surface-400">
+                {onboarding.progress}
+              </p>
             </div>
             {onboarding.all_done && (
               <Button
@@ -315,7 +435,13 @@ export default function CompanyDashboardPage() {
                 className="rounded-full"
               >
                 <X className="mr-1 h-4 w-4" />
-                {dismissingChecklist ? (locale === "ru" ? "Закрываем..." : "Yopilmoqda...") : (locale === "ru" ? "Закрыть чек-лист" : "Checklistni yopish")}
+                {dismissingChecklist
+                  ? locale === "ru"
+                    ? "Закрываем..."
+                    : "Yopilmoqda..."
+                  : locale === "ru"
+                    ? "Закрыть чек-лист"
+                    : "Checklistni yopish"}
               </Button>
             )}
           </div>
@@ -329,17 +455,33 @@ export default function CompanyDashboardPage() {
                     ) : (
                       <Circle className="h-4 w-4 text-surface-300 dark:text-surface-600" />
                     )}
-                    <span className={cn("text-sm", step.completed ? "text-surface-700 dark:text-surface-200" : "text-surface-800 dark:text-white")}>
+                    <span
+                      className={cn(
+                        "text-sm",
+                        step.completed
+                          ? "text-surface-700 dark:text-surface-200"
+                          : "text-surface-800 dark:text-white",
+                      )}
+                    >
                       {locale === "ru"
                         ? ({
                             complete_profile: "Заполните профиль компании",
                             first_job_posted: "Опубликуйте первую вакансию",
-                            first_candidate_responded: "Ответьте первому кандидату",
+                            first_candidate_responded:
+                              "Ответьте первому кандидату",
                           }[step.key] ?? step.label)
                         : step.label}
                     </span>
                   </div>
-                  <span className="text-xs text-surface-500">{step.completed ? (locale === "ru" ? "Готово" : "Bajarildi") : (locale === "ru" ? "Открыть" : "Ochish")}</span>
+                  <span className="text-xs text-surface-500">
+                    {step.completed
+                      ? locale === "ru"
+                        ? "Готово"
+                        : "Bajarildi"
+                      : locale === "ru"
+                        ? "Открыть"
+                        : "Ochish"}
+                  </span>
                 </div>
               </Link>
             ))}
@@ -419,14 +561,20 @@ export default function CompanyDashboardPage() {
             <CardContent>
               {isLoading ? (
                 <div className="space-y-3">
-                  {[1,2,3].map(i => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-16 w-full rounded-xl" />
+                  ))}
                 </div>
               ) : jobs.length === 0 ? (
                 <div className="py-8 text-center">
                   <Users className="mx-auto h-10 w-10 text-surface-400" />
-                  <p className="mt-2 text-sm text-surface-500">{t("companyDashboard.noApplications")}</p>
+                  <p className="mt-2 text-sm text-surface-500">
+                    {t("companyDashboard.noApplications")}
+                  </p>
                   <Link href="/company/jobs/new">
-                    <Button size="sm" className="mt-4" variant="outline">{t("companyDashboard.createFirstJob")}</Button>
+                    <Button size="sm" className="mt-4" variant="outline">
+                      {t("companyDashboard.createFirstJob")}
+                    </Button>
                   </Link>
                 </div>
               ) : (
@@ -447,16 +595,21 @@ export default function CompanyDashboardPage() {
                           <p className="font-semibold text-surface-900 dark:text-white">
                             {job.title}
                           </p>
-                          <p className="text-sm text-surface-500">{job.location} • {job.job_type?.replace("_", " ")}</p>
+                          <p className="text-sm text-surface-500">
+                            {job.location} • {job.job_type?.replace("_", " ")}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
                           <div className="flex items-center gap-1 text-sm font-medium text-blue-600">
                             <Users className="h-4 w-4" />
-                            {job.applications_count ?? 0} {t("companyDashboard.applications")}
+                            {job.applications_count ?? 0}{" "}
+                            {t("companyDashboard.applications")}
                           </div>
-                          <p className="text-xs text-surface-400">{job.views_count ?? 0} {t("companyDashboard.views")}</p>
+                          <p className="text-xs text-surface-400">
+                            {job.views_count ?? 0} {t("companyDashboard.views")}
+                          </p>
                         </div>
                         <StatusBadge status={job.status} />
                         <Link href={`/company/jobs/${job.id}/edit`}>
@@ -490,11 +643,15 @@ export default function CompanyDashboardPage() {
             <CardContent className="space-y-4">
               {isLoading ? (
                 <div className="space-y-3">
-                  {[1,2,3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-20 w-full rounded-xl" />
+                  ))}
                 </div>
               ) : activeJobs.length === 0 ? (
                 <div className="py-4 text-center">
-                  <p className="text-sm text-surface-500">{t("companyDashboard.noActiveJobs")}</p>
+                  <p className="text-sm text-surface-500">
+                    {t("companyDashboard.noActiveJobs")}
+                  </p>
                 </div>
               ) : (
                 activeJobs.slice(0, 4).map((job: Job) => (
@@ -519,7 +676,10 @@ export default function CompanyDashboardPage() {
                             <span>{t("companyDashboard.applications")}</span>
                             <span>{job.applications_count ?? 0}/50</span>
                           </div>
-                          <Progress value={((job.applications_count ?? 0) / 50) * 100} className="h-1" />
+                          <Progress
+                            value={((job.applications_count ?? 0) / 50) * 100}
+                            className="h-1"
+                          />
                         </div>
                       )}
                     </div>
@@ -581,8 +741,12 @@ export default function CompanyDashboardPage() {
                 <PlusCircle className="h-6 w-6" />
               </div>
               <div>
-                <p className="font-semibold text-surface-900 dark:text-white">{t("companyDashboard.createJob")}</p>
-                <p className="text-sm text-surface-500">{t("companyDashboard.createJobDesc")}</p>
+                <p className="font-semibold text-surface-900 dark:text-white">
+                  {t("companyDashboard.createJob")}
+                </p>
+                <p className="text-sm text-surface-500">
+                  {t("companyDashboard.createJobDesc")}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -595,8 +759,12 @@ export default function CompanyDashboardPage() {
                 <Users className="h-6 w-6" />
               </div>
               <div>
-                <p className="font-semibold text-surface-900 dark:text-white">{t("companyDashboard.candidates")}</p>
-                <p className="text-sm text-surface-500">{t("companyDashboard.candidatesDesc")}</p>
+                <p className="font-semibold text-surface-900 dark:text-white">
+                  {t("companyDashboard.candidates")}
+                </p>
+                <p className="text-sm text-surface-500">
+                  {t("companyDashboard.candidatesDesc")}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -609,8 +777,12 @@ export default function CompanyDashboardPage() {
                 <BarChart3 className="h-6 w-6" />
               </div>
               <div>
-                <p className="font-semibold text-surface-900 dark:text-white">{t("companyDashboard.analytics")}</p>
-                <p className="text-sm text-surface-500">{t("companyDashboard.analyticsDesc")}</p>
+                <p className="font-semibold text-surface-900 dark:text-white">
+                  {t("companyDashboard.analytics")}
+                </p>
+                <p className="text-sm text-surface-500">
+                  {t("companyDashboard.analyticsDesc")}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -623,8 +795,12 @@ export default function CompanyDashboardPage() {
                 <Building2 className="h-6 w-6" />
               </div>
               <div>
-                <p className="font-semibold text-surface-900 dark:text-white">{t("companyDashboard.companyProfile")}</p>
-                <p className="text-sm text-surface-500">{t("companyDashboard.companyProfileDesc")}</p>
+                <p className="font-semibold text-surface-900 dark:text-white">
+                  {t("companyDashboard.companyProfile")}
+                </p>
+                <p className="text-sm text-surface-500">
+                  {t("companyDashboard.companyProfileDesc")}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -633,16 +809,3 @@ export default function CompanyDashboardPage() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
