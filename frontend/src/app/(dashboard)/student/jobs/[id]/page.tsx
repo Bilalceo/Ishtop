@@ -37,6 +37,7 @@ import {
   stripHtmlTags,
 } from "@/lib/utils";
 import { jobDisplayIdentity } from "@/lib/jobLabels";
+import { jobApplyRoute } from "@/lib/jobApply";
 import type { Job } from "@/types/api";
 import { useTranslation } from "@/contexts/TranslationContext";
 
@@ -131,6 +132,11 @@ export default function JobDetailPage() {
         jobTypeLabel: "Тип занятости",
         locationLabel: "Локация",
         posted: "Опубликовано",
+        applyExternal: "Откликнуться на источнике",
+        applyExternalNote: "Отклик оформляется на странице работодателя",
+        contactTitle: "Связаться",
+        contactOpen: "Открыть канал",
+        applyClosed: "По этой вакансии отклик не принимается",
         matchTitle: "Соответствие вашему резюме",
         matchCoverage: "Требования покрыты",
         noResumeMatch:
@@ -181,6 +187,11 @@ export default function JobDetailPage() {
         jobTypeLabel: "Ish turi",
         locationLabel: "Joylashuv",
         posted: "E'lon qilingan",
+        applyExternal: "Manbada ariza berish",
+        applyExternalNote: "Ariza ish beruvchining o'z sahifasida beriladi",
+        contactTitle: "Bog'lanish",
+        contactOpen: "Kanalni ochish",
+        applyClosed: "Bu e'lon uchun ariza qabul qilinmaydi",
         matchTitle: "Rezyumengizga mosligi",
         matchCoverage: "Talablar qamrovi",
         noResumeMatch:
@@ -344,6 +355,16 @@ export default function JobDetailPage() {
       job.salary_currency || "UZS",
     ) || c.notSpecified;
   const applyHref = `/student/jobs/${job.id}/apply`;
+  // Aggregated listings live under an import account nobody reads, so applying
+  // in-app would go nowhere; send the candidate to the source instead.
+  const applyRoute = jobApplyRoute(job);
+  const applyIsExternal = applyRoute.kind !== "internal";
+  const applyUrl =
+    applyRoute.kind === "external"
+      ? applyRoute.url
+      : applyRoute.kind === "contact"
+        ? applyRoute.url
+        : undefined;
 
   // Only offer tabs that actually have content — an empty "Talablar" tab is worse
   // than no tab at all (aggregated listings often carry no structured lists).
@@ -543,12 +564,32 @@ export default function JobDetailPage() {
 
           {/* Primary actions */}
           <div ref={topApplyRef} className="w-full shrink-0 lg:w-[300px]">
-            <Link href={applyHref} className="block">
-              <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 py-6 text-base font-semibold shadow-lg shadow-brand-500/25">
-                <Sparkles className="mr-2 h-5 w-5" />
-                {c.applyButton}
-              </Button>
-            </Link>
+            {applyIsExternal ? (
+              applyUrl ? (
+                <a
+                  href={applyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="block"
+                >
+                  <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 py-6 text-base font-semibold shadow-lg shadow-brand-500/25">
+                    <ExternalLink className="mr-2 h-5 w-5" />
+                    {c.applyExternal}
+                  </Button>
+                </a>
+              ) : (
+                <div className="rounded-xl border border-surface-200 bg-surface-50 p-4 text-center text-sm text-surface-600 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300">
+                  {c.applyClosed}
+                </div>
+              )
+            ) : (
+              <Link href={applyHref} className="block">
+                <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 py-6 text-base font-semibold shadow-lg shadow-brand-500/25">
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  {c.applyButton}
+                </Button>
+              </Link>
+            )}
             <Link
               href={`/student/interview?job=${job.id}`}
               className="mt-3 block"
@@ -561,9 +602,9 @@ export default function JobDetailPage() {
                 {c.prepareInterview}
               </Button>
             </Link>
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-surface-500">
-              <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
-              {c.freeToApply}
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-surface-500">
+              <CheckCircle className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+              {applyIsExternal ? c.applyExternalNote : c.freeToApply}
             </p>
           </div>
         </div>
@@ -689,6 +730,29 @@ export default function JobDetailPage() {
             )}
           </div>
 
+          {applyRoute.kind === "contact" && (
+            <div className="rounded-2xl border border-surface-200 bg-white p-5 dark:border-surface-700 dark:bg-surface-900">
+              <h2 className="flex items-center gap-2 text-sm font-bold text-surface-900 dark:text-white">
+                <ExternalLink className="h-4 w-4 text-brand-500" />
+                {c.contactTitle}
+              </h2>
+              <p className="mt-3 break-words text-sm text-surface-600 dark:text-surface-300">
+                {applyRoute.text}
+              </p>
+              {applyRoute.url && (
+                <a
+                  href={applyRoute.url}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-surface-200 py-2.5 text-sm font-semibold text-brand-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:hover:bg-surface-800"
+                >
+                  {c.contactOpen}
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              )}
+            </div>
+          )}
+
           {job.location && (
             <div className="rounded-2xl border border-surface-200 bg-white p-5 dark:border-surface-700 dark:bg-surface-900">
               <h2 className="flex items-center gap-2 text-sm font-bold text-surface-900 dark:text-white">
@@ -808,12 +872,26 @@ export default function JobDetailPage() {
             {c.fitCtaSub}
           </p>
         </div>
-        <Link href={applyHref} className="w-full sm:w-auto">
-          <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 px-8 font-semibold shadow-lg shadow-brand-500/25 sm:w-auto">
-            <Sparkles className="mr-2 h-4 w-4" />
-            {c.applyButton}
-          </Button>
-        </Link>
+        {applyIsExternal && applyUrl ? (
+          <a
+            href={applyUrl}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            className="w-full sm:w-auto"
+          >
+            <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 px-8 font-semibold shadow-lg shadow-brand-500/25 sm:w-auto">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              {c.applyExternal}
+            </Button>
+          </a>
+        ) : applyIsExternal ? null : (
+          <Link href={applyHref} className="w-full sm:w-auto">
+            <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 px-8 font-semibold shadow-lg shadow-brand-500/25 sm:w-auto">
+              <Sparkles className="mr-2 h-4 w-4" />
+              {c.applyButton}
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Mobile sticky apply bar — only while the inline CTAs are off screen. */}
@@ -826,12 +904,26 @@ export default function JobDetailPage() {
             transition={{ type: "spring", stiffness: 380, damping: 32 }}
             className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-40 border-t border-surface-200 bg-white/95 px-4 py-3 backdrop-blur-md dark:border-surface-700 dark:bg-surface-900/95 lg:hidden"
           >
-            <Link href={applyHref} className="block pr-16">
-              <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 py-3 text-base font-semibold shadow-lg shadow-brand-500/25">
-                <Sparkles className="mr-2 h-5 w-5" />
-                {c.applyButton}
-              </Button>
-            </Link>
+            {applyIsExternal && applyUrl ? (
+              <a
+                href={applyUrl}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="block pr-16"
+              >
+                <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 py-3 text-base font-semibold shadow-lg shadow-brand-500/25">
+                  <ExternalLink className="mr-2 h-5 w-5" />
+                  {c.applyExternal}
+                </Button>
+              </a>
+            ) : (
+              <Link href={applyHref} className="block pr-16">
+                <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 py-3 text-base font-semibold shadow-lg shadow-brand-500/25">
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  {c.applyButton}
+                </Button>
+              </Link>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

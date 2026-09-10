@@ -21,7 +21,12 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import { jobApi } from "@/lib/api";
-import { formatRelativeTime, formatSalaryRange, cn, stripHtmlTags } from "@/lib/utils";
+import {
+  formatRelativeTime,
+  formatSalaryRange,
+  cn,
+  stripHtmlTags,
+} from "@/lib/utils";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
 
@@ -90,7 +95,11 @@ export default function SavedJobsPage() {
     try {
       await jobApi.unsaveJob(jobId);
       setJobs((prev) => prev.filter((j) => j.id !== jobId));
-      toast.success(isRu ? "Вакансия удалена из сохранённых." : "Ish saqlanganlar ro'yxatidan o'chirildi.");
+      toast.success(
+        isRu
+          ? "Вакансия удалена из сохранённых."
+          : "Ish saqlanganlar ro'yxatidan o'chirildi.",
+      );
     } catch {
       toast.error("O'chirishda xatolik yuz berdi.");
     } finally {
@@ -101,8 +110,10 @@ export default function SavedJobsPage() {
   const filtered = jobs.filter(
     (job) =>
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (job.company?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (job.location || "").toLowerCase().includes(searchQuery.toLowerCase())
+      (job.company?.name || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      (job.location || "").toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -157,8 +168,12 @@ export default function SavedJobsPage() {
           <BookmarkCheck className="h-16 w-16 text-surface-300" />
           <h3 className="mt-4 text-lg font-semibold text-surface-700">
             {searchQuery
-              ? (isRu ? "По вашему запросу ничего не найдено" : "Qidiruv bo'yicha natija topilmadi")
-              : (isRu ? "Пока нет сохранённых вакансий" : "Hali saqlangan ish yo'q")}
+              ? isRu
+                ? "По вашему запросу ничего не найдено"
+                : "Qidiruv bo'yicha natija topilmadi"
+              : isRu
+                ? "Пока нет сохранённых вакансий"
+                : "Hali saqlangan ish yo'q"}
           </h3>
           <p className="mt-2 text-sm text-surface-500">
             {searchQuery
@@ -209,10 +224,13 @@ export default function SavedJobsPage() {
                       {companyLetter}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-surface-900">{companyName}</p>
+                      <p className="truncate text-sm font-medium text-surface-900">
+                        {companyName}
+                      </p>
                       <p className="flex items-center gap-1 text-xs text-surface-500">
                         <Clock className="h-3 w-3" />
-                        {formatRelativeTime(job.saved_at, locale)} {isRu ? "сохранено" : "saqlangan"}
+                        {formatRelativeTime(job.saved_at, locale)}{" "}
+                        {isRu ? "сохранено" : "saqlangan"}
                       </p>
                     </div>
                   </div>
@@ -240,7 +258,12 @@ export default function SavedJobsPage() {
                     {(job.salary_min || job.salary_max) && (
                       <span className="flex items-center gap-1 font-medium text-green-600">
                         <Wallet className="h-3 w-3" />
-                        {formatSalaryRange(job.salary_min, job.salary_max, "uz", job.salary_currency || "USD")}
+                        {formatSalaryRange(
+                          job.salary_min,
+                          job.salary_max,
+                          "uz",
+                          job.salary_currency || "USD",
+                        )}
                       </span>
                     )}
                   </div>
@@ -250,18 +273,19 @@ export default function SavedJobsPage() {
                     <Badge
                       className={cn(
                         "rounded-full px-2.5 py-0.5 text-xs",
-                        jobTypeColors[job.job_type] || "bg-surface-100 text-surface-600"
+                        jobTypeColors[job.job_type] ||
+                          "bg-surface-100 text-surface-600",
                       )}
                     >
                       {jobTypeLabels[job.job_type] || job.job_type}
                     </Badge>
-                    <Link href={`/student/jobs/${job.id}/apply`}>
+                    <Link href={`/student/jobs/${job.id}`}>
                       <Button
                         size="sm"
                         className="bg-gradient-to-r from-brand-500 to-violet-600 text-xs"
                       >
                         <Sparkles className="mr-1 h-3 w-3" />
-                        Ariza
+                        Ko&apos;rish
                       </Button>
                     </Link>
                   </div>

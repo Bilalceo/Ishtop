@@ -12,11 +12,13 @@ import {
   ShieldCheck,
   AlertTriangle,
   Briefcase,
+  ExternalLink,
 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { jobDisplayIdentity, jobTypeLabel } from "@/lib/jobLabels";
+import { jobApplyRoute } from "@/lib/jobApply";
 import { formatRelativeTime, formatSalaryRange, cn } from "@/lib/utils";
 import type { Job } from "@/types/api";
 
@@ -42,6 +44,15 @@ export function JobCard({
     job.title,
     job.company?.name,
   );
+  // Aggregated listings are applied to at the source, so the card must not
+  // promise a one-click in-app application it cannot deliver.
+  const applyRoute = jobApplyRoute(job);
+  const externalUrl =
+    applyRoute.kind === "external"
+      ? applyRoute.url
+      : applyRoute.kind === "contact"
+        ? applyRoute.url
+        : undefined;
 
   return (
     <motion.div
@@ -182,17 +193,34 @@ export function JobCard({
             )}
           </button>
 
-          <Button
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onQuickApply();
-            }}
-            className="rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 px-4 text-xs shadow-sm shadow-brand-500/30"
-          >
-            <Zap className="mr-1 h-3 w-3" />
-            {isRu ? "Быстрый отклик" : "Tezkor ariza"}
-          </Button>
+          {externalUrl ? (
+            <a
+              href={externalUrl}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Button
+                size="sm"
+                className="rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 px-4 text-xs shadow-sm shadow-brand-500/30"
+              >
+                <ExternalLink className="mr-1 h-3 w-3" />
+                {isRu ? "На источнике" : "Manbada"}
+              </Button>
+            </a>
+          ) : applyRoute.kind === "internal" ? (
+            <Button
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onQuickApply();
+              }}
+              className="rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 px-4 text-xs shadow-sm shadow-brand-500/30"
+            >
+              <Zap className="mr-1 h-3 w-3" />
+              {isRu ? "Быстрый отклик" : "Tezkor ariza"}
+            </Button>
+          ) : null}
         </div>
       </div>
     </motion.div>
