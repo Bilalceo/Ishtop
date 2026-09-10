@@ -129,9 +129,29 @@ async def _ai_answer(question: str, locale: str) -> str:
     )
 
 
+def _esc(value) -> str:
+    """Escape for Telegram HTML parse mode.
+
+    Job titles come from third-party posts and three of them already contain
+    "<", ">" or "&"; unescaped, Telegram rejects the whole message and the job
+    silently never renders.
+    """
+    return (
+        str(value if value is not None else "")
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
+
+
 async def _send(token: str, chat_id: int, text: str, reply_markup: dict | None = None) -> None:
     url = f"{settings.TELEGRAM_API_BASE_URL}/bot{token}/sendMessage"
-    payload = {"chat_id": chat_id, "text": text, "disable_web_page_preview": True}
+    payload = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "HTML",
+        "disable_web_page_preview": True,
+    }
     if reply_markup is not None:
         payload["reply_markup"] = reply_markup
     try:
@@ -146,7 +166,10 @@ async def _edit(token: str, chat_id: int, message_id: int, text: str,
     """Edit a message in place — used for catalog navigation (no chat spam)."""
     url = f"{settings.TELEGRAM_API_BASE_URL}/bot{token}/editMessageText"
     payload = {
-        "chat_id": chat_id, "message_id": message_id, "text": text,
+        "chat_id": chat_id,
+        "message_id": message_id,
+        "text": text,
+        "parse_mode": "HTML",
         "disable_web_page_preview": True,
     }
     if reply_markup is not None:
@@ -172,20 +195,28 @@ async def _answer_cb(token: str, callback_id: str, text: str | None = None) -> N
 
 
 def _welcome(locale: str) -> str:
+    """First screen. Says what the bot is FOR, not what powers it.
+
+    It used to open with "I am the IshTop AI assistant, ask me anything", which
+    told a job seeker nothing about the one thing the bot is good at.
+    """
+    total = len(_load_catalog()["jobs"])
     if locale == "ru":
         return (
-            "Привет! Я AI-помощник IshTop 🤖\n\n"
-            "Задайте любой вопрос о ishtopuz.uz: поиск работы, AI-резюме, отклики, "
-            "процент совпадения и т.д.\n\n"
-            "🎁 Подпишитесь на этот канал — 1 месяц PRO бесплатно: ishtopuz.uz/plans\n\n"
-            "Начать: ishtopuz.uz"
+            "👋 Здравствуйте!\n\n"
+            f"<b>IshTop</b> — вакансии по всему Узбекистану. "
+            f"Сейчас открыто: <b>{total}</b>.\n\n"
+            "Найдите работу и откликнитесь прямо здесь — "
+            "статус отклика тоже смотрите в боте.\n\n"
+            "С чего начнём?"
         )
     return (
-        "Salom! Men IshTop AI yordamchisiman 🤖\n\n"
-        "ishtopuz.uz haqida istalgan savolni bering: ish topish, AI rezyume, "
-        "ariza berish, moslik foizi va boshqalar.\n\n"
-        "🎁 Shu kanalga obuna bo'lsangiz — 1 oy PRO bepul: ishtopuz.uz/plans\n\n"
-        "Boshlash: ishtopuz.uz"
+        "👋 Assalomu alaykum!\n\n"
+        f"<b>IshTop</b> — O'zbekiston bo'yicha ish o'rinlari. "
+        f"Ayni paytda <b>{total}</b> ta faol vakansiya.\n\n"
+        "Ish tanlang va shu yerning o'zidan ariza bering — "
+        "arizangiz holatini ham shu botda kuzatasiz.\n\n"
+        "Nimadan boshlaymiz?"
     )
 
 
@@ -317,16 +348,16 @@ def _contact_url(contact: str) -> str | None:
 
 
 def _menu_text(locale: str) -> str:
+    total = len(_load_catalog()["jobs"])
     if locale == "ru":
         return (
-            "🏠 Главное меню IshTop\n\n"
-            "Выберите действие ниже. «🔍 Поиск работы» — каталог вакансий по сферам."
+            f"🏠 <b>Главное меню</b>\n\n"
+            f"Открытых вакансий: <b>{total}</b>. Как будем искать?"
         )
     return (
-        "🏠 IshTop bosh menyu\n\n"
-        "Quyidan tanlang. «🔍 Ish qidirish» — sohalar bo'yicha vakansiyalar katalogi."
+        f"🏠 <b>Bosh menyu</b>\n\n"
+        f"Faol vakansiyalar: <b>{total}</b> ta. Qanday qidiramiz?"
     )
-
 
 def _cats_text(locale: str = "uz") -> str:
     cat = _load_catalog()
@@ -337,12 +368,15 @@ def _cats_text(locale: str = "uz") -> str:
 
 
 def _main_menu_kb() -> dict:
+    """Four actions, all of which keep the user inside the bot.
+
+    The old menu spent half its buttons sending people to the website and the
+    channel — a job bot whose main menu is a set of exit doors.
+    """
     return _kb([
         [_btn("🔍 Soha bo'yicha", "cats"), _btn("🏙 Shahar bo'yicha", "cities")],
         [_btn("🔎 Kalit so'z bilan qidirish", "search")],
-        [_url_btn("📄 AI Rezyume", f"{SITE_URL}/student/resume"),
-         _url_btn("🌐 Sayt", SITE_URL)],
-        [_url_btn("📢 Kanal", f"https://t.me/{CHANNEL_USERNAME}")],
+        [_btn("📋 Mening arizalarim", "myapps")],
     ])
 
 
@@ -381,7 +415,7 @@ def _category_view(cid: str, page: int) -> tuple[str, dict]:
     lines = [f"{meta['emoji']} {meta['label']} — {len(jobs)} ta vakansiya",
              f"Sahifa {page + 1}/{pages}", ""]
     for idx, j in enumerate(chunk, 1):
-        lines.append(f"{idx}. {j['title']}")
+        lines.append(f"{idx}. {_esc(j['title'])}")
         sub = " · ".join(x for x in [j["company"], _fmt_salary(j), j["location"]] if x)
         if sub:
             lines.append(f"    {sub}")
@@ -447,7 +481,7 @@ def _city_view(cid: str, page: int) -> tuple[str, dict]:
              f"Sahifa {page + 1}/{pages}", ""]
     for idx, j in enumerate(chunk, 1):
         cat_meta = category_meta(j["cid"])
-        lines.append(f"{idx}. {j['title']}")
+        lines.append(f"{idx}. {_esc(j['title'])}")
         sub = " · ".join(x for x in [cat_meta["label"], j["company"], _fmt_salary(j)] if x)
         if sub:
             lines.append(f"    {sub}")
@@ -477,12 +511,12 @@ def _job_detail(job_id: str, back_cb: str) -> tuple[str, dict]:
             _kb([[_btn("🔙 Orqaga", back_cb or "cats"), _btn("🏠 Menyu", "home")]]),
         )
     meta = category_meta(j["cid"])
-    lines = [f"{meta['emoji']} {meta['label']}", "", f"📣 {j['title']}"]
+    lines = [f"{meta['emoji']} {meta['label']}", "", f"📣 <b>{_esc(j['title'])}</b>"]
     if j["company"]:
-        lines.append(f"🏢 {j['company']}")
+        lines.append(f"🏢 {_esc(j['company'])}")
     lines.append(f"💵 {_fmt_salary(j)}")
     if j["location"]:
-        lines.append(f"📌 {j['location']}")
+        lines.append(f"📌 {_esc(j['location'])}")
     exp = _EXP_LABELS.get(j["experience"])
     if exp:
         lines.append(f"🕒 {exp}")
@@ -570,7 +604,7 @@ def _apply_start(job_id: str, chat_id: str, back_cb: str) -> tuple[str, dict]:
         )
         if already:
             return (
-                f"✅ Siz «{job.title}» e'loniga allaqachon ariza bergansiz.\n\n"
+                f"✅ Siz «{_esc(job.title)}» e'loniga allaqachon ariza bergansiz.\n\n"
                 "Holatini saytdagi «Arizalarim» bo'limida kuzatib boring.",
                 _kb([[_url_btn("📋 Arizalarim", f"{settings.FRONTEND_URL.rstrip('/')}/student/applications")],
                      [_btn("🔙 Orqaga", back_cb or "cats")]]),
@@ -599,7 +633,7 @@ def _apply_start(job_id: str, chat_id: str, back_cb: str) -> tuple[str, dict]:
         ]
         rows.append([_btn("🔙 Orqaga", f"j:{job_id}:{back_cb}")])
         return (
-            f"📝 «{job.title}»\n\nQaysi rezyume bilan ariza berasiz?",
+            f"📝 «{_esc(job.title)}»\n\nQaysi rezyume bilan ariza berasiz?",
             _kb(rows),
         )
     finally:
@@ -620,15 +654,15 @@ def _relay_external_application(job, user, resume) -> None:
         return
     parts = [
         "📥 <b>Yangi ariza</b> (tashqi manba)",
-        f"💼 {job.title}" + (f" · {job.location}" if job.location else ""),
+        f"💼 {_esc(job.title)}" + (f" · {_esc(job.location)}" if job.location else ""),
         "",
-        f"👤 <b>{user.full_name or 'Nomzod'}</b>",
+        f"👤 <b>{_esc(user.full_name or 'Nomzod')}</b>",
     ]
     contact = " · ".join(x for x in [user.phone or "", user.email or ""] if x)
     if contact:
         parts.append(f"📞 {contact}")
     if resume is not None and getattr(resume, "title", None):
-        parts.append(f"📄 {resume.title}")
+        parts.append(f"📄 {_esc(resume.title)}")
     if getattr(job, "contact_info", None):
         parts.append(f"🏢 Ish beruvchi: {job.contact_info}")
     if getattr(job, "external_apply_url", None):
@@ -730,8 +764,8 @@ def _apply_submit(job_id: str, resume_id: str, chat_id: str) -> tuple[str, dict]
         )
         return (
             f"✅ Arizangiz qabul qilindi!\n\n"
-            f"📣 {job.title}\n"
-            f"📄 {resume.title or 'Rezyume'}\n\n"
+            f"📣 {_esc(job.title)}\n"
+            f"📄 {_esc(resume.title or 'Rezyume')}\n\n"
             f"{tail} Holatini «Arizalarim»da kuzating.",
             _kb([[_url_btn("📋 Arizalarim", f"{site}/student/applications")],
                  [_btn("🔍 Boshqa ishlar", "cats"), _btn("🏠 Menyu", "home")]]),
@@ -740,6 +774,90 @@ def _apply_submit(job_id: str, resume_id: str, chat_id: str) -> tuple[str, dict]
         logger.warning("bot apply failed (job=%s): %s", job_id, exc)
         db.rollback()
         return ("Xatolik yuz berdi. Birozdan so'ng urinib ko'ring.", _kb([[_btn("🏠 Menyu", "home")]]))
+    finally:
+        db.close()
+
+
+_APP_STATUS_UZ = {
+    "pending": ("⏳", "Ko'rib chiqilmoqda"),
+    "reviewing": ("👀", "Ko'rilmoqda"),
+    "shortlisted": ("⭐", "Saralandi"),
+    "interview": ("📅", "Suhbatga taklif"),
+    "accepted": ("🎉", "Qabul qilindi"),
+    "hired": ("🎉", "Ishga olindi"),
+    "rejected": ("❌", "Rad etildi"),
+    "withdrawn": ("↩️", "Bekor qilindi"),
+}
+
+
+def _my_applications(chat_id: str) -> tuple[str, dict]:
+    """The candidate's own applications, so the bot is somewhere to come back to.
+
+    Without this the bot is a one-way door: apply and never hear anything. The
+    wait is shown in days for anything still untouched, matching what the site
+    now says on the same application.
+    """
+    db = SessionLocal()
+    try:
+        from app.models.user import User
+        from app.models.job import Job
+        from app.models.application import Application
+
+        user = (
+            db.query(User)
+            .filter(User.telegram_chat_id == str(chat_id), User.is_deleted.is_(False))
+            .first()
+        )
+        if not user:
+            return (
+                "🔗 Arizalaringizni ko'rish uchun IshTop hisobingizni ulang.\n\n"
+                "Saytga kiring → Sozlamalar → Telegramni ulash.",
+                _kb([[_url_btn("🌐 Hisobni ulash", f"{SITE_URL}/student/settings")],
+                     [_btn("🏠 Menyu", "home")]]),
+            )
+
+        rows = (
+            db.query(Application, Job)
+            .join(Job, Job.id == Application.job_id)
+            .filter(Application.user_id == user.id, Application.is_deleted.is_(False))
+            .order_by(Application.applied_at.desc())
+            .limit(10)
+            .all()
+        )
+        if not rows:
+            return (
+                "📋 Hozircha arizangiz yo'q.\n\n"
+                "Ish tanlang va shu yerdan ariza bering — holati shu bo'limda ko'rinadi.",
+                _kb([[_btn("🔍 Ish qidirish", "cats")], [_btn("🏠 Menyu", "home")]]),
+            )
+
+        from datetime import datetime, timezone
+
+        lines = [f"📋 <b>Mening arizalarim</b> ({len(rows)})", ""]
+        for app_row, job in rows:
+            emoji, label = _APP_STATUS_UZ.get(app_row.status, ("•", app_row.status))
+            lines.append(f"{emoji} <b>{_esc(job.title)}</b>")
+            applied = app_row.applied_at
+            if applied is not None:
+                if applied.tzinfo is None:
+                    applied = applied.replace(tzinfo=timezone.utc)
+                days = (datetime.now(timezone.utc) - applied).days
+                # An untouched application is the one worth putting a number on.
+                if app_row.status == "pending" and app_row.reviewed_at is None:
+                    lines.append(f"   {label} · {days} kun")
+                else:
+                    lines.append(f"   {label}")
+            else:
+                lines.append(f"   {label}")
+            lines.append("")
+
+        return "\n".join(lines), _kb([
+            [_btn("🔍 Yana ish qidirish", "cats")],
+            [_btn("🏠 Menyu", "home")],
+        ])
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("my applications failed: %s", exc)
+        return ("Xatolik yuz berdi.", _kb([[_btn("🏠 Menyu", "home")]]))
     finally:
         db.close()
 
@@ -792,7 +910,7 @@ def _search_view(query: str, results: list) -> tuple[str, dict]:
     lines = [f"🔎 «{query.strip()}» — {len(results)} ta topildi", ""]
     for idx, j in enumerate(shown, 1):
         meta = category_meta(j["cid"])
-        lines.append(f"{idx}. {j['title']}")
+        lines.append(f"{idx}. {_esc(j['title'])}")
         sub = " · ".join(x for x in [meta["label"], _fmt_salary(j), j["location"]] if x)
         if sub:
             lines.append(f"    {sub}")
@@ -825,11 +943,15 @@ async def _handle_callback(token: str, callback: dict) -> None:
         # then hit the warm cache instead of blocking on a DB query.
         await run_in_threadpool(_load_catalog)
         if data == "home":
-            await _edit(token, chat_id, message_id, _menu_text(locale), _main_menu_kb())
+            menu_txt = await run_in_threadpool(_menu_text, locale)
+            await _edit(token, chat_id, message_id, menu_txt, _main_menu_kb())
         elif data == "cats":
             await _edit(token, chat_id, message_id, _cats_text(locale), _categories_kb())
         elif data == "cities":
             await _edit(token, chat_id, message_id, _cities_text(locale), _cities_kb())
+        elif data == "myapps":
+            text, kb = await run_in_threadpool(_my_applications, str(chat_id))
+            await _edit(token, chat_id, message_id, text, kb)
         elif data == "search":
             await _edit(token, chat_id, message_id, _search_prompt(locale),
                         _kb([[_btn("🏠 Bosh menyu", "home")]]))
@@ -851,7 +973,8 @@ async def _handle_callback(token: str, callback: dict) -> None:
                 text, kb = view(cid, int(page))
                 await _edit(token, chat_id, message_id, text, kb)
             else:  # malformed / stale button — fall back to the top menu
-                await _edit(token, chat_id, message_id, _menu_text(locale), _main_menu_kb())
+                menu_txt = await run_in_threadpool(_menu_text, locale)
+            await _edit(token, chat_id, message_id, menu_txt, _main_menu_kb())
         elif data.startswith("j:"):
             # j:<uuid>:<back_cb>  where back_cb is itself a callback like "c:it:0"
             parts = data.split(":", 2)
@@ -859,7 +982,8 @@ async def _handle_callback(token: str, callback: dict) -> None:
                 text, kb = _job_detail(parts[1], parts[2])
                 await _edit(token, chat_id, message_id, text, kb)
             else:
-                await _edit(token, chat_id, message_id, _menu_text(locale), _main_menu_kb())
+                menu_txt = await run_in_threadpool(_menu_text, locale)
+            await _edit(token, chat_id, message_id, menu_txt, _main_menu_kb())
         elif data.startswith("apply:"):
             # apply:<job_id>:<back_cb>
             parts = data.split(":", 2)
@@ -943,7 +1067,8 @@ async def telegram_webhook(secret: str, request: Request):
             else:
                 await _send(token, chat_id, _link_fail(locale))
             return {"ok": True}
-        await _send(token, chat_id, _welcome(locale), _main_menu_kb())
+        welcome_txt = await run_in_threadpool(_welcome, locale)
+        await _send(token, chat_id, welcome_txt, _main_menu_kb())
         return {"ok": True}
 
     if text.startswith("/help"):
@@ -1015,24 +1140,23 @@ def _link_chat_to_user(link_token: str, chat_id: str) -> bool:
 def _help(locale: str) -> str:
     if locale == "ru":
         return (
-            "🤖 Я AI-помощник IshTop. Чем могу помочь:\n\n"
-            "• Задайте любой вопрос о ishtopuz.uz — отвечу с помощью AI\n"
-            "• Ежедневные подходящие вакансии — подключите Telegram в "
-            "Настройках на ishtopuz.uz\n"
-            "• AI-резюме, отклики, процент совпадения — всё на сайте\n\n"
-            "🎁 Подпишитесь на канал — 1 месяц PRO бесплатно: ishtopuz.uz/plans\n\n"
-            "Открыть: ishtopuz.uz  ·  Канал: @ishtopuz_official"
+            "🤖 <b>Что умеет бот</b>\n\n"
+            "🔍 <b>Поиск работы</b> — по сфере, городу или ключевому слову\n"
+            "📝 <b>Отклик</b> — прямо здесь, вашим резюме с сайта\n"
+            "📋 <b>Мои отклики</b> — статус каждого\n\n"
+            "Чтобы откликаться, подключите аккаунт: "
+            "Настройки на ishtopuz.uz → Telegram.\n\n"
+            "Есть вопрос — просто напишите его."
         )
     return (
-        "🤖 Men IshTop AI yordamchisiman. Nima qila olaman:\n\n"
-        "• ishtopuz.uz haqida istalgan savol bering — AI javob beradi\n"
-        "• Har kuni mos ish o'rinlari — ishtopuz.uz Sozlamalar'da "
-        "Telegram'ni ulang\n"
-        "• AI rezyume, ariza, moslik foizi — hammasi saytda\n\n"
-        "🎁 Kanalga obuna bo'lsangiz — 1 oy PRO bepul: ishtopuz.uz/plans\n\n"
-        "Ochish: ishtopuz.uz  ·  Kanal: @ishtopuz_official"
+        "🤖 <b>Bot nima qila oladi</b>\n\n"
+        "🔍 <b>Ish qidirish</b> — soha, shahar yoki kalit so'z bo'yicha\n"
+        "📝 <b>Ariza berish</b> — shu yerning o'zidan, saytdagi rezyumengiz bilan\n"
+        "📋 <b>Arizalarim</b> — har bir arizangiz holati\n\n"
+        "Ariza berish uchun hisobingizni ulang: "
+        "ishtopuz.uz → Sozlamalar → Telegram.\n\n"
+        "Savolingiz bo'lsa — shunchaki yozing."
     )
-
 
 def _link_ok(locale: str) -> str:
     if locale == "ru":
