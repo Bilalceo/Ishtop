@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import logging
 import re
+from uuid import UUID
 
 import httpx
 from fastapi import APIRouter, Depends, Request
@@ -496,14 +497,214 @@ def _job_detail(job_id: str, back_cb: str) -> tuple[str, dict]:
         curl = _contact_url(j["contact"])
         if curl:
             apply_btns.append(_url_btn("📞 Bog'lanish", curl))
-    if not j["apply_url"] and not j["contact"]:
-        lines.append("☎️ Ariza uchun ishtopuz.uz saytiga o'ting.")
+    # No external route means this job belongs to a company on the platform —
+    # the bot can take the application itself instead of sending them away.
+    is_platform_job = not j["apply_url"] and not j["contact"]
+    if is_platform_job:
+        lines.append("📝 Ariza berish uchun quyidagi tugmani bosing.")
 
     rows: list = []
+    if is_platform_job:
+        rows.append([_btn("📝 Ariza berish", f"apply:{job_id}:{back_cb or 'cats'}")])
     if apply_btns:
         rows.append(apply_btns)
     rows.append([_btn("🔙 Orqaga", back_cb or "cats"), _btn("🏠 Menyu", "home")])
     return "\n".join(lines), _kb(rows)
+
+
+# =============================================================================
+# APPLYING FROM THE BOT
+# =============================================================================
+# Telegram is the entry point most candidates actually use, but a channel post
+# that carries the employer's contact lets them skip the platform entirely. So
+# the bot takes the application itself and writes it to the same applications
+# table the site uses — Telegram is the door, the platform stays the room.
+
+
+def _linked_user(chat_id: str):
+    """The platform account connected to this chat, or None."""
+    db = SessionLocal()
+    try:
+        from app.models.user import User
+
+        return (
+            db.query(User)
+            .filter(User.telegram_chat_id == str(chat_id), User.is_deleted.is_(False))
+            .first()
+        )
+    finally:
+        db.close()
+
+
+def _apply_start(job_id: str, chat_id: str, back_cb: str) -> tuple[str, dict]:
+    """Check the candidate can apply, and offer their resumes to pick from."""
+    db = SessionLocal()
+    try:
+        from app.models.user import User
+        from app.models.job import Job
+        from app.models.resume import Resume
+        from app.models.application import Application
+
+        user = (
+            db.query(User)
+            .filter(User.telegram_chat_id == str(chat_id), User.is_deleted.is_(False))
+            .first()
+        )
+        if not user:
+            return (
+                "🔗 Ariza berish uchun avval IshTop hisobingizni ulang.\n\n"
+                "Saytga kiring → Sozlamalar → Telegramni ulash.\n"
+                "Bir marta ulasangiz, keyin shu yerdan ariza bera olasiz.",
+                _kb([[_url_btn("🌐 Saytga o'tish", f"{settings.FRONTEND_URL.rstrip('/')}/student/settings")],
+                     [_btn("🔙 Orqaga", back_cb or "cats")]]),
+            )
+
+        try:
+            jid = UUID(str(job_id))
+        except (ValueError, TypeError):
+            return ("Vakansiya topilmadi.", _kb([[_btn("🔙 Orqaga", back_cb or "cats")]]))
+
+        job = db.query(Job).filter(Job.id == jid, Job.is_deleted.is_(False)).first()
+        if not job or job.status != "active":
+            return (
+                "Bu vakansiya endi mavjud emas yoki yopilgan.",
+                _kb([[_btn("🔙 Orqaga", back_cb or "cats")]]),
+            )
+
+        already = (
+            db.query(Application.id)
+            .filter(
+                Application.job_id == jid,
+                Application.user_id == user.id,
+                Application.is_deleted.is_(False),
+            )
+            .first()
+        )
+        if already:
+            return (
+                f"✅ Siz «{job.title}» e'loniga allaqachon ariza bergansiz.\n\n"
+                "Holatini saytdagi «Arizalarim» bo'limida kuzatib boring.",
+                _kb([[_url_btn("📋 Arizalarim", f"{settings.FRONTEND_URL.rstrip('/')}/student/applications")],
+                     [_btn("🔙 Orqaga", back_cb or "cats")]]),
+            )
+
+        resumes = (
+            db.query(Resume)
+            .filter(Resume.user_id == user.id, Resume.is_deleted.is_(False))
+            .order_by(Resume.updated_at.desc())
+            .limit(5)
+            .all()
+        )
+        if not resumes:
+            return (
+                "📄 Ariza berish uchun avval rezyume yarating.\n\n"
+                "AI yordamida bir necha daqiqada tayyorlaysiz.",
+                _kb([[_url_btn("✨ Rezyume yaratish", f"{settings.FRONTEND_URL.rstrip('/')}/student/resumes/create-ai")],
+                     [_btn("🔙 Orqaga", back_cb or "cats")]]),
+            )
+
+        # callback_data is capped at 64 bytes and two UUIDs do not fit, so send
+        # a short resume prefix and resolve it against this user's own resumes.
+        rows = [
+            [_btn(f"📄 {(r.title or 'Rezyume')[:40]}", f"ap:{job_id}:{str(r.id)[:8]}")]
+            for r in resumes
+        ]
+        rows.append([_btn("🔙 Orqaga", f"j:{job_id}:{back_cb}")])
+        return (
+            f"📝 «{job.title}»\n\nQaysi rezyume bilan ariza berasiz?",
+            _kb(rows),
+        )
+    finally:
+        db.close()
+
+
+def _apply_submit(job_id: str, resume_id: str, chat_id: str) -> tuple[str, dict]:
+    """Create the application, exactly as the website would."""
+    db = SessionLocal()
+    try:
+        from app.models.user import User
+        from app.models.job import Job
+        from app.models.resume import Resume
+        from app.models.application import Application, ApplicationStatus
+        from app.models.notification import Notification
+
+        user = (
+            db.query(User)
+            .filter(User.telegram_chat_id == str(chat_id), User.is_deleted.is_(False))
+            .first()
+        )
+        if not user:
+            return ("Hisobingiz ulanmagan. Qaytadan urinib ko'ring.", _kb([[_btn("🏠 Menyu", "home")]]))
+
+        try:
+            jid = UUID(str(job_id))
+        except (ValueError, TypeError):
+            return ("Ma'lumot noto'g'ri.", _kb([[_btn("🏠 Menyu", "home")]]))
+
+        job = db.query(Job).filter(Job.id == jid, Job.is_deleted.is_(False)).first()
+        # resume_id is a prefix (see _apply_start); match within this user's own
+        # resumes only, so a prefix collision can never reach someone else's.
+        resume = next(
+            (
+                r
+                for r in db.query(Resume)
+                .filter(Resume.user_id == user.id, Resume.is_deleted.is_(False))
+                .all()
+                if str(r.id).startswith(str(resume_id))
+            ),
+            None,
+        )
+        if not job or job.status != "active" or not resume:
+            return ("Vakansiya yoki rezyume topilmadi.", _kb([[_btn("🏠 Menyu", "home")]]))
+
+        if (
+            db.query(Application.id)
+            .filter(Application.job_id == jid, Application.user_id == user.id,
+                    Application.is_deleted.is_(False))
+            .first()
+        ):
+            return ("Siz bu e'longa allaqachon ariza bergansiz.", _kb([[_btn("🏠 Menyu", "home")]]))
+
+        application = Application(
+            job_id=jid,
+            user_id=user.id,
+            resume_id=resume.id,
+            status=ApplicationStatus.PENDING.value,
+        )
+        db.add(application)
+        job.applications_count = (job.applications_count or 0) + 1
+        db.commit()
+
+        # Same courtesy the site now extends: the employer hears about it.
+        try:
+            db.add(
+                Notification(
+                    user_id=job.company_id,
+                    title="Yangi ariza",
+                    message=f"«{job.title}» e'loniga Telegram orqali yangi ariza keldi.",
+                    type="info",
+                    link="/company/applicants",
+                )
+            )
+            db.commit()
+        except Exception:  # noqa: BLE001 — advisory
+            db.rollback()
+
+        site = settings.FRONTEND_URL.rstrip("/")
+        return (
+            f"✅ Arizangiz yuborildi!\n\n"
+            f"📣 {job.title}\n"
+            f"📄 {resume.title or 'Rezyume'}\n\n"
+            "Ish beruvchiga xabar berildi. Holatini «Arizalarim»da kuzating.",
+            _kb([[_url_btn("📋 Arizalarim", f"{site}/student/applications")],
+                 [_btn("🔍 Boshqa ishlar", "cats"), _btn("🏠 Menyu", "home")]]),
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("bot apply failed (job=%s): %s", job_id, exc)
+        db.rollback()
+        return ("Xatolik yuz berdi. Birozdan so'ng urinib ko'ring.", _kb([[_btn("🏠 Menyu", "home")]]))
+    finally:
+        db.close()
 
 
 SEARCH_LIMIT = 6  # results shown per keyword search (no pagination — refine instead)
@@ -622,6 +823,22 @@ async def _handle_callback(token: str, callback: dict) -> None:
                 await _edit(token, chat_id, message_id, text, kb)
             else:
                 await _edit(token, chat_id, message_id, _menu_text(locale), _main_menu_kb())
+        elif data.startswith("apply:"):
+            # apply:<job_id>:<back_cb>
+            parts = data.split(":", 2)
+            if len(parts) == 3:
+                text, kb = await run_in_threadpool(
+                    _apply_start, parts[1], str(chat_id), parts[2]
+                )
+                await _edit(token, chat_id, message_id, text, kb)
+        elif data.startswith("ap:"):
+            # ap:<job_id>:<resume_id>  — the confirmed submission
+            parts = data.split(":", 2)
+            if len(parts) == 3:
+                text, kb = await run_in_threadpool(
+                    _apply_submit, parts[1], parts[2], str(chat_id)
+                )
+                await _edit(token, chat_id, message_id, text, kb)
         # "noop" and anything else: just acknowledge below.
     except Exception as exc:  # noqa: BLE001
         logger.warning("callback handling failed (data=%s): %s", data, exc)
