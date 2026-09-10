@@ -1408,33 +1408,28 @@ export default function ApplyPage() {
   // application we cannot deliver. Reachable via old links and bookmarks.
   const applyRoute = jobApplyRoute(job);
   if (applyRoute.kind !== "internal") {
-    const url =
-      applyRoute.kind === "external"
-        ? applyRoute.url
-        : applyRoute.kind === "contact"
-          ? applyRoute.url
-          : undefined;
+    const url = applyRoute.kind === "bot" ? applyRoute.url : undefined;
     return (
       <div className="mx-auto flex max-w-lg flex-col items-center justify-center py-16 text-center">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 dark:bg-brand-500/10">
           <ExternalLink className="h-8 w-8 text-brand-500" />
         </div>
         <h2 className="mt-4 text-xl font-semibold text-surface-900 dark:text-white">
-          {isRu ? "Отклик — на источнике" : "Ariza manbada beriladi"}
+          {isRu ? "Отклик — в Telegram" : "Ariza Telegram orqali"}
         </h2>
         <p className="mt-2 text-surface-500">
           {isRu
-            ? "Эта вакансия опубликована из внешнего канала, поэтому отклик оформляется на странице работодателя."
-            : "Bu e'lon tashqi kanaldan olingan, shuning uchun ariza ish beruvchining o'z sahifasida beriladi."}
+            ? "Эта вакансия собрана из внешнего источника — откройте её в нашем Telegram-боте, чтобы откликнуться."
+            : "Bu e'lon tashqi manbadan yig'ilgan — ariza berish uchun uni Telegram botimizda oching."}
         </p>
         <p className="mt-3 rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900 dark:bg-amber-900/20 dark:text-amber-100">
           {isRu
-            ? "Пока отклик на такие вакансии оформляется у источника — мы работаем над тем, чтобы это можно было делать прямо здесь."
-            : "Hozircha bunday e'lonlarga ariza manba orqali beriladi — buni tez orada shu yerning o'zida qilish ustida ishlayapmiz."}
+            ? "Пока такие отклики идут через бота — мы работаем над тем, чтобы это можно было делать прямо здесь."
+            : "Hozircha bunday arizalar bot orqali beriladi — buni tez orada shu yerning o'zida qilish ustida ishlayapmiz."}
         </p>
-        {applyRoute.kind === "contact" && (
+        {!!(job.contact_info || "").trim() && (
           <p className="mt-3 break-words rounded-xl bg-surface-100 px-4 py-2 text-sm text-surface-600 dark:bg-surface-800 dark:text-surface-300">
-            {applyRoute.text}
+            {job.contact_info}
           </p>
         )}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -1442,7 +1437,7 @@ export default function ApplyPage() {
             <a href={url} target="_blank" rel="noopener noreferrer nofollow">
               <Button className="bg-gradient-to-r from-brand-500 to-violet-600">
                 <ExternalLink className="mr-2 h-4 w-4" />
-                {isRu ? "Открыть источник" : "Manbani ochish"}
+                {isRu ? "Открыть в боте" : "Botda ochish"}
               </Button>
             </a>
           )}

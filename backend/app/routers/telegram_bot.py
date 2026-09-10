@@ -886,6 +886,19 @@ async def telegram_webhook(secret: str, request: Request):
     if text.startswith("/start"):
         parts = text.split(maxsplit=1)
         payload = parts[1].strip() if len(parts) > 1 else ""
+
+        # Deep link straight to one vacancy: t.me/<bot>?start=job_<uuid>.
+        # The site sends applicants here instead of to the source channel — that
+        # handed our traffic to someone else's channel and lost the candidate.
+        # (Link tokens are token_urlsafe(18) and never start with "job_", so the
+        # two payload kinds cannot collide.)
+        if payload.startswith("job_"):
+            job_id = payload[4:]
+            await run_in_threadpool(_load_catalog)
+            jtext, jkb = await run_in_threadpool(_job_detail, job_id, "cats")
+            await _send(token, chat_id, jtext, jkb)
+            return {"ok": True}
+
         if payload:
             linked = _link_chat_to_user(payload, str(chat_id))
             if linked:

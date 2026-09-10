@@ -132,8 +132,8 @@ export default function JobDetailPage() {
         jobTypeLabel: "Тип занятости",
         locationLabel: "Локация",
         posted: "Опубликовано",
-        applyExternal: "Откликнуться на источнике",
-        applyExternalNote: "Отклик оформляется на странице работодателя",
+        applyExternal: "Откликнуться в Telegram",
+        applyExternalNote: "Вакансия откроется в нашем Telegram-боте",
         contactTitle: "Связаться",
         contactOpen: "Открыть канал",
         applyClosed: "Чтобы откликнуться, свяжитесь с работодателем напрямую",
@@ -188,8 +188,8 @@ export default function JobDetailPage() {
         jobTypeLabel: "Ish turi",
         locationLabel: "Joylashuv",
         posted: "E'lon qilingan",
-        applyExternal: "Manbada ariza berish",
-        applyExternalNote: "Ariza ish beruvchining o'z sahifasida beriladi",
+        applyExternal: "Telegramda ariza berish",
+        applyExternalNote: "Vakansiya Telegram botimizda ochiladi",
         contactTitle: "Bog'lanish",
         contactOpen: "Kanalni ochish",
         applyClosed:
@@ -362,12 +362,7 @@ export default function JobDetailPage() {
   // in-app would go nowhere; send the candidate to the source instead.
   const applyRoute = jobApplyRoute(job);
   const applyIsExternal = applyRoute.kind !== "internal";
-  const applyUrl =
-    applyRoute.kind === "external"
-      ? applyRoute.url
-      : applyRoute.kind === "contact"
-        ? applyRoute.url
-        : undefined;
+  const applyUrl = applyRoute.kind === "bot" ? applyRoute.url : undefined;
 
   // Only offer tabs that actually have content — an empty "Talablar" tab is worse
   // than no tab at all (aggregated listings often carry no structured lists).
@@ -737,18 +732,18 @@ export default function JobDetailPage() {
             )}
           </div>
 
-          {applyRoute.kind === "contact" && (
+          {!!(job.contact_info || "").trim() && (
             <div className="rounded-2xl border border-surface-200 bg-white p-5 dark:border-surface-700 dark:bg-surface-900">
               <h2 className="flex items-center gap-2 text-sm font-bold text-surface-900 dark:text-white">
                 <ExternalLink className="h-4 w-4 text-brand-500" />
                 {c.contactTitle}
               </h2>
               <p className="mt-3 break-words text-sm text-surface-600 dark:text-surface-300">
-                {applyRoute.text}
+                {job.contact_info}
               </p>
-              {applyRoute.url && (
+              {applyUrl && (
                 <a
-                  href={applyRoute.url}
+                  href={applyUrl}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
                   className="mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-surface-200 py-2.5 text-sm font-semibold text-brand-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:hover:bg-surface-800"

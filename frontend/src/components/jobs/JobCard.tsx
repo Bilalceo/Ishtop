@@ -47,12 +47,7 @@ export function JobCard({
   // Aggregated listings are applied to at the source, so the card must not
   // promise a one-click in-app application it cannot deliver.
   const applyRoute = jobApplyRoute(job);
-  const externalUrl =
-    applyRoute.kind === "external"
-      ? applyRoute.url
-      : applyRoute.kind === "contact"
-        ? applyRoute.url
-        : undefined;
+  const botUrl = applyRoute.kind === "bot" ? applyRoute.url : undefined;
 
   return (
     <motion.div
@@ -193,9 +188,9 @@ export function JobCard({
             )}
           </button>
 
-          {externalUrl ? (
+          {botUrl ? (
             <a
-              href={externalUrl}
+              href={botUrl}
               target="_blank"
               rel="noopener noreferrer nofollow"
               onClick={(e) => e.stopPropagation()}
@@ -205,7 +200,7 @@ export function JobCard({
                 className="rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 px-4 text-xs shadow-sm shadow-brand-500/30"
               >
                 <ExternalLink className="mr-1 h-3 w-3" />
-                {isRu ? "На источнике" : "Manbada"}
+                {isRu ? "В боте" : "Botda ochish"}
               </Button>
             </a>
           ) : applyRoute.kind === "internal" ? (

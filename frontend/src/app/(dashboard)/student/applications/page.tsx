@@ -512,11 +512,7 @@ export default function ApplicationsPage() {
               ? jobApplyRoute(application.job)
               : null;
             const sourceUrl =
-              applyRoute?.kind === "external"
-                ? applyRoute.url
-                : applyRoute?.kind === "contact"
-                  ? applyRoute.url
-                  : undefined;
+              applyRoute?.kind === "bot" ? applyRoute.url : undefined;
 
             return (
               <motion.div key={application.id} variants={itemVariants} layout>
@@ -765,8 +761,8 @@ export default function ApplicationsPage() {
                         <p className="mt-1 text-sm text-surface-600 dark:text-surface-300">
                           {sourceUrl
                             ? isRu
-                              ? "Эта вакансия опубликована из внешнего канала — напишите работодателю напрямую."
-                              : "Bu e'lon tashqi kanaldan olingan — ish beruvchiga to'g'ridan-to'g'ri yozing."
+                              ? "Эта вакансия собрана из внешнего источника — откройте её в боте и свяжитесь с работодателем."
+                              : "Bu e'lon tashqi manbadan yig'ilgan — uni botda ochib, ish beruvchi bilan bog'laning."
                             : isRu
                               ? "Не ждите дальше — посмотрите похожие вакансии."
                               : "Kutib o'tirmang — o'xshash ishlarni ko'rib chiqing."}
@@ -780,7 +776,7 @@ export default function ApplicationsPage() {
                             >
                               <Button size="sm" variant="outline">
                                 <ExternalLink className="mr-2 h-3.5 w-3.5" />
-                                {isRu ? "Написать напрямую" : "Bevosita yozish"}
+                                {isRu ? "Открыть в боте" : "Botda ochish"}
                               </Button>
                             </a>
                           )}
