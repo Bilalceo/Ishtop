@@ -489,14 +489,18 @@ def _job_detail(job_id: str, back_cb: str) -> tuple[str, dict]:
     lines.append("")
 
     apply_btns: list = []
-    if j["apply_url"]:
-        lines.append(f"☎️ Ariza: {j['apply_url']}")
-        apply_btns.append(_url_btn("🌐 Ariza berish", j["apply_url"]))
+    # Prefer the employer's own contact over the source post. Both routes reach
+    # the employer, but the post also drops the candidate into someone else's
+    # job channel — 179 of 274 aggregated listings carry a contact, so for most
+    # of them we never need to send anyone there.
     if j["contact"]:
         lines.append(f"☎️ Aloqa: {j['contact']}")
         curl = _contact_url(j["contact"])
         if curl:
             apply_btns.append(_url_btn("📞 Bog'lanish", curl))
+    elif j["apply_url"]:
+        lines.append(f"☎️ Ariza: {j['apply_url']}")
+        apply_btns.append(_url_btn("🌐 Ariza berish", j["apply_url"]))
     # No external route means this job belongs to a company on the platform —
     # the bot can take the application itself instead of sending them away.
     is_platform_job = not j["apply_url"] and not j["contact"]
