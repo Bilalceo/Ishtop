@@ -801,6 +801,26 @@ def _parse_contacts(raw: str) -> tuple[list[str], list[str], str]:
     # "Regina: (Telegram)" -> "Regina (Telegram)"; drop a dangling colon left
     # behind where the number used to be.
     note = re.sub(r"\s*:\s*(?=\(|$)", " ", note).strip(" .,;:-")
+
+    # Strip the filler the source post wrapped the contact in. "Batafsil:
+    # @ishmi_ish kanali" leaves "Batafsil: kanali", which is a half-sentence
+    # that says less than the line above it already does. What is worth keeping
+    # is the specific part — a name ("Regina"), or what to send ("Anketa",
+    # "Portfolio").
+    _FILLER = {
+        "batafsil", "kanali", "kanal", "murojaat", "aloqa", "tel", "telefon",
+        "bog'lanish", "boglanish", "uchun", "qiling", "yozing", "raqam",
+        "контакт", "телефон", "подробнее", "канал", "связь",
+    }
+    words = [
+        w
+        for w in note.split()
+        # Drop filler words, and leading decoration like "📞" that the source
+        # used as its own label — the line already has one.
+        if w.strip(" .,;:()-").lower() not in _FILLER
+        and any(ch.isalnum() for ch in w)
+    ]
+    note = " ".join(words).strip(" .,;:-")
     return phones, handles, note
 
 
