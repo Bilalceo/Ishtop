@@ -862,11 +862,18 @@ def _apply_info(job_id: str, back_cb: str) -> tuple[str, dict]:
         lines.append("Ariza manbadagi e'lon orqali beriladi:")
         rows.append([_url_btn("🔗 Manbadagi e'lonni ochish", j["apply_url"])])
     else:
+        # No external contact means the employer has a real account on the
+        # platform, so the site's own application form actually reaches them —
+        # saying "no contact listed" here sent people away from the one job they
+        # could apply to properly.
         lines.append(
-            "Bu e'londa aloqa ma'lumoti ko'rsatilmagan.\n"
-            "Saytdagi e'lon sahifasini ko'rib chiqing."
+            "Bu ish beruvchi IshTop platformasida — "
+            "saytda to'g'ridan-to'g'ri ariza bera olasiz."
         )
-        rows.append([_url_btn("🌐 Saytda ochish", f"{SITE_URL}/jobs/{job_id}")])
+        rows.append([
+            _url_btn("🌐 Saytda ariza berish",
+                     f"{SITE_URL}/student/jobs/{job_id}/apply")
+        ])
 
     lines += [
         "",
