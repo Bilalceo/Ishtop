@@ -233,6 +233,31 @@ import time  # noqa: E402
 _CATALOG_TTL = 30.0  # seconds
 _catalog_cache: dict = {"ts": 0.0, "by_cat": {}, "by_city": {}, "jobs": {}}
 
+_JOB_TYPE_LABELS = {
+    "full_time": "To'liq stavka",
+    "part_time": "Yarim stavka",
+    "remote": "Masofaviy",
+    "hybrid": "Gibrid",
+    "contract": "Shartnoma",
+    "internship": "Amaliyot",
+}
+
+
+def _clean_description(raw: str, limit: int = 700) -> str:
+    """Plain-text description for the card.
+
+    Aggregated descriptions arrive with HTML from the source post and often
+    repeat the title and salary we already printed above, so strip the tags,
+    collapse the whitespace and keep it short enough to leave room for the
+    contact line.
+    """
+    text = re.sub(r"<[^>]+>", " ", raw or "")
+    text = re.sub(r"\s+", " ", text).strip()
+    if len(text) <= limit:
+        return text
+    return text[:limit].rsplit(" ", 1)[0] + "…"
+
+
 _EXP_LABELS = {
     "intern": "Tajriba shart emas",
     "junior": "Junior (0–2 yil)",
@@ -268,7 +293,8 @@ def _load_catalog(force: bool = False) -> dict:
                 Job.id, Job.title, Job.description, Job.profession_slug,
                 Job.salary_min, Job.salary_max, Job.salary_currency,
                 Job.location, Job.experience_level, Job.external_apply_url,
-                Job.contact_info, User.company_name, User.full_name,
+                Job.contact_info, Job.job_type, Job.requirements,
+                Job.responsibilities, User.company_name, User.full_name,
             )
             .join(User, User.id == Job.company_id)
             .filter(Job.status == "active", Job.is_deleted.is_(False))
@@ -288,7 +314,14 @@ def _load_catalog(force: bool = False) -> dict:
                 "location": (r.location or "").strip(),
                 "experience": r.experience_level or "",
                 "apply_url": (r.external_apply_url or "").strip(),
-                "contact": (r.contact_info or "").strip(), "cid": cid, "city_id": city_id,
+                "contact": (r.contact_info or "").strip(),
+                "job_type": r.job_type or "",
+                # The card is the whole listing now — the candidate decides from
+                # it whether to call, so it carries what the site page carries.
+                "description": (r.description or "").strip(),
+                "requirements": [x for x in (r.requirements or []) if str(x).strip()],
+                "responsibilities": [x for x in (r.responsibilities or []) if str(x).strip()],
+                "cid": cid, "city_id": city_id,
             }
             by_cat.setdefault(cid, []).append(rec)
             by_city.setdefault(city_id, []).append(rec)
@@ -324,11 +357,20 @@ def _fmt_salary(j: dict) -> str:
     unit = "so'm" if (j.get("salary_currency") or "UZS") == "UZS" else j["salary_currency"]
 
     def f(n: float) -> str:
+        # Millions read faster on a phone than "15 000 000".
+        if unit == "so'm" and n >= 1_000_000:
+            v = f"{n / 1_000_000:.1f}".rstrip("0").rstrip(".")
+            return f"{v} mln"
         return f"{int(n):,}".replace(",", " ")
 
     has_lo, has_hi = lo is not None, hi is not None
     if has_lo and has_hi:
-        return f"{f(lo)} {unit}" if lo == hi else f"{f(lo)}–{f(hi)} {unit}"
+        if lo == hi:
+            return f"{f(lo)} {unit}"
+        lo_s, hi_s = f(lo), f(hi)
+        if lo_s.endswith(" mln") and hi_s.endswith(" mln"):
+            lo_s = lo_s[:-4]  # "15 mln–20 mln" -> "15–20 mln"
+        return f"{lo_s}–{hi_s} {unit}"
     if has_lo:
         return f"{f(lo)}+ {unit}"
     if has_hi:
@@ -503,6 +545,14 @@ def _city_view(cid: str, page: int) -> tuple[str, dict]:
 
 
 def _job_detail(job_id: str, back_cb: str) -> tuple[str, dict]:
+    """The full listing, because this card is where the decision gets made.
+
+    There is no application step any more: nobody on our side could answer one,
+    and an unanswered application is worse than none. So the card carries
+    everything the website page carries — pay, requirements, duties, and the
+    employer's own contact — and the candidate calls them directly. The bot's
+    job is to make that call easy and to hand over a ready CV.
+    """
     cat = _load_catalog()
     j = cat["jobs"].get(job_id)
     if not j:
@@ -516,22 +566,48 @@ def _job_detail(job_id: str, back_cb: str) -> tuple[str, dict]:
         lines.append(f"🏢 {_esc(j['company'])}")
     lines.append(f"💵 {_fmt_salary(j)}")
     if j["location"]:
-        lines.append(f"📌 {_esc(j['location'])}")
-    exp = _EXP_LABELS.get(j["experience"])
-    if exp:
-        lines.append(f"🕒 {exp}")
-    lines.append("")
+        lines.append(f"📍 {_esc(j['location'])}")
 
-    # Applying always happens inside the bot, for every listing. Handing over the
-    # source post — or even the employer's own contact — drops the candidate into
-    # someone else's channel and we lose them. An aggregated application is
-    # relayed to our own team instead (see _apply_submit).
-    lines.append("📝 Ariza berish uchun quyidagi tugmani bosing.")
+    facts = [x for x in (_EXP_LABELS.get(j["experience"]),
+                         _JOB_TYPE_LABELS.get(j.get("job_type", ""))) if x]
+    if facts:
+        lines.append(f"🕒 {_esc(' · '.join(facts))}")
 
-    rows: list = [[_btn("📝 Ariza berish", f"apply:{job_id}:{back_cb or 'cats'}")]]
+    if j.get("requirements"):
+        lines += ["", "<b>📋 Talablar:</b>"]
+        lines += [f"• {_esc(x)}" for x in j["requirements"][:6]]
 
+    if j.get("responsibilities"):
+        lines += ["", "<b>📝 Vazifalar:</b>"]
+        lines += [f"• {_esc(x)}" for x in j["responsibilities"][:6]]
+
+    desc = _clean_description(j.get("description", ""))
+    if desc:
+        lines += ["", "<b>ℹ️ Batafsil:</b>", _esc(desc)]
+
+    rows: list = []
+    if j["contact"]:
+        # <code> makes it tap-to-copy in Telegram, which is the whole point of
+        # showing a phone number on a phone.
+        lines += ["", f"📞 <b>Aloqa:</b> <code>{_esc(j['contact'])}</code>"]
+        curl = _contact_url(j["contact"])
+        if curl:
+            rows.append([_url_btn("📞 Bog'lanish", curl)])
+    elif j["apply_url"]:
+        # No contact of our own: the source post is the only way through.
+        rows.append([_url_btn("🔗 Manbadagi e'lon", j["apply_url"])])
+    else:
+        lines += ["", "📞 <b>Aloqa:</b> e'londa ko'rsatilmagan"]
+
+    rows.append([_btn("📄 Rezyumemni yuborish", f"cv:{job_id}")])
     rows.append([_btn("🔙 Orqaga", back_cb or "cats"), _btn("🏠 Menyu", "home")])
-    return "\n".join(lines), _kb(rows)
+
+    text = "\n".join(lines)
+    # Telegram caps a message at 4096 characters.
+    if len(text) > 3900:
+        text = text[:3880].rsplit("\n", 1)[0] + "\n…"
+    return text, _kb(rows)
+
 
 
 # =============================================================================
@@ -554,226 +630,6 @@ def _linked_user(chat_id: str):
             .filter(User.telegram_chat_id == str(chat_id), User.is_deleted.is_(False))
             .first()
         )
-    finally:
-        db.close()
-
-
-def _apply_start(job_id: str, chat_id: str, back_cb: str) -> tuple[str, dict]:
-    """Check the candidate can apply, and offer their resumes to pick from."""
-    db = SessionLocal()
-    try:
-        from app.models.user import User
-        from app.models.job import Job
-        from app.models.resume import Resume
-        from app.models.application import Application
-
-        user = (
-            db.query(User)
-            .filter(User.telegram_chat_id == str(chat_id), User.is_deleted.is_(False))
-            .first()
-        )
-        if not user:
-            return (
-                "🔗 Ariza berish uchun avval IshTop hisobingizni ulang.\n\n"
-                "Saytga kiring → Sozlamalar → Telegramni ulash.\n"
-                "Bir marta ulasangiz, keyin shu yerdan ariza bera olasiz.",
-                _kb([[_url_btn("🌐 Saytga o'tish", f"{settings.FRONTEND_URL.rstrip('/')}/student/settings")],
-                     [_btn("🔙 Orqaga", back_cb or "cats")]]),
-            )
-
-        try:
-            jid = UUID(str(job_id))
-        except (ValueError, TypeError):
-            return ("Vakansiya topilmadi.", _kb([[_btn("🔙 Orqaga", back_cb or "cats")]]))
-
-        job = db.query(Job).filter(Job.id == jid, Job.is_deleted.is_(False)).first()
-        if not job or job.status != "active":
-            return (
-                "Bu vakansiya endi mavjud emas yoki yopilgan.",
-                _kb([[_btn("🔙 Orqaga", back_cb or "cats")]]),
-            )
-
-        already = (
-            db.query(Application.id)
-            .filter(
-                Application.job_id == jid,
-                Application.user_id == user.id,
-                Application.is_deleted.is_(False),
-            )
-            .first()
-        )
-        if already:
-            return (
-                f"✅ Siz «{_esc(job.title)}» e'loniga allaqachon ariza bergansiz.\n\n"
-                "Holatini saytdagi «Arizalarim» bo'limida kuzatib boring.",
-                _kb([[_url_btn("📋 Arizalarim", f"{settings.FRONTEND_URL.rstrip('/')}/student/applications")],
-                     [_btn("🔙 Orqaga", back_cb or "cats")]]),
-            )
-
-        resumes = (
-            db.query(Resume)
-            .filter(Resume.user_id == user.id, Resume.is_deleted.is_(False))
-            .order_by(Resume.updated_at.desc())
-            .limit(5)
-            .all()
-        )
-        if not resumes:
-            return (
-                "📄 Ariza berish uchun avval rezyume yarating.\n\n"
-                "AI yordamida bir necha daqiqada tayyorlaysiz.",
-                _kb([[_url_btn("✨ Rezyume yaratish", f"{settings.FRONTEND_URL.rstrip('/')}/student/resumes/create-ai")],
-                     [_btn("🔙 Orqaga", back_cb or "cats")]]),
-            )
-
-        # callback_data is capped at 64 bytes and two UUIDs do not fit, so send
-        # a short resume prefix and resolve it against this user's own resumes.
-        rows = [
-            [_btn(f"📄 {(r.title or 'Rezyume')[:40]}", f"ap:{job_id}:{str(r.id)[:8]}")]
-            for r in resumes
-        ]
-        rows.append([_btn("🔙 Orqaga", f"j:{job_id}:{back_cb}")])
-        return (
-            f"📝 «{_esc(job.title)}»\n\nQaysi rezyume bilan ariza berasiz?",
-            _kb(rows),
-        )
-    finally:
-        db.close()
-
-
-def _relay_external_application(job, user, resume) -> None:
-    """Tell our own team about an application to an aggregated listing.
-
-    These jobs have no employer account here, so nobody would ever see the
-    application. Rather than send the candidate off to the source channel, we
-    take the application and hand the details to the internal group, which can
-    forward them to the employer. Best-effort: the application is already saved.
-    """
-    token = (settings.TELEGRAM_APPS_BOT_TOKEN or "").strip()
-    chat_id = (settings.TELEGRAM_APPS_CHAT_ID or "").strip()
-    if not token or not chat_id:
-        return
-    parts = [
-        "📥 <b>Yangi ariza</b> (tashqi manba)",
-        f"💼 {_esc(job.title)}" + (f" · {_esc(job.location)}" if job.location else ""),
-        "",
-        f"👤 <b>{_esc(user.full_name or 'Nomzod')}</b>",
-    ]
-    contact = " · ".join(x for x in [user.phone or "", user.email or ""] if x)
-    if contact:
-        parts.append(f"📞 {contact}")
-    if resume is not None and getattr(resume, "title", None):
-        parts.append(f"📄 {_esc(resume.title)}")
-    if getattr(job, "contact_info", None):
-        parts.append(f"🏢 Ish beruvchi: {job.contact_info}")
-    if getattr(job, "external_apply_url", None):
-        parts.append(f"🔗 Manba: {job.external_apply_url}")
-    try:
-        with httpx.Client(timeout=8) as client:
-            client.post(
-                f"{settings.TELEGRAM_API_BASE_URL.rstrip('/')}/bot{token}/sendMessage",
-                json={"chat_id": chat_id, "text": "\n".join(parts),
-                      "parse_mode": "HTML", "disable_web_page_preview": True},
-            )
-    except Exception:  # noqa: BLE001 — advisory
-        logger.warning("could not relay external application for job %s", job.id, exc_info=True)
-
-
-def _apply_submit(job_id: str, resume_id: str, chat_id: str) -> tuple[str, dict]:
-    """Create the application, exactly as the website would."""
-    db = SessionLocal()
-    try:
-        from app.models.user import User
-        from app.models.job import Job
-        from app.models.resume import Resume
-        from app.models.application import Application, ApplicationStatus
-        from app.models.notification import Notification
-
-        user = (
-            db.query(User)
-            .filter(User.telegram_chat_id == str(chat_id), User.is_deleted.is_(False))
-            .first()
-        )
-        if not user:
-            return ("Hisobingiz ulanmagan. Qaytadan urinib ko'ring.", _kb([[_btn("🏠 Menyu", "home")]]))
-
-        try:
-            jid = UUID(str(job_id))
-        except (ValueError, TypeError):
-            return ("Ma'lumot noto'g'ri.", _kb([[_btn("🏠 Menyu", "home")]]))
-
-        job = db.query(Job).filter(Job.id == jid, Job.is_deleted.is_(False)).first()
-        # resume_id is a prefix (see _apply_start); match within this user's own
-        # resumes only, so a prefix collision can never reach someone else's.
-        resume = next(
-            (
-                r
-                for r in db.query(Resume)
-                .filter(Resume.user_id == user.id, Resume.is_deleted.is_(False))
-                .all()
-                if str(r.id).startswith(str(resume_id))
-            ),
-            None,
-        )
-        if not job or job.status != "active" or not resume:
-            return ("Vakansiya yoki rezyume topilmadi.", _kb([[_btn("🏠 Menyu", "home")]]))
-
-        if (
-            db.query(Application.id)
-            .filter(Application.job_id == jid, Application.user_id == user.id,
-                    Application.is_deleted.is_(False))
-            .first()
-        ):
-            return ("Siz bu e'longa allaqachon ariza bergansiz.", _kb([[_btn("🏠 Menyu", "home")]]))
-
-        application = Application(
-            job_id=jid,
-            user_id=user.id,
-            resume_id=resume.id,
-            status=ApplicationStatus.PENDING.value,
-        )
-        db.add(application)
-        job.applications_count = (job.applications_count or 0) + 1
-        db.commit()
-
-        # Who actually reads this application decides who we tell.
-        is_aggregated = bool(
-            (job.external_apply_url or "").strip() or (job.contact_info or "").strip()
-        )
-        if is_aggregated:
-            _relay_external_application(job, user, resume)
-        else:
-            try:
-                db.add(
-                    Notification(
-                        user_id=job.company_id,
-                        title="Yangi ariza",
-                        message=f"«{job.title}» e'loniga Telegram orqali yangi ariza keldi.",
-                        type="info",
-                        link="/company/applicants",
-                    )
-                )
-                db.commit()
-            except Exception:  # noqa: BLE001 — advisory
-                db.rollback()
-
-        site = settings.FRONTEND_URL.rstrip("/")
-        tail = (
-            "Jamoamiz arizangizni ish beruvchiga yetkazadi va siz bilan bog'lanadi."
-            if is_aggregated
-            else "Ish beruvchiga xabar berildi."
-        )
-        return (
-            f"✅ Arizangiz qabul qilindi!\n\n"
-            f"📣 {_esc(job.title)}\n"
-            f"📄 {_esc(resume.title or 'Rezyume')}\n\n"
-            f"{tail} Holatini «Arizalarim»da kuzating.",
-            _kb([[_url_btn("📋 Arizalarim", f"{site}/student/applications")],
-                 [_btn("🔍 Boshqa ishlar", "cats"), _btn("🏠 Menyu", "home")]]),
-        )
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("bot apply failed (job=%s): %s", job_id, exc)
-        db.rollback()
-        return ("Xatolik yuz berdi. Birozdan so'ng urinib ko'ring.", _kb([[_btn("🏠 Menyu", "home")]]))
     finally:
         db.close()
 
@@ -860,6 +716,79 @@ def _my_applications(chat_id: str) -> tuple[str, dict]:
         return ("Xatolik yuz berdi.", _kb([[_btn("🏠 Menyu", "home")]]))
     finally:
         db.close()
+
+
+async def _send_cv(token: str, chat_id: int) -> None:
+    """Send the candidate their own CV as a PDF, ready to forward.
+
+    This replaces applying. We cannot promise an employer will read an
+    application we take, but we can make the candidate's own approach one tap:
+    they get the PDF here and forward it straight into the employer's chat.
+    """
+    def _build():
+        db = SessionLocal()
+        try:
+            from app.models.user import User
+            from app.models.resume import Resume
+            from app.api.v1.routes.resumes import _generate_pdf
+
+            user = (
+                db.query(User)
+                .filter(User.telegram_chat_id == str(chat_id), User.is_deleted.is_(False))
+                .first()
+            )
+            if not user:
+                return None, (
+                    "🔗 Rezyumengizni olish uchun IshTop hisobingizni ulang.\n\n"
+                    "Saytga kiring → Sozlamalar → Telegramni ulash."
+                ), _kb([[_url_btn("🌐 Hisobni ulash", f"{SITE_URL}/student/settings")],
+                        [_btn("🏠 Menyu", "home")]])
+
+            resume = (
+                db.query(Resume)
+                .filter(Resume.user_id == user.id, Resume.is_deleted.is_(False))
+                .order_by(Resume.updated_at.desc())
+                .first()
+            )
+            if resume is None:
+                return None, (
+                    "📄 Sizda hali rezyume yo'q.\n\n"
+                    "AI yordamida bir necha daqiqada tayyorlang."
+                ), _kb([[_url_btn("✨ Rezyume yaratish", f"{SITE_URL}/student/resumes/create-ai")],
+                        [_btn("🏠 Menyu", "home")]])
+
+            name = (user.full_name or "rezyume").strip().replace(" ", "_")
+            return (_generate_pdf(resume), f"{name}_CV.pdf"), None, None
+        finally:
+            db.close()
+
+    try:
+        pdf, err_text, err_kb = await run_in_threadpool(_build)
+    except Exception:  # noqa: BLE001
+        logger.warning("CV build failed for chat %s", chat_id, exc_info=True)
+        await _send(token, chat_id, "Rezyumeni tayyorlab bo'lmadi. Birozdan so'ng urinib ko'ring.")
+        return
+
+    if pdf is None:
+        await _send(token, chat_id, err_text, err_kb)
+        return
+
+    data, filename = pdf
+    caption = (
+        "📄 Rezyumengiz tayyor.\n\n"
+        "Ish beruvchiga shu faylni <b>ulashing (forward)</b> — "
+        "qisqacha xabar bilan birga yuborsangiz yaxshi taassurot qoldiradi."
+    )
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            await client.post(
+                f"{settings.TELEGRAM_API_BASE_URL.rstrip('/')}/bot{token}/sendDocument",
+                data={"chat_id": chat_id, "caption": caption, "parse_mode": "HTML"},
+                files={"document": (filename, data, "application/pdf")},
+            )
+    except Exception:  # noqa: BLE001
+        logger.warning("CV send failed for chat %s", chat_id, exc_info=True)
+        await _send(token, chat_id, "Faylni yuborib bo'lmadi. Birozdan so'ng urinib ko'ring.")
 
 
 SEARCH_LIMIT = 6  # results shown per keyword search (no pagination — refine instead)
@@ -984,22 +913,8 @@ async def _handle_callback(token: str, callback: dict) -> None:
             else:
                 menu_txt = await run_in_threadpool(_menu_text, locale)
             await _edit(token, chat_id, message_id, menu_txt, _main_menu_kb())
-        elif data.startswith("apply:"):
-            # apply:<job_id>:<back_cb>
-            parts = data.split(":", 2)
-            if len(parts) == 3:
-                text, kb = await run_in_threadpool(
-                    _apply_start, parts[1], str(chat_id), parts[2]
-                )
-                await _edit(token, chat_id, message_id, text, kb)
-        elif data.startswith("ap:"):
-            # ap:<job_id>:<resume_id>  — the confirmed submission
-            parts = data.split(":", 2)
-            if len(parts) == 3:
-                text, kb = await run_in_threadpool(
-                    _apply_submit, parts[1], parts[2], str(chat_id)
-                )
-                await _edit(token, chat_id, message_id, text, kb)
+        elif data.startswith("cv:"):
+            await _send_cv(token, chat_id)
         # "noop" and anything else: just acknowledge below.
     except Exception as exc:  # noqa: BLE001
         logger.warning("callback handling failed (data=%s): %s", data, exc)

@@ -1415,17 +1415,17 @@ export default function ApplyPage() {
           <ExternalLink className="h-8 w-8 text-brand-500" />
         </div>
         <h2 className="mt-4 text-xl font-semibold text-surface-900 dark:text-white">
-          {isRu ? "Отклик — в Telegram" : "Ariza Telegram orqali"}
+          {isRu ? "Связь — через Telegram" : "Aloqa Telegram orqali"}
         </h2>
         <p className="mt-2 text-surface-500">
           {isRu
-            ? "Эта вакансия собрана из внешнего источника — откройте её в нашем Telegram-боте, чтобы откликнуться."
-            : "Bu e'lon tashqi manbadan yig'ilgan — ariza berish uchun uni Telegram botimizda oching."}
+            ? "Эта вакансия собрана из внешнего источника. Откройте её в боте: там полная информация и контакты работодателя."
+            : "Bu e'lon tashqi manbadan yig'ilgan. Uni botda oching — to'liq ma'lumot va ish beruvchi aloqasi o'sha yerda."}
         </p>
         <p className="mt-3 rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900 dark:bg-amber-900/20 dark:text-amber-100">
           {isRu
-            ? "Пока такие отклики идут через бота — мы работаем над тем, чтобы это можно было делать прямо здесь."
-            : "Hozircha bunday arizalar bot orqali beriladi — buni tez orada shu yerning o'zida qilish ustida ishlayapmiz."}
+            ? "Бот также пришлёт ваше резюме в PDF — останется переслать его работодателю."
+            : "Bot rezyumengizni PDF qilib ham yuboradi — uni ish beruvchiga ulashish kifoya."}
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           {url && (
