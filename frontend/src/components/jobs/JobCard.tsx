@@ -47,7 +47,9 @@ export function JobCard({
   // Aggregated listings are applied to at the source, so the card must not
   // promise a one-click in-app application it cannot deliver.
   const applyRoute = jobApplyRoute(job);
-  const botUrl = applyRoute.kind === "bot" ? applyRoute.url : undefined;
+  // Applying needs the contact panel on the job page, so the card sends them
+  // there rather than trying to reproduce it in a list row.
+  const isExternal = applyRoute.kind !== "internal";
 
   return (
     <motion.div
@@ -188,21 +190,18 @@ export function JobCard({
             )}
           </button>
 
-          {botUrl ? (
-            <a
-              href={botUrl}
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-              onClick={(e) => e.stopPropagation()}
+          {isExternal ? (
+            <Button
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect();
+              }}
+              className="rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 px-4 text-xs shadow-sm shadow-brand-500/30"
             >
-              <Button
-                size="sm"
-                className="rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 px-4 text-xs shadow-sm shadow-brand-500/30"
-              >
-                <ExternalLink className="mr-1 h-3 w-3" />
-                {isRu ? "Откликнуться" : "Ariza berish"}
-              </Button>
-            </a>
+              <Zap className="mr-1 h-3 w-3" />
+              {isRu ? "Откликнуться" : "Ariza berish"}
+            </Button>
           ) : applyRoute.kind === "internal" ? (
             <Button
               size="sm"

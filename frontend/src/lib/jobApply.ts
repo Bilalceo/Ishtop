@@ -1,49 +1,96 @@
 /**
- * Where does applying to a job actually go?
+ * How a candidate reaches the employer for a given job.
  *
  * Most listings are aggregated from other people's Telegram channels and sit
- * under one import account that nobody signs into, so the in-app form is a dead
- * end for them: the application lands on an account with no reader. (Five real
- * ones sat unread for two months.)
+ * under one import account nobody signs into, so we do not take applications
+ * for them — an application nobody can answer is worse than none. What we do
+ * have is the employer's own contact, exactly as the source post wrote it.
  *
- * The first fix sent those applicants to the source post — which quietly handed
- * our traffic to a competitor's channel and lost the candidate for good. So they
- * now go to our own bot instead, deep-linked to that exact vacancy:
- * t.me/<bot>?start=job_<id>. The bot shows the job, keeps the candidate inside
- * our ecosystem, and can take the application itself where the employer is on
- * the platform.
+ * This used to route people into our Telegram bot to read that contact, which
+ * meant leaving the site to see information the site already had. The bot still
+ * serves people who arrive from Telegram; on the web it is shown here.
  */
 
 import type { Job } from "@/types/api";
 
-/** The bot that receives job deep links. Stable — it is the account name. */
 export const APPLY_BOT = "ishtop_ariza_bot";
 
 export type ApplyRoute =
   | { kind: "internal" }
-  | { kind: "bot"; url: string }
+  | { kind: "contact" }
+  | { kind: "source"; url: string }
   | { kind: "none" };
 
-/** Deep link into the bot, opened on this exact vacancy. */
-export function jobBotLink(jobId: string): string {
-  return `https://t.me/${APPLY_BOT}?start=job_${jobId}`;
+export type ParsedContact = {
+  phones: string[];
+  handles: string[];
+  /** Whatever the post said around the contact — a name, or what to send. */
+  note: string;
+};
+
+const PHONE_RE = /\+?998[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}/g;
+const HANDLE_RE = /@([A-Za-z0-9_]{4,32})/g;
+
+/** Words the source wrapped the contact in; they say less than our own labels. */
+const FILLER = new Set([
+  "batafsil",
+  "kanali",
+  "kanal",
+  "murojaat",
+  "aloqa",
+  "tel",
+  "telefon",
+  "bog'lanish",
+  "boglanish",
+  "uchun",
+  "qiling",
+  "yozing",
+  "raqam",
+  "контакт",
+  "телефон",
+  "подробнее",
+  "канал",
+  "связь",
+]);
+
+export function parseContact(raw: string | null | undefined): ParsedContact {
+  const text = (raw || "").trim();
+  const phones = [...text.matchAll(PHONE_RE)].map((m) => m[0].trim());
+  const handles = [...text.matchAll(HANDLE_RE)].map((m) => m[1]);
+
+  let note = text.replace(PHONE_RE, " ").replace(HANDLE_RE, " ");
+  note = note.replace(/[\s,;/]+/g, " ").replace(/\s*:\s*(?=\(|$)/g, " ");
+  note = note
+    .split(" ")
+    .filter((w) => {
+      const bare = w.replace(/^[.,;:()-]+|[.,;:()-]+$/g, "").toLowerCase();
+      return bare && !FILLER.has(bare) && /[\p{L}\p{N}]/u.test(w);
+    })
+    .join(" ")
+    .replace(/^[.,;:-]+|[.,;:-]+$/g, "");
+
+  return { phones, handles, note };
 }
 
 export function jobApplyRoute(job: Job): ApplyRoute {
-  const hasExternalRoute =
-    !!(job.external_apply_url || "").trim() ||
-    !!(job.contact_info || "").trim();
+  const contact = (job.contact_info || "").trim();
+  if (contact) return { kind: "contact" };
 
-  // Aggregated listing: hand it to our bot, not to the channel it came from.
-  if (hasExternalRoute) return { kind: "bot", url: jobBotLink(job.id) };
+  const source = (job.external_apply_url || "").trim();
+  if (/^https?:\/\//i.test(source)) return { kind: "source", url: source };
 
-  // No external route means the employer is a real account here, so the in-app
-  // form reaches someone.
+  // No external route: the employer has a real account here, so the in-app
+  // application form actually reaches someone.
   if (job.company_id) return { kind: "internal" };
   return { kind: "none" };
 }
 
-/** True when applying leaves the site (i.e. goes through the bot). */
+/** True when applying does not go through our own application form. */
 export function isExternalApply(job: Job): boolean {
   return jobApplyRoute(job).kind !== "internal";
+}
+
+/** Deep link opening this exact job in the bot (used from Telegram entry points). */
+export function jobBotLink(jobId: string): string {
+  return `https://t.me/${APPLY_BOT}?start=job_${jobId}`;
 }

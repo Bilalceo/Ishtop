@@ -1404,41 +1404,27 @@ export default function ApplyPage() {
 
   // An aggregated listing has no reader on this side: its "employer" is the
   // shared import account, so a submission here would sit unread forever (five
-  // did, for two months). Send the candidate to the source instead of taking an
-  // application we cannot deliver. Reachable via old links and bookmarks.
+  // did, for two months). The job page carries the employer's own contact and
+  // the CV download instead. Reachable via old links and bookmarks.
   const applyRoute = jobApplyRoute(job);
   if (applyRoute.kind !== "internal") {
-    const url = applyRoute.kind === "bot" ? applyRoute.url : undefined;
     return (
       <div className="mx-auto flex max-w-lg flex-col items-center justify-center py-16 text-center">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 dark:bg-brand-500/10">
-          <ExternalLink className="h-8 w-8 text-brand-500" />
+          <Building className="h-8 w-8 text-brand-500" />
         </div>
         <h2 className="mt-4 text-xl font-semibold text-surface-900 dark:text-white">
-          {isRu ? "Связь — через Telegram" : "Aloqa Telegram orqali"}
+          {isRu ? "Связь напрямую" : "Bevosita bog'lanish"}
         </h2>
         <p className="mt-2 text-surface-500">
           {isRu
-            ? "Эта вакансия собрана из внешнего источника. Откройте её в боте: там полная информация и контакты работодателя."
-            : "Bu e'lon tashqi manbadan yig'ilgan. Uni botda oching — to'liq ma'lumot va ish beruvchi aloqasi o'sha yerda."}
+            ? "Эта вакансия собрана из внешнего источника — работодатель не ведёт её у нас. Откройте вакансию: там его контакты и ваше резюме в PDF."
+            : "Bu e'lon tashqi manbadan yig'ilgan — ish beruvchi bizda emas. E'lonni oching: u yerda aloqa ma'lumoti va rezyumengiz PDF'da."}
         </p>
-        <p className="mt-3 rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900 dark:bg-amber-900/20 dark:text-amber-100">
-          {isRu
-            ? "Бот также пришлёт ваше резюме в PDF — останется переслать его работодателю."
-            : "Bot rezyumengizni PDF qilib ham yuboradi — uni ish beruvchiga ulashish kifoya."}
-        </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          {url && (
-            <a href={url} target="_blank" rel="noopener noreferrer nofollow">
-              <Button className="bg-gradient-to-r from-brand-500 to-violet-600">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                {isRu ? "Открыть в боте" : "Botda ochish"}
-              </Button>
-            </a>
-          )}
+        <div className="mt-6">
           <Link href={`/student/jobs/${job.id}`}>
-            <Button variant="outline">
-              {isRu ? "Вернуться к вакансии" : "E'longa qaytish"}
+            <Button className="bg-gradient-to-r from-brand-500 to-violet-600">
+              {isRu ? "Открыть вакансию" : "E'lonni ochish"}
             </Button>
           </Link>
         </div>

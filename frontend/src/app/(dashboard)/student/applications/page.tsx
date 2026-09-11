@@ -511,8 +511,9 @@ export default function ApplicationsPage() {
             const applyRoute = application.job
               ? jobApplyRoute(application.job)
               : null;
-            const sourceUrl =
-              applyRoute?.kind === "bot" ? applyRoute.url : undefined;
+            const canContact = applyRoute
+              ? applyRoute.kind !== "internal"
+              : false;
 
             return (
               <motion.div key={application.id} variants={itemVariants} layout>
@@ -759,26 +760,24 @@ export default function ApplicationsPage() {
                             : `Ish beruvchi ${waited} kun ichida javob bermadi`}
                         </p>
                         <p className="mt-1 text-sm text-surface-600 dark:text-surface-300">
-                          {sourceUrl
+                          {canContact
                             ? isRu
-                              ? "Эта вакансия собрана из внешнего источника — откройте её в боте и свяжитесь с работодателем."
-                              : "Bu e'lon tashqi manbadan yig'ilgan — uni botda ochib, ish beruvchi bilan bog'laning."
+                              ? "Эта вакансия собрана из внешнего источника — откройте её и свяжитесь с работодателем напрямую."
+                              : "Bu e'lon tashqi manbadan yig'ilgan — uni ochib, ish beruvchi bilan bevosita bog'laning."
                             : isRu
                               ? "Не ждите дальше — посмотрите похожие вакансии."
                               : "Kutib o'tirmang — o'xshash ishlarni ko'rib chiqing."}
                         </p>
                         <div className="mt-3 flex flex-wrap gap-2">
-                          {sourceUrl && (
-                            <a
-                              href={sourceUrl}
-                              target="_blank"
-                              rel="noopener noreferrer nofollow"
-                            >
+                          {canContact && (
+                            <Link href={`/student/jobs/${application.job_id}`}>
                               <Button size="sm" variant="outline">
                                 <ExternalLink className="mr-2 h-3.5 w-3.5" />
-                                {isRu ? "Открыть в боте" : "Botda ochish"}
+                                {isRu
+                                  ? "Контакты работодателя"
+                                  : "Ish beruvchi aloqasi"}
                               </Button>
-                            </a>
+                            </Link>
                           )}
                           <Link href="/student/jobs">
                             <Button size="sm" variant="outline">
