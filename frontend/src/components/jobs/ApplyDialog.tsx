@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { resumeApi } from "@/lib/api";
 import { jobApplyRoute, parseContact } from "@/lib/jobApply";
+import { jobDisplayIdentity } from "@/lib/jobLabels";
 import { toast } from "sonner";
 import type { Job, Resume } from "@/types/api";
 
@@ -45,6 +46,11 @@ export function ApplyDialog({
   isRu: boolean;
 }) {
   const route = jobApplyRoute(job);
+  // Match the page heading: aggregated titles carry the employer in brackets.
+  const { title: displayTitle, company } = jobDisplayIdentity(
+    job.title,
+    job.company?.name,
+  );
   const { phones, handles, note } = parseContact(job.contact_info);
   const [copied, setCopied] = useState<string | null>(null);
   const [resume, setResume] = useState<Resume | null>(null);
@@ -114,7 +120,10 @@ export function ApplyDialog({
           <DialogTitle>{isRu ? "Откликнуться" : "Ariza berish"}</DialogTitle>
         </DialogHeader>
 
-        <p className="text-sm text-surface-500">{job.title}</p>
+        <p className="text-sm text-surface-500">
+          {displayTitle}
+          {company ? ` · ${company}` : ""}
+        </p>
 
         {route.kind === "contact" && (
           <div className="mt-2 space-y-3">
