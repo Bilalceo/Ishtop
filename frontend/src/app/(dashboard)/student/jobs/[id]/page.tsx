@@ -39,6 +39,7 @@ import {
 import { jobDisplayIdentity } from "@/lib/jobLabels";
 import { jobApplyRoute } from "@/lib/jobApply";
 import { ApplyDialog } from "@/components/jobs/ApplyDialog";
+import { ApplyPanel } from "@/components/jobs/ApplyPanel";
 import type { Job } from "@/types/api";
 import { useTranslation } from "@/contexts/TranslationContext";
 
@@ -554,13 +555,16 @@ export default function JobDetailPage() {
           {/* Primary actions */}
           <div ref={topApplyRef} className="w-full shrink-0 lg:w-[300px]">
             {applyIsExternal ? (
-              <Button
-                onClick={() => setApplyOpen(true)}
-                className="w-full bg-gradient-to-r from-brand-500 to-violet-600 py-6 text-base font-semibold shadow-lg shadow-brand-500/25"
-              >
-                <Sparkles className="mr-2 h-5 w-5" />
-                {c.applyButton}
-              </Button>
+              /* The employer answers directly, so the number IS the call to
+                 action — putting it behind a button hid the one thing the
+                 candidate came for. */
+              <div className="rounded-2xl border border-surface-200 bg-white p-4 dark:border-surface-700 dark:bg-surface-900">
+                <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-surface-900 dark:text-white">
+                  <Sparkles className="h-4 w-4 text-brand-500" />
+                  {c.applyButton}
+                </p>
+                <ApplyPanel job={job} isRu={isRu} />
+              </div>
             ) : (
               <Link href={applyHref} className="block">
                 <Button className="w-full bg-gradient-to-r from-brand-500 to-violet-600 py-6 text-base font-semibold shadow-lg shadow-brand-500/25">
@@ -581,10 +585,14 @@ export default function JobDetailPage() {
                 {c.prepareInterview}
               </Button>
             </Link>
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-surface-500">
-              <CheckCircle className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-              {applyIsExternal ? c.applyExternalNote : c.freeToApply}
-            </p>
+            {/* The external case says its own piece inside the panel — the
+                contact is right there, so pointing at it twice is noise. */}
+            {!applyIsExternal && (
+              <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-surface-500">
+                <CheckCircle className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                {c.freeToApply}
+              </p>
+            )}
           </div>
         </div>
       </motion.div>

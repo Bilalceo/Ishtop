@@ -244,9 +244,6 @@ export interface Job {
     state: "strong" | "medium" | "weak";
   }>;
   verification_state?: "unverified" | "pending" | "approved" | "rejected" | string;
-  /** Where we read this listing from. Provenance only — never an apply target;
-   *  see jobApplyRoute. */
-  external_apply_url?: string | null;
   contact_info?: string | null;
   created_at: string;
   updated_at: string;

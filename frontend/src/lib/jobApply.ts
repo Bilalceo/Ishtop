@@ -71,6 +71,18 @@ export function parseContact(raw: string | null | undefined): ParsedContact {
   return { phones, handles, note };
 }
 
+/** "+998901234567" -> "+998 90 123-45-67", the way a number is written here. */
+export function formatPhone(raw: string): string {
+  const d = raw.replace(/\D/g, "").slice(-12);
+  if (d.length !== 12) return raw.trim();
+  return `+${d.slice(0, 3)} ${d.slice(3, 5)} ${d.slice(5, 8)}-${d.slice(8, 10)}-${d.slice(10)}`;
+}
+
+/** The `tel:` target for a phone as the post wrote it. */
+export function telHref(raw: string): string {
+  return `tel:+${raw.replace(/\D/g, "").slice(-12)}`;
+}
+
 export function jobApplyRoute(job: Job): ApplyRoute {
   const contact = (job.contact_info || "").trim();
   if (contact) return { kind: "contact" };
@@ -99,12 +111,7 @@ const IMPORT_ACCOUNT_NAMES = new Set(["ish beruvchi", "работодатель"
  */
 function isImportAccount(job: Job): boolean {
   const name = (job.company?.name || "").trim().toLowerCase();
-  if (IMPORT_ACCOUNT_NAMES.has(name)) return true;
-  // Some responses omit `company` entirely. Those rows are aggregated when they
-  // carry the source they were read from, which a real employer's own posting
-  // never does — and defaulting the other way would hide the in-app form from a
-  // company that does read its applications.
-  return name === "" && Boolean((job.external_apply_url || "").trim());
+  return IMPORT_ACCOUNT_NAMES.has(name);
 }
 
 /** Deep link opening this exact job in the bot (used from Telegram entry points). */

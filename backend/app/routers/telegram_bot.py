@@ -292,7 +292,7 @@ def _load_catalog(force: bool = False) -> dict:
             db.query(
                 Job.id, Job.title, Job.description, Job.profession_slug,
                 Job.salary_min, Job.salary_max, Job.salary_currency,
-                Job.location, Job.experience_level, Job.external_apply_url,
+                Job.location, Job.experience_level,
                 Job.contact_info, Job.job_type, Job.requirements,
                 Job.responsibilities, User.company_name, User.full_name,
             )
@@ -313,7 +313,6 @@ def _load_catalog(force: bool = False) -> dict:
                 "salary_max": r.salary_max, "salary_currency": r.salary_currency or "UZS",
                 "location": (r.location or "").strip(),
                 "experience": r.experience_level or "",
-                "apply_url": (r.external_apply_url or "").strip(),
                 "contact": (r.contact_info or "").strip(),
                 "job_type": r.job_type or "",
                 # The card is the whole listing now — the candidate decides from
@@ -858,9 +857,6 @@ def _apply_info(job_id: str, back_cb: str) -> tuple[str, dict]:
             lines.append(f"💬 @{_esc(h)}")
         for h in handles[:2]:
             rows.append([_url_btn(f"💬 @{h} ga yozish", f"https://t.me/{h}")])
-    elif j["apply_url"]:
-        lines.append("Ariza manbadagi e'lon orqali beriladi:")
-        rows.append([_url_btn("🔗 Manbadagi e'lonni ochish", j["apply_url"])])
     else:
         # No external contact means the employer has a real account on the
         # platform, so the site's own application form actually reaches them —

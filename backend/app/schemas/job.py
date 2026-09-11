@@ -314,7 +314,11 @@ class JobResponse(BaseModel):
     trust_factors: List[Dict[str, Any]] = Field(default_factory=list)
     verification_state: Optional[str] = None
     is_featured: bool
-    external_apply_url: Optional[str] = None
+    # external_apply_url is deliberately NOT exposed. It records where we read an
+    # aggregated listing from — a Telegram channel post, cloz.uz, hh.uz — and
+    # every client that saw it turned it into an "apply here" link, which sent
+    # the candidate to the aggregator and left the application somewhere we
+    # cannot follow up. The employer's own phone/@handle is the only apply route.
     contact_info: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
