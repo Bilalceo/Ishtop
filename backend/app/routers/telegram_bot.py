@@ -585,21 +585,9 @@ def _job_detail(job_id: str, back_cb: str) -> tuple[str, dict]:
     if desc:
         lines += ["", "<b>ℹ️ Batafsil:</b>", _esc(desc)]
 
-    rows: list = []
-    if j["contact"]:
-        # <code> makes it tap-to-copy in Telegram, which is the whole point of
-        # showing a phone number on a phone.
-        lines += ["", f"📞 <b>Aloqa:</b> <code>{_esc(j['contact'])}</code>"]
-        curl = _contact_url(j["contact"])
-        if curl:
-            rows.append([_url_btn("📞 Bog'lanish", curl)])
-    elif j["apply_url"]:
-        # No contact of our own: the source post is the only way through.
-        rows.append([_url_btn("🔗 Manbadagi e'lon", j["apply_url"])])
-    else:
-        lines += ["", "📞 <b>Aloqa:</b> e'londa ko'rsatilmagan"]
-
-    rows.append([_btn("📄 Rezyumemni yuborish", f"cv:{job_id}")])
+    # The contact itself lives one tap away, on a screen titled "Ariza berish"
+    # — that is the wording a candidate looks for. See _apply_info.
+    rows: list = [[_btn("📝 Ariza berish", f"ap:{job_id}:{back_cb or 'cats'}")]]
     rows.append([_btn("🔙 Orqaga", back_cb or "cats"), _btn("🏠 Menyu", "home")])
 
     text = "\n".join(lines)
@@ -791,6 +779,85 @@ async def _send_cv(token: str, chat_id: int) -> None:
         await _send(token, chat_id, "Faylni yuborib bo'lmadi. Birozdan so'ng urinib ko'ring.")
 
 
+_PHONE_RE = re.compile(r"\+?998[\s\-]?\d{2}[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}")
+_HANDLE_RE = re.compile(r"@([A-Za-z0-9_]{4,32})")
+
+
+def _parse_contacts(raw: str) -> tuple[list[str], list[str], str]:
+    """Split a free-text contact line into phones, handles and the leftover note.
+
+    The aggregator stores exactly what the source post said, and it varies:
+    "+998777372333; @hr_kanishka", "Anketa: @Tegen_jbot",
+    "Regina: +998 99 115 52 56 (Telegram)". Pulling the parts out lets each
+    phone be tap-to-copy and each handle a real button, while the leftover text
+    ("Anketa:", "Regina:") is kept because it says what to do with them.
+    """
+    text = raw or ""
+    phones = [m.group(0).strip() for m in _PHONE_RE.finditer(text)]
+    handles = [m.group(1) for m in _HANDLE_RE.finditer(text)]
+    note = _PHONE_RE.sub(" ", text)
+    note = _HANDLE_RE.sub(" ", note)
+    note = re.sub(r"[\s,;/]+", " ", note)
+    # "Regina: (Telegram)" -> "Regina (Telegram)"; drop a dangling colon left
+    # behind where the number used to be.
+    note = re.sub(r"\s*:\s*(?=\(|$)", " ", note).strip(" .,;:-")
+    return phones, handles, note
+
+
+def _apply_info(job_id: str, back_cb: str) -> tuple[str, dict]:
+    """How to apply for this job, in the employer's own words.
+
+    We do not take the application ourselves — nobody here could answer it — so
+    this screen gives the candidate everything the source post gave: who to
+    contact, how, and any instruction that came with it.
+    """
+    cat = _load_catalog()
+    j = cat["jobs"].get(job_id)
+    if not j:
+        return (
+            "Bu vakansiya endi mavjud emas yoki yopilgan.",
+            _kb([[_btn("🔙 Orqaga", back_cb or "cats"), _btn("🏠 Menyu", "home")]]),
+        )
+
+    lines = [f"📝 <b>Ariza berish</b>", "", f"📣 {_esc(j['title'])}"]
+    if j["company"]:
+        lines.append(f"🏢 {_esc(j['company'])}")
+    lines.append("")
+
+    rows: list = []
+    phones, handles, note = _parse_contacts(j["contact"])
+
+    if phones or handles:
+        lines.append("Ish beruvchi bilan bevosita bog'laning:")
+        lines.append("")
+        if note:
+            lines.append(f"ℹ️ {_esc(note)}")
+        for ph in phones:
+            lines.append(f"📞 <code>{_esc(ph)}</code>")
+        for h in handles:
+            lines.append(f"💬 @{_esc(h)}")
+        for h in handles[:2]:
+            rows.append([_url_btn(f"💬 @{h} ga yozish", f"https://t.me/{h}")])
+    elif j["apply_url"]:
+        lines.append("Ariza manbadagi e'lon orqali beriladi:")
+        rows.append([_url_btn("🔗 Manbadagi e'lonni ochish", j["apply_url"])])
+    else:
+        lines.append(
+            "Bu e'londa aloqa ma'lumoti ko'rsatilmagan.\n"
+            "Saytdagi e'lon sahifasini ko'rib chiqing."
+        )
+        rows.append([_url_btn("🌐 Saytda ochish", f"{SITE_URL}/jobs/{job_id}")])
+
+    lines += [
+        "",
+        "📄 Rezyumengizni PDF qilib yuboraman — "
+        "uni ish beruvchiga ulashing (forward).",
+    ]
+    rows.append([_btn("📄 Rezyumemni yuborish", f"cv:{job_id}")])
+    rows.append([_btn("🔙 Vakansiyaga", f"j:{job_id}:{back_cb or 'cats'}")])
+    return "\n".join(lines), _kb(rows)
+
+
 SEARCH_LIMIT = 6  # results shown per keyword search (no pagination — refine instead)
 
 
@@ -913,6 +980,12 @@ async def _handle_callback(token: str, callback: dict) -> None:
             else:
                 menu_txt = await run_in_threadpool(_menu_text, locale)
             await _edit(token, chat_id, message_id, menu_txt, _main_menu_kb())
+        elif data.startswith("ap:"):
+            # ap:<job_id>:<back_cb> — how to apply for this job
+            parts = data.split(":", 2)
+            if len(parts) == 3:
+                text, kb = await run_in_threadpool(_apply_info, parts[1], parts[2])
+                await _edit(token, chat_id, message_id, text, kb)
         elif data.startswith("cv:"):
             await _send_cv(token, chat_id)
         # "noop" and anything else: just acknowledge below.

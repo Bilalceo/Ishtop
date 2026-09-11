@@ -200,7 +200,7 @@ export function JobCard({
                 className="rounded-xl bg-gradient-to-r from-brand-500 to-violet-600 px-4 text-xs shadow-sm shadow-brand-500/30"
               >
                 <ExternalLink className="mr-1 h-3 w-3" />
-                {isRu ? "Связаться" : "Aloqa"}
+                {isRu ? "Откликнуться" : "Ariza berish"}
               </Button>
             </a>
           ) : applyRoute.kind === "internal" ? (
