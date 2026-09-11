@@ -779,7 +779,10 @@ async def _send_cv(token: str, chat_id: int) -> None:
 
 
 _PHONE_RE = re.compile(r"\+?998[\s\-]?\d{2}[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}")
-_HANDLE_RE = re.compile(r"@([A-Za-z0-9_]{4,32})")
+_EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+# Same boundary rule as the site's parseContact: an @ that follows a word
+# character is the domain half of an email, not a handle.
+_HANDLE_RE = re.compile(r"(?:^|[\s:;,.·|(])@([A-Za-z0-9_]{4,32})(?![\w.])")
 
 
 def _parse_contacts(raw: str) -> tuple[list[str], list[str], str]:
@@ -793,9 +796,15 @@ def _parse_contacts(raw: str) -> tuple[list[str], list[str], str]:
     """
     text = raw or ""
     phones = [m.group(0).strip() for m in _PHONE_RE.finditer(text)]
-    handles = [m.group(1) for m in _HANDLE_RE.finditer(text)]
-    note = _PHONE_RE.sub(" ", text)
+    # Emails carry an @ too; take them out before looking for handles, and keep
+    # them in the note so a "send your CV here" address is not lost.
+    emails = [m.group(0).strip() for m in _EMAIL_RE.finditer(text)]
+    without_email = _EMAIL_RE.sub(" ", text)
+    handles = [m.group(1) for m in _HANDLE_RE.finditer(without_email)]
+    note = _PHONE_RE.sub(" ", without_email)
     note = _HANDLE_RE.sub(" ", note)
+    if emails:
+        note = (note + " " + " ".join(emails)).strip()
     note = re.sub(r"[\s,;/]+", " ", note)
     # "Regina: (Telegram)" -> "Regina (Telegram)"; drop a dangling colon left
     # behind where the number used to be.

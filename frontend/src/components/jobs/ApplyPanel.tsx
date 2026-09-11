@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 import {
   Phone,
   Send,
+  Mail,
   Copy,
   Check,
   FileDown,
@@ -47,7 +48,7 @@ export function ApplyPanel({
   active?: boolean;
 }) {
   const route = jobApplyRoute(job);
-  const { phones, handles, note } = parseContact(job.contact_info);
+  const { phones, emails, handles, note } = parseContact(job.contact_info);
   const [copied, setCopied] = useState<string | null>(null);
   const [resume, setResume] = useState<Resume | null>(null);
   const [downloading, setDownloading] = useState(false);
@@ -169,7 +170,23 @@ export function ApplyPanel({
             </a>
           ))}
 
-          {phones.length === 0 && handles.length === 0 && (
+          {emails.map((e) => (
+            <a
+              key={e}
+              href={`mailto:${e}`}
+              className="flex items-center justify-between gap-2 rounded-xl border border-surface-200 px-3 py-3 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:hover:bg-surface-800"
+            >
+              <span className="flex min-w-0 items-center gap-2.5 font-medium text-surface-900 dark:text-white">
+                <Mail className="h-4 w-4 shrink-0 text-brand-500" />
+                <span className="truncate">{e}</span>
+              </span>
+              <span className="shrink-0 text-sm text-surface-500">
+                {isRu ? "Написать" : "Yozish"}
+              </span>
+            </a>
+          ))}
+
+          {phones.length === 0 && emails.length === 0 && handles.length === 0 && (
             <p className="rounded-xl bg-surface-100 px-3 py-2 text-sm text-surface-600 dark:bg-surface-800 dark:text-surface-300">
               {job.contact_info}
             </p>

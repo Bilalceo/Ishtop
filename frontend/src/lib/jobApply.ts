@@ -22,13 +22,18 @@ export type ApplyRoute =
 
 export type ParsedContact = {
   phones: string[];
+  emails: string[];
   handles: string[];
   /** Whatever the post said around the contact — a name, or what to send. */
   note: string;
 };
 
 const PHONE_RE = /\+?998[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}/g;
-const HANDLE_RE = /@([A-Za-z0-9_]{4,32})/g;
+const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+// The @ must start a word and not be followed by a dot, or the domain half of
+// an email address parses as a Telegram handle — "shintree.uz@korshop.one" was
+// offered to candidates as a chat link to @korshop, which does not exist.
+const HANDLE_RE = /(?:^|[\s:;,.·|(])@([A-Za-z0-9_]{4,32})(?![\w.])/g;
 
 /** Words the source wrapped the contact in; they say less than our own labels. */
 const FILLER = new Set([
@@ -55,9 +60,12 @@ const FILLER = new Set([
 export function parseContact(raw: string | null | undefined): ParsedContact {
   const text = (raw || "").trim();
   const phones = [...text.matchAll(PHONE_RE)].map((m) => m[0].trim());
-  const handles = [...text.matchAll(HANDLE_RE)].map((m) => m[1]);
+  // Emails first: their domain half would otherwise be eaten as a handle.
+  const emails = [...text.matchAll(EMAIL_RE)].map((m) => m[0].trim());
+  const withoutEmail = text.replace(EMAIL_RE, " ");
+  const handles = [...withoutEmail.matchAll(HANDLE_RE)].map((m) => m[1]);
 
-  let note = text.replace(PHONE_RE, " ").replace(HANDLE_RE, " ");
+  let note = withoutEmail.replace(PHONE_RE, " ").replace(HANDLE_RE, " ");
   note = note.replace(/[\s,;/]+/g, " ").replace(/\s*:\s*(?=\(|$)/g, " ");
   note = note
     .split(" ")
@@ -68,7 +76,7 @@ export function parseContact(raw: string | null | undefined): ParsedContact {
     .join(" ")
     .replace(/^[.,;:-]+|[.,;:-]+$/g, "");
 
-  return { phones, handles, note };
+  return { phones, emails, handles, note };
 }
 
 /** "+998901234567" -> "+998 90 123-45-67", the way a number is written here. */
