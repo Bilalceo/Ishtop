@@ -182,26 +182,6 @@ export function ApplyDialog({
           </div>
         )}
 
-        {route.kind === "source" && (
-          <div className="mt-2 space-y-3">
-            <p className="text-sm text-surface-600 dark:text-surface-300">
-              {isRu
-                ? "Эта вакансия собрана из внешнего источника — отклик оформляется там."
-                : "Bu e'lon tashqi manbadan yig'ilgan — ariza o'sha yerda beriladi."}
-            </p>
-            <a
-              href={route.url}
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-            >
-              <Button className="w-full gap-2">
-                <ExternalLink className="h-4 w-4" />
-                {isRu ? "Открыть источник" : "Manbani ochish"}
-              </Button>
-            </a>
-          </div>
-        )}
-
         {route.kind === "none" && (
           <p className="mt-2 rounded-xl bg-surface-100 px-3 py-2 text-sm text-surface-600 dark:bg-surface-800 dark:text-surface-300">
             {isRu

@@ -18,7 +18,6 @@ export const APPLY_BOT = "ishtop_ariza_bot";
 export type ApplyRoute =
   | { kind: "internal" }
   | { kind: "contact" }
-  | { kind: "source"; url: string }
   | { kind: "none" };
 
 export type ParsedContact = {
@@ -76,18 +75,36 @@ export function jobApplyRoute(job: Job): ApplyRoute {
   const contact = (job.contact_info || "").trim();
   if (contact) return { kind: "contact" };
 
-  const source = (job.external_apply_url || "").trim();
-  if (/^https?:\/\//i.test(source)) return { kind: "source", url: source };
+  // The employer has a real account here, so the in-app form reaches someone.
+  if (job.company_id && !isImportAccount(job)) return { kind: "internal" };
 
-  // No external route: the employer has a real account here, so the in-app
-  // application form actually reaches someone.
-  if (job.company_id) return { kind: "internal" };
+  // Deliberately NOT falling back to `external_apply_url`. That field holds the
+  // source post or the site we read the listing from — sending the candidate
+  // there hands our traffic to the channel (or the competitor) we took the
+  // listing from, and they apply somewhere we can never follow up. A listing we
+  // cannot route on our own page is a listing we should not be carrying.
   return { kind: "none" };
 }
 
 /** True when applying does not go through our own application form. */
 export function isExternalApply(job: Job): boolean {
   return jobApplyRoute(job).kind !== "internal";
+}
+
+const IMPORT_ACCOUNT_NAMES = new Set(["ish beruvchi", "работодатель"]);
+
+/**
+ * Aggregated listings sit under one shared import account, so a `company_id`
+ * on them points at us, not at an employer who reads applications.
+ */
+function isImportAccount(job: Job): boolean {
+  const name = (job.company?.name || "").trim().toLowerCase();
+  if (IMPORT_ACCOUNT_NAMES.has(name)) return true;
+  // Some responses omit `company` entirely. Those rows are aggregated when they
+  // carry the source they were read from, which a real employer's own posting
+  // never does — and defaulting the other way would hide the in-app form from a
+  // company that does read its applications.
+  return name === "" && Boolean((job.external_apply_url || "").trim());
 }
 
 /** Deep link opening this exact job in the bot (used from Telegram entry points). */

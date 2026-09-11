@@ -350,7 +350,8 @@ export default function JobDetailPage() {
     ) || c.notSpecified;
   const applyHref = `/student/jobs/${job.id}/apply`;
   // Aggregated listings live under an import account nobody reads, so applying
-  // in-app would go nowhere; send the candidate to the source instead.
+  // in-app would go nowhere; the candidate contacts the employer directly from
+  // the panel on this page. We never send them to the source we read it from.
   const applyRoute = jobApplyRoute(job);
   const applyIsExternal = applyRoute.kind !== "internal";
 

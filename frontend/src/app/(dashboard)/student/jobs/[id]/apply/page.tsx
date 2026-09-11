@@ -1418,8 +1418,8 @@ export default function ApplyPage() {
         </h2>
         <p className="mt-2 text-surface-500">
           {isRu
-            ? "Эта вакансия собрана из внешнего источника — работодатель не ведёт её у нас. Откройте вакансию: там его контакты и ваше резюме в PDF."
-            : "Bu e'lon tashqi manbadan yig'ilgan — ish beruvchi bizda emas. E'lonni oching: u yerda aloqa ma'lumoti va rezyumengiz PDF'da."}
+            ? "По этой вакансии работодатель отвечает напрямую. Откройте вакансию: там его телефон или Telegram и ваше резюме в PDF."
+            : "Bu e'longa ish beruvchi to'g'ridan-to'g'ri javob beradi. E'lonni oching: u yerda uning telefoni yoki Telegram useri va rezyumengiz PDF'da."}
         </p>
         <div className="mt-6">
           <Link href={`/student/jobs/${job.id}`}>

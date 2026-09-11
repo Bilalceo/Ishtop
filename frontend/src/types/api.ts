@@ -244,7 +244,8 @@ export interface Job {
     state: "strong" | "medium" | "weak";
   }>;
   verification_state?: "unverified" | "pending" | "approved" | "rejected" | string;
-  /** When set, this is an external (aggregated) listing — apply happens on the source. */
+  /** Where we read this listing from. Provenance only — never an apply target;
+   *  see jobApplyRoute. */
   external_apply_url?: string | null;
   contact_info?: string | null;
   created_at: string;

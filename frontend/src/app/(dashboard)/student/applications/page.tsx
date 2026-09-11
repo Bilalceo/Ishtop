@@ -511,9 +511,9 @@ export default function ApplicationsPage() {
             const applyRoute = application.job
               ? jobApplyRoute(application.job)
               : null;
-            const canContact = applyRoute
-              ? applyRoute.kind !== "internal"
-              : false;
+            // Only offer "contact the employer" when we actually hold a
+            // contact — "not internal" also covers listings with nothing to show.
+            const canContact = applyRoute?.kind === "contact";
 
             return (
               <motion.div key={application.id} variants={itemVariants} layout>
