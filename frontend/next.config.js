@@ -60,6 +60,10 @@ const nextConfig = {
       "'unsafe-inline'",
       ...(isDev ? ["'unsafe-eval'"] : []),
       "https://js.stripe.com",
+      // Cloudflare injects its Web Analytics beacon into every response it
+      // proxies. Without this the browser blocks it and logs a CSP violation on
+      // every page load, which buries real errors in the console.
+      "https://static.cloudflareinsights.com",
     ].join(" ");
 
     const csp = [
@@ -73,7 +77,8 @@ const nextConfig = {
       // Images: self + Google user avatars + data URIs
       "img-src 'self' data: blob: https://lh3.googleusercontent.com https://avatars.githubusercontent.com",
       // API + Stripe + Google OAuth
-      `connect-src 'self'${apiOrigin ? ` ${apiOrigin}` : ""} https://api.stripe.com https://accounts.google.com`,
+      // The beacon posts its measurements back to cloudflareinsights.com.
+      `connect-src 'self'${apiOrigin ? ` ${apiOrigin}` : ""} https://api.stripe.com https://accounts.google.com https://cloudflareinsights.com`,
       // Stripe payment iframe
       "frame-src https://js.stripe.com https://hooks.stripe.com",
       "worker-src 'self'",
