@@ -9,6 +9,7 @@ Save and manage search filters.
 import logging
 from typing import List, Literal
 from datetime import datetime, timezone
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -42,7 +43,10 @@ class SavedSearchUpdate(BaseModel):
 
 
 class SavedSearchResponse(BaseModel):
-    id: str
+    # Same GUID-vs-str trap as NotificationResponse: the column hands back a
+    # uuid.UUID, so declaring str here would 500 the moment anyone actually
+    # saves a search. Pydantic serialises UUID to a string either way.
+    id: UUID
     name: str
     search_type: str
     filters: dict

@@ -27,11 +27,17 @@ router = APIRouter()
 # SCHEMAS
 # =============================================================================
 
+from uuid import UUID
+
 from pydantic import BaseModel
 
 
 class NotificationResponse(BaseModel):
-    id: str
+    # The column is a GUID TypeDecorator, which hands back a uuid.UUID — not a
+    # str. Declaring str here made every non-empty notification list fail
+    # validation and return 500, so nobody ever saw a notification. Pydantic
+    # still serialises UUID to a string in the JSON response.
+    id: UUID
     title: str
     message: str
     type: str
