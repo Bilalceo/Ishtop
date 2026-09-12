@@ -7,6 +7,7 @@ someone else's channel. The two are indistinguishable from the string alone, so
 resolve each one.
 """
 import os
+import re
 import sys, json, asyncio
 from telethon import TelegramClient
 from telethon.tl.types import User, Channel, Chat
@@ -40,8 +41,11 @@ async def main():
         mark = {"odam": "OK", "bot": "OK"}.get(kind, "!!")
         print(f"  [{mark}] @{h:<26} {kind:<10} {label[:34]}")
         await asyncio.sleep(0.6)
-    json.dump(out, open(path.replace("handles", "handles_kind"), "w",
-                        encoding="utf-8"), ensure_ascii=False, indent=1)
+    # ".../handles2.json" -> ".../handles2_kind.json"; a bare replace of
+    # "handles" put the batch number after the suffix instead.
+    out_path = re.sub(r"\.json$", "_kind.json", path)
+    json.dump(out, open(out_path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    print(f"  -> {out_path}")
     bad = [h for h, v in out.items() if v["kind"] not in ("odam", "bot")]
     print(f"\n  odam/bot: {len(out) - len(bad)}   muammoli: {len(bad)} -> {bad}")
     await c.disconnect()

@@ -14,12 +14,16 @@ from telethon import TelegramClient
 
 API_ID = int(os.environ.get("TG_API_ID", "29997465"))
 api_hash, out_path = sys.argv[1], sys.argv[2]
+# How far back to read each channel. The first pass took the top 120;
+# a later batch has to go deeper to find posts it has not already used.
+DEPTH = int(os.environ.get("HARVEST_DEPTH", "120"))
 
 CHANNELS = [
     "rabota_uz", "ishmi_ish", "itcloz", "ishtopuz_rasmiy", "UstozShogird",
     "jobfortm", "forpython", "mohirdev", "p_rabota", "django_jobs_board",
     "pythonpythonjobs", "proglib_jobs", "doglobal", "mirqobilov_dev",
-    "uzcombinator", "foundershub_uz",
+    "uzcombinator", "foundershub_uz", "runello_rus_backend", "runello_rus_python",
+    "remocatedevs", "ishtopuz_official", "keyllect", "adept_tech",
 ]
 # These are the sources, never the employer.
 AGGREGATORS = {c.lower() for c in CHANNELS} | {
@@ -49,7 +53,7 @@ async def main():
     for chan in CHANNELS:
         got = 0
         try:
-            async for m in c.iter_messages(chan, limit=120):
+            async for m in c.iter_messages(chan, limit=DEPTH):
                 text = (m.text or "").strip()
                 if len(text) < 180 or NOT_A_VACANCY.search(text):
                     continue
