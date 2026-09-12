@@ -314,6 +314,10 @@ class JobResponse(BaseModel):
     trust_factors: List[Dict[str, Any]] = Field(default_factory=list)
     verification_state: Optional[str] = None
     is_featured: bool
+    # Which "soha" this listing belongs to (it, sales, food, ...). Derived, not
+    # stored: `profession_slug` is empty on ~65% of aggregated rows and is free
+    # text on the rest, so it cannot drive a UI. See app.core.job_categories.
+    category: Optional[str] = None
     # external_apply_url is deliberately NOT exposed. It records where we read an
     # aggregated listing from — a Telegram channel post, cloz.uz, hh.uz — and
     # every client that saw it turned it into an "apply here" link, which sent

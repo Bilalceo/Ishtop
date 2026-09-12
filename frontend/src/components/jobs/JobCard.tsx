@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import {
   MapPin,
-  Wallet,
   Clock,
   Bookmark,
   BookmarkCheck,
@@ -18,6 +17,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { jobDisplayIdentity, jobTypeLabel } from "@/lib/jobLabels";
+import { categoryLabel, categoryStyle } from "@/lib/jobCategories";
 import { jobApplyRoute } from "@/lib/jobApply";
 import { formatRelativeTime, formatSalaryRange, cn } from "@/lib/utils";
 import type { Job } from "@/types/api";
@@ -50,6 +50,14 @@ export function JobCard({
   // Applying needs the contact panel on the job page, so the card sends them
   // there rather than trying to reproduce it in a list row.
   const isExternal = applyRoute.kind !== "internal";
+  const cat = categoryStyle(job.category);
+  const CatIcon = cat.Icon;
+  const salary = formatSalaryRange(
+    job.salary_min,
+    job.salary_max,
+    isRu ? "ru" : "uz",
+    job.salary_currency || "UZS",
+  );
 
   return (
     <motion.div
@@ -67,9 +75,16 @@ export function JobCard({
       )}
     >
       <div className="flex items-start gap-3">
-        {/* Logo */}
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-100 to-violet-100 text-base font-bold text-brand-700 dark:from-brand-900/50 dark:to-violet-900/50 dark:text-brand-300">
-          {(company || displayTitle)?.charAt(0)?.toUpperCase() || "?"}
+        {/* The listing's field of work. An employer initial told the reader
+            nothing — every row opened with the same grey glyph. */}
+        <div
+          className={cn(
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
+            cat.tile,
+          )}
+          title={categoryLabel(job.category, isRu)}
+        >
+          <CatIcon className="h-5 w-5" />
         </div>
 
         {/* Title, company, meta and chips */}
@@ -77,37 +92,46 @@ export function JobCard({
           <h3 className="truncate text-[17px] font-semibold leading-tight text-surface-900 dark:text-white">
             {displayTitle}
           </h3>
-          {company && (
-            <p className="mt-0.5 truncate text-sm text-surface-500 dark:text-surface-400">
-              {company}
+          <p className="mt-0.5 truncate text-sm text-surface-500 dark:text-surface-400">
+            {company || categoryLabel(job.category, isRu)}
+          </p>
+
+          {/* Pay is what the reader scans a list for, so it leads and the rest
+              of the meta drops to one quiet line behind it. */}
+          {salary ? (
+            <p className="mt-1.5 text-[15px] font-semibold text-emerald-600 dark:text-emerald-400">
+              {salary}
+            </p>
+          ) : (
+            <p className="mt-1.5 text-[13px] text-surface-400 dark:text-surface-500">
+              {isRu ? "Зарплата не указана" : "Maosh ko'rsatilmagan"}
             </p>
           )}
 
-          {/* Meta row: location, salary, posted */}
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-surface-500">
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-surface-500">
             {job.location && (
               <span className="flex items-center gap-1">
                 <MapPin className="h-3 w-3" />
                 {job.location}
               </span>
             )}
-            <span className="flex items-center gap-1">
-              <Wallet className="h-3 w-3" />
-              {formatSalaryRange(
-                job.salary_min,
-                job.salary_max,
-                isRu ? "ru" : "uz",
-                job.salary_currency || "UZS",
-              ) || (isRu ? "Зарплата не указана" : "Maosh ko'rsatilmagan")}
-            </span>
+            {job.job_type && (
+              <span className="flex items-center gap-1">
+                <Briefcase className="h-3 w-3" />
+                {jobTypeLabel(job.job_type, isRu)}
+              </span>
+            )}
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {formatRelativeTime(job.created_at, isRu ? "ru" : "uz")}
             </span>
           </div>
 
-          {/* Chips: match, trust, job type */}
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          {/* Only the match score stays a badge. Trust and job type used to be
+              the same weight, so three loud chips competed with the salary and
+              the row had no focal point; job type moved into the meta line and
+              trust is a quiet mark. */}
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             {job.matchScore ? (
               <Badge
                 variant={
@@ -124,30 +148,23 @@ export function JobCard({
               </Badge>
             ) : null}
             {typeof job.trust_score === "number" ? (
-              <Badge
-                variant={
-                  job.trust_score >= 75
-                    ? "success"
-                    : job.trust_score >= 50
-                      ? "warning"
-                      : "secondary"
-                }
-                className="gap-1"
+              <span
+                className={cn(
+                  "flex items-center gap-1 text-xs",
+                  job.trust_score >= 50
+                    ? "text-surface-500 dark:text-surface-400"
+                    : "text-amber-600 dark:text-amber-400",
+                )}
+                title={isRu ? "Оценка доверия" : "Ishonch bahosi"}
               >
                 {job.trust_score >= 50 ? (
-                  <ShieldCheck className="h-3 w-3" />
+                  <ShieldCheck className="h-3.5 w-3.5" />
                 ) : (
-                  <AlertTriangle className="h-3 w-3" />
+                  <AlertTriangle className="h-3.5 w-3.5" />
                 )}
-                {Math.round(job.trust_score)} {isRu ? "доверие" : "ishonch"}
-              </Badge>
+                {Math.round(job.trust_score)}
+              </span>
             ) : null}
-            {job.job_type && (
-              <Badge variant="secondary" className="gap-1">
-                <Briefcase className="h-3 w-3" />
-                {jobTypeLabel(job.job_type, isRu)}
-              </Badge>
-            )}
           </div>
         </div>
 

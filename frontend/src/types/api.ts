@@ -245,6 +245,8 @@ export interface Job {
   }>;
   verification_state?: "unverified" | "pending" | "approved" | "rejected" | string;
   contact_info?: string | null;
+  /** Derived "soha" (it, sales, food, ...) — see lib/jobCategories.ts. */
+  category?: string | null;
   created_at: string;
   updated_at: string;
   expires_at?: string;

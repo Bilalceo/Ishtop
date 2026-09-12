@@ -76,6 +76,7 @@ from app.schemas.application import (
 )
 from app.schemas.auth import MessageResponse
 from app.config import settings
+from app.core.job_categories import classify_job
 from app.services import job_matching
 from app.services.discovery import normalize_discovery_labels, normalize_discovery_slug
 from app.services.trust_engine import (
@@ -487,6 +488,9 @@ def job_to_response(job: Job, include_company: bool = True) -> JobResponse:
         trust_factors=trust_factors,
         verification_state=verification_state,
         is_featured=job.is_featured,
+        # The title is authoritative; the description only breaks a tie for
+        # titles that classify to "other" (classify_job's own rule).
+        category=classify_job(job.title or "", (job.description or "")[:200]),
         contact_info=job.contact_info,
         is_active=job.is_active,
         is_expired=job.is_expired,

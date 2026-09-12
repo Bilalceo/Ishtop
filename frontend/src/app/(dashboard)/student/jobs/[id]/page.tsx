@@ -40,6 +40,7 @@ import { jobDisplayIdentity } from "@/lib/jobLabels";
 import { jobApplyRoute } from "@/lib/jobApply";
 import { ApplyDialog } from "@/components/jobs/ApplyDialog";
 import { ApplyPanel } from "@/components/jobs/ApplyPanel";
+import { categoryLabel, categoryStyle } from "@/lib/jobCategories";
 import type { Job } from "@/types/api";
 import { useTranslation } from "@/contexts/TranslationContext";
 
@@ -354,6 +355,8 @@ export default function JobDetailPage() {
   // in-app would go nowhere; the candidate contacts the employer directly from
   // the panel on this page. We never send them to the source we read it from.
   const applyRoute = jobApplyRoute(job);
+  const cat = categoryStyle(job.category);
+  const CatIcon = cat.Icon;
   const applyIsExternal = applyRoute.kind !== "internal";
 
   // Only offer tabs that actually have content — an empty "Talablar" tab is worse
@@ -451,8 +454,17 @@ export default function JobDetailPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           <div className="min-w-0 flex-1">
             <div className="flex items-start gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-violet-600 text-xl font-bold text-white shadow-sm">
-                {companyLetter}
+              {/* The field of work, not the employer's initial — aggregated
+                  listings share one import account, so the letter was the same
+                  on every page. */}
+              <div
+                className={cn(
+                  "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl",
+                  cat.tile,
+                )}
+                title={categoryLabel(job.category, isRu)}
+              >
+                <CatIcon className="h-7 w-7" />
               </div>
               <div className="min-w-0">
                 <h1 className="text-[22px] font-bold leading-tight text-surface-900 dark:text-white sm:text-2xl">
@@ -461,6 +473,10 @@ export default function JobDetailPage() {
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
                   <span className="font-medium text-surface-600 dark:text-surface-300">
                     {companyName}
+                  </span>
+                  <span className="text-surface-400">·</span>
+                  <span className="text-surface-500 dark:text-surface-400">
+                    {categoryLabel(job.category, isRu)}
                   </span>
                   {isVerified && (
                     <>
