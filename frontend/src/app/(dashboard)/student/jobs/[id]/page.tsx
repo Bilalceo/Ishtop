@@ -14,6 +14,7 @@ import {
   Users,
   Eye,
   CheckCircle,
+  Phone,
   Sparkles,
   Share2,
   Bookmark,
@@ -114,6 +115,10 @@ export default function JobDetailPage() {
         jobDescription: "Описание вакансии",
         noDescription: "Описание отсутствует.",
         requirements: "Требования",
+        requirementsByPhone:
+          "Работодатель не перечислил требования в объявлении — уточните их по телефону, когда свяжетесь.",
+        requirementsByContact:
+          "Работодатель не перечислил требования в объявлении — уточните их при обращении.",
         technicalSkills: "Технические навыки",
         experience: "Опыт",
         education: "Образование",
@@ -165,6 +170,10 @@ export default function JobDetailPage() {
         jobDescription: "Ish tavsifi",
         noDescription: "Tavsif mavjud emas.",
         requirements: "Talablar",
+        requirementsByPhone:
+          "Ish beruvchi e'londa talablarni yozmagan — bog'langaningizda telefon orqali aniqlashtirasiz.",
+        requirementsByContact:
+          "Ish beruvchi e'londa talablarni yozmagan — bog'langaningizda aniqlashtirasiz.",
         technicalSkills: "Texnik ko'nikmalar",
         experience: "Tajriba",
         education: "Ta'lim",
@@ -335,6 +344,9 @@ export default function JobDetailPage() {
   const safeDescriptionHtml = sanitizeRichTextHtml(job.description || "");
   const hasDescription = stripHtmlTags(job.description || "").length > 0;
   const requirements = job.requirements ?? [];
+  const hasPhoneContact = /\d{7}/.test(
+    (job.contact_info || "").replace(/[\s()-]/g, ""),
+  );
   const responsibilities = job.responsibilities ?? [];
   // Aggregated listings all sit under one approved import account, so its
   // "verified" flag says nothing about the actual employer. Only badge a
@@ -362,9 +374,9 @@ export default function JobDetailPage() {
   // than no tab at all (aggregated listings often carry no structured lists).
   const tabs: { id: string; label: string }[] = [
     { id: "overview", label: c.tabOverview },
-    ...(requirements.length
-      ? [{ id: "requirements", label: c.requirements }]
-      : []),
+    // Always offered. "Not listed" is information the candidate needs before
+    // calling — hiding the tab left them wondering whether the page was broken.
+    { id: "requirements", label: c.requirements },
     ...(responsibilities.length
       ? [{ id: "responsibilities", label: c.responsibilities }]
       : []),
@@ -644,12 +656,21 @@ export default function JobDetailPage() {
       {/* ---------------------------------------------------------------- */}
       <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="space-y-5">
-          {(tab === "overview" || tab === "requirements") &&
-            requirements.length > 0 && (
-              <Section title={c.requirements}>
+          {(tab === "overview" || tab === "requirements") && (
+            <Section title={c.requirements}>
+              {requirements.length > 0 ? (
                 <BulletList items={requirements} />
-              </Section>
-            )}
+              ) : (
+                /* Which line depends on what the employer actually left: telling
+                   someone to "ask by phone" when all we have is a Telegram
+                   handle sends them looking for a number that isn't there. */
+                <p className="mt-3 flex items-start gap-2.5 rounded-xl bg-surface-100 px-3.5 py-3 text-[15px] leading-relaxed text-surface-600 dark:bg-surface-800 dark:text-surface-300">
+                  <Phone className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" />
+                  {hasPhoneContact ? c.requirementsByPhone : c.requirementsByContact}
+                </p>
+              )}
+            </Section>
+          )}
 
           {(tab === "overview" || tab === "responsibilities") &&
             responsibilities.length > 0 && (

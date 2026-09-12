@@ -77,6 +77,15 @@ PHONE = re.compile(r"\+?998[\s\-()]?\d{2}[\s\-()]?\d{3}[\s\-()]?\d{2}[\s\-()]?\d
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 URL = re.compile(r"\[([^\]]*)\]\(([^)]*)\)|https?://\S+|t\.me/\S+|www\.\S+")
 
+# Some posts put their social links straight after the "Talablar" heading, so
+# the list we lift starts with "instagram | telegram | facebook". Ten listings
+# shipped that as their only stated requirement. Match only lines made up
+# ENTIRELY of network names and separators — a short real entry ("Python",
+# "DRF") must survive.
+_NETWORKS = (r"instagram|telegram|facebook|tiktok|youtube|linkedin|whatsapp|vk|"
+             r"threads|инстаграм|телеграм|фейсбук")
+ONLY_LINKS = re.compile(rf"^(?:\s*(?:{_NETWORKS})\s*[|,/·•—\-]*)+$", re.I)
+
 # headings that open a bullet list we can lift verbatim
 REQ_HEAD = re.compile(r"(talab(lar)?|требовани|sizdan kutamiz|bizga kerak|kerakli)", re.I)
 RESP_HEAD = re.compile(r"(vazifa(lar)?|majburiyat|обязанност|ish haqida|чем предстоит)", re.I)
@@ -275,7 +284,7 @@ def section(text: str, head_re) -> list:
                 break
             if PHONE.search(l) or EMAIL.search(l) or l.lower().startswith(("telegram", "aloqa", "murojaat")):
                 break
-            if 3 < len(l) <= 160:
+            if 3 < len(l) <= 160 and not ONLY_LINKS.match(l):
                 out.append(l)
             if len(out) >= 8:
                 break

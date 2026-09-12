@@ -575,6 +575,19 @@ def _job_detail(job_id: str, back_cb: str) -> tuple[str, dict]:
     if j.get("requirements"):
         lines += ["", "<b>📋 Talablar:</b>"]
         lines += [f"• {_esc(x)}" for x in j["requirements"][:6]]
+    else:
+        # Say so rather than leaving the section out: a listing with no
+        # "Talablar" block reads as an incomplete page, and the candidate is
+        # about to call anyway. Matches the site's job page.
+        has_phone = any(ch.isdigit() for ch in (j.get("contact") or "")) and \
+            sum(ch.isdigit() for ch in (j.get("contact") or "")) >= 7
+        lines += [
+            "",
+            "<b>📋 Talablar:</b>",
+            "• E'londa ko'rsatilmagan — "
+            + ("bog'langaningizda telefon orqali aniqlashtirasiz."
+               if has_phone else "bog'langaningizda aniqlashtirasiz."),
+        ]
 
     if j.get("responsibilities"):
         lines += ["", "<b>📝 Vazifalar:</b>"]
