@@ -17,7 +17,8 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { jobDisplayIdentity, jobTypeLabel } from "@/lib/jobLabels";
-import { categoryLabel, categoryStyle } from "@/lib/jobCategories";
+import { categoryLabel } from "@/lib/jobCategories";
+import { CompanyLogo } from "@/components/jobs/CompanyLogo";
 import { jobApplyRoute } from "@/lib/jobApply";
 import { formatRelativeTime, formatSalaryRange, cn } from "@/lib/utils";
 import type { Job } from "@/types/api";
@@ -50,8 +51,6 @@ export function JobCard({
   // Applying needs the contact panel on the job page, so the card sends them
   // there rather than trying to reproduce it in a list row.
   const isExternal = applyRoute.kind !== "internal";
-  const cat = categoryStyle(job.category);
-  const CatIcon = cat.Icon;
   const salary = formatSalaryRange(
     job.salary_min,
     job.salary_max,
@@ -75,17 +74,14 @@ export function JobCard({
       )}
     >
       <div className="flex items-start gap-3">
-        {/* The listing's field of work. An employer initial told the reader
-            nothing — every row opened with the same grey glyph. */}
-        <div
-          className={cn(
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
-            cat.tile,
-          )}
-          title={categoryLabel(job.category, isRu)}
-        >
-          <CatIcon className="h-5 w-5" />
-        </div>
+        {/* The employer's mark. A category icon was worse than a letter here:
+            half the active listings classify as "Savdo", so half the list
+            showed one identical cart and no row stood out. */}
+        <CompanyLogo
+          name={company || displayTitle}
+          logoUrl={job.company?.logo_url || job.company?.logo}
+          size="sm"
+        />
 
         {/* Title, company, meta and chips */}
         <div className="min-w-0 flex-1">

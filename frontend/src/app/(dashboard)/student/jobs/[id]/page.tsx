@@ -40,7 +40,9 @@ import { jobDisplayIdentity } from "@/lib/jobLabels";
 import { jobApplyRoute } from "@/lib/jobApply";
 import { ApplyDialog } from "@/components/jobs/ApplyDialog";
 import { ApplyPanel } from "@/components/jobs/ApplyPanel";
-import { categoryLabel, categoryStyle } from "@/lib/jobCategories";
+import { categoryLabel } from "@/lib/jobCategories";
+import { CompanyLogo } from "@/components/jobs/CompanyLogo";
+import { JobBanner } from "@/components/jobs/JobBanner";
 import type { Job } from "@/types/api";
 import { useTranslation } from "@/contexts/TranslationContext";
 
@@ -330,7 +332,6 @@ export default function JobDetailPage() {
     companyIsReal,
   } = jobDisplayIdentity(job.title, job.company?.name);
   const companyName = resolvedCompany || c.companyFallback;
-  const companyLetter = (companyName || displayTitle)[0]?.toUpperCase() || "?";
   const safeDescriptionHtml = sanitizeRichTextHtml(job.description || "");
   const hasDescription = stripHtmlTags(job.description || "").length > 0;
   const requirements = job.requirements ?? [];
@@ -355,8 +356,6 @@ export default function JobDetailPage() {
   // in-app would go nowhere; the candidate contacts the employer directly from
   // the panel on this page. We never send them to the source we read it from.
   const applyRoute = jobApplyRoute(job);
-  const cat = categoryStyle(job.category);
-  const CatIcon = cat.Icon;
   const applyIsExternal = applyRoute.kind !== "internal";
 
   // Only offer tabs that actually have content — an empty "Talablar" tab is worse
@@ -449,24 +448,30 @@ export default function JobDetailPage() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mt-3 rounded-2xl border border-surface-200 bg-white p-5 dark:border-surface-700 dark:bg-surface-900 sm:p-6"
+        className="mt-3 overflow-hidden rounded-2xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-900"
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        {/* Generated cover — the employer's own colour, a motif for the field
+            of work. The title stays on the card surface below it, so no text
+            ever has to be legible over a gradient. */}
+        <JobBanner
+          name={resolvedCompany || displayTitle}
+          category={job.category}
+          className="h-24 w-full sm:h-28"
+        />
+
+        <div className="flex flex-col gap-6 p-5 pt-0 sm:p-6 sm:pt-0 lg:flex-row lg:items-start">
           <div className="min-w-0 flex-1">
             <div className="flex items-start gap-4">
-              {/* The field of work, not the employer's initial — aggregated
-                  listings share one import account, so the letter was the same
-                  on every page. */}
-              <div
-                className={cn(
-                  "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl",
-                  cat.tile,
-                )}
-                title={categoryLabel(job.category, isRu)}
-              >
-                <CatIcon className="h-7 w-7" />
-              </div>
-              <div className="min-w-0">
+              {/* Lifted onto the banner, the way a profile photo sits on a
+                  cover — it ties the two together and keeps the title aligned
+                  with the card's own padding. */}
+              <CompanyLogo
+                name={resolvedCompany || displayTitle}
+                logoUrl={job.company?.logo_url || job.company?.logo}
+                size="md"
+                className="relative z-10 -mt-9 ring-4 ring-white dark:ring-surface-900"
+              />
+              <div className="min-w-0 pt-1">
                 <h1 className="text-[22px] font-bold leading-tight text-surface-900 dark:text-white sm:text-2xl">
                   {displayTitle}
                 </h1>
@@ -708,9 +713,11 @@ export default function JobDetailPage() {
               {c.aboutCompany}
             </h2>
             <div className="mt-4 flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-violet-600 text-base font-bold text-white">
-                {companyLetter}
-              </div>
+              <CompanyLogo
+                name={companyName}
+                logoUrl={job.company?.logo_url || job.company?.logo}
+                size="sm"
+              />
               <div className="min-w-0">
                 <p className="truncate font-semibold text-surface-900 dark:text-white">
                   {companyName}
