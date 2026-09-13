@@ -112,8 +112,24 @@ class TestSalary:
         # ko'rsatilmagan" — only so'm was ever read.
         lo, hi = struct.find_salary("Maosh: $500+")
         assert lo == 500 * struct.USD_RATE and hi is None
-        lo, hi = struct.find_salary("Ish haqi 1000-1500$")
+        lo, hi = struct.find_salary("Maosh: 1000-1500$")
         assert (lo, hi) == (1000 * struct.USD_RATE, 1500 * struct.USD_RATE)
+
+    def test_reads_the_shapes_the_posts_actually_use(self, struct):
+        for text, lo, hi in [
+            ("Maosh: 300$ - 500$", 300, 500),
+            ("Maosh: 700-1000+$", 700, 1000),
+            ("Maosh: Internship / 150$-200$", 150, 200),
+            ("Maosh: 100$", 100, None),
+        ]:
+            got = struct.find_salary(text)
+            assert got == (lo * struct.USD_RATE,
+                           hi * struct.USD_RATE if hi else None), text
+
+    def test_a_weekly_figure_is_not_a_salary(self, struct):
+        # "Haftalik daromad: 50$ – 300$" stored as a monthly wage would
+        # understate the job by four.
+        assert struct.find_salary("Haftalik daromad: 50$ – 300$ gacha") == (None, None)
 
     def test_ignores_figures_that_are_not_money(self, struct):
         # "18-35 yosh" is an age range, and 18 so'm is not a salary.

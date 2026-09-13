@@ -288,20 +288,27 @@ def find_salary(text: str):
         if 300_000 <= a <= 100_000_000:
             return a, None
 
-    # Dollars. IT postings quote "$500+", "500$", "1000-1500$" — the listing
-    # said "Maosh: $500+" while the page said "Maosh ko'rsatilmagan", because
-    # only so'm was ever read. Stored in so'm at a deliberately round rate: the
-    # alternative is showing nothing, and nobody reads a job ad to the tiyin.
-    usd = re.search(r"\$\s*(\d{3,5})(?:\s*[-–—]\s*(\d{3,5}))?|"
-                    r"(\d{3,5})(?:\s*[-–—]\s*(\d{3,5}))?\s*\$", t)
-    if usd:
-        lo = usd.group(1) or usd.group(3)
-        hi = usd.group(2) or usd.group(4)
-        rate = USD_RATE
-        a = int(lo) * rate
-        b = int(hi) * rate if hi else None
-        if 300_000 <= a <= 200_000_000 and (b is None or a <= b <= 200_000_000):
-            return a, b
+    # Dollars. The posts write these every way round — "$500+", "500$",
+    # "300$ - 500$", "700-1000+$", "Internship / 150$-200$" — so rather than
+    # chase each shape, take the line that introduces the pay and read the
+    # numbers out of it with the dollar signs removed.
+    money_line = re.search(
+        r"(?:maosh|oylik|ish haqi|daromad|зарплат\w*|оклад|salary)\s*[:\-–]?\s*([^\n]{0,60})",
+        t, re.I)
+    # A weekly or daily figure is not a salary field. "Haftalik daromad: 50$ –
+    # 300$" stored as a monthly wage would understate the job by four.
+    per_period = re.search(r"haftalik|kunlik|soatlik|в неделю|в день|per (week|day|hour)",
+                           t, re.I)
+    if money_line and "$" in money_line.group(1) and not per_period:
+        nums = [int(x) for x in re.findall(r"\d{2,5}", money_line.group(1).replace("$", " "))]
+        # Plausible monthly pay in dollars. Anything outside is a time, a date
+        # or a phone fragment that wandered onto the same line.
+        nums = [n for n in nums if 50 <= n <= 20_000]
+        if nums:
+            a = min(nums) * USD_RATE
+            b = max(nums) * USD_RATE if len(nums) > 1 else None
+            if 300_000 <= a <= 300_000_000:
+                return a, b
     return None, None
 
 
