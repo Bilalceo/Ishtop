@@ -59,7 +59,7 @@ VERSION: 1.0.0
 # =============================================================================
 
 from enum import Enum
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional, List, Dict, Any, TYPE_CHECKING
 
 # SQLAlchemy imports
@@ -559,11 +559,22 @@ class Job(Base, UUIDMixin, TimestampMixin, SoftDeleteMixin):
     # STATUS METHODS
     # =========================================================================
     
+    DEFAULT_RUN_DAYS = 30
+
     def publish(self) -> None:
-        """Publish the job (make it active)."""
+        """Publish the job (make it active).
+
+        Also carries the deadline forward when it has already passed. Public
+        listings filter on `expires_at` (see `visible_job_filters`), so
+        publishing or reopening a job whose date is behind us used to return
+        200 with status=active while the job appeared in no list at all — and
+        nothing told the employer why. Same for a clone of an expired job.
+        """
         self.status = JobStatus.ACTIVE.value
         self.close_reason_code = None
         self.close_reason_note = None
+        if self.is_expired:
+            self.expires_at = utc_now() + timedelta(days=self.DEFAULT_RUN_DAYS)
 
     def pause(self) -> None:
         """Temporarily pause accepting applications."""

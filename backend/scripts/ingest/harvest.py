@@ -13,6 +13,7 @@ import sys, re, json, asyncio
 from datetime import datetime, timedelta, timezone
 
 from telethon import TelegramClient, functions
+from telethon.tl.types import Channel
 
 API_ID = int(os.environ.get("TG_API_ID", "29997465"))
 api_hash, out_path = sys.argv[1], sys.argv[2]
@@ -57,6 +58,12 @@ async def folder_channels(client):
                 return peers
     except Exception as exc:
         print(f"  ⚠️  papka o'qilmadi ({type(exc).__name__}) — zaxira ro'yxat")
+    else:
+        print(f"  '{FOLDER}' papkasi topilmadi — zaxira ro'yxat")
+    # Usernames, so the caller's `get_entity` works the same way for both paths.
+    # (An earlier version returned these strings straight through, and
+    # `getattr("rabota_uz", "title", "?")` returns the bound str.title METHOD,
+    # which then blew up on `.lower()` — the fallback never once worked.)
     return FALLBACK
 
 PHONE = re.compile(r"\+?998[\s\-()]?\d{2}[\s\-()]?\d{3}[\s\-()]?\d{2}[\s\-()]?\d{2}")
@@ -83,11 +90,26 @@ async def main():
     names = []
     for peer in channels:
         try:
-            ent = peer if isinstance(peer, str) else await c.get_entity(peer)
-            names.append((getattr(ent, "username", None) or
-                          getattr(ent, "title", "?"), ent))
+            ent = await c.get_entity(peer)
         except Exception as exc:
             print(f"  ⚠️  peer o'qilmadi: {type(exc).__name__}")
+            continue
+        # A Telegram folder can hold private chats and groups alongside
+        # channels. Reading those would mean scanning the owner's own
+        # conversations and publishing whatever looked like a vacancy — so only
+        # broadcast channels are harvested.
+        if not (isinstance(ent, Channel) and getattr(ent, "broadcast", False)):
+            print(f"  ⏭  o'tkazildi (kanal emas): "
+                  f"{getattr(ent, 'title', type(ent).__name__)}")
+            continue
+        # The provenance URL is built as t.me/<name>/<id>, so the name has to be
+        # a username. A display title would produce a broken link with spaces
+        # in it, and would defeat the username-based NEWS_CHANNELS check.
+        uname = getattr(ent, "username", None)
+        if not uname:
+            print(f"  ⏭  o'tkazildi (username yo'q): {getattr(ent, 'title', '?')}")
+            continue
+        names.append((uname, ent))
     aggregators = _AGG_EXTRA | {n.lower() for n, _ in names}
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=SINCE_DAYS)
@@ -118,7 +140,9 @@ async def main():
                 seen.add(key)
                 out.append({
                     "channel": chan, "msg_id": m.id,
-                    "date": str(m.date)[:10], "text": text,
+                    # "" rather than str(None)[:10] == "None", which sorts
+                    # ABOVE every real date and would win the newest-first pick.
+                    "date": (str(m.date)[:10] if m.date else ""), "text": text,
                     "phones": phones[:2], "emails": emails[:1], "handles": handles[:2],
                 })
                 got += 1

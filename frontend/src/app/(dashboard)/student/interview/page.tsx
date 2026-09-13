@@ -298,12 +298,19 @@ function InterviewCoach() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Most-posted titles, counted client-side off one page of the feed.
+  // Most-posted titles, counted client-side off a slice of the feed.
+  //
+  // Deliberately lazy and small: this only feeds six suggestion chips, and
+  // `GET /jobs` returns whole JobResponse objects (description, requirements,
+  // joined company). Pulling 100 of those on every visit — including for the
+  // students who never open manual mode — is real load on a single-worker API.
   useEffect(() => {
+    if (mode !== "manual") return;
+    if (topRoles !== FALLBACK_ROLES) return; // already counted once
     let cancelled = false;
     (async () => {
       try {
-        const resp = await jobApi.list({ page: 1, limit: 100 });
+        const resp = await jobApi.list({ page: 1, limit: 30 });
         const payload = (resp as any)?.data?.data || (resp as any)?.data;
         const list: { title?: string }[] = payload?.jobs || [];
         const counts = new Map<string, number>();
@@ -327,7 +334,7 @@ function InterviewCoach() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [mode, topRoles]);
 
   // Aim at the most specific thing available, until the student says otherwise.
   useEffect(() => {
@@ -342,6 +349,18 @@ function InterviewCoach() {
     setMode(m);
   };
 
+  // Manual mode is the initial state, so its chips are tappable before the
+  // resume/job fetches resolve. Choosing a role is choosing an aim — without
+  // this, the effect above would flip the mode out from under the student.
+  const chooseRole = (r: string) => {
+    modeTouched.current = true;
+    setRole(r);
+  };
+  const chooseRoleOther = (v: boolean) => {
+    modeTouched.current = true;
+    setRoleOther(v);
+  };
+
   const typeLabel = (tp: string) =>
     tp === "behavioral" ? t.behavioral : tp === "technical" ? t.technical : tp === "situational" ? t.situational : "";
 
@@ -350,7 +369,11 @@ function InterviewCoach() {
   const payloadFor = (m: Mode) => ({
     job_id: m === "job" ? job?.id : undefined,
     resume_id: m === "job" || m === "resume" ? resumeId || undefined : undefined,
-    role: m === "manual" ? role.trim() || undefined : role.trim() || undefined,
+    // Only manual mode sends a role. The backend's priority is explicit role >
+    // job title > resume, so leaving a stale role in (the vacancy the student
+    // arrived with, or a chip they tapped before switching) would generate
+    // questions for the aim they just abandoned.
+    role: m === "manual" ? role.trim() || undefined : undefined,
   });
 
   const start = async () => {
@@ -473,9 +496,9 @@ function InterviewCoach() {
           setResumeId={setResumeId}
           topRoles={topRoles}
           role={role}
-          setRole={setRole}
+          setRole={chooseRole}
           roleOther={roleOther}
-          setRoleOther={setRoleOther}
+          setRoleOther={chooseRoleOther}
           level={level}
           setLevel={(lv) => {
             levelTouched.current = true;

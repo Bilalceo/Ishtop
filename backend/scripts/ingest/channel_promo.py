@@ -39,7 +39,7 @@ def stats(dsn: str) -> dict:
     db = pg8000.native.Connection(user=d.username, password=d.password, host=d.hostname,
                                   port=d.port, database=d.path[1:])
     visible = ("status='active' and is_deleted=false "
-               "and (expires_at is null or expires_at > now())")
+               "and (expires_at is null or expires_at + interval '1 day' > now())")
     one = lambda s: db.run(s)[0][0]
     out = {
         "jobs": one(f"select count(*) from jobs where {visible}"),
@@ -112,7 +112,7 @@ def posts(s: dict) -> dict:
                 "✅ Sotuv tajribasi — bor\n"
                 "✅ Rus tili — bor\n"
                 "➖ Haydovchilik guvohnomasi — yo'q\n\n"
-                "Shunda qaysi ishga arizа berish kerakligini, va nimani "
+                "Shunda qaysi ishga ariza berish kerakligini, va nimani "
                 f"o'rganish kerakligini aniq bilasiz.\n\n👉 {SITE}"
             ),
         },

@@ -980,7 +980,8 @@ class InterviewQuestionsRequest(BaseModel):
     # from the job's title (preferred) or the resume's most recent job title.
     role: str = Field(default="", max_length=160, description="Target role / job title (optional if resume_id/job_id given)")
     skills: List[str] = Field(default_factory=list, description="Candidate skills (optional)")
-    level: str = Field(default="junior", max_length=40, description="intern | junior | mid")
+    level: str = Field(default="junior", max_length=40,
+                       description="intern | junior | mid | senior | lead")
     locale: str = Field(default="uz", description="uz | ru")
     count: int = Field(default=5, ge=3, le=8)
     resume_id: Optional[str] = Field(default=None, description="If set, personalize questions from this resume")
@@ -1242,6 +1243,31 @@ def _build_job_profile(job) -> str:
     )
 
 
+# What each level actually means for the questions. Without this the prompt said
+# "at {level} level ... appropriate for a junior" in one breath, so the widened
+# Senior/Lead options still produced junior questions.
+_SENIORITY_BRIEF = {
+    "intern": "Assume no professional experience: ask about studies, attitude "
+              "and willingness to learn, not production systems.",
+    "junior": "Assume 0-2 years: fundamentals, small real tasks, and how they "
+              "ask for help.",
+    "mid": "Assume 2-5 years: independent delivery, trade-offs they have made, "
+           "and owning a feature end to end.",
+    "senior": "Assume 5+ years: architecture and trade-off decisions, mentoring, "
+              "and how they handle ambiguity and incidents. Do NOT ask textbook "
+              "definitions.",
+    "lead": "Assume they lead a team: hiring, prioritisation, stakeholder "
+            "conflict, and how they grow the people under them. Ask about "
+            "judgement, not syntax.",
+}
+
+
+def _seniority_brief(level: str) -> str:
+    """A one-line brief for the requested level; junior's when it's unknown."""
+    return _SENIORITY_BRIEF.get((level or "").strip().lower(),
+                                _SENIORITY_BRIEF["junior"])
+
+
 @router.post(
     "/interview/questions",
     response_model=Dict[str, Any],
@@ -1302,15 +1328,16 @@ async def interview_questions(
         )
     skills = ", ".join(skills_list[:12]) or "—"
 
+    seniority = _seniority_brief(request.level)
     system = (
         "You are IshTop Interview Coach, an experienced technical recruiter who "
-        "prepares junior candidates in Uzbekistan for real interviews."
+        "prepares candidates in Uzbekistan for real interviews."
     )
     prompt = (
         f"Generate exactly {request.count} interview questions for the role "
         f'"{role}" at {request.level} level. Candidate skills: {skills}.\n'
         f"Write every question in {lang}. Mix the types: behavioral, technical "
-        "and situational, appropriate for a junior. Keep each question one "
+        f"and situational. {seniority} Keep each question one "
         "sentence, realistic and specific.\n"
         'Return ONLY JSON: {"questions":[{"q":"...","type":"behavioral|technical|situational"}]}'
     )
@@ -1392,7 +1419,8 @@ async def interview_evaluate(
     )
     system = (
         "You are IshTop Interview Coach. Evaluate the candidate's answer fairly "
-        "and constructively, at a junior level. Be encouraging but honest."
+        "and constructively, at the candidate's stated level. Be encouraging "
+        "but honest."
     )
     prompt = (
         f'Role: "{role_str}".\nQuestion: "{request.question}".\n'
