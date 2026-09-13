@@ -31,7 +31,7 @@ CATEGORIES = [
         "ekonomist","iqtisodchi","auditor","accountant","bookkeeper","finance","kassir-buxgalter","moddiy buxgalter","glavbux",
     ]),
     ("food",      "🍽", "Ovqatlanish · HoReCa", [
-        "oshpaz","shef","povar","повар","ofitsiant","официант","waiter","konditer","кондитер","baker","novvoy",
+        "oshpaz","ошпаз","shef","povar","повар","мехмонхона","mehmonxona","йиғиштирувчи","yig'ishtiruvchi","ofitsiant","официант","waiter","konditer","кондитер","baker","novvoy",
         "restoran","restaurant","kafe","cafe","bar ","barmen","бармен","waiter","chef","cook","oshxona","qassob","salatchi","posuda","kuxnya","fastfood","burger",
         "shashlik","shashlikchi","universal","hostes",
     ]),
@@ -46,14 +46,14 @@ CATEGORIES = [
         "muhandis","injener","инженер","engineer","prorab","прораб","stanok","станок","operator stanok",
         "elektronik","elektrik","электрик","montaj","montajchi","mexanik","механик","texnolog","технолог",
         "ishlab chiqarish","proizvodstvo","zavod","fabrika","svarshik","payvandchi","сварщик",
-        "qoliplovchi","формовщик","qolip","liteyshik","frezerovshik","tokar","токарь",
+        "qoliplovchi","формовщик","kesuvchi","резчик","кесувчи","qolip","liteyshik","frezerovshik","tokar","токарь",
     ]),
     ("call",      "📞", "Call-markaz · Operator", [
         "call","колл","call-markaz","call markaz","call-center","call center","operator-konsultant","dispetcher","диспетчер",
         "operator (","operator, ","telemarketing","kontakt markaz",
     ]),
     ("logistics", "🚚", "Logistika · Transport", [
-        "kuryer","kurer","курьер","courier","haydovchi","хайдовчи","voditel","водитель","driver","yuk tashuvchi",
+        "kuryer","kurer","курьер","courier","gruzchik","guruzshik","грузчик","yuk ortuvchi","юк ташувчи","yuk tashuvchi-yordamchi","sborshik","сборщик","haydovchi","хайдовчи","voditel","водитель","driver","yuk tashuvchi",
         "yetkazib beruvchi","ekspeditor","экспедитор","ombor","склад","logist","логист","logistika","gruzchik","yuk ortuvchi",
     ]),
     ("construction","🏗", "Qurilish · Ta'mirlash", [
@@ -71,8 +71,8 @@ CATEGORIES = [
         "logoped","defektolog","terapist","терапист","psixolog","психолог","aba terapist","reabilitolog",
     ]),
     ("sales",     "🛒", "Savdo · Xizmat", [
-        "sotuvchi","sotuv","savdo","продавец","продаж","konsultant","консультант","kassir","кассир","menejer",
-        "менеджер","supervayzer","супервайзер","agent","агент","merchandayzer","administrator",
+        "sotuvchi","sotuv","savdo","продавец","продаж","сотув","савдо","сотувчи","торговый представител","торговый агент","rop","роп","konsultant","консультант","kassir","кассир","menejer",
+        "менеджер","supervayzer","супервайзер","agent","qo'riqchi","qorovul","охранник","qo‘riqchi","агент","merchandayzer","administrator",
         "администратор","xizmat","ресепшн","resepshn","reception","assistent","yordamchi","hr ","rekruter","рекрутер","ambassador",
         "tovaroved","товаровед","realizator",
         "sales","supervisor","promouter","промоутер","promoter","tozalik","tozalovchi","farrosh","gornichnaya",
