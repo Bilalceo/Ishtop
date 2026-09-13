@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { aiApi, jobApi, resumeApi } from "@/lib/api";
 import { InterviewSetup } from "@/components/interview/InterviewSetup";
+import { jobDisplayIdentity } from "@/lib/jobLabels";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/hooks/useTranslation";
 import { toast } from "sonner";
@@ -270,15 +271,19 @@ function InterviewCoach() {
         const resp = await jobApi.get(wanted);
         const j = (resp as any)?.data?.data || (resp as any)?.data;
         if (cancelled || !j?.id) return;
+        // Same split the job page uses: aggregated listings sit under the
+        // placeholder account "Ish beruvchi" with the real employer appended to
+        // the title, so showing `company.name` raw put "Ish beruvchi" under
+        // every card and left the employer buried in brackets.
+        const ident = jobDisplayIdentity(j.title, j.company?.name);
         setJob({
           id: j.id,
-          // JobResponse nests CompanyInfo with a `name` field.
-          title: j.title || "",
-          company: j.company?.name || "",
+          title: ident.title || j.title || "",
+          company: ident.company || "",
           experience_level: j.experience_level || "",
         });
         // The vacancy title is the interview role unless the user typed one.
-        setRole((cur) => cur || j.title || "");
+        setRole((cur) => cur || ident.title || j.title || "");
         // Don't clobber a level the user already picked while this was loading.
         if (!levelTouched.current) {
           const lvl = String(j.experience_level || "").toLowerCase();
@@ -361,6 +366,36 @@ function InterviewCoach() {
     setRoleOther(v);
   };
 
+  // The coach had been used zero times before this screen was rebuilt, and the
+  // rebuild is a hypothesis, not a result. These three events are how we find
+  // out: how many arrive, how many start, how many reach the end — and in which
+  // mode. Fire-and-forget; a failed beacon must never interrupt a session.
+  const track = (event_name: string, metadata: Record<string, unknown> = {}) => {
+    try {
+      void jobApi.trackEvent({
+        event_name,
+        job_id: job?.id,
+        source: "interview_coach",
+        metadata,
+      });
+    } catch {
+      /* telemetry is never worth a broken page */
+    }
+  };
+
+  // One per visit, once the aim has settled — before that the mode is still the
+  // default and would over-report "manual".
+  const viewTracked = useRef(false);
+  useEffect(() => {
+    if (viewTracked.current || phase !== "setup") return;
+    const t = setTimeout(() => {
+      viewTracked.current = true;
+      track("interview_setup_view", { mode, has_resume: resumes.length > 0 });
+    }, 1500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, mode, resumes.length]);
+
   const typeLabel = (tp: string) =>
     tp === "behavioral" ? t.behavioral : tp === "technical" ? t.technical : tp === "situational" ? t.situational : "";
 
@@ -403,6 +438,7 @@ function InterviewCoach() {
       setFeedback(null);
       setScores([]);
       setPhase("quiz");
+      track("interview_started", { mode, level, questions: qs.length });
     } catch {
       toast.error(t.aiBusy);
     } finally {
@@ -442,6 +478,14 @@ function InterviewCoach() {
   const next = () => {
     if (idx + 1 >= questions.length) {
       setPhase("summary");
+      track("interview_finished", {
+        mode,
+        level,
+        answered: scores.length,
+        avg_score: scores.length
+          ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+          : 0,
+      });
       return;
     }
     setIdx((i) => i + 1);

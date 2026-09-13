@@ -204,6 +204,37 @@ def find_company(text: str) -> str:
     return ""
 
 
+def split_roles(title: str) -> list:
+    """Split on / and , but never inside brackets — the bracket is the employer."""
+    parts, buf, depth = [], "", 0
+    for ch in title:
+        if ch in "([":
+            depth += 1
+        elif ch in ")]":
+            depth = max(0, depth - 1)
+        if ch in "/," and depth == 0:
+            parts.append(buf.strip())
+            buf = ""
+        else:
+            buf += ch
+    parts.append(buf.strip())
+    return [x for x in parts if x]
+
+
+def shorten_title(title: str) -> str:
+    """One post advertising six roles gave a 77-character title that broke every
+    card it appeared on. The first role plus a count says the same thing; the
+    full list is still in the description."""
+    roles = split_roles(title)
+    if len(roles) < 2 or len(title) <= 70:
+        return title
+    m = re.search(r"\(([^()]{3,60})\)\s*$", title)
+    out = f"{roles[0]} va yana {len(roles) - 1} ta lavozim"
+    if m and m.group(1) not in roles[0]:
+        out = f"{out} ({m.group(1)})"
+    return out if len(out) < len(title) else title
+
+
 def normalise_title(t: str) -> str:
     t = re.sub(r"\s+", " ", t).strip(" !.,:;-")
     # Post headlines shout; the site does not.
@@ -337,6 +368,7 @@ for p in posts:
     company = find_company(text)
     if company and company.lower() not in title.lower():
         title = f"{title} ({company})"
+    title = shorten_title(title)
     if len(title) < 5 or len(title) > 80:
         skipped["no_title"] += 1
         continue
