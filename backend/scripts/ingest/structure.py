@@ -86,6 +86,14 @@ _NETWORKS = (r"instagram|telegram|facebook|tiktok|youtube|linkedin|whatsapp|vk|"
              r"threads|инстаграм|телеграм|фейсбук")
 ONLY_LINKS = re.compile(rf"^(?:\s*(?:{_NETWORKS})\s*[|,/·•—\-]*)+$", re.I)
 
+# Posts nest their lists ("Требования:" / "Обязательные:" / bullets), and the
+# inner heading was landing in the list as if it were an item — the bot showed
+# a vacancy whose only stated requirement was the word "Обязательные".
+SECTION_WORD = re.compile(
+    r"^(обязательн\w*|требовани\w*|talablar|majburiy|kerakli|условия|shartlar|"
+    r"обязанност\w*|vazifalar|мы предлагаем|biz taklif|плюсом|будет плюсом|"
+    r"nice to have|желательно|преимуществ\w*)[:\s]*$", re.I)
+
 # headings that open a bullet list we can lift verbatim
 REQ_HEAD = re.compile(r"(talab(lar)?|требовани|sizdan kutamiz|bizga kerak|kerakli)", re.I)
 RESP_HEAD = re.compile(r"(vazifa(lar)?|majburiyat|обязанност|ish haqida|чем предстоит)", re.I)
@@ -284,7 +292,8 @@ def section(text: str, head_re) -> list:
                 break
             if PHONE.search(l) or EMAIL.search(l) or l.lower().startswith(("telegram", "aloqa", "murojaat")):
                 break
-            if 3 < len(l) <= 160 and not ONLY_LINKS.match(l):
+            if (3 < len(l) <= 160 and not ONLY_LINKS.match(l)
+                    and not SECTION_WORD.match(l)):
                 out.append(l)
             if len(out) >= 8:
                 break
