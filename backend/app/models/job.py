@@ -777,3 +777,33 @@ class SavedJob(Base, UUIDMixin, TimestampMixin):
 
     def __repr__(self) -> str:
         return f"<SavedJob(user={self.user_id}, job={self.job_id})>"
+
+
+# =============================================================================
+# VISIBILITY
+# =============================================================================
+
+def visible_job_filters():
+    """What the public is allowed to see: active, not deleted, not past its date.
+
+    Lives here rather than in the routes module because it is the rule, not an
+    endpoint detail: the bot, the discovery feeds, recommendations and search
+    all have to agree, and a copy in each was how 48 expired listings stayed in
+    the feed for a week.
+
+    `expires_at` is a DAY, not an instant — the company form posts
+    `new Date(<date input>).toISOString()`, midnight UTC of the deadline day — so
+    a strict `> now()` made a job whose deadline is today invisible the moment it
+    was created and cut the final day off every other one. Carrying to the end
+    of that day keeps the day the employer meant to offer.
+    """
+    from sqlalchemy import func, or_, text as sa_text
+
+    return (
+        Job.is_deleted == False,  # noqa: E712 — SQLAlchemy needs ==, not `is`
+        Job.status == JobStatus.ACTIVE.value,
+        or_(
+            Job.expires_at.is_(None),
+            Job.expires_at + sa_text("interval '1 day'") > func.now(),
+        ),
+    )

@@ -14,9 +14,6 @@ Rules that matter here:
 import sys, re, json, unicodedata
 from roles import role_name
 
-src, dst = sys.argv[1], sys.argv[2]
-posts = json.load(open(src, encoding="utf-8"))
-
 # Startup/news channels post announcements, not vacancies.
 NEWS_CHANNELS = {"uzcombinator", "foundershub_uz"}
 # An employer post says, somewhere, that it is hiring.
@@ -323,7 +320,10 @@ def section(text: str, head_re) -> list:
                 break
             if PHONE.search(l) or EMAIL.search(l) or l.lower().startswith(("telegram", "aloqa", "murojaat")):
                 break
-            if (3 < len(l) <= 160 and not ONLY_LINKS.match(l)
+            # >= 2, not > 3: a real requirement is often three characters —
+            # DRF, SQL, 1C, PHP — and those were being dropped in silence.
+            # Junk is kept out by the link/heading filters above, not by length.
+            if (2 <= len(l) <= 160 and not ONLY_LINKS.match(l)
                     and not SECTION_WORD.match(l)):
                 out.append(l)
             if len(out) >= 8:
@@ -347,52 +347,64 @@ def build_description(text: str, title: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", "\n".join(keep)).strip()[:4000]
 
 
-rows, skipped = [], {"seeker": 0, "multi": 0, "no_title": 0, "short": 0}
-for p in posts:
-    text = p["text"]
-    if p["channel"] in NEWS_CHANNELS or not HIRING.search(text):
-        skipped["not_hiring"] = skipped.get("not_hiring", 0) + 1
-        continue
-    if SEEKER.search(text):
-        skipped["seeker"] += 1
-        continue
-    if MULTI_ROLE.search(text):
-        skipped["multi"] += 1
-        continue
-    headline = pick_title(text)
-    role = role_name(strip_emoji(strip_md(text)))
-    if not role:
-        skipped["no_role"] = skipped.get("no_role", 0) + 1
-        continue
-    title = normalise_title(role)
-    company = find_company(text)
-    if company and company.lower() not in title.lower():
-        title = f"{title} ({company})"
-    title = shorten_title(title)
-    if len(title) < 5 or len(title) > 80:
-        skipped["no_title"] += 1
-        continue
-    desc = build_description(text, title)
-    if len(desc) < 120:
-        skipped["short"] += 1
-        continue
-    smin, smax = find_salary(text)
-    rows.append({
-        "channel": p["channel"], "msg_id": p["msg_id"], "date": p["date"],
-        "title": title, "company": company,
-        "description": desc,
-        "requirements": section(text, REQ_HEAD),
-        "responsibilities": section(text, RESP_HEAD),
-        "benefits": section(text, BEN_HEAD),
-        "salary_min": smin, "salary_max": smax,
-        "city": find_city(text),
-        "is_remote": bool(REMOTE.search(text)),
-        "experience_level": find_experience(text, title),
-        "phones": p["phones"], "emails": p["emails"], "handles": p["handles"],
-    })
+def structure(posts: list) -> tuple:
+    """Turn harvested posts into vacancy rows. Returns (rows, skipped)."""
+    rows, skipped = [], {"seeker": 0, "multi": 0, "no_title": 0, "short": 0}
+    for p in posts:
+        text = p["text"]
+        if p["channel"] in NEWS_CHANNELS or not HIRING.search(text):
+            skipped["not_hiring"] = skipped.get("not_hiring", 0) + 1
+            continue
+        if SEEKER.search(text):
+            skipped["seeker"] += 1
+            continue
+        if MULTI_ROLE.search(text):
+            skipped["multi"] += 1
+            continue
+        headline = pick_title(text)
+        role = role_name(strip_emoji(strip_md(text)))
+        if not role:
+            skipped["no_role"] = skipped.get("no_role", 0) + 1
+            continue
+        title = normalise_title(role)
+        company = find_company(text)
+        if company and company.lower() not in title.lower():
+            title = f"{title} ({company})"
+        title = shorten_title(title)
+        if len(title) < 5 or len(title) > 80:
+            skipped["no_title"] += 1
+            continue
+        desc = build_description(text, title)
+        if len(desc) < 120:
+            skipped["short"] += 1
+            continue
+        smin, smax = find_salary(text)
+        rows.append({
+            "channel": p["channel"], "msg_id": p["msg_id"], "date": p["date"],
+            "title": title, "company": company,
+            "description": desc,
+            "requirements": section(text, REQ_HEAD),
+            "responsibilities": section(text, RESP_HEAD),
+            "benefits": section(text, BEN_HEAD),
+            "salary_min": smin, "salary_max": smax,
+            "city": find_city(text),
+            "is_remote": bool(REMOTE.search(text)),
+            "experience_level": find_experience(text, title),
+            "phones": p["phones"], "emails": p["emails"], "handles": p["handles"],
+        })
 
-json.dump(rows, open(dst, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-print(f"tayyor: {len(rows)}   tashlab yuborildi: {skipped}")
-print(f"  maoshi bor: {sum(1 for r in rows if r['salary_min'])}")
-print(f"  shahri bor: {sum(1 for r in rows if r['city'])}")
-print(f"  talablari bor: {sum(1 for r in rows if r['requirements'])}")
+    return rows, skipped
+
+
+def main() -> None:
+    src, dst = sys.argv[1], sys.argv[2]
+    rows, skipped = structure(json.load(open(src, encoding="utf-8")))
+    json.dump(rows, open(dst, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    print(f"tayyor: {len(rows)}   tashlab yuborildi: {skipped}")
+    print(f"  maoshi bor: {sum(1 for r in rows if r['salary_min'])}")
+    print(f"  shahri bor: {sum(1 for r in rows if r['city'])}")
+    print(f"  talablari bor: {sum(1 for r in rows if r['requirements'])}")
+
+
+if __name__ == "__main__":
+    main()

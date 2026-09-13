@@ -28,15 +28,22 @@ const customJestConfig = {
   },
   
   // Test file patterns
-  testMatch: [
-    '**/__tests__/**/*.[jt]s?(x)',
-    '**/?(*.)+(spec|test).[jt]s?(x)',
-  ],
+  // Only actual test files. The first pattern used to be
+  // '**/__tests__/**/*.[jt]s?(x)', which collected helpers like test-utils.tsx
+  // as suites and then failed them for containing no tests.
+  testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)'],
   
+  // The standalone build copies package.json, which jest-haste-map then reports
+  // as a duplicate module name on every run.
+  modulePathIgnorePatterns: ['<rootDir>/.next/'],
+
   // Files to ignore
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
     '<rootDir>/.next/',
+    // The Playwright suites live in tests/e2e, not e2e — jest was collecting
+    // them and failing on `import { test } from '@playwright/test'`.
+    '<rootDir>/tests/e2e/',
     '<rootDir>/e2e/',
   ],
   

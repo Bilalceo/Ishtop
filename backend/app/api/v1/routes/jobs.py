@@ -38,7 +38,7 @@ from enum import Enum
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func, or_, and_, desc, asc, text
+from sqlalchemy import func, or_, and_, desc, asc
 from pydantic import BaseModel, Field
 
 from app.core.dependencies import (
@@ -77,6 +77,7 @@ from app.schemas.application import (
 from app.schemas.auth import MessageResponse
 from app.config import settings
 from app.core.job_categories import classify_job
+from app.models.job import visible_job_filters
 from app.services import job_matching
 from app.services.discovery import normalize_discovery_labels, normalize_discovery_slug
 from app.services.trust_engine import (
@@ -412,31 +413,6 @@ async def _send_deadline_telegram_reminders(
         prefs["telegram_deadline_reminders_sent"] = sent_map
         company.notification_preferences = prefs
         db.commit()
-
-
-def visible_job_filters():
-    """What the public is allowed to see: active, not deleted, not past its date.
-
-    `expires_at` was set on every listing and then checked nowhere, so 48 active
-    listings whose date had passed a week earlier were still being served — a
-    candidate calling about one reaches an employer who filled the role. The
-    model has an `is_expired` property, but that is Python-side and cannot filter
-    a query, which is how the gap survived.
-    """
-    return (
-        Job.is_deleted == False,  # noqa: E712 — SQLAlchemy needs ==, not `is`
-        Job.status == JobStatus.ACTIVE.value,
-        # The deadline is a DAY, not an instant. The company form posts
-        # `new Date(<date input>).toISOString()` — midnight UTC of the deadline
-        # day — so a strict `> now()` made a job whose deadline is today
-        # invisible the moment it was created, and cut the final day off every
-        # other one. Carrying to the end of that day (+1d, which is 05:00
-        # Tashkent the next morning) keeps the day the employer meant to offer.
-        or_(
-            Job.expires_at.is_(None),
-            Job.expires_at + text("interval '1 day'") > func.now(),
-        ),
-    )
 
 
 def job_to_response(job: Job, include_company: bool = True) -> JobResponse:

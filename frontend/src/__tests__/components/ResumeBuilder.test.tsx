@@ -278,8 +278,12 @@ describe('ResumeBuilder', () => {
       
       await user.click(screen.getByTestId('next-button'));
       
-      const errorMessage = screen.getByRole('alert');
-      expect(errorMessage).toBeInTheDocument();
+      // Submitting the empty form raises one alert per invalid field (name and
+      // email), so the singular getter throws on the second one. What this test
+      // is actually about is that the errors are announced at all.
+      const alerts = screen.getAllByRole('alert');
+      expect(alerts.length).toBeGreaterThan(0);
+      alerts.forEach((a) => expect(a).toBeInTheDocument());
     });
 
     it('should set aria-invalid on invalid inputs', async () => {
