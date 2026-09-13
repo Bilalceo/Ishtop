@@ -90,3 +90,25 @@ more than no post.
 
 Icons on these cards are drawn with primitives, not typed: Arial has no ☎ / ✈ /
 ✓ glyph, and the first cut shipped a row of tofu boxes.
+
+## Running it on a schedule
+
+```bash
+./install_schedule.sh          # install; asks you to fill ~/.ishtop.env once
+./install_schedule.sh remove   # uninstall
+```
+
+- **Sunday 20:00** — `weekly.py --commit`: the whole pipeline, then a report to
+  the owner's Telegram Saved Messages.
+- **Daily 09:00** — `healthcheck.py --notify`: messages **only when something is
+  wrong**. A daily "all fine" trains you to ignore it.
+
+Both run on the owner's Mac, not the server, because the pipeline authenticates
+as their personal Telegram account and that session file is a key to their
+Telegram. launchd runs a missed job once the machine wakes, so a closed lid
+delays a run rather than skipping it.
+
+The report exists because two things fail quietly: the Telethon session expires,
+and the well runs dry (one batch already skipped 116 of 424 posts as employers
+we carry). Both surface as a number in the message, alongside the one that
+decides this project — **haqiqiy ish beruvchi**.
