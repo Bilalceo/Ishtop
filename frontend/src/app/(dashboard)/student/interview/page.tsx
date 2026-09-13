@@ -25,6 +25,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { aiApi, jobApi, resumeApi } from "@/lib/api";
+import { InterviewSetup } from "@/components/interview/InterviewSetup";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/hooks/useTranslation";
 import { toast } from "sonner";
@@ -37,7 +38,20 @@ type Feedback = {
   model_answer: string;
 };
 
-const LEVELS = ["intern", "junior", "mid"] as const;
+const LEVELS = ["intern", "junior", "mid", "senior", "lead"] as const;
+
+/** How the setup screen is aimed. Derived on load, switchable by the user. */
+type Mode = "job" | "resume" | "manual";
+
+/** Fallback role chips if the catalogue can't be read (see `topRoles`). */
+const FALLBACK_ROLES = [
+  "Sotuv menejeri",
+  "Call-markaz operatori",
+  "Sotuvchi",
+  "Administrator",
+  "Buxgalter",
+  "Dasturchi",
+];
 
 export default function InterviewCoachPage() {
   // useSearchParams() requires a Suspense boundary in the Next.js app router;
@@ -65,7 +79,22 @@ function InterviewCoach() {
             roleLabel: "Должность / роль",
             rolePh: "Например: Junior Frontend Developer",
             levelLabel: "Уровень",
-            levels: { intern: "Стажёр", junior: "Junior", mid: "Middle" },
+            levels: { intern: "Стажёр", junior: "Junior", mid: "Middle", senior: "Senior", lead: "Lead" },
+            aim: "К чему готовитесь?",
+            modeJob: "Эта вакансия",
+            modeResume: "Моё резюме",
+            modeManual: "Другая профессия",
+            modeManualHint: "Выберите профессию или напишите свою",
+            modeJobWithResume: "Резюме сравним с требованиями вакансии",
+            modeJobOnly: "Вопросы по требованиям этой вакансии",
+            modeResumeHint: "Вопросы по вашему опыту и навыкам",
+            otherResume: "Другое резюме",
+            levelShort: "Уровень",
+            change: "изменить",
+            meta: "5 вопросов · ~10 минут · можно остановиться в любой момент",
+            roleOther: "Другое…",
+            resumeNudge: "Создайте резюме — и вопросы подстроятся под ваш опыт",
+            applyToJob: "Откликнуться на эту вакансию",
             start: "Начать тренировку",
             generating: "Готовлю вопросы…",
             question: "Вопрос",
@@ -108,7 +137,22 @@ function InterviewCoach() {
             roleLabel: "Lavozim / rol",
             rolePh: "Masalan: Junior Frontend Developer",
             levelLabel: "Daraja",
-            levels: { intern: "Amaliyotchi", junior: "Junior", mid: "Middle" },
+            levels: { intern: "Amaliyotchi", junior: "Junior", mid: "Middle", senior: "Senior", lead: "Lead" },
+            aim: "Nimaga tayyorlanasiz?",
+            modeJob: "Shu vakansiya",
+            modeResume: "Rezyumem",
+            modeManual: "Boshqa kasb",
+            modeManualHint: "Kasbni tanlang yoki o'zingiz yozing",
+            modeJobWithResume: "Rezyumengiz vakansiya talablariga solishtiriladi",
+            modeJobOnly: "Savollar shu vakansiya talablari bo'yicha",
+            modeResumeHint: "Savollar tajribangiz va ko'nikmalaringiz bo'yicha",
+            otherResume: "Boshqa rezyume",
+            levelShort: "Daraja",
+            change: "o'zgartirish",
+            meta: "5 savol · ~10 daqiqa · istalgan payt to'xtatasiz",
+            roleOther: "Boshqa…",
+            resumeNudge: "Rezyume yaratsangiz — savollar tajribangizga moslashadi",
+            applyToJob: "Shu vakansiyaga ariza berish",
             start: "Mashqni boshlash",
             generating: "Savollar tayyorlanmoqda…",
             question: "Savol",
@@ -170,6 +214,20 @@ function InterviewCoach() {
   // Once the user picks a level themselves, a late job fetch must not override it.
   const levelTouched = useRef(false);
 
+  // What the session is aimed at. Everything else on this screen follows from
+  // it, so the student makes one decision instead of filling four fields.
+  const [mode, setMode] = useState<Mode>("manual");
+  // The mode is chosen for them on arrival — but only until they touch it, or a
+  // late resume/job fetch would silently move the selection under their finger.
+  const modeTouched = useRef(false);
+  const [levelOpen, setLevelOpen] = useState(false);
+
+  // Role suggestions come from the live catalogue rather than a guessed list:
+  // typing a job title on a phone is the worst input we could ask for, and we
+  // already know which roles this market actually posts.
+  const [topRoles, setTopRoles] = useState<string[]>(FALLBACK_ROLES);
+  const [roleOther, setRoleOther] = useState(false);
+
   // Load the user's resumes once; default the selection to the ?resume= deep
   // link if valid, otherwise the most recently updated resume.
   useEffect(() => {
@@ -224,8 +282,11 @@ function InterviewCoach() {
         // Don't clobber a level the user already picked while this was loading.
         if (!levelTouched.current) {
           const lvl = String(j.experience_level || "").toLowerCase();
-          if (lvl === "intern" || lvl === "junior") setLevel(lvl);
-          else if (lvl) setLevel("mid"); // mid/senior/lead/executive -> mid
+          const mapped =
+            lvl === "executive" ? "lead" : lvl === "middle" ? "mid" : lvl;
+          if ((LEVELS as readonly string[]).includes(mapped)) {
+            setLevel(mapped as (typeof LEVELS)[number]);
+          }
         }
       } catch {
         /* job is optional — silently fall back to role/resume mode */
@@ -237,25 +298,76 @@ function InterviewCoach() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Most-posted titles, counted client-side off one page of the feed.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const resp = await jobApi.list({ page: 1, limit: 100 });
+        const payload = (resp as any)?.data?.data || (resp as any)?.data;
+        const list: { title?: string }[] = payload?.jobs || [];
+        const counts = new Map<string, number>();
+        for (const j of list) {
+          // Titles carry the employer in a trailing bracket; the role is what
+          // is left, and that is what a student recognises.
+          const role = (j.title || "").replace(/\s*\([^)]*\)\s*$/, "").trim();
+          if (role.length >= 4 && role.length <= 34) {
+            counts.set(role, (counts.get(role) || 0) + 1);
+          }
+        }
+        const top = [...counts.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 6)
+          .map(([r]) => r);
+        if (!cancelled && top.length >= 3) setTopRoles(top);
+      } catch {
+        /* the fallback list is already in state */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Aim at the most specific thing available, until the student says otherwise.
+  useEffect(() => {
+    if (modeTouched.current) return;
+    if (job) setMode("job");
+    else if (resumes.length > 0) setMode("resume");
+    else setMode("manual");
+  }, [job, resumes.length]);
+
+  const pickMode = (m: Mode) => {
+    modeTouched.current = true;
+    setMode(m);
+  };
+
   const typeLabel = (tp: string) =>
     tp === "behavioral" ? t.behavioral : tp === "technical" ? t.technical : tp === "situational" ? t.situational : "";
 
+  // What the chosen mode actually sends. "job" keeps the resume too — that is
+  // the gap-analysis mode the card promises, and the strongest one we have.
+  const payloadFor = (m: Mode) => ({
+    job_id: m === "job" ? job?.id : undefined,
+    resume_id: m === "job" || m === "resume" ? resumeId || undefined : undefined,
+    role: m === "manual" ? role.trim() || undefined : role.trim() || undefined,
+  });
+
   const start = async () => {
-    // A role is required only when neither a resume nor a job is selected —
-    // with those the backend derives the role (job title wins over resume).
-    if (!resumeId && !job && !role.trim()) {
+    const aim = payloadFor(mode);
+    // Only manual mode needs a typed role; the other two derive it server-side
+    // (the vacancy title wins over the resume's).
+    if (!aim.job_id && !aim.resume_id && !aim.role) {
       toast.error(t.needRole);
       return;
     }
     setLoading(true);
     try {
       const res = await aiApi.interviewQuestions({
-        role: role.trim() || undefined,
+        ...aim,
         level,
         locale: ru ? "ru" : "uz",
         count: 5,
-        resume_id: resumeId || undefined,
-        job_id: job?.id,
       });
       const qs = (res.data?.data?.questions || []) as Question[];
       if (!qs.length) throw new Error("empty");
@@ -282,6 +394,7 @@ function InterviewCoach() {
     }
     setLoading(true);
     try {
+      const aim = payloadFor(mode);
       const res = await aiApi.interviewEvaluate({
         // Empty is fine — the backend tolerates it (resume-only sessions) and
         // fills a neutral role. Never send a sub-2-char placeholder.
@@ -289,8 +402,9 @@ function InterviewCoach() {
         question: questions[idx].q,
         answer: answer.trim(),
         locale: ru ? "ru" : "uz",
-        resume_id: resumeId || undefined,
-        job_id: job?.id,
+        // Evaluation must judge against the same thing the questions came from.
+        resume_id: aim.resume_id,
+        job_id: aim.job_id,
       });
       const fb = res.data?.data as Feedback;
       setFeedback(fb);
@@ -348,143 +462,30 @@ function InterviewCoach() {
         </div>
       </div>
 
-      {/* SETUP */}
       {phase === "setup" && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-3xl border border-surface-200/70 bg-white p-6 dark:border-white/[0.06] dark:bg-surface-900 sm:p-8"
-        >
-          {/* Targeted vacancy (from a job's "prepare for interview" link) */}
-          {job && (
-            <div className="mb-5 rounded-xl border border-brand-200 bg-gradient-to-r from-brand-50 to-violet-50 p-4 dark:border-brand-500/20 dark:from-brand-500/10 dark:to-violet-500/10">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-300">
-                    <Briefcase className="h-3.5 w-3.5" />
-                    {t.jobLabel}
-                  </p>
-                  <p className="mt-1 truncate text-sm font-bold text-surface-900 dark:text-white">
-                    {job.title}
-                  </p>
-                  {job.company && (
-                    <p className="truncate text-xs text-surface-500">{job.company}</p>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setJob(null)}
-                  className="shrink-0 text-xs font-medium text-surface-400 underline-offset-2 hover:text-surface-600 hover:underline dark:hover:text-surface-200"
-                >
-                  {t.jobClear}
-                </button>
-              </div>
-              <p className="mt-3 rounded-lg bg-white/70 px-3 py-2 text-xs font-medium text-brand-700 dark:bg-surface-900/40 dark:text-brand-300">
-                {resumeId ? t.jobResumeBadge : t.jobBadge}
-              </p>
-            </div>
-          )}
-
-          {resumes.length > 0 ? (
-            <>
-              <label className="flex items-center gap-2 text-sm font-semibold text-surface-800 dark:text-white">
-                <FileText className="h-4 w-4 text-brand-500" />
-                {t.resumeLabel}
-              </label>
-              <select
-                value={resumeId}
-                onChange={(e) => setResumeId(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-surface-200 bg-white px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-surface-700 dark:bg-surface-800"
-              >
-                {resumes.map((r, i) => (
-                  <option key={r.id} value={r.id}>
-                    {r.title?.trim() || `${t.resumeLabel} ${i + 1}`}
-                  </option>
-                ))}
-                <option value="">{t.resumeNone}</option>
-              </select>
-              {/* When a vacancy is targeted, its banner already states the
-                  combined mode — don't repeat a second badge here. */}
-              {resumeId && !job && (
-                <p className="mt-2 flex items-center gap-1.5 rounded-lg bg-brand-50 px-3 py-2 text-xs font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
-                  {t.resumeBadge}
-                </p>
-              )}
-            </>
-          ) : (
-            <div className="mb-5 rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-500/20 dark:bg-brand-500/10">
-              <p className="text-sm font-semibold text-brand-800 dark:text-brand-200">
-                {t.noResumeTitle}
-              </p>
-              <p className="mt-1 text-xs text-brand-700/90 dark:text-brand-300/90">
-                {t.noResumeText}
-              </p>
-              <Link
-                href="/student/resumes/create-ai"
-                className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:text-brand-500"
-              >
-                <FileText className="h-4 w-4" />
-                {t.noResumeCta}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          )}
-
-          <label className="mt-5 block text-sm font-semibold text-surface-800 dark:text-white">
-            {t.roleLabel}
-            {(resumeId || job) && (
-              <span className="ml-2 text-xs font-normal text-surface-400">
-                ({t.roleOptional})
-              </span>
-            )}
-          </label>
-          <input
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            placeholder={t.rolePh}
-            className="mt-2 w-full rounded-xl border border-surface-200 bg-white px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-surface-700 dark:bg-surface-800"
-          />
-
-          <label className="mt-5 block text-sm font-semibold text-surface-800 dark:text-white">
-            {t.levelLabel}
-          </label>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {LEVELS.map((lv) => (
-              <button
-                key={lv}
-                type="button"
-                onClick={() => { levelTouched.current = true; setLevel(lv); }}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                  level === lv
-                    ? "bg-brand-500 text-white"
-                    : "bg-surface-100 text-surface-600 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-300"
-                }`}
-              >
-                {t.levels[lv]}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={start}
-            disabled={loading}
-            className="btn-silver-primary group mt-7 w-full disabled:opacity-60"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {t.generating}
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4" />
-                {t.start}
-                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-              </>
-            )}
-          </button>
-        </motion.div>
+        <InterviewSetup
+          t={t}
+          mode={mode}
+          pickMode={pickMode}
+          job={job}
+          resumes={resumes}
+          resumeId={resumeId}
+          setResumeId={setResumeId}
+          topRoles={topRoles}
+          role={role}
+          setRole={setRole}
+          roleOther={roleOther}
+          setRoleOther={setRoleOther}
+          level={level}
+          setLevel={(lv) => {
+            levelTouched.current = true;
+            setLevel(lv);
+          }}
+          levelOpen={levelOpen}
+          setLevelOpen={setLevelOpen}
+          loading={loading}
+          onStart={start}
+        />
       )}
 
       {/* QUIZ */}
@@ -637,7 +638,9 @@ function InterviewCoach() {
           <h2 className="mt-4 font-display text-2xl font-bold text-surface-900 dark:text-white">
             {t.summaryTitle}
           </h2>
-          <p className="mt-1 text-sm text-surface-500">{role}</p>
+          <p className="mt-1 text-sm text-surface-500">
+            {mode === "job" && job ? job.title : resolvedRole || role}
+          </p>
 
           <div className="mt-6 inline-flex flex-col items-center">
             <span className={`font-display text-5xl font-bold ${scoreColor(avg)}`}>{avg}</span>
@@ -647,10 +650,30 @@ function InterviewCoach() {
           </div>
 
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <button type="button" onClick={reset} className="btn-silver-primary group">
-              <RotateCcw className="h-4 w-4" />
-              {t.again}
-            </button>
+            {/* Practising was never the goal — applying is. When the session was
+                aimed at a real vacancy, close the loop back to its contact
+                panel instead of dropping the student on the dashboard. */}
+            {mode === "job" && job ? (
+              <Link
+                href={`/student/jobs/${job.id}`}
+                className="btn-silver-primary group"
+              >
+                <Briefcase className="h-4 w-4" />
+                {t.applyToJob}
+                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+              </Link>
+            ) : (
+              <button type="button" onClick={reset} className="btn-silver-primary group">
+                <RotateCcw className="h-4 w-4" />
+                {t.again}
+              </button>
+            )}
+            {mode === "job" && job && (
+              <button type="button" onClick={reset} className="btn-silver-ghost !bg-[#f6f6f4]">
+                <RotateCcw className="h-4 w-4" />
+                {t.again}
+              </button>
+            )}
             <Link href="/student" className="btn-silver-ghost !bg-[#f6f6f4]">
               <ArrowLeft className="h-4 w-4" />
               {t.backToDash}
