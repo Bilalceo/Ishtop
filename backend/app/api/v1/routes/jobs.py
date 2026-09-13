@@ -1001,6 +1001,9 @@ def recommended_jobs(
     resume_skills = job_matching.extract_skills_from_resume(resume.content)
     resume_experience = job_matching.extract_experience_level(resume.content)
     resume_keywords = job_matching.extract_keywords(resume.content)
+    # Same signal the /match feed ranks on — without it every listing scored the
+    # neutral middle and the recommendations were effectively unsorted.
+    resume_cat = job_matching.resume_category(resume.content)
 
     # =========================================================================
     # STEP 3: Candidate jobs (active only; cheap pre-filter for remote_only)
@@ -1028,6 +1031,7 @@ def recommended_jobs(
             resume_experience=resume_experience,
             resume_keywords=resume_keywords,
             job=job,
+            resume_category_id=resume_cat,
         )
         explainability = None
         if explainability_enabled:
@@ -1774,8 +1778,12 @@ def match_jobs(
     resume_skills = job_matching.extract_skills_from_resume(resume.content)
     resume_experience = job_matching.extract_experience_level(resume.content)
     resume_keywords = job_matching.extract_keywords(resume.content)
-    
-    logger.info(f"   Extracted {len(resume_skills)} skills from resume")
+    # The field of work carries most of the score, and it is a property of the
+    # resume — compute it once, not once per listing.
+    resume_cat = job_matching.resume_category(resume.content)
+
+    logger.info(f"   Extracted {len(resume_skills)} skills from resume "
+                f"(field: {resume_cat or 'unknown'})")
     
     # =========================================================================
     # STEP 3: Get matching jobs
@@ -1852,6 +1860,7 @@ def match_jobs(
             resume_experience=resume_experience,
             resume_keywords=resume_keywords,
             job=job,
+            resume_category_id=resume_cat,
         )
         
         matches.append({

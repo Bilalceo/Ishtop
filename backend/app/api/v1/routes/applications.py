@@ -2095,6 +2095,8 @@ def auto_apply(
         resume_skills = job_matching.extract_skills_from_resume(resume.content)
         resume_experience = job_matching.extract_experience_level(resume.content)
         resume_keywords = job_matching.extract_keywords(resume.content)
+        # Auto-apply must rank the same way the student's own feed does.
+        resume_cat = job_matching.resume_category(resume.content)
 
         scored_jobs: list = []
         for job in jobs:
@@ -2106,6 +2108,7 @@ def auto_apply(
                 resume_experience=resume_experience,
                 resume_keywords=resume_keywords,
                 job=job,
+                resume_category_id=resume_cat,
             )
             scored_jobs.append((job, score, matched, missing, reasons))
         
