@@ -303,6 +303,43 @@ def resume_category(content: Dict[str, Any]) -> str:
     return ""
 
 
+# Fields that are the same work under two names here: a "Sotuv operatori" and a
+# "Call-markaz operatori" do the same job for the same employers. Kept
+# deliberately short — every pair added widens what counts as "relevant", which
+# is the thing this is meant to narrow.
+RELATED_CATEGORIES = {
+    "sales": {"call"},
+    "call": {"sales"},
+}
+
+
+def job_category_of(job: Any) -> str:
+    """The job's field, from the row if the API set it, else classified."""
+    cid = getattr(job, "category", None) or ""
+    if cid:
+        return cid
+    from app.core.job_categories import classify_job
+
+    return classify_job(
+        getattr(job, "title", "") or "",
+        (getattr(job, "description", "") or "")[:200],
+    )
+
+
+def is_relevant_field(resume_category_id: str, job_category_id: str) -> bool:
+    """Should this listing appear in a resume-based feed at all?
+
+    Unknown on either side means we cannot judge, and refusing to show a job
+    because we failed to classify it would be our mistake showing as the
+    student's empty page — so those stay in.
+    """
+    if not resume_category_id or not job_category_id or job_category_id == "other":
+        return True
+    if resume_category_id == job_category_id:
+        return True
+    return job_category_id in RELATED_CATEGORIES.get(resume_category_id, set())
+
+
 def calculate_match_score(
     resume_skills: List[str],
     resume_experience: str,
@@ -342,18 +379,14 @@ def calculate_match_score(
     missing_skills = sorted(job_requirement_set - set(skill_matches))
 
     # ---- field of work (45) -------------------------------------------------
-    job_category = getattr(job, "category", None) or ""
-    if not job_category:
-        from app.core.job_categories import classify_job
-
-        job_category = classify_job(
-            getattr(job, "title", "") or "",
-            (getattr(job, "description", "") or "")[:200],
-        )
+    job_category = job_category_of(job)
     if resume_category_id and job_category and job_category != "other":
         if resume_category_id == job_category:
             score += 45
             reasons.append("Same field of work as your resume")
+        elif job_category in RELATED_CATEGORIES.get(resume_category_id, set()):
+            score += 30
+            reasons.append("A neighbouring field to your resume")
         else:
             reasons.append("A different field from your resume")
     else:

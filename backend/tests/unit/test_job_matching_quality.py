@@ -145,3 +145,41 @@ class TestNoRequirements:
         full = job("Grafik dizayner", ["Adobe Photoshop", "Illustrator"],
                    category="marketing")
         assert score(DESIGNER, full) > score(DESIGNER, bare)
+
+
+class TestFieldRelevance:
+    """What the matched feed is allowed to contain at all.
+
+    Ranking an off-field job below an on-field one still puts it in front of the
+    student — they scroll, they see a cleaning job under their design resume,
+    and the feed stops meaning anything. So those are removed, not demoted.
+    """
+
+    def test_same_field_is_relevant(self):
+        assert jm.is_relevant_field("marketing", "marketing")
+
+    def test_a_different_field_is_not(self):
+        assert not jm.is_relevant_field("marketing", "food")
+        assert not jm.is_relevant_field("it", "sales")
+
+    def test_neighbouring_fields_are(self):
+        # A "Sotuv operatori" and a "Call-markaz operatori" are the same work
+        # here, for the same employers.
+        assert jm.is_relevant_field("sales", "call")
+        assert jm.is_relevant_field("call", "sales")
+
+    def test_unknown_on_either_side_stays_in(self):
+        # Refusing to show a job because WE failed to classify it would be our
+        # mistake showing up as the student's empty page.
+        assert jm.is_relevant_field("", "food")
+        assert jm.is_relevant_field("it", "")
+        assert jm.is_relevant_field("it", "other")
+
+    def test_a_neighbouring_field_scores_below_the_same_one(self):
+        sales_resume = {
+            "skills": {"technical": ["Sotuv", "Muzokara"]},
+            "experience": [{"position": "Sotuv menejeri"}],
+        }
+        same = job("Sotuv menejeri", ["Sotuv"], category="sales")
+        near = job("Call-markaz operatori", ["Sotuv"], category="call")
+        assert score(sales_resume, same) > score(sales_resume, near)

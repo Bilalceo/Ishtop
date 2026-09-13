@@ -165,6 +165,14 @@ class JobMatchRequest(BaseModel):
         description="Free-text search over title, description and location"
     )
 
+    relevant_only: bool = Field(
+        default=True,
+        description=(
+            "Return only listings in the resume's field of work (and its "
+            "neighbours). Off, the feed ranks everything instead."
+        ),
+    )
+
     job_type: Optional[str] = Field(
         None,
         description="full_time | part_time | remote | hybrid | contract | internship"
@@ -1051,6 +1059,15 @@ def recommended_jobs(
             }
         )
 
+    # Recommendations are the same promise as the matched feed: a listing
+    # outside the student's field does not belong in either.
+    if resume_cat:
+        scored = [
+            item for item in scored
+            if job_matching.is_relevant_field(
+                resume_cat, job_matching.job_category_of(item["job"]))
+        ]
+
     scored.sort(key=lambda x: x["score"], reverse=True)
     scored = scored[:limit]
 
@@ -1881,6 +1898,20 @@ def match_jobs(
         })
     
     # Sort by score (highest first)
+    # Ranking an irrelevant job below a relevant one still puts it in front of
+    # the student — they scroll, they see a cleaning job under their design
+    # resume, and the feed stops meaning anything. Off-field listings are
+    # removed, not demoted; "Barcha ishlar" is the tab for browsing wider.
+    if request.relevant_only and resume_cat:
+        in_field = [
+            m for m in matches
+            if job_matching.is_relevant_field(
+                resume_cat, job_matching.job_category_of(m["job"]))
+        ]
+        logger.info(f"   {len(in_field)}/{len(matches)} in the resume's field "
+                    f"({resume_cat})")
+        matches = in_field
+
     matches.sort(key=lambda x: x["score"], reverse=True)
     
     # Limit results
