@@ -62,3 +62,31 @@ pay and requirements go in first.
 
 `external_apply_url` is written as provenance only — it is not returned by the
 API and is never an apply target. See `frontend/src/lib/jobApply.ts`.
+
+## Channel posts
+
+`channel_top.py` — the week's best-paying vacancy from each category, as an
+album of rendered cards (`job_card.py`).
+
+`channel_promo.py` — the platform's own posts, one feature per post
+(`promo_card.py`). Five exist: `contact`, `resume`, `match`, `interview`,
+`trust`.
+
+```bash
+python3 channel_promo.py "$DSN" "$HASH" --list        # what exists + live numbers
+python3 channel_promo.py "$DSN" "$HASH" contact       # render + print the caption
+python3 channel_promo.py "$DSN" "$HASH" contact --send
+```
+
+Two rules these follow:
+
+**One post at a time.** Five posts in five minutes reads as spam to a channel
+this size; one a day reads as a series. That is why there is no `--all`.
+
+**Nothing is claimed that does not work.** The counts in each caption are read
+from prod at render time, and every feature named was checked against the live
+API before it went into the series. A post advertising a broken feature costs
+more than no post.
+
+Icons on these cards are drawn with primitives, not typed: Arial has no ☎ / ✈ /
+✓ glyph, and the first cut shipped a row of tofu boxes.
