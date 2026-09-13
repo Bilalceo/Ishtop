@@ -70,6 +70,10 @@ EXPERIENCE = [
     ("mid", r"\b([2-4])\+?\s*(yil|год|лет)|\bmiddle\b|\bmid\b|o['‘’]?rta darajadagi"),
 ]
 
+# Rounded on purpose: the rate moves, the listing does not, and a salary shown
+# to the tiyin would imply a precision the post never had.
+USD_RATE = 12_500
+
 PHONE = re.compile(r"\+?998[\s\-()]?\d{2}[\s\-()]?\d{3}[\s\-()]?\d{2}[\s\-()]?\d{2}")
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 URL = re.compile(r"\[([^\]]*)\]\(([^)]*)\)|https?://\S+|t\.me/\S+|www\.\S+")
@@ -283,6 +287,21 @@ def find_salary(text: str):
         a = int(m.group(1)) * 1_000_000
         if 300_000 <= a <= 100_000_000:
             return a, None
+
+    # Dollars. IT postings quote "$500+", "500$", "1000-1500$" — the listing
+    # said "Maosh: $500+" while the page said "Maosh ko'rsatilmagan", because
+    # only so'm was ever read. Stored in so'm at a deliberately round rate: the
+    # alternative is showing nothing, and nobody reads a job ad to the tiyin.
+    usd = re.search(r"\$\s*(\d{3,5})(?:\s*[-–—]\s*(\d{3,5}))?|"
+                    r"(\d{3,5})(?:\s*[-–—]\s*(\d{3,5}))?\s*\$", t)
+    if usd:
+        lo = usd.group(1) or usd.group(3)
+        hi = usd.group(2) or usd.group(4)
+        rate = USD_RATE
+        a = int(lo) * rate
+        b = int(hi) * rate if hi else None
+        if 300_000 <= a <= 200_000_000 and (b is None or a <= b <= 200_000_000):
+            return a, b
     return None, None
 
 

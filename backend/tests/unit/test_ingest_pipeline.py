@@ -107,6 +107,14 @@ class TestSalary:
     def test_invents_nothing_when_the_post_is_silent(self, struct):
         assert struct.find_salary("Ish haqi suhbat asosida") == (None, None)
 
+    def test_reads_dollars(self, struct):
+        # An IT listing said "Maosh: $500+" while the page said "Maosh
+        # ko'rsatilmagan" — only so'm was ever read.
+        lo, hi = struct.find_salary("Maosh: $500+")
+        assert lo == 500 * struct.USD_RATE and hi is None
+        lo, hi = struct.find_salary("Ish haqi 1000-1500$")
+        assert (lo, hi) == (1000 * struct.USD_RATE, 1500 * struct.USD_RATE)
+
     def test_ignores_figures_that_are_not_money(self, struct):
         # "18-35 yosh" is an age range, and 18 so'm is not a salary.
         assert struct.find_salary("Yosh: 18-35") == (None, None)

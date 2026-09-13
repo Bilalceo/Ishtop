@@ -340,7 +340,10 @@ export default function JobDetailPage() {
     company: resolvedCompany,
     companyIsReal,
   } = jobDisplayIdentity(job.title, job.company?.name);
-  const companyName = resolvedCompany || c.companyFallback;
+  // Aggregated listings sit under a shared import account, so there is often no
+  // employer to name. Printing "Kompaniya" put a company called "Kompaniya" on
+  // the page — with a generated logo beside it, which reads as a real firm.
+  const companyName = resolvedCompany;
   const safeDescriptionHtml = sanitizeRichTextHtml(job.description || "");
   const hasDescription = stripHtmlTags(job.description || "").length > 0;
   const requirements = job.requirements ?? [];
@@ -488,10 +491,14 @@ export default function JobDetailPage() {
                   {displayTitle}
                 </h1>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                  <span className="font-medium text-surface-600 dark:text-surface-300">
-                    {companyName}
-                  </span>
-                  <span className="text-surface-400">·</span>
+                  {companyName && (
+                    <>
+                      <span className="font-medium text-surface-600 dark:text-surface-300">
+                        {companyName}
+                      </span>
+                      <span className="text-surface-400">·</span>
+                    </>
+                  )}
                   <span className="text-surface-500 dark:text-surface-400">
                     {categoryLabel(job.category, isRu)}
                   </span>
@@ -682,8 +689,11 @@ export default function JobDetailPage() {
           {tab === "overview" && (
             <Section title={c.jobDescription}>
               {hasDescription ? (
+                /* whitespace-pre-line: an aggregated description is the
+                   Telegram post's plain text, and its line breaks are the only
+                   structure it has. Without it the post renders as one wall. */
                 <div
-                  className="prose prose-sm mt-3 max-w-none text-surface-600 dark:prose-invert dark:text-surface-300"
+                  className="prose prose-sm mt-3 max-w-none whitespace-pre-line text-surface-600 dark:prose-invert dark:text-surface-300"
                   dangerouslySetInnerHTML={{ __html: safeDescriptionHtml }}
                 />
               ) : (
@@ -728,6 +738,10 @@ export default function JobDetailPage() {
 
         {/* SIDEBAR */}
         <aside className="space-y-5 lg:sticky lg:top-5">
+          {/* Only when there IS a company. On an aggregated listing this block
+              rendered a firm called "Kompaniya" with a generated logo beside
+              it — a company that does not exist, presented as one that does. */}
+          {companyName && (
           <div className="rounded-2xl border border-surface-200 bg-white p-5 dark:border-surface-700 dark:bg-surface-900">
             <h2 className="flex items-center gap-2 text-sm font-bold text-surface-900 dark:text-white">
               <Building2 className="h-4 w-4 text-brand-500" />
@@ -760,6 +774,7 @@ export default function JobDetailPage() {
               </Link>
             )}
           </div>
+          )}
 
           {job.location && (
             <div className="rounded-2xl border border-surface-200 bg-white p-5 dark:border-surface-700 dark:bg-surface-900">
