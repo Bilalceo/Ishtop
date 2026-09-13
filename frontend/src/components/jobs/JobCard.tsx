@@ -60,10 +60,13 @@ export function JobCard({
 
   return (
     <motion.div
-      layout
-      initial={{ opacity: 0, y: 20 }}
+      // Deliberately NO `layout`. The list is replaced wholesale by the server
+      // on every filter change, so there is no continuous motion to preserve —
+      // and the layout animation left the rows stranded at their old offsets
+      // when 26 became 6, so the list read as empty with a blank band above it.
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.18 }}
       onClick={onSelect}
       className={cn(
         "relative cursor-pointer rounded-2xl border p-4 transition-all",
