@@ -1062,11 +1062,7 @@ def recommended_jobs(
     # Recommendations are the same promise as the matched feed: a listing
     # outside the student's field does not belong in either.
     if resume_cat:
-        scored = [
-            item for item in scored
-            if job_matching.is_relevant_field(
-                resume_cat, job_matching.job_category_of(item["job"]))
-        ]
+        scored = job_matching.keep_relevant(resume_cat, scored, key=lambda i: i["job"])
 
     scored.sort(key=lambda x: x["score"], reverse=True)
     scored = scored[:limit]
@@ -1903,14 +1899,8 @@ def match_jobs(
     # resume, and the feed stops meaning anything. Off-field listings are
     # removed, not demoted; "Barcha ishlar" is the tab for browsing wider.
     if request.relevant_only and resume_cat:
-        in_field = [
-            m for m in matches
-            if job_matching.is_relevant_field(
-                resume_cat, job_matching.job_category_of(m["job"]))
-        ]
-        logger.info(f"   {len(in_field)}/{len(matches)} in the resume's field "
-                    f"({resume_cat})")
-        matches = in_field
+        matches = job_matching.keep_relevant(resume_cat, matches, key=lambda m: m["job"])
+        logger.info(f"   {len(matches)} kept for field {resume_cat}")
 
     matches.sort(key=lambda x: x["score"], reverse=True)
     

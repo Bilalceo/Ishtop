@@ -183,3 +183,36 @@ class TestFieldRelevance:
         same = job("Sotuv menejeri", ["Sotuv"], category="sales")
         near = job("Call-markaz operatori", ["Sotuv"], category="call")
         assert score(sales_resume, same) > score(sales_resume, near)
+
+
+class TestKeepRelevant:
+    """Unclassified listings are a fallback for a thin feed, not a default.
+
+    Eight bare "Operator" postings were turning up under an IT resume, an
+    accounting one and a design one alike, because we could not classify them
+    and let them through everywhere.
+    """
+
+    @staticmethod
+    def _items(*cats):
+        return [{"job": job(f"Ish {i}", category=c)} for i, c in enumerate(cats)]
+
+    def test_drops_unclassified_when_there_are_enough_real_matches(self):
+        items = self._items(*(["it"] * 8), "other", "other")
+        kept = jm.keep_relevant("it", items, key=lambda i: i["job"])
+        assert len(kept) == 8
+        assert all(jm.job_category_of(k["job"]) == "it" for k in kept)
+
+    def test_keeps_unclassified_when_the_feed_would_be_thin(self):
+        items = self._items("education", "education", "other", "other")
+        kept = jm.keep_relevant("education", items, key=lambda i: i["job"])
+        assert len(kept) == 4      # 2 is not a feed
+
+    def test_always_drops_a_different_field(self):
+        items = self._items(*(["it"] * 8), "food", "food")
+        kept = jm.keep_relevant("it", items, key=lambda i: i["job"])
+        assert all(jm.job_category_of(k["job"]) != "food" for k in kept)
+
+    def test_an_unknown_resume_field_filters_nothing(self):
+        items = self._items("it", "food", "other")
+        assert len(jm.keep_relevant("", items, key=lambda i: i["job"])) == 3

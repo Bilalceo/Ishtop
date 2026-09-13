@@ -772,7 +772,12 @@ export default function JobsPage() {
         ) : (
           <>
             <div className="space-y-3">
-              <AnimatePresence>
+              {/* popLayout, not the default: each card animates its own layout,
+                  so when a filter replaces 26 rows with 6 the twenty leaving
+                  ones kept their space while fading and the list looked empty
+                  with a long blank band above it. popLayout takes them out of
+                  flow the moment they start leaving. */}
+              <AnimatePresence mode="popLayout">
                 {sortedJobs.map((job) => (
                   <JobCard
                     key={job.id}

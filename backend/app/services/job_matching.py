@@ -340,6 +340,39 @@ def is_relevant_field(resume_category_id: str, job_category_id: str) -> bool:
     return job_category_id in RELATED_CATEGORIES.get(resume_category_id, set())
 
 
+# Below this many on-field results, the unclassified listings are let back in:
+# a nearly empty feed is a worse failure than a little noise, and some fields
+# genuinely have only three listings in the whole catalogue.
+MIN_FEED = 6
+
+
+def keep_relevant(resume_category_id: str, items: list, key) -> list:
+    """Drop listings outside the resume's field, unclassified ones included.
+
+    `is_relevant_field` deliberately keeps a listing we could not classify —
+    our failure should not look like the student having no options. But when
+    there are already plenty of real matches, those unclassified rows are just
+    the noise the student complained about: eight bare "Operator" postings
+    turned up under an IT resume, an accounting one and a design one alike.
+
+    So they are a fallback, not a default: kept only to top a thin feed up.
+    """
+    if not resume_category_id:
+        return items
+
+    on_field, unknown = [], []
+    for item in items:
+        cid = job_category_of(key(item))
+        if cid and cid != "other" and is_relevant_field(resume_category_id, cid):
+            on_field.append(item)
+        elif not cid or cid == "other":
+            unknown.append(item)
+
+    if len(on_field) >= MIN_FEED:
+        return on_field
+    return on_field + unknown
+
+
 def calculate_match_score(
     resume_skills: List[str],
     resume_experience: str,
