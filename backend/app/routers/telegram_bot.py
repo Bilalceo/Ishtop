@@ -285,6 +285,8 @@ def _load_catalog(force: bool = False) -> dict:
     ok = False
     db = SessionLocal()
     try:
+        from sqlalchemy import func, or_
+
         from app.models.job import Job
         from app.models.user import User
 
@@ -297,7 +299,13 @@ def _load_catalog(force: bool = False) -> dict:
                 Job.responsibilities, User.company_name, User.full_name,
             )
             .join(User, User.id == Job.company_id)
-            .filter(Job.status == "active", Job.is_deleted.is_(False))
+            .filter(
+                Job.status == "active",
+                Job.is_deleted.is_(False),
+                # Same rule as the site: a listing past its date is not a
+                # listing. The catalog used to keep serving them.
+                or_(Job.expires_at.is_(None), Job.expires_at > func.now()),
+            )
             .order_by(Job.created_at.desc())
             .all()
         )

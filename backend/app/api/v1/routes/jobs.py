@@ -414,6 +414,22 @@ async def _send_deadline_telegram_reminders(
         db.commit()
 
 
+def visible_job_filters():
+    """What the public is allowed to see: active, not deleted, not past its date.
+
+    `expires_at` was set on every listing and then checked nowhere, so 48 active
+    listings whose date had passed a week earlier were still being served — a
+    candidate calling about one reaches an employer who filled the role. The
+    model has an `is_expired` property, but that is Python-side and cannot filter
+    a query, which is how the gap survived.
+    """
+    return (
+        Job.is_deleted == False,  # noqa: E712 — SQLAlchemy needs ==, not `is`
+        Job.status == JobStatus.ACTIVE.value,
+        or_(Job.expires_at.is_(None), Job.expires_at > func.now()),
+    )
+
+
 def job_to_response(job: Job, include_company: bool = True) -> JobResponse:
     """Convert Job model to JobResponse."""
 
@@ -657,10 +673,7 @@ def search_jobs(
     logger.info(f"Job search: query='{query}', location='{location}', type='{job_type}'")
     
     # Base query: only active, non-deleted jobs
-    q = db.query(Job).filter(
-        Job.is_deleted == False,
-        Job.status == JobStatus.ACTIVE.value
-    )
+    q = db.query(Job).filter(*visible_job_filters())
     
     # =========================================================================
     # APPLY SEARCH
@@ -989,8 +1002,7 @@ def recommended_jobs(
     # STEP 3: Candidate jobs (active only; cheap pre-filter for remote_only)
     # =========================================================================
     q = db.query(Job).filter(
-        Job.is_deleted == False,
-        Job.status == JobStatus.ACTIVE.value,
+        *visible_job_filters(),
     )
     if remote_only:
         q = q.filter(or_(Job.is_remote_allowed == True, Job.job_type == "remote"))
@@ -1121,8 +1133,7 @@ def discovery_city_jobs(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Feature is disabled")
 
     q = db.query(Job).filter(
-        Job.is_deleted == False,
-        Job.status == JobStatus.ACTIVE.value,
+        *visible_job_filters(),
         Job.city_slug == normalize_discovery_slug(city_slug, kind="city"),
     )
     total = q.count()
@@ -1157,8 +1168,7 @@ def discovery_profession_jobs(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Feature is disabled")
 
     q = db.query(Job).filter(
-        Job.is_deleted == False,
-        Job.status == JobStatus.ACTIVE.value,
+        *visible_job_filters(),
         Job.profession_slug == normalize_discovery_slug(profession_slug, kind="profession"),
     )
     total = q.count()
@@ -1194,8 +1204,7 @@ def discovery_company_jobs(
 
     slug = normalize_discovery_slug(company_slug, kind="company")
     q = db.query(Job).filter(
-        Job.is_deleted == False,
-        Job.status == JobStatus.ACTIVE.value,
+        *visible_job_filters(),
         Job.company_slug == slug,
     )
     total = q.count()
@@ -1768,10 +1777,7 @@ def match_jobs(
     # STEP 3: Get matching jobs
     # =========================================================================
     
-    q = db.query(Job).filter(
-        Job.is_deleted == False,
-        Job.status == JobStatus.ACTIVE.value
-    )
+    q = db.query(Job).filter(*visible_job_filters())
     
     # Apply filters
     if request.location_preference:
