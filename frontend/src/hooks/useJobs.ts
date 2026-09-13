@@ -40,6 +40,10 @@ interface JobFilters {
   sort_order?: "asc" | "desc";
 }
 
+/** `job_type` and `experience_level` are declared as one-or-many; take one. */
+const first = (v?: string | string[]): string | undefined =>
+  Array.isArray(v) ? v[0] : v || undefined;
+
 interface JobMatchApiItem {
   job: Job;
   match_score: number;
@@ -201,11 +205,26 @@ export function useJobs() {
   }, [fetchJobs]);
 
   // Match jobs to resume (AI)
-  const matchJobs = useCallback(async (resumeId: string) => {
+  const matchJobs = useCallback(async (resumeId: string, filters?: JobFilters) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const response = await jobApi.match(resumeId);
+      // The matched feed is filtered by the SERVER, like the list. It used to
+      // return ten rows and let the browser filter those, so every filter on
+      // the matched tab looked broken.
+      const response = await jobApi.match(resumeId, {
+        query: filters?.search?.trim() || undefined,
+        location_preference: filters?.location || undefined,
+        // Both fields accept a single value or a list; the API takes one.
+        job_type: first(filters?.job_type),
+        remote_only: filters?.is_remote || undefined,
+        min_salary: filters?.salary_min,
+        salary_max: filters?.salary_max,
+        experience_levels: first(filters?.experience_level)
+          ? [first(filters?.experience_level) as string]
+          : undefined,
+        limit: 100,
+      });
       const data = response.data as JobMatchApiResponse;
       const matchedJobs: (Job & { matchScore?: number })[] = (
         data.matches || []

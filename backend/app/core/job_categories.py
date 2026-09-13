@@ -19,7 +19,7 @@ CATEGORIES = [
     ("it",        "💻", "IT · Dasturlash", [
         "developer","dasturchi","programmer","programmist","dasturlash","frontend","backend",
         "full stack","fullstack","full-stack","devops","qa engineer","qa tester","tester","tester",
-        "1c","1с","flutter","android","kotlin","react","vue","php","python","java","golang","node",
+        "1c dasturchi","1с программист","1c developer","1c razrabotchik","1с разработчик","flutter","android","kotlin","react","vue","php","python","java","golang","node",
         "ai ","sun'iy intellekt","suniy intellekt","machine learning","ml ","data scientist","data analyst",
         "sysadmin","system administrator","tizim administrator","dba","database administrator",
         "it-mutaxassis","it mutaxassis","it menejer","it-menejer","it specialist","ui/ux","ux/ui","ux dizayn","seo",
@@ -28,11 +28,11 @@ CATEGORIES = [
     ]),
     ("finance",   "📊", "Buxgalteriya · Moliya", [
         "buxgalter","buxgalteriya","hisobchi","bugalter","бухгалтер","moliyachi","moliya","finansist",
-        "ekonomist","iqtisodchi","auditor","kassir-buxgalter","moddiy buxgalter","glavbux",
+        "ekonomist","iqtisodchi","auditor","accountant","bookkeeper","finance","kassir-buxgalter","moddiy buxgalter","glavbux",
     ]),
     ("food",      "🍽", "Ovqatlanish · HoReCa", [
         "oshpaz","shef","povar","повар","ofitsiant","официант","waiter","konditer","кондитер","baker","novvoy",
-        "restoran","kafe","bar ","barmen","бармен","oshxona","qassob","salatchi","posuda","kuxnya","fastfood","burger",
+        "restoran","restaurant","kafe","cafe","bar ","barmen","бармен","waiter","chef","cook","oshxona","qassob","salatchi","posuda","kuxnya","fastfood","burger",
         "shashlik","shashlikchi","universal","hostes",
     ]),
     # Marketing is checked BEFORE engineering so a "Video montajchi" resolves to
@@ -40,7 +40,7 @@ CATEGORIES = [
     ("marketing", "🎨", "Marketing · Dizayn", [
         "marketing","marketolog","маркетолог","smm","targetolog","таргетолог","dizayn","dizayner","дизайн","designer",
         "grafik dizayn","videograf","видеограф","mobilograf","montajchi video","video montaj","video montajchi",
-        "kontent","content maker","kreativ","brand","reklama","copywriter","kopirayter","3d","animator","fotograf","vizualizator",
+        "kontent","content maker","kreativ","photoshop","illustrator","coreldraw","corel","indesign","figma","canva","after effects","premiere pro","brand","reklama","copywriter","kopirayter","3d","animator","fotograf","vizualizator",
     ]),
     ("engineering","🏭", "Ishlab chiqarish · Muhandislik", [
         "muhandis","injener","инженер","engineer","prorab","прораб","stanok","станок","operator stanok",

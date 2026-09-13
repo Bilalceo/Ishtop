@@ -167,7 +167,7 @@ export default function JobsPage() {
 
     if (!bestResume?.id) return false;
 
-    await matchJobs(bestResume.id);
+    await matchJobs(bestResume.id, apiFiltersRef.current);
     return true;
   }, [matchJobs]);
 
@@ -289,10 +289,10 @@ export default function JobsPage() {
     });
   };
 
-  // The "all" feed is filtered, searched and sorted by the server: it is paged,
-  // so filtering the page in the browser would only ever search the 20 rows in
-  // front of the user. The matched feed arrives complete, so it stays local.
-  const isServerFiltered = feedMode === "all";
+  // BOTH feeds are filtered by the server. The matched one used to be filtered
+  // in the browser — over the ten rows the API happened to return — so every
+  // filter on that tab quietly did the wrong thing.
+  const isServerFiltered = true;
 
   const apiFilters = useMemo(
     () => ({
@@ -319,16 +319,25 @@ export default function JobsPage() {
     [searchQuery, filters, sortBy],
   );
 
+  // The matched loader reads the filters through a ref: it is called from
+  // callbacks that must not be rebuilt every keystroke.
+  const apiFiltersRef = useRef(apiFilters);
+  useEffect(() => {
+    apiFiltersRef.current = apiFilters;
+  }, [apiFilters]);
+
   // Push filter changes to the server (debounced so typing doesn't spam it).
   useEffect(() => {
-    if (!isServerFiltered || isInitializing) return;
+    if (isInitializing) return;
     const t = window.setTimeout(() => {
-      void fetchJobs(apiFilters, 1);
+      if (feedMode === "matched") void loadMatchedJobs();
+      else void fetchJobs(apiFilters, 1);
     }, 350);
     return () => window.clearTimeout(t);
-    // fetchJobs is stable (useCallback with a ref); re-running on it would loop.
+    // fetchJobs and loadMatchedJobs are stable (useCallback + refs); listing
+    // them would re-run this on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiFilters, isServerFiltered, isInitializing]);
+  }, [apiFilters, feedMode, isInitializing]);
 
   const clientFiltered = isServerFiltered
     ? localJobs

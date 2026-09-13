@@ -306,7 +306,20 @@ export const jobApi = {
 
   clone: (id: string) => api.post(`/jobs/${id}/clone`),
 
-  match: (resumeId: string) => api.post("/jobs/match", { resume_id: resumeId }),
+  /** The matched feed takes the same filters as the list — see useJobs.matchJobs. */
+  match: (
+    resumeId: string,
+    filters?: {
+      query?: string;
+      location_preference?: string;
+      job_type?: string;
+      remote_only?: boolean;
+      min_salary?: number;
+      salary_max?: number;
+      experience_levels?: string[];
+      limit?: number;
+    },
+  ) => api.post("/jobs/match", { resume_id: resumeId, ...(filters || {}) }),
 
   recommended: (params?: { limit?: number; remote_only?: boolean }) =>
     api.get("/jobs/recommended", { params }),

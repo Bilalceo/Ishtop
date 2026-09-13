@@ -149,11 +149,30 @@ class JobMatchRequest(BaseModel):
         description="Preferred experience levels"
     )
     
+    # The matched feed is a FEED, not a top-ten: the student filters and sorts
+    # it like the other one. Ten was enough to make every filter look broken —
+    # it was applied in the browser to whatever ten rows had arrived.
     limit: int = Field(
-        default=10,
+        default=50,
         ge=1,
-        le=50,
+        le=100,
         description="Maximum number of matches to return"
+    )
+
+    query: Optional[str] = Field(
+        None,
+        max_length=200,
+        description="Free-text search over title, description and location"
+    )
+
+    job_type: Optional[str] = Field(
+        None,
+        description="full_time | part_time | remote | hybrid | contract | internship"
+    )
+
+    salary_max: Optional[int] = Field(
+        None,
+        description="Maximum salary (whole units)"
     )
 
 
@@ -1791,7 +1810,27 @@ def match_jobs(
     
     if request.experience_levels:
         q = q.filter(Job.experience_level.in_(request.experience_levels))
-    
+
+    # Same filters the "all" feed applies, so switching tabs does not silently
+    # change what a filter means.
+    if request.query:
+        term = f"%{request.query.strip()}%"
+        q = q.filter(
+            or_(
+                Job.title.ilike(term),
+                Job.description.ilike(term),
+                Job.location.ilike(term),
+            )
+        )
+
+    if request.job_type:
+        q = q.filter(Job.job_type == request.job_type)
+
+    if request.salary_max:
+        q = q.filter(
+            or_(Job.salary_min <= request.salary_max, Job.salary_min.is_(None))
+        )
+
     jobs = q.all()
     
     logger.info(f"   Analyzing {len(jobs)} jobs for matching")
