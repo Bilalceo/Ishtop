@@ -53,10 +53,13 @@ for c, in db.run("select contact_info from jobs where is_deleted=false and coale
         existing_contacts.add(h.lower())
 
 picked, per_role, skipped = [], collections.Counter(), collections.Counter()
-# best first: a listing that states city, pay and requirements is a better listing
-rows.sort(key=lambda r: (bool(r["city"]) + bool(r["salary_min"]) +
-                         bool(r["requirements"]) + bool(r["responsibilities"]),
-                         r["date"]), reverse=True)
+# Newest first. A vacancy posted today is still open; one from six weeks ago has
+# most likely been filled, and a candidate who calls it gets told so. Within the
+# same day, prefer the listing that states city, pay and requirements.
+rows.sort(key=lambda r: (r["date"],
+                         bool(r["city"]) + bool(r["salary_min"]) +
+                         bool(r["requirements"]) + bool(r["responsibilities"])),
+          reverse=True)
 
 for r in rows:
     if len(picked) >= want:
