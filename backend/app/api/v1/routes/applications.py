@@ -449,12 +449,18 @@ class ApplicationListData(BaseModel):
     page_size: int
     total_pages: int
     
-    # Status counts
+    # Status counts. All eight, because this model is what the endpoint
+    # actually builds: a kwarg with no field here is dropped in silence, and
+    # three missing ones made the student's page read "Jami 1" above six zeroes
+    # next to a card that said "Yopildi".
     pending_count: int = 0
     reviewing_count: int = 0
     interview_count: int = 0
     accepted_count: int = 0
     rejected_count: int = 0
+    shortlisted_count: int = 0
+    hired_count: int = 0
+    withdrawn_count: int = 0
 
 
 class AutoApplyResult(BaseModel):

@@ -254,8 +254,14 @@ export default function ApplicationsPage() {
         !searchQuery ||
         job?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         job?.company?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+      // The filter has to fold statuses exactly as the tiles above it do,
+      // or clicking "Ko'rilmoqda" hides the shortlisted applications the
+      // tile just counted.
       const matchesStatus =
-        statusFilter === "all" || app.status === statusFilter;
+        statusFilter === "all" ||
+        app.status === statusFilter ||
+        (statusFilter === "reviewing" && app.status === "shortlisted") ||
+        (statusFilter === "accepted" && app.status === "hired");
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
@@ -519,6 +525,9 @@ export default function ApplicationsPage() {
                     </SelectItem>
                     <SelectItem value="rejected">
                       {t("applicationsPage.rejected")}
+                    </SelectItem>
+                    <SelectItem value="withdrawn">
+                      {t("applicationsPage.closed")}
                     </SelectItem>
                   </SelectContent>
                 </Select>
