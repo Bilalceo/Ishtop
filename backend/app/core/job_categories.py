@@ -64,6 +64,7 @@ CATEGORIES = [
         "beton","g'isht teruvchi","otdelka","remont","ta'mirlash","plitkachi","gipsokarton",
     ]),
     ("education", "📚", "Ta'lim", [
+        "учител","педагог","мактаб","maktab",
         "o'qituvchi","oqituvchi","ustoz","teacher","репетитор","repetitor","murabbiy","tutor","tarbiyachi","воспитатель",
         "pedagog","педагог","mentor","trener","тренер","instruktor","ustaz","преподаватель","prepodavatel","o'qituvchisi",
     ]),

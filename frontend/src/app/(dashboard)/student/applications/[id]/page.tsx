@@ -62,9 +62,43 @@ const statusConfig: Record<string, { label: string; color: string; icon: any; de
     icon: XCircle,
     description: "Afsuski, bu safar ariza rad etildi.",
   },
+  shortlisted: {
+    label: "Saralandi",
+    color: "bg-violet-100 text-violet-700",
+    icon: Eye,
+    description: "Arizangiz saralashdan o'tdi — kompaniya bilan bog'lanish kutilmoqda.",
+  },
+  hired: {
+    label: "Ishga olindi",
+    color: "bg-green-100 text-green-700",
+    icon: CheckCircle,
+    description: "Tabriklaymiz! Siz ishga qabul qilindingiz.",
+  },
+  // The one that made this page lie: a CLOSED application was falling through
+  // to "pending" and telling the student their application had been sent to
+  // the company and a reply was on the way — for a vacancy taken down weeks
+  // earlier, where the notification had already said it was closed.
+  withdrawn: {
+    label: "Yopildi",
+    color: "bg-surface-200 text-surface-700",
+    icon: XCircle,
+    description:
+      "Bu ariza yopilgan — e'lon olib tashlangani yoki siz qaytarib olganingiz uchun. Javob kutilmaydi.",
+  },
 };
 
+/** Statuses that are NOT part of the pending -> hired progression. */
+const OFF_TRACK_STATUSES = new Set(["withdrawn", "rejected"]);
+
 const statusSteps = ["pending", "reviewing", "interview", "accepted"];
+
+/** Never fall back to "pending": that invents a reply the student is owed. */
+const unknownStatusConfig = (status: string) => ({
+  label: status || "—",
+  color: "bg-surface-200 text-surface-700",
+  icon: Clock,
+  description: "Bu ariza holati noma'lum. Iltimos, bizga xabar bering.",
+});
 
 type StudentApplicationDetails = Application & {
   interview_type?: string;
@@ -148,11 +182,16 @@ export default function ApplicationDetailPage() {
   }
 
   const applicationDetails = application as StudentApplicationDetails;
-  const status = statusConfig[application.status] || statusConfig.pending;
+  const status =
+    statusConfig[application.status] || unknownStatusConfig(application.status);
   const StatusIcon = status.icon;
   const job = applicationDetails.job;
   const currentStepIndex = statusSteps.indexOf(application.status);
   const isRejected = application.status === "rejected";
+  // A closed application is not "on step 1 of 4" either: the progress bar was
+  // still drawn for withdrawn ones, so a taken-down vacancy looked like an
+  // application that had only just started moving.
+  const isOffTrack = OFF_TRACK_STATUSES.has(application.status);
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-4 md:p-6">
@@ -193,7 +232,7 @@ export default function ApplicationDetailPage() {
         </div>
 
         {/* Progress Steps */}
-        {!isRejected && (
+        {!isOffTrack && (
           <div className="mt-6 flex items-center gap-1">
             {statusSteps.map((step, i) => (
               <div key={step} className="flex flex-1 items-center gap-1">

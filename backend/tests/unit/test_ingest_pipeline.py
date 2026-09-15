@@ -112,6 +112,91 @@ class TestRoleName:
         assert roles.role_name("Требуется продавец в магазин") == "Продавец"
 
 
+class TestTechnologistVsTechnology:
+    """The role "texnolog" versus the noun "texnologiya".
+
+    `texnolog|технолог` matched both, so "Стек технологий" and "Учитель
+    информационных технологий" were titled as production technologists —
+    eighteen listings, every one of them actually an IT job (Python, Flutter,
+    Kubernetes), and every one filed under manufacturing where no IT student
+    would ever see it.
+    """
+
+    def test_the_role_is_still_matched_however_it_declines(self):
+        for text in [
+            "Texnolog kerak zavodga",
+            "Ishlab chiqarish texnologi",
+            "Oziq-ovqat texnologi kerak",
+            "Texnologlar jamoasi kerak",
+        ]:
+            assert roles.role_name(text) == "Texnolog", text
+        assert roles.role_name("Технолог на производство") == "Технолог"
+        assert roles.role_name("технологи требуются на завод") == "Технолог"
+
+    def test_the_noun_is_not_a_job_title(self):
+        for text in ["Стек технологий", "Texnologiya: Python, Django",
+                     "технологический процесс"]:
+            assert roles.role_name(text) != "Texnolog", text
+            assert roles.role_name(text) != "Технолог", text
+
+    def test_a_school_hiring_teachers_is_not_a_technologist(self):
+        assert roles.role_name(
+            "Учитель информационных технологий для классов"
+        ) == "Преподаватель"
+
+
+class TestStackRoles:
+    """A template post states its stack and leaves the title as "Xodim kerak"."""
+
+    def test_the_stack_names_the_discipline(self):
+        for stack, want in [
+            ("Python, Django, Sql, Postgresql", "Backend dasturchi"),
+            ("Figma, Ui Design, Ux Design", "Dizayner"),
+            ("Flutter, Dart, Cubit", "Mobil ilova dasturchisi"),
+            ("Kubernetes (K8s) & Helm, Terraform", "DevOps muhandisi"),
+            ("Python, Ml, Pytorch, Numpy", "AI/ML muhandisi"),
+            ("Qa, Mannual Tester", "QA muhandisi"),
+            ("Arduino, C++, Robototexnika", "Embedded dasturchi"),
+        ]:
+            assert roles.role_from_stack(stack) == want, stack
+
+    def test_c_sharp_and_c_plus_plus_are_matched(self):
+        # `\b` after "c#" or "c++" never matches — both end in punctuation.
+        assert roles.role_from_stack("C#") == "Dasturchi"
+        assert roles.role_from_stack("C++, C") == "Dasturchi"
+
+    def test_an_unnamed_discipline_stays_unnamed(self):
+        assert roles.role_from_stack("Kommunikatsiya, Sabr") == ""
+
+
+class TestLabelledTemplate:
+    """A third of these channels post on a labelled template."""
+
+    POST = ("Xodim kerak\n"
+            "Idora: Elma\n"
+            "Texnologiya: Html, Css, Js, Nodejs, Git\n"
+            "Hudud: Toshkent sh\n"
+            "Mas'ul: Alee\n"
+            "Maosh: 1. 000. 000 so'm")
+
+    def test_reads_the_employer(self, struct):
+        # 35 listings had a real company here and showed "Ish beruvchi".
+        assert struct.labelled_field(self.POST, "company") == "Elma"
+
+    def test_reads_the_skills_as_requirements(self, struct):
+        # 35 said "talablar yozilmagan" with the skills two lines below.
+        assert struct.labelled_skills(self.POST) == [
+            "Html", "Css", "Js", "Nodejs", "Git"]
+
+    def test_reads_the_city_and_contact_person(self, struct):
+        assert struct.labelled_field(self.POST, "city") == "Toshkent sh"
+        assert struct.labelled_field(self.POST, "contact_person") == "Alee"
+
+    def test_a_free_form_post_yields_nothing(self, struct):
+        assert struct.labelled_field("Bizga sotuvchi kerak", "company") == ""
+        assert struct.labelled_skills("Bizga sotuvchi kerak") == []
+
+
 class TestLanguageDetection:
     def test_cyrillic_heavy_text_is_russian(self):
         assert roles.is_russian("Требуется менеджер по продажам в Ташкенте")

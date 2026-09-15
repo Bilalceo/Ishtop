@@ -900,6 +900,11 @@ export const uz = {
     reviewed: "Ko'rildi",
     offer: "Taklif",
     underReview: "Ko'rib chiqilmoqda",
+    shortlisted: "Saralandi",
+    hired: "Ishga olindi",
+    withdrawn: "Yopildi",
+    closed: "Yopildi",
+    closedHint: "Bu e'lon olib tashlangani uchun arizangiz yopildi",
   },
 
   // Universities Page

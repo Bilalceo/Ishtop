@@ -64,14 +64,22 @@ ROLES = [
     (r"promouter|промоутер", "Promouter", "Промоутер"),
     (r"kassir|кассир", "Kassir", "Кассир"),
     (r"administrator|админист\w+|\badmin\b", "Administrator", "Администратор"),
-    (r"o['’`]?qituvchi|преподавател\w+|repetitor|репетитор",
+    (r"o['’`]?qituvchi|преподавател\w+|учител\w+|педагог\w*|repetitor|репетитор|"
+     r"o['’`]?quv markazi|мактаб|maktabga",
      "O'qituvchi", "Преподаватель"),
     (r"hr[\s-]*(menejer|менеджер|mutaxassis|специалист)|rekruter|рекрутер|recruiter",
      "HR menejer", "HR-менеджер"),
     (r"hamshira|медсестр\w+", "Hamshira", "Медсестра"),
     (r"shifokor|врач", "Shifokor", "Врач"),
     (r"provizor|фармацевт|farmatsevt", "Farmatsevt", "Фармацевт"),
-    (r"texnolog|технолог", "Texnolog", "Технолог"),
+    # The role, not the noun: texnolog/технолог but NOT texnologiya,
+    # технология, технологий, технологии — "Стек технологий" and "Учитель
+    # информационных технологий" were both being titled as technologists.
+    # The role declines (texnologi, texnologlar, технолога, технологи); the
+    # NOUN always continues with iya/ik or "и"+vowel (texnologiya,
+    # технология/технологий/технологический). Blocking exactly those keeps
+    # "Ishlab chiqarish texnologi" while refusing "Стек технологий".
+    (r"\btexnolog(?!iya|ik)|\bтехнолог(?!и[яийче])", "Texnolog", "Технолог"),
     (r"upakovsh\w+|упаковщи\w+|qadoqlovchi", "Qadoqlovchi", "Упаковщик"),
     (r"rezchik|резчик", "Kesuvchi", "Резчик"),
     (r"chertyojchi|чертёжник|чертежник", "Chizmachi", "Чертёжник"),
@@ -84,7 +92,10 @@ ROLES = [
     (r"operator|оператор", "Operator", "Оператор"),
     (r"sotuvchi|сотувчи|продавец", "Sotuvchi", "Продавец"),
     (r"menejer|менеджер|manager", "Menejer", "Менеджер"),
-    (r"muhandis|инженер|engineer", "Muhandis", "Инженер"),
+    # More specific than the bare `engineer` below, so it must come first.
+    (r"(software|backend|frontend|fullstack|full[- ]stack|data|ml|ai|devops|qa|"
+     r"mobile|cloud|platform)\s*engineer", "Dasturchi", "Разработчик"),
+    (r"muhandis|инженер|\bengineer\b", "Muhandis", "Инженер"),
     (r"analitik|аналитик|analyst", "Analitik", "Аналитик"),
     (r"mobilograf|мобилограф", "Mobilograf", "Мобилограф"),
     (r"montajchi|монтажёр|видеомонтаж", "Video montajchi", "Видеомонтажёр"),
@@ -132,6 +143,54 @@ _UZBEK_CYRILLIC = re.compile(
     r"[ўқғҳ]|\b(ва|учун|керак|ишга|иш|маош|ойлик|талаб|таклиф|бўйича|"
     r"ходим|ходимлар|шахри|шахардан|шаҳар\w*|вилояти|сўм|қилинади|этилади|"
     r"бизга|сизни|сотув\w*|савдо|тикувчи|ёрдамчи|тозалик|хизмат\w*)\b", re.I)
+
+
+# What a technology stack implies about the job. Template posts state the stack
+# and leave the title as "Xodim kerak", so this is the only role signal they
+# carry — and it is a strong one: "Python, Django, PostgreSQL" is a backend
+# developer whatever the headline says.
+#
+# Ordered most specific first, and deliberately short: a stack that does not
+# clearly name a discipline is better left unnamed than guessed.
+STACK_ROLES = [
+    (r"\b(figma|adobe xd|ui design|ux design|wireframing|photoshop|illustrator|"
+     r"corel|indesign)\b", "Dizayner", "Дизайнер"),
+    (r"\b(flutter|dart|swift|kotlin|react native|android studio|jetpack)\b",
+     "Mobil ilova dasturchisi", "Мобильный разработчик"),
+    (r"\b(kubernetes|k8s|terraform|helm|ansible|jenkins|gitlab ci|docker swarm|"
+     r"devops)\b", "DevOps muhandisi", "DevOps-инженер"),
+    (r"\b(pytorch|tensorflow|machine learning|deep learning|ml|nlp|"
+     r"prompt engineering|fine-?tuning|langchain)\b",
+     "AI/ML muhandisi", "AI/ML-инженер"),
+    (r"\b(selenium|mannual tester|manual test|test case|qa automation|postman)\b",
+     "QA muhandisi", "QA-инженер"),
+    (r"\b(arduino|stm32|esp32|robototexnika|robotatexnima|embedded|"
+     r"mikrokontroller)\b|\bc\+\+.*\b(arduino|robot)", "Embedded dasturchi",
+     "Embedded-разработчик"),
+    (r"\b(lego|wedo|scratch|kodlash asoslari)\b",
+     "Robototexnika o'qituvchisi", "Преподаватель робототехники"),
+    (r"\b(kiberxavfsizlik|cyber ?security|penetration|pentest)\b",
+     "Kiberxavfsizlik mutaxassisi", "Специалист по кибербезопасности"),
+    (r"\b(react|vue|angular|next\.?js|typescript|tailwind)\b(?!.*\b(node|django|"
+     r"laravel|spring)\b)", "Frontend dasturchi", "Frontend-разработчик"),
+    (r"\b(django|fastapi|laravel|yii2|spring boot|nestjs|node\.?js|express|"
+     r"postgresql|mysql|\.net|asp\.net)\b", "Backend dasturchi", "Backend-разработчик"),
+    (r"\b(html|css|javascript|js)\b", "Veb-dasturchi", "Веб-разработчик"),
+    (r"\b(python|java|golang|php|ruby)\b|\bc\+\+|\bc#|\bc\s*sharp",
+     "Dasturchi", "Разработчик"),
+    (r"\b(microsoft word|microsoft excel|excel|word|1c)\b",
+     "Ofis xodimi", "Офисный работник"),
+]
+_STACK = [(re.compile(p, re.I), uz, ru) for p, uz, ru in STACK_ROLES]
+
+
+def role_from_stack(stack_text: str):
+    """Role implied by a technology list, or "" when it names no discipline."""
+    ru = is_russian(stack_text)
+    for rx, uz_name, ru_name in _STACK:
+        if rx.search(stack_text):
+            return ru_name if ru else uz_name
+    return ""
 
 
 def is_russian(text: str) -> bool:

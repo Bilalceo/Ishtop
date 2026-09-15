@@ -19,6 +19,7 @@ import {
   Search,
   Filter,
   Clock,
+  Sparkles,
   CheckCircle,
   XCircle,
   MessageSquare,
@@ -101,10 +102,34 @@ const statusConfig: Record<
     bgColor: "bg-red-100",
     icon: XCircle,
   },
+  shortlisted: {
+    labelKey: "applicationsPage.shortlisted",
+    color: "text-violet-600",
+    bgColor: "bg-violet-100",
+    icon: Sparkles,
+  },
+  hired: {
+    labelKey: "applicationsPage.hired",
+    color: "text-green-700",
+    bgColor: "bg-green-100",
+    icon: CheckCircle,
+  },
+  withdrawn: {
+    labelKey: "applicationsPage.withdrawn",
+    color: "text-surface-600",
+    bgColor: "bg-surface-200",
+    icon: XCircle,
+  },
 };
 
+/** Statuses where nothing more is coming — the student is not waiting. */
+const TERMINAL_STATUSES = new Set(["withdrawn", "rejected", "hired", "accepted"]);
+
+// An unknown status must NOT read as "pending": that tells the student to wait
+// for something that may already be over. Show the raw value instead — ugly is
+// better than wrong, and it surfaces the gap instead of hiding it.
 const fallbackStatusConfig = {
-  labelKey: "applicationsPage.pending",
+  labelKey: "",
   color: "text-surface-600",
   bgColor: "bg-surface-100",
   icon: Clock,
@@ -197,6 +222,17 @@ export default function ApplicationsPage() {
     0,
     (typeof stats.pending === "number" ? stats.pending : 0) - silentCount,
   );
+  // Three of the eight statuses had no tile, so the displayed categories never
+  // summed to the total. They are folded in where they belong rather than given
+  // tiles of their own: `shortlisted` is further along the SAME review, and
+  // `hired` is the best possible version of `accepted`.
+  const num = (v: unknown) => (typeof v === "number" ? v : 0);
+  const st = stats as Record<string, unknown>;
+  const reviewingCount = num(st.reviewing) + num(st.shortlisted);
+  const acceptedCount = num(st.accepted) + num(st.hired);
+  // Closed: withdrawn by either side, or the vacancy was taken down. Nothing
+  // more is coming, and the student should not be told to wait.
+  const closedCount = num(st.withdrawn);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState("applied_at");
@@ -301,7 +337,7 @@ export default function ApplicationsPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-surface-900">
-                {renderStatValue(stats.reviewing)}
+                {renderStatValue(reviewingCount)}
               </p>
               <p className="text-xs text-surface-500">
                 {t("applicationsPage.reviewing")}
@@ -331,7 +367,7 @@ export default function ApplicationsPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-surface-900">
-                {renderStatValue(stats.accepted)}
+                {renderStatValue(acceptedCount)}
               </p>
               <p className="text-xs text-surface-500">
                 {t("applicationsPage.accepted")}
@@ -350,6 +386,25 @@ export default function ApplicationsPage() {
               </p>
               <p className="text-xs text-surface-500">
                 {t("applicationsPage.rejected")}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Closed: withdrawn by either side, or the vacancy was taken down.
+            Without this tile the displayed categories did not add up to the
+            total, and the difference was invisible. */}
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-200">
+              <XCircle className="h-5 w-5 text-surface-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-surface-900">
+                {renderStatValue(closedCount)}
+              </p>
+              <p className="text-xs text-surface-500">
+                {t("applicationsPage.withdrawn")}
               </p>
             </div>
           </CardContent>

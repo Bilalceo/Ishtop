@@ -900,6 +900,11 @@ export const ru = {
     reviewed: "Просмотрено",
     offer: "Предложение",
     underReview: "На рассмотрении",
+    shortlisted: "В шорт-листе",
+    hired: "Принят на работу",
+    withdrawn: "Закрыта",
+    closed: "Закрыта",
+    closedHint: "Заявка закрыта: вакансия была снята",
   },
 
   // Universities Page

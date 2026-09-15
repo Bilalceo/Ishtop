@@ -12,7 +12,7 @@ Rules that matter here:
     is an employer.
 """
 import sys, re, json, unicodedata
-from roles import role_name
+from roles import role_from_stack, role_name
 
 # Startup/news channels post announcements, not vacancies.
 NEWS_CHANNELS = {"uzcombinator", "foundershub_uz"}
@@ -205,6 +205,54 @@ def find_company(text: str) -> str:
     return ""
 
 
+# A third of these channels post on a template, one labelled field per line:
+#
+#   Xodim kerak
+#   Idora: Elma
+#   Texnologiya: Html, Css, Js, Nodejs, Git
+#   Hudud: Toshkent sh
+#   Mas'ul: Alee
+#   Maosh: 1 000 000 so'm
+#
+# Reading it gives us the employer and the required skills outright — 35
+# listings had a real company name in "Idora:" that the page showed as "Ish
+# beruvchi", and 35 had their skills in "Texnologiya:" while the page said
+# "talablar yozilmagan". It also explains a bug worth more than either: the
+# word "Texnologiya" matched the ROLE "Texnolog", so eighteen Python, Flutter
+# and Kubernetes jobs were titled as production technologists and filed under
+# manufacturing, where no IT student would ever see them.
+LABELLED = {
+    "company": r"(?:idora|kompaniya|компания|идора|tashkilot)",
+    "skills": r"(?:texnologiya|технология|texnologiyalar|stack|texnalogiya)",
+    "contact_person": r"(?:mas['‘’]?ul|масъул|mas['‘’]?ul shaxs|aloqa uchun)",
+    "city": r"(?:hudud|ҳудуд|худуд|manzil|shahar|joylashuv)",
+    "schedule": r"(?:ish vaqti|иш вақти|grafik|график)",
+}
+
+
+def labelled_field(text: str, key: str) -> str:
+    """The value of one template field, or "" when the post has no such line."""
+    m = re.search(rf"(?:^|\n)\s*{LABELLED[key]}\s*:\s*([^\n]{{2,120}})",
+                  strip_emoji(strip_md(text)), re.I)
+    if not m:
+        return ""
+    return re.sub(r"\s+", " ", m.group(1)).strip(" .,;:|-")
+
+
+def labelled_skills(text: str) -> list:
+    """Split a "Texnologiya:" line into individual requirements."""
+    raw = labelled_field(text, "skills")
+    if not raw:
+        return []
+    out = []
+    for part in re.split(r"[,;/|]| va | и ", raw):
+        item = part.strip(" .!&+").strip()
+        # Keep "C++", "1C", "Node.js"; drop the connective debris.
+        if 1 < len(item) <= 40 and not SECTION_WORD.match(item):
+            out.append(item)
+    return list(dict.fromkeys(out))[:12]
+
+
 def split_roles(title: str) -> list:
     """Split on / and , but never inside brackets — the bracket is the employer."""
     parts, buf, depth = [], "", 0
@@ -388,12 +436,30 @@ def structure(posts: list) -> tuple:
             skipped["multi"] += 1
             continue
         headline = pick_title(text)
-        role = role_name(strip_emoji(strip_md(text)))
+        clean = strip_emoji(strip_md(text))
+        # Blank the template's label words before naming the role: "Texnologiya:"
+        # contains the role "Texnolog", and "Mas'ul:"/"Hudud:" carry names and
+        # places that are not job titles either. Eighteen Python, Flutter and
+        # Kubernetes jobs were titled as production technologists this way, and
+        # filed under manufacturing where no IT student would see them.
+        for _key in ("skills", "company", "contact_person", "city", "schedule"):
+            clean = re.sub(rf"(?:^|\n)\s*{LABELLED[_key]}\s*:", "\n", clean,
+                           flags=re.I)
+        role = role_name(clean)
+        # On a template post the stack is the only role signal there is — and a
+        # strong one: "Python, Django, PostgreSQL" says backend developer far
+        # more clearly than the headline "Xodim kerak" ever will.
+        stack = labelled_skills(text)
+        if stack:
+            joined = " ".join(stack)
+            role = role_from_stack(joined) or role_name(joined) or role
         if not role:
             skipped["no_role"] = skipped.get("no_role", 0) + 1
             continue
         title = normalise_title(role)
-        company = find_company(text)
+        # The template states the employer outright; the bracket heuristic is
+        # only the fallback for free-form posts.
+        company = labelled_field(text, "company") or find_company(text)
         if company and company.lower() not in title.lower():
             title = f"{title} ({company})"
         title = shorten_title(title)
@@ -409,11 +475,13 @@ def structure(posts: list) -> tuple:
             "channel": p["channel"], "msg_id": p["msg_id"], "date": p["date"],
             "title": title, "company": company,
             "description": desc,
-            "requirements": section(text, REQ_HEAD),
+            # The template's "Texnologiya:" line is the requirement list for a
+        # third of these posts; the heading-based parse finds nothing there.
+        "requirements": section(text, REQ_HEAD) or labelled_skills(text),
             "responsibilities": section(text, RESP_HEAD),
             "benefits": section(text, BEN_HEAD),
             "salary_min": smin, "salary_max": smax,
-            "city": find_city(text),
+            "city": find_city(text) or find_city(labelled_field(text, "city")),
             "is_remote": bool(REMOTE.search(text)),
             "experience_level": find_experience(text, title),
             "phones": p["phones"], "emails": p["emails"], "handles": p["handles"],
