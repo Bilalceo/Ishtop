@@ -1034,6 +1034,9 @@ def get_my_applications(
         interview_count=counts.get(ApplicationStatus.INTERVIEW.value, 0),
         accepted_count=counts.get(ApplicationStatus.ACCEPTED.value, 0),
         rejected_count=counts.get(ApplicationStatus.REJECTED.value, 0),
+        shortlisted_count=counts.get(ApplicationStatus.SHORTLISTED.value, 0),
+        hired_count=counts.get(ApplicationStatus.HIRED.value, 0),
+        withdrawn_count=counts.get(ApplicationStatus.WITHDRAWN.value, 0),
     )
     
     return create_response(

@@ -203,6 +203,15 @@ class ApplicationListResponse(BaseModel):
     pending_count: int = 0
     reviewing_count: int = 0
     interview_count: int = 0
+    accepted_count: int = 0
+    rejected_count: int = 0
+    # The three the model never declared. Pydantic dropped them from the
+    # payload, so the student's counters read 0 across the board while the card
+    # beside them said "Yopildi" — and a closed application was invisible in
+    # every total on the page.
+    shortlisted_count: int = 0
+    hired_count: int = 0
+    withdrawn_count: int = 0
     
     model_config = ConfigDict(
         json_schema_extra={

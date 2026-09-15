@@ -14,6 +14,9 @@ interface ApplicationsState {
   stats: {
     total: number;
     pending: number;
+    shortlisted?: number;
+    hired?: number;
+    withdrawn?: number;
     reviewing: number;
     interview: number;
     accepted: number;
@@ -31,6 +34,9 @@ export function useApplications() {
     stats: {
       total: 0,
       pending: 0,
+      shortlisted: 0,
+      hired: 0,
+      withdrawn: 0,
       reviewing: 0,
       interview: 0,
       accepted: 0,
@@ -53,6 +59,9 @@ export function useApplications() {
             interview_count?: number;
             accepted_count?: number;
             rejected_count?: number;
+            shortlisted_count?: number;
+            hired_count?: number;
+            withdrawn_count?: number;
           };
         };
 
@@ -69,6 +78,12 @@ export function useApplications() {
             interview: data.data?.interview_count ?? 0,
             accepted: data.data?.accepted_count ?? 0,
             rejected: data.data?.rejected_count ?? 0,
+            // Without these three the displayed categories never summed to the
+            // total: a closed application counted towards "Jami" and nothing
+            // else, so the page showed 1 above six zeroes.
+            shortlisted: data.data?.shortlisted_count ?? 0,
+            hired: data.data?.hired_count ?? 0,
+            withdrawn: data.data?.withdrawn_count ?? 0,
           },
         }));
       } catch (error) {

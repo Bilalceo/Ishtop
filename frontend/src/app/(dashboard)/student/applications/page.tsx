@@ -753,7 +753,18 @@ export default function ApplicationsPage() {
                       </div>
                     </div>
 
-                    {/* Timeline */}
+                    {/* Timeline — only while the application is still moving.
+                        Its "reviewed" dot tested `status !== "pending"`, which
+                        a CLOSED application also satisfies: a taken-down
+                        vacancy was drawn with two green steps, as if it were
+                        progressing. */}
+                    {application.status === "withdrawn" ? (
+                      <div className="mt-4 border-t border-surface-100 pt-4">
+                        <p className="text-xs text-surface-500">
+                          {t("applicationsPage.closedHint")}
+                        </p>
+                      </div>
+                    ) : (
                     <div className="mt-4 flex items-center gap-2 border-t border-surface-100 pt-4">
                       <div className="flex items-center gap-2">
                         <div className="h-2 w-2 rounded-full bg-green-500" />
@@ -806,8 +817,10 @@ export default function ApplicationsPage() {
                         </span>
                       </div>
                     </div>
+                    )}
 
-                    {waitStage === "silent" && (
+                    {waitStage === "silent" &&
+                      !TERMINAL_STATUSES.has(application.status) && (
                       <div className="mt-4 rounded-xl border border-surface-200 bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800/60">
                         <p className="text-sm font-semibold text-surface-800 dark:text-surface-100">
                           {isRu
