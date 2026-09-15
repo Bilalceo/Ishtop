@@ -137,7 +137,13 @@ export default function StudentDashboardPage() {
   const { stats: appStats, applications, isLoading: appsLoading, fetchMyApplications } = useApplications();
   useJobs(); // warmup; not displayed in this redesign
 
-  const [summaryCounts, setSummaryCounts] = useState<{ resumes: number; applications: number } | null>(null);
+  // null means "the profile endpoint did not tell us", which is not the same
+  // as zero: a fabricated 0 here used to win the `??` below and overwrite the
+  // real counts, so the tiles read 0 while the panel beside them said 1.
+  const [summaryCounts, setSummaryCounts] = useState<{
+    resumes: number | null;
+    applications: number | null;
+  } | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [recsLoading, setRecsLoading] = useState(true);
   const [recsError, setRecsError] = useState(false);
@@ -187,9 +193,10 @@ export default function StudentDashboardPage() {
       try {
         const res = await userApi.getProfile();
         const payload = res.data?.data ?? res.data ?? {};
+        const known = (v: unknown) => (typeof v === "number" ? v : null);
         setSummaryCounts({
-          resumes: typeof payload.resume_count === "number" ? payload.resume_count : 0,
-          applications: typeof payload.application_count === "number" ? payload.application_count : 0,
+          resumes: known(payload.resume_count),
+          applications: known(payload.application_count),
         });
       } catch {
         setSummaryCounts(null);
@@ -258,7 +265,7 @@ export default function StudentDashboardPage() {
       bg: "bg-brand-500/10",
     },
     {
-      label: t("dashboard.stats.profileViews"),
+      label: t("dashboard.stats.underReview"),
       value: appStats.reviewing,
       Icon: Eye,
       tone: "text-amber-600 dark:text-amber-300",

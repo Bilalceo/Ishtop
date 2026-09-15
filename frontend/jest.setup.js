@@ -56,6 +56,11 @@ jest.mock('framer-motion', () => ({
     stop: jest.fn(),
   }),
   useInView: () => true,
+  // Components that only animate when motion is allowed still have to render
+  // their real content in tests; without this they crash on mount.
+  useReducedMotion: () => false,
+  useMotionValue: (v) => ({ get: () => v, set: () => {} }),
+  useTransform: () => ({ get: () => 0, set: () => {} }),
 }));
 
 // Mock canvas-confetti

@@ -36,21 +36,27 @@ export function StatCard({
   loading = false,
 }: StatCardProps) {
   const reduce = useReducedMotion();
-  const [display, setDisplay] = useState(reduce ? value : 0);
+  // Seeded with the real number, not 0. The count-up is decoration, and
+  // decoration must never be what decides which figure the user reads.
+  const [display, setDisplay] = useState(value);
   const startTs = useRef<number | null>(null);
 
   useEffect(() => {
-    if (reduce) {
+    if (reduce || loading) {
       setDisplay(value);
-      return;
-    }
-    if (loading) {
-      setDisplay(0);
       return;
     }
     let raf = 0;
     startTs.current = null;
     const duration = Math.min(1100, Math.max(500, 400 + value * 30));
+    // requestAnimationFrame does not run in a hidden tab, so a dashboard
+    // opened in a background tab used to animate from 0 and never arrive:
+    // real counts of 1 were displayed as 0. This timer lands on the true
+    // value whether or not a single frame was ever painted.
+    const settle = window.setTimeout(() => {
+      cancelAnimationFrame(raf);
+      setDisplay(value);
+    }, duration + 80);
     const tick = (now: number) => {
       if (startTs.current === null) startTs.current = now;
       const t = Math.min(1, (now - startTs.current) / duration);
@@ -58,8 +64,12 @@ export function StatCard({
       setDisplay(Math.round(value * eased));
       if (t < 1) raf = requestAnimationFrame(tick);
     };
+    setDisplay(0);
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(settle);
+    };
   }, [value, loading, reduce]);
 
   return (
