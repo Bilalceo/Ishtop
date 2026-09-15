@@ -77,16 +77,35 @@ def _set_prod_env(monkeypatch, **overrides):
         monkeypatch.setenv(key, value)
 
 
-def test_production_rejects_access_token_ttl_above_10_minutes(monkeypatch):
-    """A 30-minute access TTL in prod must refuse to boot."""
+def test_production_rejects_a_long_access_token_ttl(monkeypatch):
+    """A 30-minute access TTL in prod must refuse to boot.
+
+    The assertion is on the boundary's behaviour rather than on the number in
+    the message: the cap was raised from 10 to 15 and this test kept asserting
+    the old string, failing for years while the rule it guards still worked.
+    """
     import pytest
 
     _set_prod_env(monkeypatch, ACCESS_TOKEN_EXPIRE_MINUTES="30")
     with pytest.raises(ValueError) as excinfo:
         _build_settings()
-    msg = str(excinfo.value)
-    assert "ACCESS_TOKEN_EXPIRE_MINUTES" in msg
-    assert "<= 10" in msg
+    assert "ACCESS_TOKEN_EXPIRE_MINUTES" in str(excinfo.value)
+
+
+def test_production_rejects_the_first_value_above_the_cap(monkeypatch):
+    """Whatever the cap is, one minute past it must not boot."""
+    import pytest
+
+    cap = None
+    for minutes in range(1, 61):
+        _set_prod_env(monkeypatch, ACCESS_TOKEN_EXPIRE_MINUTES=str(minutes))
+        try:
+            _build_settings()
+        except ValueError:
+            cap = minutes - 1
+            break
+    assert cap is not None, "production accepts any access-token TTL up to an hour"
+    assert 1 <= cap <= 15, f"production cap is {cap} minutes, which is too long"
 
 
 def test_production_accepts_access_token_ttl_at_cap(monkeypatch):

@@ -319,12 +319,12 @@ def test_download_resume_pdf_points_to_real_endpoint():
     db = PdfDBStub(resume)
     current_user = SimpleNamespace(id=resume.user_id)
 
-    response = asyncio.run(
-        download_resume_pdf(
-            resume_id=resume.id,
-            current_user=current_user,
-            db=db,
-        )
+    # A sync handler: these routes run their blocking DB work off the event
+    # loop, so there is nothing to await.
+    response = download_resume_pdf(
+        resume_id=resume.id,
+        current_user=current_user,
+        db=db,
     )
 
     assert response.success is True
@@ -385,12 +385,12 @@ def test_resume_analytics_includes_keyword_count():
     db = AnalyticsDBStub(resume, applications, applications[-1])
     current_user = SimpleNamespace(id=resume.user_id)
 
-    response = asyncio.run(
-        get_resume_analytics(
-            resume_id=resume.id,
-            current_user=current_user,
-            db=db,
-        )
+    # A sync handler: these routes run their blocking DB work off the event
+    # loop, so there is nothing to await.
+    response = get_resume_analytics(
+        resume_id=resume.id,
+        current_user=current_user,
+        db=db,
     )
 
     assert response.ats_keywords_matched == 7
