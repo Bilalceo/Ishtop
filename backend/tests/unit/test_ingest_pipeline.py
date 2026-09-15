@@ -80,6 +80,37 @@ class TestRoleName:
     def test_prefers_the_more_specific_role(self):
         assert roles.role_name("Sotuvchi-konsultant kerak") == "Sotuvchi-konsultant"
 
+    def test_knows_the_trades_these_channels_carry(self):
+        # 38 posts a fortnight were dropped for "no recognised role" and turned
+        # out to be real jobs the list simply had never heard of.
+        for text, want in [
+            ("МАЛАКАЛИ ТИКУВЧИ ВА ЁРДАМЧИ ТИКУВЧИ", "Tikuvchi"),
+            ("GROOM COUTURE ИЩЕТ ГРУМЕРОВ В КОМАНДУ", "Грумер"),
+            ("ХОСТЕЛ BESHIC СРОЧНО ИЩЕТ ГОРНИЧНУЮ", "Горничная"),
+            ("Вакансия: Воспитатель в детский сад", "Воспитатель"),
+            ("ELEKTRIKA BO'YICHA USTALAR ISHGA TAKLIF QILINADI", "Elektrik"),
+            ("Тозалик ходимаси талаб этилади", "Tozalik xodimi"),
+            ("ТРЕБУЮТСЯ РАБОТНИКИ НА ПОЛИГРАФИЧЕСКОЕ ПРОИЗВОДСТВО",
+             "Работник полиграфии"),
+        ]:
+            assert roles.role_name(text) == want, text
+
+    def test_lash_does_not_match_inside_qadoqlash(self):
+        # "Tuz qadoqlash sehiga..." came out as a nail technician: "lash"
+        # matched inside "qadoqlash". Same class of bug as substring matching
+        # in the scorer.
+        assert roles.role_name(
+            "Tuz qadoqlash sehiga ayol qizlarni ishga taklif qilamiz"
+        ) == "Qadoqlovchi"
+
+    def test_cyrillic_uzbek_answers_in_uzbek(self):
+        # Cyrillic does not mean Russian: these channels carry Uzbek in
+        # Cyrillic, and "МАЛАКАЛИ ТИКУВЧИ" was getting the Russian job title.
+        assert roles.role_name("Сотув агентлари керак") == "Savdo vakili"
+        assert roles.role_name("Тошкент шахардан сотувчилар") == "Sotuvchi"
+        # ...while actual Russian still answers in Russian.
+        assert roles.role_name("Требуется продавец в магазин") == "Продавец"
+
 
 class TestLanguageDetection:
     def test_cyrillic_heavy_text_is_russian(self):

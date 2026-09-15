@@ -31,7 +31,7 @@ CATEGORIES = [
         "ekonomist","iqtisodchi","auditor","accountant","bookkeeper","finance","kassir-buxgalter","moddiy buxgalter","glavbux",
     ]),
     ("food",      "🍽", "Ovqatlanish · HoReCa", [
-        "oshpaz","ошпаз","shef","povar","повар","мехмонхона","mehmonxona","йиғиштирувчи","yig'ishtiruvchi","ofitsiant","официант","waiter","konditer","кондитер","baker","novvoy",
+        "oshpaz","ошпаз","shef","povar","повар","мехмонхона","mehmonxona","горничн","gornichnaya","xizmatchi ayol","hostel","хостел","йиғиштирувчи","yig'ishtiruvchi","ofitsiant","официант","waiter","konditer","кондитер","baker","novvoy",
         "restoran","restaurant","kafe","cafe","bar ","barmen","бармен","waiter","chef","cook","oshxona","qassob","salatchi","posuda","kuxnya","fastfood","burger",
         "shashlik","shashlikchi","universal","hostes",
     ]),
@@ -46,7 +46,10 @@ CATEGORIES = [
         "muhandis","injener","инженер","engineer","prorab","прораб","stanok","станок","operator stanok",
         "elektronik","elektrik","электрик","montaj","montajchi","mexanik","механик","texnolog","технолог",
         "ishlab chiqarish","proizvodstvo","zavod","fabrika","svarshik","payvandchi","сварщик",
-        "qoliplovchi","формовщик","kesuvchi","резчик","кесувчи","qolip","liteyshik","frezerovshik","tokar","токарь",
+        "qoliplovchi","формовщик","kesuvchi","резчик","кесувчи",
+        "tikuvchi","тикувчи","швея","швеи","портной","bichuvchi","бичувчи","закройщик",
+        "qadoqlovchi","қадоқлаш","qadoqlash","упаковщи","фасовщи",
+        "presslovchi","прессловчи","poligrafi","полиграфи","bosmaxona","типограф","qolip","liteyshik","frezerovshik","tokar","токарь",
     ]),
     ("call",      "📞", "Call-markaz · Operator", [
         "call","колл","call-markaz","call markaz","call-center","call center","operator-konsultant","dispetcher","диспетчер",
@@ -69,6 +72,11 @@ CATEGORIES = [
         "massajist","массажист","farmatsevt","фармацевт","laborant","pediatr","kosmetolog yordamchisi","salon",
         "sartarosh","парикмахер","manikur","маникюр","brovist","vizajist","apteka",
         "logoped","defektolog","terapist","терапист","psixolog","психолог","aba terapist","reabilitolog",
+        # Beauty trades. The list had "manikur" but the posts write "manikyur",
+        # and "массажист" but not the Uzbek "massajchi" — so those fell through
+        # to "other", which puts a job in every student's feed as a fallback.
+        "manikyur","ногтев","pedikyur","педикюр","massajchi","massaj ustasi",
+        "grumer","грумер","gruming","kiprik","lash maker","brow",
     ]),
     ("sales",     "🛒", "Savdo · Xizmat", [
         "sotuvchi","sotuv","savdo","продавец","продаж","сотув","савдо","сотувчи","торговый представител","торговый агент","rop","роп","konsultant","консультант","kassir","кассир","menejer",

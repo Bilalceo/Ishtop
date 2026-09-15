@@ -18,11 +18,14 @@ ROLES = [
      "Sotuv menejeri yordamchisi", "Помощник менеджера"),
     (r"call[\s-]?(centr|center|центр)\w*\s*(operator\w*)?|оператор\s+call",
      "Call-markaz operatori", "Оператор call-центра"),
-    (r"(sotuv|savdo)\s+menejer\w*|менеджер\s+по\s+продажам|sales\s+manager",
+    (r"(sotuv|savdo|сотув|савдо)\s+менежер\w*|(sotuv|savdo)\s+menejer\w*|"
+     r"менеджер\s+по\s+продажам|sales\s+manager",
      "Sotuv menejeri", "Менеджер по продажам"),
-    (r"(sotuv|savdo)\s+operator\w*|оператор\s+продаж",
+    (r"(sotuv|savdo|сотув|савдо)\s+операторы?|(sotuv|savdo)\s+operator\w*|"
+     r"оператор\s+продаж",
      "Sotuv operatori", "Оператор продаж"),
-    (r"(savdo|sotuv)\s+(agenti|vakili)|торгов\w+\s+представител\w+|агент\s+прямых\s+продаж",
+    (r"(savdo|sotuv)\s+(agenti|vakili)|(савдо|сотув)\s+агент\w*|"
+     r"торгов\w+\s+представител\w+|агент\s+прямых\s+продаж",
      "Savdo vakili", "Торговый представитель"),
     (r"помощник\s+бухгалтера|buxgalter\s+yordamchisi|младший\s+бухгалтер",
      "Buxgalter yordamchisi", "Помощник бухгалтера"),
@@ -79,21 +82,66 @@ ROLES = [
     (r"assistent|ассистент|yordamchi\b|помощник\b", "Yordamchi", "Помощник"),
     (r"konsultant|консультант", "Konsultant", "Консультант"),
     (r"operator|оператор", "Operator", "Оператор"),
-    (r"sotuvchi|продавец", "Sotuvchi", "Продавец"),
+    (r"sotuvchi|сотувчи|продавец", "Sotuvchi", "Продавец"),
     (r"menejer|менеджер|manager", "Menejer", "Менеджер"),
     (r"muhandis|инженер|engineer", "Muhandis", "Инженер"),
     (r"analitik|аналитик|analyst", "Analitik", "Аналитик"),
     (r"mobilograf|мобилограф", "Mobilograf", "Мобилограф"),
     (r"montajchi|монтажёр|видеомонтаж", "Video montajchi", "Видеомонтажёр"),
     (r"kopirayter|копирайтер|copywriter", "Kopirayter", "Копирайтер"),
+
+    # --- trades and services the source channels are full of -----------------
+    # These were the biggest single loss: 38 posts a fortnight dropped for
+    # "no recognised role" turned out to be real jobs whose titles simply were
+    # not in this list — and most were written in Cyrillic Uzbek, which is
+    # neither the Latin spelling nor the Russian one.
+    (r"tikuvchi|тикувчи|швея|швеи|портной|tikuv sex",
+     "Tikuvchi", "Швея"),
+    (r"bichuvchi|бичувчи|закройщик", "Bichuvchi", "Закройщик"),
+    (r"gruming|грумер|grumer", "Grumer", "Грумер"),
+    (r"gornichnaya|горничн|mehmonxona xizmatchisi|xizmatchi ayol",
+     "Mehmonxona xizmatchisi", "Горничная"),
+    (r"tarbiyachi|тарбиячи|воспитател|nanny|enaga",
+     "Tarbiyachi", "Воспитатель"),
+    (r"manikyur|маникюр|ногтев\w+|pedikyur|педикюр|\blash\s*(maker|ustasi)|"
+     r"наращивание ресниц|kiprik\s*(ustasi|qo)",
+     "Manikyur ustasi", "Мастер маникюра"),
+    (r"kosmetolog|косметолог|vizajist|визажист", "Kosmetolog", "Косметолог"),
+    (r"sartarosh|сартарош|парикмахер|barber", "Sartarosh", "Парикмахер"),
+    (r"massajchi|массажист|massaj ustasi", "Massajchi", "Массажист"),
+    (r"poligrafi|полиграфи|bosmaxona|типограф",
+     "Poligrafiya xodimi", "Работник полиграфии"),
+    (r"elektrik\w*\s*(usta|bo['‘’]?yicha)|электрик|elektr montaj",
+     "Elektrik", "Электрик"),
+    (r"payvandchi|сварщик|svarshik", "Payvandchi", "Сварщик"),
+    (r"santexnik|сантехник", "Santexnik", "Сантехник"),
+    (r"tozalik xodim|тозалик ходим|уборщи|farrosh|фаррош",
+     "Tozalik xodimi", "Уборщик"),
+    (r"qadoqlovchi|қадоқлаш|qadoqlash|упаковщи|фасовщи",
+     "Qadoqlovchi", "Упаковщик"),
+    (r"presslovchi|прессловчи|пресс operator", "Presslovchi", "Прессовщик"),
+    (r"tikuvchi yordamchisi|ёрдамчи тикувчи", "Tikuvchi yordamchisi", "Помощник швеи"),
 ]
 COMPILED = [(re.compile(p, re.I), uz, ru) for p, uz, ru in ROLES]
 
 
+# Letters and words that appear in Uzbek-in-Cyrillic but not in Russian. A
+# post can be mostly Cyrillic and still be Uzbek — "МАЛАКАЛИ ТИКУВЧИ" was
+# getting a Russian job title.
+_UZBEK_CYRILLIC = re.compile(
+    r"[ўқғҳ]|\b(ва|учун|керак|ишга|иш|маош|ойлик|талаб|таклиф|бўйича|"
+    r"ходим|ходимлар|шахри|шахардан|шаҳар\w*|вилояти|сўм|қилинади|этилади|"
+    r"бизга|сизни|сотув\w*|савдо|тикувчи|ёрдамчи|тозалик|хизмат\w*)\b", re.I)
+
+
 def is_russian(text: str) -> bool:
+    """Russian, as opposed to Uzbek — in either script."""
     cyr = sum(1 for ch in text if "Ѐ" <= ch <= "ӿ")
     lat = sum(1 for ch in text if ch.isascii() and ch.isalpha())
-    return cyr > lat
+    if cyr <= lat:
+        return False
+    # Cyrillic-heavy, so now: Russian, or Uzbek written in Cyrillic?
+    return not _UZBEK_CYRILLIC.search(text)
 
 
 def role_name(text: str):
