@@ -228,6 +228,12 @@ export default function DemoClient() {
           <p className="mt-4 max-w-2xl text-pretty text-[#63636b] sm:text-lg">
             {ru ? "Выберите навыки — AI подумает, объяснит и найдёт 3 самые подходящие вакансии. Без регистрации. Это то, что вы увидите внутри продукта." : "Ko'nikmalaringizni tanlang — AI o'ylab, izohlab, eng mos 3 ta vakansiyani topadi. Hech qanday ro'yxatdan o'tish kerak emas. Bu — mahsulot ichida ko'rasiz."}
           </p>
+
+          <p className="mt-3 text-sm text-[#7a7a84]">
+            {ru
+              ? "Вакансии в этом демо — примеры из IT. Настоящий каталог шире: продажи, общепит, образование, медицина, рабочие профессии."
+              : "Bu demodagi vakansiyalar — IT sohasidan namunalar. Haqiqiy katalog kengroq: savdo, umumiy ovqatlanish, ta'lim, tibbiyot, ishchi kasblar."}
+          </p>
         </div>
       </header>
 
