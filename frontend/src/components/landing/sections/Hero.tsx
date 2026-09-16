@@ -246,7 +246,7 @@ export function Hero({ cms }: { cms?: HeroCmsPayload }) {
                   <p className="text-sm font-semibold leading-tight text-[#18181b]">
                     Junior Frontend Developer
                   </p>
-                  <p className="mt-0.5 text-xs text-[#8e8e96]">Uzum Market · Toshkent</p>
+                  <p className="mt-0.5 text-xs text-[#8e8e96]">Namuna Kompaniya · Toshkent</p>
                 </div>
               </div>
               <span className="shrink-0 rounded-full bg-[#d9f1e4] px-3 py-1 text-xs font-semibold text-[#2f7a56]">

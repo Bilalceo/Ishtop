@@ -1,6 +1,12 @@
 /**
  * Local match engine — runs entirely in the browser, no backend needed.
  * Produces realistic, explainable scores so the demo feels honest.
+ *
+ * The sample listings deliberately use placeholder employers. They used to
+ * name real businesses — Uzum Market, EPAM, TBC Bank, Click, Payme, Humans,
+ * Korzinka — each with an invented Trust Score attached. The page says it is
+ * a demo, but a visitor still reads "EPAM · Trust Score 88" as a claim about
+ * EPAM, and it is not ours to make.
  */
 
 export type Skill = {
@@ -64,7 +70,7 @@ export const JOBS: Job[] = [
   {
     id: "uzum-frontend",
     title: "Junior Frontend Developer",
-    company: "Uzum Market",
+    company: "Namuna Marketplace",
     location: "Toshkent · Hybrid",
     required: ["react", "typescript", "css"],
     nice: ["nextjs", "tailwind"],
@@ -75,7 +81,7 @@ export const JOBS: Job[] = [
   {
     id: "epam-fe",
     title: "Frontend Trainee",
-    company: "EPAM",
+    company: "Namuna IT Servis",
     location: "Toshkent · Onsite",
     required: ["react", "typescript"],
     nice: ["tailwind", "css", "git"],
@@ -86,7 +92,7 @@ export const JOBS: Job[] = [
   {
     id: "tbc-product",
     title: "Product Designer",
-    company: "TBC Bank",
+    company: "Namuna Bank",
     location: "Toshkent · Onsite",
     required: ["figma", "ui-ux"],
     nice: ["sketch", "css"],
@@ -97,7 +103,7 @@ export const JOBS: Job[] = [
   {
     id: "click-backend",
     title: "Python Backend Junior",
-    company: "Click",
+    company: "Namuna Fintex",
     location: "Toshkent · Remote",
     required: ["python", "django", "sql"],
     nice: ["postgres", "docker"],
@@ -108,7 +114,7 @@ export const JOBS: Job[] = [
   {
     id: "payme-fullstack",
     title: "Fullstack Engineer",
-    company: "Payme",
+    company: "Namuna To'lov",
     location: "Toshkent · Hybrid",
     required: ["react", "node", "sql"],
     nice: ["typescript", "postgres", "docker"],
@@ -119,7 +125,7 @@ export const JOBS: Job[] = [
   {
     id: "humans-data",
     title: "Junior Data Analyst",
-    company: "Humans",
+    company: "Namuna Telekom",
     location: "Toshkent · Onsite",
     required: ["sql", "python"],
     nice: ["pandas", "postgres"],
@@ -130,7 +136,7 @@ export const JOBS: Job[] = [
   {
     id: "korzinka-mobile",
     title: "Mobile Engineer (RN)",
-    company: "Korzinka",
+    company: "Namuna Riteyl",
     location: "Toshkent · Onsite",
     required: ["react-native", "typescript"],
     nice: ["react", "git"],
@@ -200,7 +206,7 @@ export function scoreJob(job: Job, selected: string[], locale: "uz" | "ru" = "uz
     reasons.push({
       type: "trust",
       text: ru
-        ? `Trust Score ${job.trustScore} — проверенная компания`
+        ? `Trust Score ${job.trustScore} — высокая оценка доверия`
         : `Trust Score ${job.trustScore} — ishonch bahosi yuqori`,
     });
   }
