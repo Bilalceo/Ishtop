@@ -562,12 +562,19 @@ export default function CompanyApplicantsPage() {
                         <SelectTrigger className="w-full md:w-44">
                           <SelectValue />
                         </SelectTrigger>
+                        {/* "withdrawn" is the candidate's own act and has
+                            its own endpoint; an employer choosing it would
+                            record that the candidate withdrew. The API now
+                            refuses it too. An employer who does not want to
+                            proceed rejects. */}
                         <SelectContent>
-                          {STATUS_KEYS.map((status) => (
-                            <SelectItem key={status} value={status}>
-                              {statusLabels[status]}
-                            </SelectItem>
-                          ))}
+                          {STATUS_KEYS.filter((s) => s !== "withdrawn").map(
+                            (status) => (
+                              <SelectItem key={status} value={status}>
+                                {statusLabels[status]}
+                              </SelectItem>
+                            ),
+                          )}
                         </SelectContent>
                       </Select>
                     </div>

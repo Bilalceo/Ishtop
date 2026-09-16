@@ -1220,12 +1220,22 @@ async def update_application_status(
 
     interview_email_payload = None
     
-    # Validate status
-    valid_statuses = [s.value for s in ApplicationStatus]
-    if request.status not in valid_statuses:
+    # Validate status. Withdrawal is the CANDIDATE's act and has its own
+    # endpoint (POST /{id}/withdraw); an employer setting it here would record
+    # "the candidate withdrew" about a decision the candidate did not make,
+    # and the student's page would then show their application closed with no
+    # reason. An employer who does not want to proceed rejects.
+    employer_settable = [
+        s.value for s in ApplicationStatus if s != ApplicationStatus.WITHDRAWN
+    ]
+    if request.status not in employer_settable:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
+            detail=(
+                "Invalid status. Must be one of: "
+                f"{', '.join(employer_settable)}. Withdrawal is the "
+                "candidate's own action."
+            ),
         )
     
     _apply_status_transition(application, request)
