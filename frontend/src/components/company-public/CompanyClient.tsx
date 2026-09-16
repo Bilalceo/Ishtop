@@ -83,8 +83,8 @@ export default function CompanyClient() {
                 {ru ? "Запросить демо" : "Demo so'rash"}
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
               </Link>
-              <Link href="/plans" className="btn-silver-ghost focus-ring">
-                {ru ? "Смотреть тарифы" : "Tariflarni ko'rish"}
+              <Link href="/register" className="btn-silver-ghost focus-ring">
+                {ru ? "Разместить вакансию" : "Vakansiya joylash"}
                 <ArrowUpRight className="h-3.5 w-3.5 text-[#8ab4ff]" aria-hidden />
               </Link>
             </div>
@@ -102,8 +102,11 @@ export default function CompanyClient() {
                 <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#5470b8]">
                   {ru ? "Проверенные кандидаты" : "Tasdiqlangan nomzodlar"}
                 </span>
+                {/* Was "10K+". The database holds 188 students. Telling an
+                    employer we have ten thousand is the one lie they can check
+                    the moment they post a vacancy and nobody applies. */}
                 <p className="font-display mt-6 text-7xl font-bold tracking-tight text-[#2e4278] sm:text-8xl lg:text-[120px]">
-                  10K+
+                  180+
                 </p>
                 <p className="mt-4 max-w-sm text-sm text-[#4a5a85]">
                   {ru ? "Активные студенты, навыки проверены AI. От junior до mid-level." : "Hozir faol talaba, ko'nikmalari AI tomonidan tekshirilgan. Junior'lardan mid-level'gacha."}
@@ -313,21 +316,21 @@ export default function CompanyClient() {
           <Reveal className="mx-auto max-w-3xl">
             <div className="card-silver p-10 text-center sm:p-16">
               <h2 id="cta-h" className="h-display text-4xl text-[#18181b] sm:text-5xl">
-                {ru ? "10K+ талантов. " : "10K+ talant. "}
+                {ru ? "180+ студентов. " : "180+ talaba. "}
                 <span className="bg-gradient-to-r from-[#6f9bf0] to-[#a08de0] bg-clip-text text-transparent">
                   {ru ? "Ваша очередь." : "Sizning navbatingiz."}
                 </span>
               </h2>
               <p className="mx-auto mt-5 max-w-xl text-[#63636b] sm:text-lg">
-                {ru ? "30-минутное демо. Первые 10 вакансий бесплатно. Без карты." : "30 daqiqalik demo. Birinchi 10 ta vakansiya bepul. Karta yo'q."}
+                {ru ? "Размещение вакансий сейчас бесплатное. Без карты и без лимита." : "Vakansiya joylash hozircha bepul. Karta ham, limit ham yo'q."}
               </p>
               <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <Link href="/contact" className="btn-silver-primary focus-ring group">
                   {ru ? "Запросить демо" : "Demo so'rash"}
                   <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
                 </Link>
-                <Link href="/plans" className="btn-silver-ghost focus-ring !bg-[#f6f6f4]">
-                  {ru ? "Смотреть тарифы" : "Tariflarni ko'rish"}
+                <Link href="/register" className="btn-silver-ghost focus-ring !bg-[#f6f6f4]">
+                  {ru ? "Разместить вакансию" : "Vakansiya joylash"}
                 </Link>
               </div>
             </div>

@@ -8,10 +8,64 @@ from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_db, require_admin_permission
 from app.models import LandingContent, User
+from app.models.job import visible_job_filters
 
 router = APIRouter()
 
 Locale = Literal["uz", "ru"]
+
+
+# The landing page advertised "10K+ talaba" and "500+ vakansiya" against a
+# database holding 188 students and 268 listings, plus a "95% get a reply in a
+# week" that nothing measures — on a platform where most applications have
+# never been answered. A number nobody can source is worth less than a smaller
+# number that is true, so these are counted at request time and cannot go
+# stale or drift back into fiction.
+def live_stats(db: Session, locale: Locale) -> list[Dict[str, Any]]:
+    from app.models.job import Job, JobStatus
+    from app.models.resume import Resume
+    from sqlalchemy import func as sa_func
+
+    students = (
+        db.query(sa_func.count(User.id))
+        .filter(User.is_deleted == False, User.role == "student")  # noqa: E712
+        .scalar()
+        or 0
+    )
+    jobs = (
+        db.query(sa_func.count(Job.id))
+        .filter(*visible_job_filters())
+        .scalar()
+        or 0
+    )
+    resumes = (
+        db.query(sa_func.count(Resume.id))
+        .filter(Resume.is_deleted == False)  # noqa: E712
+        .scalar()
+        or 0
+    )
+
+    def rounded(n: int) -> str:
+        """Round down, never up: the claim must stay true between requests."""
+        if n >= 1000:
+            return f"{(n // 100) * 100:,}".replace(",", " ") + "+"
+        if n >= 100:
+            return f"{(n // 10) * 10}+"
+        return str(n)
+
+    if locale == "ru":
+        return [
+            {"value": rounded(jobs), "label": "Открытых вакансий с контактом"},
+            {"value": rounded(students), "label": "Студентов на платформе"},
+            {"value": rounded(resumes), "label": "Созданных AI-резюме"},
+            {"value": "60 сек", "label": "От AI-резюме до отклика"},
+        ]
+    return [
+        {"value": rounded(jobs), "label": "Kontakti bor ochiq vakansiya"},
+        {"value": rounded(students), "label": "Platformadagi talaba"},
+        {"value": rounded(resumes), "label": "Yaratilgan AI rezyume"},
+        {"value": "60 soniya", "label": "AI rezyumedan arizagacha"},
+    ]
 
 
 def default_payload(locale: Locale) -> Dict[str, Any]:
@@ -27,12 +81,8 @@ def default_payload(locale: Locale) -> Dict[str, Any]:
                 "primaryCta": "Начать бесплатно",
                 "secondaryCta": "Посмотреть AI демо",
             },
-            "stats": [
-                {"value": "10K+", "label": "Студентов и выпускников"},
-                {"value": "500+", "label": "Junior-вакансий и стажировок"},
-                {"value": "95%", "label": "Первый отклик за неделю"},
-                {"value": "60s", "label": "От AI-резюме до отклика"},
-            ],
+            # Filled by live_stats() at request time; see the note there.
+            "stats": [],
             "features": [],
             "howItWorks": [],
             "pricing": [],
@@ -52,12 +102,8 @@ def default_payload(locale: Locale) -> Dict[str, Any]:
             "primaryCta": "Bepul boshlash",
             "secondaryCta": "AI demo ko'rish",
         },
-        "stats": [
-            {"value": "10K+", "label": "Talaba va bitiruvchi"},
-            {"value": "500+", "label": "Junior vakansiya va internship"},
-            {"value": "95%", "label": "Bir hafta ichida birinchi javob"},
-            {"value": "60s", "label": "AI rezyumedan arizagacha"},
-        ],
+        # Filled by live_stats() at request time; see the note there.
+        "stats": [],
         "features": [],
         "howItWorks": [],
         "pricing": [],
@@ -122,14 +168,20 @@ def get_public_landing_content(
 
     if not record:
         payload = default_payload(locale)
+        payload["stats"] = live_stats(db, locale)
         return {"success": True, "data": {"locale": locale, "payload": payload, "is_published": True}}
+
+    # Counted now, whatever the CMS has stored: an admin must not be able to
+    # publish a headline number the database cannot support.
+    payload = dict(record.payload or {})
+    payload["stats"] = live_stats(db, locale)
 
     return {
         "success": True,
         "data": {
             "id": str(record.id),
             "locale": record.locale,
-            "payload": record.payload,
+            "payload": payload,
             "is_published": record.is_published,
             "updated_at": record.updated_at,
         },

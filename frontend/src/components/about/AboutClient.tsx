@@ -71,13 +71,16 @@ const UZ: Copy = {
   dontBody:
     " kompaniyalardan to'lov olib, vakansiyalarni reyting tepasiga ko'tarmaymiz. Sizga balanssiz reklama ko'rsatmaymiz. Ma'lumotlaringizni uchinchi tomonga sotmaymiz. Bu ish modeli emas — bu va'da.",
   numbersEyebrow: "Raqamlar bo'yicha",
-  numbersTitleA: "24 oyda. ",
-  numbersTitleEm: "O'sib.",
+  numbersTitleA: "Bugungi holat. ",
+  numbersTitleEm: "Ochiq.",
+  // Bu raqamlar bazadan olinadi. Ilgari bu yerda 10 247 talaba va 1 180 ta
+  // "tasdiqlangan oferta" yozilgan edi — ikkalasi ham to'qilgan. Kichik,
+  // lekin haqiqiy raqam — katta, lekin yolg'on raqamdan qimmatroq.
   numbers: [
-    { num: "10,247", label: "talaba ro'yxatda" },
-    { num: "1,180", label: "birinchi oferta tasdiqlangan" },
-    { num: "500+", label: "tekshirilgan kompaniya" },
-    { num: "24 oy", label: "loyiha yoshi" },
+    { num: "260+", label: "kontakti bor ochiq vakansiya" },
+    { num: "180+", label: "ro'yxatdan o'tgan talaba" },
+    { num: "100+", label: "yaratilgan AI rezyume" },
+    { num: "0", label: "bizga to'lab reyting ko'targan kompaniya" },
   ],
   principlesEyebrow: "Tamoyillarimiz",
   principlesTitleA: "4 ta qoida bilan ",
@@ -141,13 +144,13 @@ const RU: Copy = {
   dontBody:
     " не берём плату с компаний за поднятие вакансий в рейтинге. Не показываем вам несбалансированную рекламу. Не продаём ваши данные третьим лицам. Это не бизнес-модель — это обещание.",
   numbersEyebrow: "В цифрах",
-  numbersTitleA: "За 24 месяца. ",
-  numbersTitleEm: "Рост.",
+  numbersTitleA: "Положение на сегодня. ",
+  numbersTitleEm: "Открыто.",
   numbers: [
-    { num: "10,247", label: "студентов зарегистрировано" },
-    { num: "1,180", label: "первых офферов подтверждено" },
-    { num: "500+", label: "проверенных компаний" },
-    { num: "24 мес", label: "возраст проекта" },
+    { num: "260+", label: "открытых вакансий с контактом" },
+    { num: "180+", label: "зарегистрированных студентов" },
+    { num: "100+", label: "созданных AI-резюме" },
+    { num: "0", label: "компаний, поднявших вакансии за плату" },
   ],
   principlesEyebrow: "Наши принципы",
   principlesTitleA: "Работаем по ",

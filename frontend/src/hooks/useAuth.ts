@@ -36,7 +36,18 @@ export function useRequireAuth(requiredRole?: "student" | "company" | "admin") {
   useEffect(() => {
     if (!hasHydrated) return;
     if (!isAuthenticated) {
-      router.replace("/login?session_expired=true");
+      // A guest who has never signed in is not someone whose session expired.
+      // Telling them it did makes them hunt for an account they never had.
+      // A persisted user record means this browser did have a session once.
+      let hadSession = false;
+      try {
+        hadSession = Boolean(
+          JSON.parse(window.localStorage.getItem("auth-storage") ?? "{}")?.state?.user
+        );
+      } catch {
+        hadSession = false;
+      }
+      router.replace(hadSession ? "/login?session_expired=true" : "/login");
       return;
     }
     if (requiredRole && user?.role && user.role !== requiredRole) {

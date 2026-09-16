@@ -53,11 +53,15 @@ function buildDefaultPayload(locale: Locale): LandingPayload {
         primaryCta: "Начать бесплатно",
         secondaryCta: "Смотреть демо",
       },
+      // The public endpoint recomputes stats from the database on every
+      // request, so nothing typed here reaches the landing page as a headline
+      // number. Kept truthful anyway, so the editor does not read as an
+      // invitation to invent one.
       stats: [
-        { value: "50K+", label: "Резюме создано" },
-        { value: "10K+", label: "Пользователей" },
-        { value: "95%", label: "Уровень успеха" },
-        { value: "500+", label: "Компаний" },
+        { value: "260+", label: "Открытых вакансий" },
+        { value: "180+", label: "Студентов" },
+        { value: "100+", label: "AI-резюме" },
+        { value: "60 сек", label: "От резюме до отклика" },
       ],
       features: [
         { title: "AI Резюме", description: "Профессиональные резюме за секунды." },
@@ -121,10 +125,10 @@ function buildDefaultPayload(locale: Locale): LandingPayload {
       secondaryCta: "Demo ko'rish",
     },
     stats: [
-      { value: "50K+", label: "Rezyumelar yaratildi" },
-      { value: "10K+", label: "Foydalanuvchilar" },
-      { value: "95%", label: "Muvaffaqiyat darajasi" },
-      { value: "500+", label: "Kompaniyalar" },
+      { value: "260+", label: "Ochiq vakansiya" },
+      { value: "180+", label: "Talaba" },
+      { value: "100+", label: "AI rezyume" },
+      { value: "60 soniya", label: "Rezyumedan arizagacha" },
     ],
     features: [
       { title: "AI Rezyume", description: "Soniyalarda professional rezyume yarating." },

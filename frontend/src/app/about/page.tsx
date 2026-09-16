@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     siteName: "IshTop",
     title: "IshTop — Birinchi ish. Soddaroq yo'l.",
     description:
-      "Trust-first karyera platformasi. 1,180 ta birinchi oferta. 4 hafta o'rtacha.",
+      "Trust-first karyera platformasi. Kontakti tekshirilgan vakansiyalar, AI rezyume va to'g'ridan-to'g'ri ish beruvchiga ariza.",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "IshTop manifesto" }],
   },
   twitter: {

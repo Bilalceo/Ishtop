@@ -369,7 +369,7 @@ export default function DemoClient() {
                 className="mt-6 rounded-3xl bg-gradient-to-br from-[#d7e7ff]/60 via-white to-[#ffe9d6]/60 p-5 shadow-[0_10px_30px_-18px_rgba(24,24,27,0.25)]"
               >
                 <p className="text-sm text-[#52525b]">
-                  {ru ? "Это только демо. В настоящем IshTop: 500+ проверенных компаний, авто-отклики, AI-резюме и тренажёр собеседований." : "Bu faqat demo. Haqiqiy IshTop'da: 500+ tasdiqlangan kompaniya, avto-ariza, AI rezyume va suhbat murabbiyi."}
+                  {ru ? "Это только демо. В настоящем IshTop: 260+ открытых вакансий с проверенным контактом, авто-отклик, AI-резюме и тренажёр собеседований." : "Bu faqat demo. Haqiqiy IshTop'da: kontakti tekshirilgan 260+ ochiq vakansiya, avto-ariza, AI rezyume va suhbat murabbiyi."}
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <Link
