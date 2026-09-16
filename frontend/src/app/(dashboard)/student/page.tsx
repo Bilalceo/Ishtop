@@ -243,14 +243,25 @@ export default function StudentDashboardPage() {
   const applicationsForDisplay = applications as DashboardApplication[];
   const upcoming = nextUpcomingInterview(applicationsForDisplay);
 
-  // Pipeline counts
+  // Pipeline counts. Folded exactly as the applications page folds them, so
+  // the two pages cannot disagree about the same application.
+  const n = (v: unknown) => (typeof v === "number" ? v : 0);
+  const st = appStats as Record<string, unknown>;
   const pipelineCounts: Record<PipelineStage, number> = {
-    applied: appStats.pending ?? 0,
-    reviewing: appStats.reviewing ?? 0,
-    interview: appStats.interview ?? 0,
-    accepted: appStats.accepted ?? 0,
+    applied: n(st.pending),
+    reviewing: n(st.reviewing) + n(st.shortlisted),
+    interview: n(st.interview),
+    accepted: n(st.accepted) + n(st.hired),
   };
-  const pipelineTotal = PIPELINE_STAGES.reduce((sum, s) => sum + pipelineCounts[s], 0);
+  // The four stages are the ACTIVE ones. An application that is closed,
+  // withdrawn or rejected belongs to none of them, so summing the stages
+  // under the heading "Jami N ta ariza" reported 0 for a student whose only
+  // application had been closed — while the tile above said 1 and the
+  // sidebar badge said 1. The heading now uses the real total, and what sits
+  // outside the pipeline is named instead of vanishing.
+  const pipelineActive = PIPELINE_STAGES.reduce((sum, s) => sum + pipelineCounts[s], 0);
+  const pipelineClosed = n(st.withdrawn) + n(st.rejected);
+  const pipelineTotal = Math.max(n(st.total), pipelineActive + pipelineClosed);
 
   // Top recommendation for "today's signal"
   const topRec = recommendations[0];
@@ -524,8 +535,10 @@ export default function StudentDashboardPage() {
               </h2>
               <p className="text-sm text-surface-500 dark:text-white/60">
                 {locale === "ru"
-                  ? `Всего откликов: ${pipelineTotal}`
-                  : `Jami ${pipelineTotal} ta ariza`}
+                  ? `Всего ${pipelineTotal} · в процессе ${pipelineActive}` +
+                    (pipelineClosed ? ` · закрыто ${pipelineClosed}` : "")
+                  : `Jami ${pipelineTotal} · jarayonda ${pipelineActive}` +
+                    (pipelineClosed ? ` · yopildi ${pipelineClosed}` : "")}
               </p>
             </div>
             <Link href="/student/applications" className="focus-ring rounded-full text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">
@@ -552,7 +565,7 @@ export default function StudentDashboardPage() {
 
             {PIPELINE_STAGES.map((stage, i) => {
               const count = pipelineCounts[stage];
-              const total = Math.max(pipelineTotal, 1);
+              const total = Math.max(pipelineActive, 1);
               const pct = Math.round((count / total) * 100);
               const stageMeta: Record<PipelineStage, { label: string; tone: string }> = {
                 applied: { label: locale === "ru" ? "Отправлено" : "Yuborildi", tone: "from-brand-400 to-violet-500" },
