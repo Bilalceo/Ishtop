@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { closureOf, closureText } from "@/lib/applicationClosure";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -87,8 +88,9 @@ const statusConfig: Record<string, { label: string; color: string; icon: any; de
     label: "Yopildi",
     color: "bg-surface-200 text-surface-700",
     icon: XCircle,
-    description:
-      "Bu ariza yopilgan — e'lon olib tashlangani yoki siz qaytarib olganingiz uchun. Javob kutilmaydi.",
+    // Overridden at render time by closureText(), which names the actual
+    // cause and the date instead of listing both possibilities.
+    description: "Ariza yopildi. Javob kutilmaydi.",
   },
 };
 
@@ -232,7 +234,14 @@ export default function ApplicationDetailPage() {
           </div>
           <div>
             <Badge className={cn("text-sm", status.color)}>{status.label}</Badge>
-            <p className="mt-1 text-surface-700">{status.description}</p>
+            <p className="mt-1 text-surface-700">
+              {(() => {
+                const c = application ? closureOf(application) : null;
+                if (!c) return status.description;
+                const when = c.at ? formatDate(c.at) : null;
+                return closureText(c, isRu) + (when ? ` · ${when}` : "");
+              })()}
+            </p>
           </div>
         </div>
 

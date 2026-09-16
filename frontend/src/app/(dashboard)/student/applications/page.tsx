@@ -13,6 +13,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { closureOf, closureText } from "@/lib/applicationClosure";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -769,8 +770,16 @@ export default function ApplicationsPage() {
                         progressing. */}
                     {application.status === "withdrawn" ? (
                       <div className="mt-4 border-t border-surface-100 pt-4">
+                        {/* Reason and date from the data, via the same helper
+                            the detail page uses, so the two cannot give a
+                            student different accounts of the same closure. */}
                         <p className="text-xs text-surface-500">
-                          {t("applicationsPage.closedHint")}
+                          {(() => {
+                            const c = closureOf(application);
+                            if (!c) return t("applicationsPage.closedHint");
+                            const when = c.at ? formatDate(c.at) : null;
+                            return closureText(c, isRu) + (when ? ` · ${when}` : "");
+                          })()}
                         </p>
                       </div>
                     ) : (
