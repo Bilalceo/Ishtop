@@ -354,9 +354,12 @@ export default function JobDetailPage() {
   // Aggregated listings all sit under one approved import account, so its
   // "verified" flag says nothing about the actual employer. Only badge a
   // company that identifies itself rather than one parsed out of the title.
-  const isVerified =
-    companyIsReal &&
-    (job.verification_state === "approved" || !!job.company?.is_verified);
+  // `is_verified` on a user means their EMAIL was confirmed — the column
+  // comment in backend/app/models/user.py says so, and Google sign-in sets it
+  // automatically. Treating it as company verification badged any employer
+  // who signed in with Google as "Tasdiqlangan kompaniya". Only
+  // verification_state records an actual decision about the business.
+  const isVerified = companyIsReal && job.verification_state === "approved";
   const matchScore =
     typeof job.matchScore === "number" ? Math.round(job.matchScore) : null;
   const salaryText =

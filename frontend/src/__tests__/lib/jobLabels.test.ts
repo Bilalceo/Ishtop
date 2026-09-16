@@ -8,6 +8,7 @@
 
 import {
   experienceLabel,
+  experienceOptions,
   isPlaceholderCompany,
   jobDisplayIdentity,
   jobTypeLabel,
@@ -140,6 +141,17 @@ describe("every enum member the backend stores has a label", () => {
 
   it("offers internship among the job type options", () => {
     expect(jobTypeOptions(false).map((o) => o.value)).toContain("internship");
+  });
+
+  it("offers every backend value in both option lists", () => {
+    // The company posting and editing forms build their selects from these,
+    // so a missing member means a role that cannot be posted at all.
+    expect(jobTypeOptions(false).map((o) => o.value).sort()).toEqual(
+      [...JOB_TYPES].sort()
+    );
+    expect(experienceOptions(false).map((o) => o.value).sort()).toEqual(
+      [...LEVELS].sort()
+    );
   });
 });
 

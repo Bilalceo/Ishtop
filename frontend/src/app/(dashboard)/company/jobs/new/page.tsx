@@ -13,6 +13,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { experienceOptions, jobTypeOptions } from "@/lib/jobLabels";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -88,8 +89,12 @@ function buildJobSchema(isRu: boolean) {
     title: z.string().min(3, m.titleMin),
     department: z.string().optional(),
     location: z.string().min(2, m.locationReq),
-    jobType: z.enum(["full_time", "part_time", "contract", "internship", "remote"]),
-    experienceLevel: z.enum(["entry", "junior", "mid", "senior", "lead", "executive"]),
+    jobType: z.enum([
+      "full_time", "part_time", "internship", "remote", "hybrid", "contract",
+    ]),
+    experienceLevel: z.enum([
+      "intern", "junior", "mid", "senior", "lead", "executive",
+    ]),
     salaryMin: z.number().min(0).optional(),
     salaryMax: z.number().min(0).optional(),
     salaryCurrency: z.enum(["UZS", "USD"]).default("UZS"),
@@ -118,22 +123,14 @@ const steps = [
   { id: 4, title: "Ko'rib chiqish", icon: Eye },
 ];
 
-const jobTypes = [
-  { value: "full_time", label: "To'liq vaqtli" },
-  { value: "part_time", label: "Yarim vaqtli" },
-  { value: "contract", label: "Shartnoma" },
-  { value: "internship", label: "Amaliyot" },
-  { value: "remote", label: "Masofaviy" },
-];
-
-const experienceLevels = [
-  { value: "entry", label: "Boshlang'ich" },
-  { value: "junior", label: "Boshlovchi (1-2 yil)" },
-  { value: "mid", label: "O'rta (3-5 yil)" },
-  { value: "senior", label: "Katta (5+ yil)" },
-  { value: "lead", label: "Rahbar" },
-  { value: "executive", label: "Direktor+" },
-];
+// Straight from the shared helper, which mirrors the backend enums. These
+// were hand-written copies and had drifted: "entry" is not a value the API
+// accepts (it takes intern/junior/mid/senior/lead/executive), so an employer
+// who picked "Boshlang'ich" filled in the whole form and got a validation
+// failure on publish. "hybrid" was missing too, so a hybrid role could not be
+// posted at all.
+const jobTypes = jobTypeOptions(false);
+const experienceLevels = experienceOptions(false);
 
 const suggestedSkills = [
   "JavaScript", "TypeScript", "Python", "React", "Node.js", "PostgreSQL",

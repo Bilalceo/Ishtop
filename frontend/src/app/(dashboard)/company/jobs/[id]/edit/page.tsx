@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { experienceOptions, jobTypeOptions } from "@/lib/jobLabels";
 import { useRouter, useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -293,12 +294,15 @@ export default function EditJobPage() {
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
+                {/* A third hand-written copy of this list, and it was
+                    missing "internship" — so an internship's type rendered
+                    blank here and could not be re-selected. */}
                 <SelectContent>
-                  <SelectItem value="full_time">To'liq stavka</SelectItem>
-                  <SelectItem value="part_time">Yarim stavka</SelectItem>
-                  <SelectItem value="remote">Masofaviy</SelectItem>
-                  <SelectItem value="hybrid">Gibrid</SelectItem>
-                  <SelectItem value="contract">Shartnoma</SelectItem>
+                  {jobTypeOptions(false).map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -312,11 +316,11 @@ export default function EditJobPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="junior">Boshlovchi (0-2 yil)</SelectItem>
-                  <SelectItem value="mid">O'rta (2-5 yil)</SelectItem>
-                  <SelectItem value="senior">Katta (5+ yil)</SelectItem>
-                  <SelectItem value="lead">Rahbar</SelectItem>
-                  <SelectItem value="executive">Direktor</SelectItem>
+                  {experienceOptions(false).map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

@@ -178,8 +178,10 @@ export function jobTypeOptions(
 export function experienceOptions(
   isRu: boolean,
 ): { value: string; label: string }[] {
-  return (["intern", "junior", "mid", "senior", "lead"] as const).map((v) => ({
-    value: v,
-    label: experienceLabel(v, isRu),
-  }));
+  // All six the backend accepts. "executive" was missing, which mattered once
+  // the company forms started using this list: an employer could no longer
+  // post a director-level role.
+  return (
+    ["intern", "junior", "mid", "senior", "lead", "executive"] as const
+  ).map((v) => ({ value: v, label: experienceLabel(v, isRu) }));
 }
