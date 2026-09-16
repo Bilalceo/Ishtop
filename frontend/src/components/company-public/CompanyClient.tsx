@@ -269,44 +269,19 @@ export default function CompanyClient() {
             </Reveal>
 
             {/* Logos */}
-            <Reveal className="sm:col-span-6" delay={0.18}>
-              <div className="card-silver h-full p-6">
-                <p className="text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[#a0a0a8]">
-                  {ru ? "Нам доверяют" : "Bizga ishonganlar"}
-                </p>
-                <div className="mt-5 grid grid-cols-3 gap-4 sm:grid-cols-6">
-                  {["Uzum", "EPAM", "TBC Bank", "Click", "Payme", "Beeline"].map((n) => (
-                    <div key={n} className="text-center text-sm font-semibold text-[#8e8e96]">
-                      {n}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Reveal>
+            {/* A "Bizga ishonganlar" grid of Uzum, EPAM, TBC Bank, Click,
+                Payme and Beeline used to sit here. None of them are
+                customers: the platform holds five company accounts. Removed
+                rather than restyled — there is no honest version of a
+                customer wall we do not have. */}
           </div>
         </div>
       </section>
 
-      {/* Testimonial */}
-      <section className="py-16 sm:py-20" aria-label="Mijoz fikri">
-        <div className="section-shell">
-          <Reveal className="mx-auto max-w-3xl">
-            <div className="card-silver p-8 sm:p-10">
-              <div className="flex items-center gap-1 text-[#e2b184]" aria-label="5 yulduz">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-current" aria-hidden />
-                ))}
-              </div>
-              <p className="font-display mt-4 text-2xl font-semibold leading-tight text-[#18181b] sm:text-3xl">
-                {ru ? "«С IshTop время найма junior-фронтендера сократилось с 6 недель до 11 дней. AI-скрининг экономит нашей HR-команде 20 часов в неделю.»" : "“IshTop bilan junior frontend yollash vaqtimiz 6 haftadan 11 kunga qisqardi. AI saralash HR jamoamizning haftasiga 20 soatini tejaydi.”"}
-              </p>
-              <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-[#8e8e96]">
-                {ru ? "Диёра Р. · HR-руководитель Uzum Market" : "Diyora R. · Uzum Market HR rahbari"}
-              </p>
-            </div>
-          </Reveal>
-        </div>
-      </section>
+      {/* A five-star review signed "Diyora R. · Uzum Market HR rahbari",
+          quoting a hiring time cut from six weeks to eleven days and twenty
+          HR hours saved weekly. Nobody wrote it and none of it was measured.
+          When a real employer says something real, it goes here. */}
 
       {/* CTA */}
       <section className="relative overflow-hidden py-16 sm:py-28" aria-labelledby="cta-h">

@@ -111,10 +111,13 @@ const UZ: Copy = {
         "Sayt yuklanishi 1.8s, ariza bir bosishda. Foydalanuvchi vaqti bizning eng qadrli resurs ekanligini bilamiz — uni isrof qilmaymiz.",
     },
   ],
-  quoteEyebrow: "Talabadan",
+  // Was an invented student quote signed by a named person at EPAM, with
+  // invented outcomes. Replaced with what the platform is for, stated in our
+  // own voice, until a real student gives a real quote.
+  quoteEyebrow: "Nima uchun",
   quote:
-    "“12 ta ariza, 4 ta suhbat, 2 ta oferta. IshTop tushuntirib bergan match score sababli qaysi ishga e'tibor qaratishni bildim — bu o'zgartirgan narsa.”",
-  quoteAuthor: "Sevinch Q. · Junior Frontend Developer · EPAM",
+    "“Birinchi ish eng qiyini: tajriba yo'q, kim javob berishini bilmaysiz. Biz kontakti bor e'lonlarni yig'amiz va rezyumengizni tayyorlaymiz — qolganini o'zingiz qilasiz.”",
+  quoteAuthor: "IshTop jamoasi",
   ctaTitleA: "Birinchi ishingiz — ",
   ctaTitleEm: "bu yerda",
   ctaTitleB: " boshlanadi.",
@@ -181,10 +184,10 @@ const RU: Copy = {
         "Сайт грузится за 1.8s, отклик — в один клик. Мы знаем, что время пользователя — наш самый ценный ресурс, и не тратим его впустую.",
     },
   ],
-  quoteEyebrow: "От студента",
+  quoteEyebrow: "Зачем",
   quote:
-    "«12 откликов, 4 интервью, 2 оффера. Благодаря объяснимому match score от IshTop я поняла, на какие вакансии стоит делать ставку — это всё изменило.»",
-  quoteAuthor: "Севинч К. · Junior Frontend Developer · EPAM",
+    "«Первая работа — самая трудная: опыта нет, и непонятно, кто вообще ответит. Мы собираем объявления с контактом и помогаем подготовить резюме — остальное делаете вы.»",
+  quoteAuthor: "Команда IshTop",
   ctaTitleA: "Ваша первая работа ",
   ctaTitleEm: "начинается здесь",
   ctaTitleB: ".",

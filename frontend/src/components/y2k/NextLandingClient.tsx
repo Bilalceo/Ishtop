@@ -23,9 +23,13 @@ import {
 } from "lucide-react";
 import "./y2k.css";
 
-const LOGOS = [
-  "EPAM", "Uzum", "TBC Bank", "Click", "Payme", "Beeline",
-  "Humans", "Korzinka", "MyTaxi", "Anorbank", "Kapital",
+// The same false "trusted by" wall of real companies that the main landing
+// page carried, on the /next variant, which is live and returns 200. None of
+// these companies are customers. Replaced with the catalogue's actual fields.
+const FIELDS = [
+  "IT va dasturlash", "Savdo va sotuv", "Buxgalteriya", "Ta'lim",
+  "Tibbiyot", "Umumiy ovqatlanish", "Logistika", "Dizayn",
+  "Marketing", "Ishchi kasblar", "Xizmat ko'rsatish",
 ];
 
 const FEATURES = [
@@ -229,7 +233,7 @@ export default function NextLandingClient() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-white">Junior Frontend Developer</p>
-                    <p className="mt-0.5 text-xs text-white/60">Uzum Market · Toshkent</p>
+                    <p className="mt-0.5 text-xs text-white/60">Namuna Kompaniya · Toshkent</p>
                   </div>
                 </div>
                 <span
@@ -354,10 +358,10 @@ export default function NextLandingClient() {
       </section>
 
       {/* ========== Logo marquee ========== */}
-      <section className="relative z-10 py-6" aria-label="Trusted by">
+      <section className="relative z-10 py-6" aria-label="Katalogdagi sohalar">
         <div className="y2k-marquee y2k-shell overflow-hidden">
           <div className="y2k-marquee-track">
-            {[...LOGOS, ...LOGOS].map((name, i) => (
+            {[...FIELDS, ...FIELDS].map((name, i) => (
               <span
                 key={`${name}-${i}`}
                 className="text-sm font-semibold tracking-wide text-white/45"
