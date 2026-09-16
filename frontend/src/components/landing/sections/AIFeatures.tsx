@@ -37,7 +37,7 @@ const COPY: Record<
       {
         title: "Resume AI",
         tag: "GPT-class",
-        desc: "ATS-friendly, kuchli bullet pointlar, 5 ta professional dizayn — 60 soniyada eksport.",
+        desc: "ATS-friendly, kuchli bullet pointlar, 5 ta professional dizayn — PDF eksport.",
         bullets: ["Action-verb tahrir", "Quantified achievement", "PDF / DOCX eksport"],
       },
       {
@@ -68,7 +68,7 @@ const COPY: Record<
       {
         title: "Resume AI",
         tag: "GPT-class",
-        desc: "ATS-friendly, сильные булиты, 5 готовых дизайнов — экспорт за 60 секунд.",
+        desc: "ATS-friendly, сильные булиты, 5 готовых дизайнов — экспорт в PDF.",
         bullets: ["Action verbs", "Метрики достижений", "PDF / DOCX"],
       },
       {

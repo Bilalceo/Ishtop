@@ -43,8 +43,9 @@ const FEATURES = [
   {
     Icon: Wand2,
     title: "Resume AI",
-    desc: "60 soniyada ATS-friendly resume. GPT-class.",
-    stat: "60s",
+    desc: "tez ATS-friendly resume. GPT-class.",
+    // No stored measurement backs a seconds figure.
+    stat: "PDF",
     statLabel: "eksport",
   },
   {
@@ -468,7 +469,7 @@ export default function NextLandingClient() {
               <span className="y2k-rgb y2k-breathe">yaqin</span>.
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-white/75">
-              60 soniyada profil. AI mosligini soniyada topadi. Ariza — bir tugma.
+              bir necha qadamda profil. AI mosligini soniyada topadi. Ariza — bir tugma.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link href="/register" className="y2k-pill">

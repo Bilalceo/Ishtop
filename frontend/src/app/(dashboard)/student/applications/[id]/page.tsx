@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { closureOf, closureText } from "@/lib/applicationClosure";
+import { closureLine, closureOf } from "@/lib/applicationClosure";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -238,8 +238,7 @@ export default function ApplicationDetailPage() {
               {(() => {
                 const c = application ? closureOf(application) : null;
                 if (!c) return status.description;
-                const when = c.at ? formatDate(c.at) : null;
-                return closureText(c, isRu) + (when ? ` · ${when}` : "");
+                return closureLine(c, isRu, formatDate);
               })()}
             </p>
           </div>

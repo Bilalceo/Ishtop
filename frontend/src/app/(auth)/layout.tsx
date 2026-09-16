@@ -160,7 +160,7 @@ export default function AuthLayout({
             >
               {[
                 {
-                  value: locale === "ru" ? "2 мин" : "2 daq.",
+                  value: locale === "ru" ? "с AI" : "AI bilan",
                   label: locale === "ru" ? "AI-резюме" : "AI rezyume",
                 },
                 {

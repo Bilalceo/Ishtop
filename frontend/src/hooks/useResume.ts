@@ -106,7 +106,7 @@ function isTransientAIOverloadError(error: unknown): boolean {
 }
 
 const TRANSIENT_AI_RETRY_MESSAGE =
-  "AI xizmati vaqtincha band. 20-60 soniyadan keyin qayta urinib ko'ring. Сервис временно перегружен, попробуйте снова через 20-60 секунд.";
+  "AI xizmati vaqtincha band. 20-tezn keyin qayta urinib ko'ring. Сервис временно перегружен, попробуйте снова через 20-с AIунд.";
 
 const resumeMessages = {
   uz: {

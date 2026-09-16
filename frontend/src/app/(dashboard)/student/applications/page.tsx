@@ -13,7 +13,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { closureOf, closureText } from "@/lib/applicationClosure";
+import { closureLine, closureOf } from "@/lib/applicationClosure";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -777,8 +777,7 @@ export default function ApplicationsPage() {
                           {(() => {
                             const c = closureOf(application);
                             if (!c) return t("applicationsPage.closedHint");
-                            const when = c.at ? formatDate(c.at) : null;
-                            return closureText(c, isRu) + (when ? ` · ${when}` : "");
+                            return closureLine(c, isRu, formatDate);
                           })()}
                         </p>
                       </div>

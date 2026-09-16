@@ -10,6 +10,11 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import {
+  blamesResume,
+  narrowingOf,
+  type JobFilters,
+} from "@/lib/searchNarrowing";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -399,27 +404,15 @@ export default function JobsPage() {
         }
       });
 
-  // A search or a filter the student typed is the likeliest reason a list is
-  // empty, and it is the one thing they can undo in a click.
-  const hasActiveSearch = searchQuery.trim().length > 0;
-  const hasActiveFilters =
-    filters.locations.length > 0 ||
-    filters.jobTypes.length > 0 ||
-    filters.experienceLevels.length > 0 ||
-    filters.companies.length > 0 ||
-    filters.datePosted !== "all" ||
-    filters.isRemote ||
-    filters.salaryRange[0] > 0 ||
-    filters.salaryRange[1] < SALARY_MAX;
-  const isNarrowed = hasActiveSearch || hasActiveFilters;
+  // Definition lives in src/lib/searchNarrowing.ts so the page and its
+  // regression test cannot drift apart.
+  const narrowing = narrowingOf(searchQuery, filters as JobFilters);
+  const hasActiveSearch = narrowing.hasSearch;
+  const hasActiveFilters = narrowing.hasFilters;
+  const isNarrowed = narrowing.isNarrowed;
 
-  // Only blame the resume when nothing else explains the empty list. Typing a
-  // query that matches nothing used to produce "recommendations depend on your
-  // resume — update your resume", sending the student off to edit a resume
-  // that was never the problem.
   const isMatchedEmpty =
-    feedMode === "matched" &&
-    !isNarrowed &&
+    blamesResume(feedMode, narrowing) &&
     !isLoading &&
     !isInitializing &&
     sortedJobs.length === 0;

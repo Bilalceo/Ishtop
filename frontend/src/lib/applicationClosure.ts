@@ -1,67 +1,89 @@
 /**
- * Why a closed application closed, and when — one answer for every surface.
+ * What we can say about a closed application — and nothing more.
  *
- * AUD-01 asks that the notification, the card, the detail page and the
- * timeline show the same closing reason and time. They did not: the card
- * asserted "Bu e'lon olib tashlangani uchun arizangiz yopildi" even when the
- * student had withdrawn it themselves, the detail page hedged between the two
- * causes ("...yoki siz qaytarib olganingiz uchun"), and neither showed a date.
+ * The first version of this file inferred the cause from the CURRENT state of
+ * the listing: job closed now, therefore the application closed because of it;
+ * job open now, therefore the student withdrew. Both inferences are unsound.
+ * A listing can be closed long after, or for reasons unrelated to, an
+ * application ending; and a listing being open says nothing about who ended
+ * the application. Checked against production on 2026-09-16: three withdrawn
+ * applications sit against listings that are still active, and they were not
+ * withdrawn by the students.
  *
- * The reason is derivable: if the listing itself is closed or gone, it was
- * taken down; otherwise the student withdrew. Nothing is asserted that the
- * data does not say — where the cause is genuinely unknown, it says so.
+ * It also used `updated_at` as the closing date. For 15 of the 16 withdrawn
+ * applications in production `decided_at` is NULL, so `updated_at` was the
+ * timestamp of a bulk maintenance write — presented to the student as the day
+ * their application closed.
+ *
+ * So: the cause comes only from a recorded closure reason, the date only from
+ * `decided_at`, and where neither exists the page says so. No inference.
  */
 
 import type { Application } from "@/types/api";
 
-export type ClosureCause = "listing_removed" | "withdrawn_by_user" | "unknown";
-
-export interface Closure {
-  cause: ClosureCause;
-  /** When the application reached its closed state, if we know. */
-  at: string | null;
-}
-
 /** Statuses that mean the application is over. */
 export const CLOSED_STATUSES = new Set(["withdrawn", "rejected"]);
 
+/**
+ * A closure reason recorded against the application itself.
+ *
+ * Nothing writes one today, which is why `reason` is effectively always null
+ * and the UI says the cause was not recorded. The field is read rather than
+ * assumed absent so that a reason stored later surfaces without another
+ * change here.
+ */
+interface WithClosure {
+  closure_reason?: string | null;
+  closure_reason_code?: string | null;
+}
+
+export interface Closure {
+  /** Recorded reason, or null when nothing recorded one. */
+  reason: string | null;
+  /** The recorded decision time, or null. Never a row's last-modified time. */
+  at: string | null;
+}
+
 export function closureOf(application: Application): Closure | null {
+  // Only "withdrawn". A rejection records its own cause — the employer
+  // declined — so it keeps its own wording; overwriting it with "sababi qayd
+  // etilmagan" would lose information we actually have.
   if (application.status !== "withdrawn") return null;
 
-  const jobStatus = application.job?.status as string | undefined;
-  const closeCode = application.job?.close_reason_code;
-
-  let cause: ClosureCause = "unknown";
-  if (jobStatus && jobStatus !== "active") {
-    cause = "listing_removed";
-  } else if (closeCode) {
-    cause = "listing_removed";
-  } else if (jobStatus === "active") {
-    // The listing is still open, so the application did not end because of it.
-    cause = "withdrawn_by_user";
-  }
+  const extra = application as Application & WithClosure;
+  const reason =
+    typeof extra.closure_reason === "string" && extra.closure_reason.trim()
+      ? extra.closure_reason.trim()
+      : null;
 
   return {
-    cause,
-    // decided_at is set when a decision is recorded; updated_at is when the
-    // row last changed, which for a closed application is the closing.
-    at: application.decided_at || application.updated_at || null,
+    reason,
+    // decided_at is set by the transition that ended the application. Absent
+    // means we do not know when it happened, and updated_at is not a
+    // substitute: it moves on every write, including maintenance.
+    at: application.decided_at || null,
   };
 }
 
+/** One sentence for the student, asserting only what is recorded. */
 export function closureText(c: Closure, isRu: boolean): string {
-  switch (c.cause) {
-    case "listing_removed":
-      return isRu
-        ? "Заявка закрыта: вакансия была снята."
-        : "Ariza yopildi: e'lon olib tashlangan.";
-    case "withdrawn_by_user":
-      return isRu
-        ? "Заявка закрыта: вы её отозвали."
-        : "Ariza yopildi: siz qaytarib oldingiz.";
-    default:
-      return isRu
-        ? "Заявка закрыта. Ответ не ожидается."
-        : "Ariza yopildi. Javob kutilmaydi.";
+  if (c.reason) {
+    return isRu ? `Заявка закрыта: ${c.reason}` : `Ariza yopilgan: ${c.reason}`;
   }
+  return isRu
+    ? "Заявка закрыта; причина не зафиксирована."
+    : "Ariza yopilgan; sababi qayd etilmagan.";
+}
+
+/**
+ * The line the card and the detail page both render: the sentence, plus the
+ * date only when there is a recorded one.
+ */
+export function closureLine(
+  c: Closure,
+  isRu: boolean,
+  formatDate: (iso: string) => string
+): string {
+  const text = closureText(c, isRu);
+  return c.at ? `${text} · ${formatDate(c.at)}` : text;
 }

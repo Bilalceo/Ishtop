@@ -18,6 +18,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  PROFILE_FIELD_LABELS,
+  profileCompletion as profileCompletionOf,
+  type ProfileFieldKey,
+} from "@/lib/profileCompletion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -208,29 +213,11 @@ export default function StudentDashboardPage() {
 
   // ---- Derived state -------------------------------------------------------
 
-  // The percentage alone told the student they were at 60% and left them to
-  // guess which 40%. The fields that make it up are named, so the card can
-  // show the next one or two things to do.
-  const PROFILE_FIELDS = useMemo(
-    () => [
-      { key: "full_name", weight: 20, value: user?.full_name },
-      { key: "email", weight: 20, value: user?.email },
-      { key: "phone", weight: 15, value: user?.phone },
-      { key: "bio", weight: 15, value: user?.bio },
-      { key: "location", weight: 10, value: user?.location },
-    ],
+  // Definition lives in src/lib/profileCompletion.ts so the page and its
+  // regression test cannot drift apart.
+  const { percent: profileCompletion, missing: missingProfileFields } = useMemo(
+    () => profileCompletionOf(user),
     [user]
-  );
-
-  const profileCompletion = useMemo(
-    () =>
-      PROFILE_FIELDS.reduce((sum, f) => (f.value ? sum + f.weight : sum), 20),
-    [PROFILE_FIELDS]
-  );
-
-  const missingProfileFields = useMemo(
-    () => PROFILE_FIELDS.filter((f) => !f.value).map((f) => f.key),
-    [PROFILE_FIELDS]
   );
 
   const greeting = () => {
@@ -746,14 +733,6 @@ export default function StudentDashboardPage() {
 // SUB-COMPONENTS
 // =============================================================================
 
-const PROFILE_FIELD_LABELS: Record<string, [string, string]> = {
-  full_name: ["Ism va familiya", "Имя и фамилия"],
-  email: ["Elektron pochta", "Электронная почта"],
-  phone: ["Telefon raqami", "Номер телефона"],
-  bio: ["O'zingiz haqingizda qisqacha", "Кратко о себе"],
-  location: ["Joylashuv", "Местоположение"],
-};
-
 function TodaysSignal({
   loading,
   profileCompletion,
@@ -766,7 +745,7 @@ function TodaysSignal({
 }: {
   loading: boolean;
   profileCompletion: number;
-  missingProfileFields: string[];
+  missingProfileFields: ProfileFieldKey[];
   upcoming: ReturnType<typeof nextUpcomingInterview>;
   topRec: Recommendation | undefined;
   topRecCompany: string;

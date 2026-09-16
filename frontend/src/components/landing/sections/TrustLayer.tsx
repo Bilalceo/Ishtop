@@ -10,13 +10,13 @@ type Locale = "uz" | "ru" | "en";
 // Honest, product-true highlights (no fabricated user/scale metrics).
 const STATS: Record<Locale, { value: string; label: string; icon: typeof Clock }[]> = {
   uz: [
-    { value: "2 daqiqa", label: "AI bilan rezyume", icon: Clock },
+    { value: "AI bilan", label: "AI bilan rezyume", icon: Clock },
     { value: "50+", label: "Kasb bo'yicha ko'nikma bazasi", icon: Briefcase },
     { value: "UZ · RU", label: "Ikki tilda", icon: Globe },
     { value: "Bepul", label: "Boshlash uchun", icon: Sparkles },
   ],
   ru: [
-    { value: "2 мин", label: "AI-резюме", icon: Clock },
+    { value: "с AI", label: "AI-резюме", icon: Clock },
     { value: "50+", label: "Профессий с навыками", icon: Briefcase },
     { value: "UZ · RU", label: "На двух языках", icon: Globe },
     { value: "Бесплатно", label: "Для старта", icon: Sparkles },

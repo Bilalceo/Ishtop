@@ -166,7 +166,7 @@ export default function CompanyClient() {
                   {ru ? "AI-скрининг" : "AI saralash"}
                 </span>
                 <h3 className="font-display mt-3 text-xl font-semibold text-[#18181b]">
-                  {ru ? "Резюме — 60 секунд, оценка — 5 секунд" : "Rezyume — 60 soniya, baho — 5 soniya"}
+                  {ru ? "Резюме с AI, оценка автоматически" : "Rezyume AI bilan, baho avtomatik"}
                 </h3>
                 {/* A mockup of the screening panel, not a record. Labelled as
                     a sample so a 94% beside a person's name cannot be read as

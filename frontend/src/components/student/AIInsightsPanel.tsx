@@ -36,7 +36,7 @@ function buildInsightLines(input: InsightsInput, isRu: boolean): string[] {
     if (input.resumes > 0) {
       lines.push(`> Найдено резюме: ${input.resumes} — отличный старт`);
     } else {
-      lines.push(`> Пока нет резюме — соберём с помощью AI за 60 секунд`);
+      lines.push(`> Пока нет резюме — соберём с помощью AI быстро`);
     }
     if (input.applications > 0) {
       lines.push(`> Отправлено откликов: ${input.applications}`);
@@ -62,7 +62,7 @@ function buildInsightLines(input: InsightsInput, isRu: boolean): string[] {
     if (input.resumes > 0) {
       lines.push(`> ${input.resumes} ta resume topildi — kuchli boshlash`);
     } else {
-      lines.push(`> Hali resume yo'q — AI Resume bilan 60 soniyada tayyor`);
+      lines.push(`> Hali resume yo'q — AI Resume bilan tez tayyor`);
     }
     if (input.applications > 0) {
       lines.push(`> ${input.applications} ta ariza yuborilgan`);

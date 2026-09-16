@@ -121,7 +121,7 @@ const UZ: Copy = {
   ctaTitleA: "Birinchi ishingiz — ",
   ctaTitleEm: "bu yerda",
   ctaTitleB: " boshlanadi.",
-  ctaLead: "60 soniyada profil. Ariza — bir tugma. To'lovsiz, va'dasiz.",
+  ctaLead: "bir necha qadamda profil. Ariza — bir tugma. To'lovsiz, va'dasiz.",
   home: "Bosh sahifa",
 };
 
@@ -191,7 +191,7 @@ const RU: Copy = {
   ctaTitleA: "Ваша первая работа ",
   ctaTitleEm: "начинается здесь",
   ctaTitleB: ".",
-  ctaLead: "Профиль за 60 секунд. Отклик — одна кнопка. Без оплаты и обещаний.",
+  ctaLead: "Профиль быстро. Отклик — одна кнопка. Без оплаты и обещаний.",
   home: "Главная",
 };
 

@@ -61,7 +61,7 @@ function buildDefaultPayload(locale: Locale): LandingPayload {
         { value: "260+", label: "Открытых вакансий" },
         { value: "180+", label: "Студентов" },
         { value: "100+", label: "AI-резюме" },
-        { value: "60 сек", label: "От резюме до отклика" },
+        { value: "с AI", label: "От резюме до отклика" },
       ],
       features: [
         { title: "AI Резюме", description: "Профессиональные резюме за секунды." },
@@ -129,7 +129,7 @@ function buildDefaultPayload(locale: Locale): LandingPayload {
       { value: "260+", label: "Ochiq vakansiya" },
       { value: "180+", label: "Talaba" },
       { value: "100+", label: "AI rezyume" },
-      { value: "60 soniya", label: "Rezyumedan arizagacha" },
+      { value: "AI bilan", label: "Rezyumedan arizagacha" },
     ],
     features: [
       { title: "AI Rezyume", description: "Soniyalarda professional rezyume yarating." },

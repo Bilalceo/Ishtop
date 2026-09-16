@@ -70,10 +70,14 @@ def live_stats(db: Session, locale: Locale) -> list[Dict[str, Any]]:
                 "label": "Созданных резюме",
                 "note": "Резюме, созданные пользователями, включая черновики.",
             },
+            # A "60 сек" figure used to sit here. Nothing measures it:
+            # processing_time_seconds is computed per request and logged, never
+            # stored, so there is no sample to quote. Replaced with a count we
+            # do keep.
             {
-                "value": "60 сек",
-                "label": "От AI-резюме до отклика",
-                "note": "Время работы AI-генератора, а не срок поиска работы.",
+                "value": "UZ · RU",
+                "label": "Две языковые версии",
+                "note": "Интерфейс и AI-резюме на узбекском и русском.",
             },
         ]
     return [
@@ -93,9 +97,9 @@ def live_stats(db: Session, locale: Locale) -> list[Dict[str, Any]]:
             "note": "Foydalanuvchilar yaratgan rezyumelar, qoralamalar ham kiradi.",
         },
         {
-            "value": "60 soniya",
-            "label": "AI rezyumedan arizagacha",
-            "note": "AI generatorining ishlash vaqti, ish topish muddati emas.",
+            "value": "UZ · RU",
+            "label": "Ikki tilda",
+            "note": "Interfeys va AI rezyume o'zbek va rus tillarida.",
         },
     ]
 

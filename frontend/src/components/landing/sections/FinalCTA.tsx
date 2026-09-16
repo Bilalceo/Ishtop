@@ -11,15 +11,15 @@ const COPY: Record<Locale, { eyebrow: string; title: string; sub: string; primar
   uz: {
     eyebrow: "Hozir vaqt",
     title: "Bugun boshla — birinchi oferta uzoq emas",
-    sub: "Bepul ro'yxatdan o'tish, 60 soniyada profil, soniyalar ichida birinchi mos vakansiya.",
+    sub: "Bepul ro'yxatdan o'tish, bir necha qadamda profil, birinchi mos vakansiyalar darhol.",
     primary: "Bepul ro'yxatdan o'tish",
     secondary: "Kompaniyalarga ko'rsat",
-    bullets: ["Kredit karta talab qilinmaydi", "60 soniyada AI profil", "Ma'lumotlar shifrlangan"],
+    bullets: ["Kredit karta talab qilinmaydi", "AI profil bir necha qadamda", "Ma'lumotlar shifrlangan"],
   },
   ru: {
     eyebrow: "Время сейчас",
     title: "Начни сегодня — первый оффер ближе, чем кажется",
-    sub: "Бесплатная регистрация, профиль за 60 секунд, первая подходящая вакансия — за секунды.",
+    sub: "Бесплатная регистрация, профиль за несколько шагов, первые подходящие вакансии сразу.",
     primary: "Зарегистрироваться бесплатно",
     secondary: "Я компания",
     bullets: ["Без банковской карты", "AI-профиль за 60с", "Данные зашифрованы"],
@@ -30,7 +30,7 @@ const COPY: Record<Locale, { eyebrow: string; title: string; sub: string; primar
     sub: "Free signup, AI profile in 60 seconds, your first matched job in moments.",
     primary: "Sign up free",
     secondary: "I'm a company",
-    bullets: ["No credit card", "AI profile in 60s", "End-to-end encrypted"],
+    bullets: ["No credit card", "AI profile in a few steps", "End-to-end encrypted"],
   },
 };
 
