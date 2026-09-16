@@ -109,6 +109,8 @@ function InterviewCoach() {
             model: "Пример ответа",
             next: "Следующий вопрос",
             finish: "Завершить",
+            exitPractice: "Закончить тренировку",
+            exitHint: "Тренировку можно прервать в любой момент. Ответы на текущие вопросы не сохраняются.",
             summaryTitle: "Тренировка завершена!",
             avgScore: "Средний балл",
             again: "Пройти заново",
@@ -167,6 +169,8 @@ function InterviewCoach() {
             model: "Namuna javob",
             next: "Keyingi savol",
             finish: "Yakunlash",
+            exitPractice: "Mashqni tugatish",
+            exitHint: "Mashqni istalgan paytda to'xtatish mumkin. Joriy savollarga bergan javoblaringiz saqlanmaydi.",
             summaryTitle: "Mashq yakunlandi!",
             avgScore: "O'rtacha ball",
             again: "Qaytadan mashq",
@@ -526,7 +530,24 @@ function InterviewCoach() {
             </h1>
             <p className="mt-0.5 text-sm text-surface-500 dark:text-surface-400">{t.subtitle}</p>
           </div>
+
+          {phase === "quiz" && (
+            <button
+              type="button"
+              onClick={reset}
+              title={t.exitHint}
+              className="focus-ring ml-auto shrink-0 rounded-full border border-surface-200 px-3 py-1.5 text-xs font-semibold text-surface-600 transition-colors hover:bg-surface-50 dark:border-white/[0.12] dark:text-surface-300 dark:hover:bg-white/[0.04]"
+            >
+              {t.exitPractice}
+            </button>
+          )}
         </div>
+
+        {phase === "quiz" && (
+          <p className="relative mt-3 text-xs text-surface-500 dark:text-surface-400">
+            {t.exitHint}
+          </p>
+        )}
       </div>
 
       {phase === "setup" && (

@@ -399,8 +399,27 @@ export default function JobsPage() {
         }
       });
 
+  // A search or a filter the student typed is the likeliest reason a list is
+  // empty, and it is the one thing they can undo in a click.
+  const hasActiveSearch = searchQuery.trim().length > 0;
+  const hasActiveFilters =
+    filters.locations.length > 0 ||
+    filters.jobTypes.length > 0 ||
+    filters.experienceLevels.length > 0 ||
+    filters.companies.length > 0 ||
+    filters.datePosted !== "all" ||
+    filters.isRemote ||
+    filters.salaryRange[0] > 0 ||
+    filters.salaryRange[1] < SALARY_MAX;
+  const isNarrowed = hasActiveSearch || hasActiveFilters;
+
+  // Only blame the resume when nothing else explains the empty list. Typing a
+  // query that matches nothing used to produce "recommendations depend on your
+  // resume — update your resume", sending the student off to edit a resume
+  // that was never the problem.
   const isMatchedEmpty =
     feedMode === "matched" &&
+    !isNarrowed &&
     !isLoading &&
     !isInitializing &&
     sortedJobs.length === 0;
@@ -735,17 +754,21 @@ export default function JobsPage() {
                   ? "Подходящие вакансии пока не найдены"
                   : "Mos ishlar hozircha topilmadi"
                 : isRu
-                  ? "Вакансии не найдены"
-                  : "Ishlar topilmadi"}
+                  ? "Ничего не найдено"
+                  : "Hech narsa topilmadi"}
             </h3>
             <p className="mt-2 text-sm text-surface-500">
               {isMatchedEmpty
                 ? isRu
                   ? "Рекомендации зависят от вашего резюме. Посмотрите все вакансии или обновите резюме."
                   : "Tavsiyalar rezyumengizga bog'liq. Barcha ishlarni ko'ring yoki rezyumeni yangilang."
-                : isRu
-                  ? "Попробуйте изменить фильтры или поиск."
-                  : "Filtrlar yoki qidiruvni o'zgartiring."}
+                : hasActiveSearch
+                  ? isRu
+                    ? `По запросу «${searchQuery.trim()}»${hasActiveFilters ? " с выбранными фильтрами" : ""} ничего не найдено.`
+                    : `«${searchQuery.trim()}» so'rovi${hasActiveFilters ? " va tanlangan filtrlar" : ""} bo'yicha hech narsa topilmadi.`
+                  : isRu
+                    ? "Выбранным фильтрам не соответствует ни одна вакансия."
+                    : "Tanlangan filtrlarga mos vakansiya yo'q."}
             </p>
             {isMatchedEmpty ? (
               <Button
@@ -758,15 +781,26 @@ export default function JobsPage() {
                 {isRu ? "Показать все вакансии" : "Barcha ishlarni ko'rsatish"}
               </Button>
             ) : (
-              <Button
-                variant="outline"
-                onClick={resetFilters}
-                className="mt-4"
-                size="sm"
-              >
-                <RotateCcw className="mr-2 h-4 w-4" />
-                {isRu ? "Сбросить фильтры" : "Filtrlarni tozalash"}
-              </Button>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                {hasActiveSearch && (
+                  <Button variant="outline" onClick={() => setSearchQuery("")} size="sm">
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    {isRu ? "Очистить поиск" : "Qidiruvni tozalash"}
+                  </Button>
+                )}
+                {hasActiveFilters && (
+                  <Button variant="outline" onClick={resetFilters} size="sm">
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    {isRu ? "Сбросить фильтры" : "Filtrlarni tozalash"}
+                  </Button>
+                )}
+                {!isNarrowed && (
+                  <Button variant="outline" onClick={resetFilters} size="sm">
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    {isRu ? "Сбросить фильтры" : "Filtrlarni tozalash"}
+                  </Button>
+                )}
+              </div>
             )}
           </div>
         ) : (
