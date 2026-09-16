@@ -168,9 +168,17 @@ export default function CompanyClient() {
                 <h3 className="font-display mt-3 text-xl font-semibold text-[#18181b]">
                   {ru ? "Резюме — 60 секунд, оценка — 5 секунд" : "Rezyume — 60 soniya, baho — 5 soniya"}
                 </h3>
+                {/* A mockup of the screening panel, not a record. Labelled as
+                    a sample so a 94% beside a person's name cannot be read as
+                    a real candidate's score. */}
                 <div className="mt-5 rounded-2xl bg-[#f6f6f4] p-4">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-[#18181b]">Sevinch Q.</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#a0a0a8]">
+                    {ru ? "Пример" : "Namuna"}
+                  </p>
+                  <div className="mt-2 flex items-center justify-between">
+                    <p className="text-sm font-semibold text-[#18181b]">
+                      {ru ? "Кандидат А." : "Nomzod A."}
+                    </p>
                     <span className="rounded-full bg-[#d9f1e4] px-2.5 py-0.5 text-[10px] font-semibold text-[#2f7a56]">
                       {ru ? "94% совпадение" : "94% moslik"}
                     </span>
