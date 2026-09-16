@@ -12,6 +12,8 @@ import {
   Sparkles,
   Loader2,
   AlertCircle,
+  CheckCircle2,
+  Circle,
   Mic,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +22,31 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { resumeApi } from "@/lib/api";
 import { formatRelativeTime } from "@/lib/utils";
 import type { Resume } from "@/types/api";
+
+interface AtsComponent {
+  code: string;
+  points: number;
+  earned: boolean;
+  label_uz: string;
+  label_ru: string;
+  fix_uz: string;
+  fix_ru: string;
+}
+
+interface ContentWarning {
+  code: string;
+  claimed_years?: number;
+  implied_years?: number;
+  earliest_year?: number;
+  overstated?: boolean;
+}
+
+interface AtsInfo {
+  ats_score?: number;
+  ats_breakdown: AtsComponent[];
+  ats_suggestions: string[];
+  content_warnings: ContentWarning[];
+}
 import { toast } from "sonner";
 import { ResumePreview } from "@/components/resume/ResumePreview";
 import { useTranslation } from "@/contexts/TranslationContext";
@@ -65,6 +92,12 @@ export default function ResumeDetailPage() {
         aiGenerated: "Создано с помощью ИИ",
         manuallyCreated: "Создано вручную",
         atsScore: "ATS балл",
+        atsTitle: "Из чего складывается балл",
+        atsLead: "Это проверка полноты резюме, а не прогноз найма.",
+        atsEarned: "есть",
+        atsMissing: "не хватает",
+        atsNext: "Что стоит добавить",
+        warnTitle: "Проверьте перед отправкой",
       }
     : {
         notFound: "Resume topilmadi yoki xatolik yuz berdi.",
@@ -79,6 +112,12 @@ export default function ResumeDetailPage() {
         aiGenerated: "AI bilan yaratilgan",
         manuallyCreated: "Qo'lda yaratilgan",
         atsScore: "ATS ball",
+        atsTitle: "Ball nimalardan tashkil topgan",
+        atsLead: "Bu rezyume to'liqligini tekshiradi, ishga olinish ehtimolini emas.",
+        atsEarned: "bor",
+        atsMissing: "yetishmayapti",
+        atsNext: "Nima qo'shish kerak",
+        warnTitle: "Yuborishdan oldin tekshiring",
       };
   const statusConfig = getStatusConfig(isRu);
 
@@ -86,6 +125,9 @@ export default function ResumeDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  // The score's components, from the server, so the page never has to keep a
+  // second copy of the scoring rules.
+  const [ats, setAts] = useState<AtsInfo | null>(null);
 
   useEffect(() => {
     const fetchResume = async () => {
@@ -99,7 +141,24 @@ export default function ResumeDetailPage() {
         setIsLoading(false);
       }
     };
-    if (resumeId) fetchResume();
+    const fetchAts = async () => {
+      try {
+        const res = await resumeApi.analytics(resumeId);
+        const d = (res.data?.data ?? res.data ?? {}) as AtsInfo & { ats_score?: number };
+        setAts({
+          ats_score: d.ats_score,
+          ats_breakdown: Array.isArray(d.ats_breakdown) ? d.ats_breakdown : [],
+          ats_suggestions: Array.isArray(d.ats_suggestions) ? d.ats_suggestions : [],
+          content_warnings: Array.isArray(d.content_warnings) ? d.content_warnings : [],
+        });
+      } catch {
+        setAts(null); // the resume still renders without it
+      }
+    };
+    if (resumeId) {
+      fetchResume();
+      fetchAts();
+    }
     // c is recomputed each render; only the id should drive a refetch.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resumeId]);
@@ -220,15 +279,94 @@ export default function ResumeDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {resume.ats_score && (
+          {typeof (ats?.ats_score ?? resume.ats_score) === "number" && (
             <div className="text-center">
-              <div className="text-lg font-bold text-green-600">{resume.ats_score}%</div>
+              <div className="text-lg font-bold text-green-600">
+                {ats?.ats_score ?? resume.ats_score}%
+              </div>
               <div className="text-xs text-surface-500">{c.atsScore}</div>
             </div>
           )}
           <Badge className={status.color}>{status.label}</Badge>
         </div>
       </motion.div>
+
+      {/* A claim in the summary that the resume's own dates do not support.
+          Shown before download or publish, and never corrected automatically:
+          only the student knows whether the summary is wrong or whether there
+          is earlier work they did not list. */}
+      {ats?.content_warnings?.map((w) => (
+        <motion.div
+          key={w.code}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-500/30 dark:bg-amber-500/10"
+        >
+          <div className="flex gap-3">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-300" />
+            <div>
+              <p className="font-semibold text-amber-900 dark:text-amber-200">{c.warnTitle}</p>
+              <p className="mt-1 text-sm text-amber-800 dark:text-amber-200/90">
+                {isRu
+                  ? `В кратком резюме указано ${w.claimed_years} лет опыта, но самая ранняя запись в разделе опыта начинается в ${w.earliest_year} году — это примерно ${w.implied_years} лет. Исправьте то, что неверно.`
+                  : `Qisqacha ma'lumotda ${w.claimed_years} yil tajriba yozilgan, lekin tajriba bo'limidagi eng erta yozuv ${w.earliest_year}-yildan boshlanadi — bu taxminan ${w.implied_years} yil. Qaysi biri noto'g'ri bo'lsa, shuni to'g'rilang.`}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      ))}
+
+      {/* What the score is made of. A bare "50%" is a verdict the student
+          cannot act on — and until today it was the same 50% for every
+          resume in the database. */}
+      {ats && ats.ats_breakdown.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="rounded-2xl border border-surface-200 bg-white p-4 shadow-sm dark:border-surface-700 dark:bg-surface-800"
+        >
+          <h2 className="font-semibold text-surface-900 dark:text-white">{c.atsTitle}</h2>
+          <p className="mt-1 text-xs text-surface-500">{c.atsLead}</p>
+
+          <ul className="mt-3 space-y-2">
+            {ats.ats_breakdown.map((item) => (
+              <li key={item.code} className="flex items-center gap-2 text-sm">
+                {item.earned ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" aria-hidden />
+                ) : (
+                  <Circle className="h-4 w-4 shrink-0 text-surface-300" aria-hidden />
+                )}
+                <span
+                  className={
+                    item.earned
+                      ? "text-surface-700 dark:text-surface-200"
+                      : "text-surface-500"
+                  }
+                >
+                  {isRu ? item.label_ru : item.label_uz}
+                </span>
+                <span className="ml-auto shrink-0 text-xs text-surface-400">
+                  {item.earned ? `+${item.points}` : `0 / ${item.points}`}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          {ats.ats_suggestions.length > 0 && (
+            <div className="mt-4 rounded-xl bg-amber-50 p-3 dark:bg-amber-500/10">
+              <p className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                {c.atsNext}
+              </p>
+              <ul className="mt-1.5 list-disc space-y-1 pl-4 text-sm text-surface-700 dark:text-surface-200">
+                {ats.ats_suggestions.map((fix, i) => (
+                  <li key={i}>{fix}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </motion.div>
+      )}
 
       {/* Resume Preview */}
       <motion.div

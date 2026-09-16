@@ -208,15 +208,30 @@ export default function StudentDashboardPage() {
 
   // ---- Derived state -------------------------------------------------------
 
-  const profileCompletion = useMemo(() => {
-    let s = 20;
-    if (user?.full_name) s += 20;
-    if (user?.email) s += 20;
-    if (user?.phone) s += 15;
-    if (user?.bio) s += 15;
-    if (user?.location) s += 10;
-    return s;
-  }, [user]);
+  // The percentage alone told the student they were at 60% and left them to
+  // guess which 40%. The fields that make it up are named, so the card can
+  // show the next one or two things to do.
+  const PROFILE_FIELDS = useMemo(
+    () => [
+      { key: "full_name", weight: 20, value: user?.full_name },
+      { key: "email", weight: 20, value: user?.email },
+      { key: "phone", weight: 15, value: user?.phone },
+      { key: "bio", weight: 15, value: user?.bio },
+      { key: "location", weight: 10, value: user?.location },
+    ],
+    [user]
+  );
+
+  const profileCompletion = useMemo(
+    () =>
+      PROFILE_FIELDS.reduce((sum, f) => (f.value ? sum + f.weight : sum), 20),
+    [PROFILE_FIELDS]
+  );
+
+  const missingProfileFields = useMemo(
+    () => PROFILE_FIELDS.filter((f) => !f.value).map((f) => f.key),
+    [PROFILE_FIELDS]
+  );
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -362,6 +377,7 @@ export default function StudentDashboardPage() {
           <TodaysSignal
             loading={isLoading || recsLoading}
             profileCompletion={profileCompletion}
+            missingProfileFields={missingProfileFields}
             upcoming={upcoming}
             topRec={topRec}
             topRecCompany={topRecCompany}
@@ -447,7 +463,13 @@ export default function StudentDashboardPage() {
                 </div>
               ) : skillGap.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-surface-200 p-6 text-center text-sm text-surface-500 dark:border-white/[0.08] dark:text-white/60">
-                  Profil to&apos;la — boshqa platformalardan tushgan ko&apos;nikmalarni qo&apos;shing.
+                  {/* Said "Profil to'la" — but this branch means the current
+                      recommendations show no missing skills, which is a fact
+                      about those listings, not about the profile. It appeared
+                      beside a card reading "Profil 60%". */}
+                  {locale === "ru"
+                    ? "В текущих рекомендациях не хватает ни одного навыка. Посмотрите больше вакансий, чтобы увидеть, чему стоит поучиться."
+                    : "Hozirgi tavsiyalarda yetishmayotgan ko'nikma yo'q. Nimani o'rganish kerakligini ko'rish uchun ko'proq vakansiyani ko'ring."}
                 </div>
               ) : (
                 <>
@@ -711,9 +733,18 @@ export default function StudentDashboardPage() {
 // SUB-COMPONENTS
 // =============================================================================
 
+const PROFILE_FIELD_LABELS: Record<string, [string, string]> = {
+  full_name: ["Ism va familiya", "Имя и фамилия"],
+  email: ["Elektron pochta", "Электронная почта"],
+  phone: ["Telefon raqami", "Номер телефона"],
+  bio: ["O'zingiz haqingizda qisqacha", "Кратко о себе"],
+  location: ["Joylashuv", "Местоположение"],
+};
+
 function TodaysSignal({
   loading,
   profileCompletion,
+  missingProfileFields,
   upcoming,
   topRec,
   topRecCompany,
@@ -722,6 +753,7 @@ function TodaysSignal({
 }: {
   loading: boolean;
   profileCompletion: number;
+  missingProfileFields: string[];
   upcoming: ReturnType<typeof nextUpcomingInterview>;
   topRec: Recommendation | undefined;
   topRecCompany: string;
@@ -872,6 +904,17 @@ function TodaysSignal({
               </div>
               <span className="text-sm font-medium text-surface-700 dark:text-white/80">{profileCompletion}%</span>
             </div>
+            {/* Which 40% is missing. A percentage on its own is a score, not
+                a next step. */}
+            {missingProfileFields.length > 0 && (
+              <p className="mt-2 text-sm text-surface-600 dark:text-white/70">
+                {locale === "ru" ? "Осталось заполнить: " : "To'ldirish kerak: "}
+                {missingProfileFields
+                  .slice(0, 3)
+                  .map((f) => PROFILE_FIELD_LABELS[f]?.[locale === "ru" ? 1 : 0] ?? f)
+                  .join(", ")}
+              </p>
+            )}
           </div>
         </div>
         <Button asChild className="rounded-full bg-amber-600 hover:bg-amber-700">

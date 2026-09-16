@@ -1448,9 +1448,15 @@ class ResumeAnalyticsResponse(BaseModel):
     interview_rate: float  # % of applications that got interviews
     success_rate: float    # % of applications that got accepted
     
-    # ATS info
+    # ATS info. The breakdown ships with the score so the UI can say what the
+    # number is made of; a bare "50%" is a verdict the student cannot act on.
     ats_score: Optional[int] = None
     ats_keywords_matched: Optional[int] = None
+    ats_breakdown: List[Dict[str, Any]] = Field(default_factory=list)
+    ats_suggestions: List[str] = Field(default_factory=list)
+    # A summary claiming years the dates do not support. Flagged, never fixed
+    # for the student.
+    content_warnings: List[Dict[str, Any]] = Field(default_factory=list)
     
     # Timeline
     created_at: datetime
@@ -2410,7 +2416,8 @@ def get_resume_analytics(
     views_this_month = resume.view_count
     
     logger.info(f"Analytics retrieved for resume: {resume.id}")
-    ats_keywords_matched = len(_extract_resume_keywords(resume.content or {}))
+    resume_content = resume.content or {}
+    ats_keywords_matched = len(_extract_resume_keywords(resume_content))
     
     return ResumeAnalyticsResponse(
         resume_id=str(resume.id),
@@ -2426,8 +2433,14 @@ def get_resume_analytics(
         rejected_applications=rejected_count,
         interview_rate=round(interview_rate, 1),
         success_rate=round(success_rate, 1),
-        ats_score=resume.ats_score,
+        # Recomputed rather than read from the column: every stored score was
+        # written by the old scorer, which could not see a production resume's
+        # summary or experience and gave them all 50.
+        ats_score=_calculate_ats_score(resume_content),
         ats_keywords_matched=ats_keywords_matched,
+        ats_breakdown=_ats_breakdown(resume_content),
+        ats_suggestions=_get_ats_suggestions(resume_content, None),
+        content_warnings=[w for w in [_experience_conflict(resume_content)] if w],
         created_at=resume.created_at,
         last_updated=resume.updated_at,
         last_used_in_application=last_used,
@@ -2438,70 +2451,177 @@ def get_resume_analytics(
 # HELPER FUNCTIONS
 # =============================================================================
 
-def _calculate_ats_score(content: Dict[str, Any], job_description: Optional[str]) -> int:
+# The stored resume JSONB does not use the schema's field names. An
+# AI-generated resume in production has "summary", "experience" and
+# "skills.technical"; the schema calls those "professional_summary",
+# "work_experience" and "technical_skills". Reading only the schema names cost
+# every resume the summary (20), the experience (20) and the achievements (10)
+# — which is why every resume in the database scored exactly 50 out of 100,
+# whatever was in it. The score was a constant, not a judgement.
+def _resume_section(content: Dict[str, Any], *names: str) -> Any:
+    """First non-empty value among the shapes a resume might be stored in."""
+    for name in names:
+        value = content.get(name)
+        if value:
+            return value
+    return None
+
+
+def _ats_breakdown(
+    content: Dict[str, Any], job_description: Optional[str] = None
+) -> List[Dict[str, Any]]:
+    """The score, itemised, so the number can be explained rather than asserted.
+
+    Each item carries the points it is worth, whether they were earned, and
+    what to do about it when they were not.
     """
-    Calculate ATS (Applicant Tracking System) compatibility score.
-    
-    Factors:
-    - Has all required sections (summary, experience, education, skills)
-    - Keyword density
-    - Proper formatting
-    - Quantified achievements
-    """
-    score = 0
-    
-    # Check for required sections (20 points each)
-    if content.get("professional_summary"):
-        score += 20
-    if content.get("work_experience"):
-        score += 20
-    if content.get("education"):
-        score += 20
-    if content.get("skills"):
-        score += 20
-    
-    # Check for contact info (10 points)
-    personal_info = content.get("personal_info", {})
-    if personal_info.get("email") and personal_info.get("phone"):
-        score += 10
-    
-    # Check for quantified achievements (10 points)
-    work_exp = content.get("work_experience", [])
-    if work_exp:
-        for exp in work_exp:
-            achievements = exp.get("achievements", [])
-            if achievements:
-                score += 10
-                break
-    
-    return min(score, 100)
+    summary = _resume_section(content, "summary", "professional_summary")
+    experience = _resume_section(content, "experience", "work_experience") or []
+    education = _resume_section(content, "education")
+    skills = _resume_section(content, "skills", "technical_skills")
+    personal = content.get("personal_info") or {}
+
+    if isinstance(experience, dict):
+        experience = [experience]
+    has_achievements = any(
+        (item.get("achievements") or item.get("description"))
+        for item in experience
+        if isinstance(item, dict)
+    )
+
+    return [
+        {
+            "code": "summary",
+            "points": 20,
+            "earned": bool(summary),
+            "label_uz": "Qisqacha ma'lumot",
+            "label_ru": "Краткое резюме",
+            "fix_uz": "Boshiga 2-3 jumlalik qisqacha ma'lumot qo'shing.",
+            "fix_ru": "Добавьте в начало описание на 2–3 предложения.",
+        },
+        {
+            "code": "experience",
+            "points": 20,
+            "earned": bool(experience),
+            "label_uz": "Ish tajribasi",
+            "label_ru": "Опыт работы",
+            "fix_uz": "Kamida bitta ish yoki amaliyot tajribasini kiriting.",
+            "fix_ru": "Укажите хотя бы одно место работы или стажировку.",
+        },
+        {
+            "code": "education",
+            "points": 20,
+            "earned": bool(education),
+            "label_uz": "Ta'lim",
+            "label_ru": "Образование",
+            "fix_uz": "O'quv yurtingiz va yo'nalishingizni qo'shing.",
+            "fix_ru": "Добавьте учебное заведение и направление.",
+        },
+        {
+            "code": "skills",
+            "points": 20,
+            "earned": bool(skills),
+            "label_uz": "Ko'nikmalar",
+            "label_ru": "Навыки",
+            "fix_uz": "Texnik ko'nikmalaringizni ro'yxat qilib yozing.",
+            "fix_ru": "Перечислите свои технические навыки.",
+        },
+        {
+            "code": "contact",
+            "points": 10,
+            "earned": bool(personal.get("email") and personal.get("phone")),
+            "label_uz": "Aloqa ma'lumotlari",
+            "label_ru": "Контактные данные",
+            "fix_uz": "Elektron pochta va telefon raqamini ikkalasini ham yozing.",
+            "fix_ru": "Укажите и электронную почту, и телефон.",
+        },
+        {
+            "code": "achievements",
+            "points": 10,
+            "earned": has_achievements,
+            "label_uz": "Aniq natijalar",
+            "label_ru": "Конкретные результаты",
+            "fix_uz": "Har bir ish joyida nima qilganingizni, iloji bo'lsa raqam bilan yozing.",
+            "fix_ru": "Опишите результаты по каждому месту работы, лучше с цифрами.",
+        },
+    ]
+
+
+def _calculate_ats_score(content: Dict[str, Any], job_description: Optional[str] = None) -> int:
+    """ATS compatibility score, 0-100. See _ats_breakdown for the components."""
+    return min(
+        sum(i["points"] for i in _ats_breakdown(content, job_description) if i["earned"]),
+        100,
+    )
+
+
+# A third of the resumes in production carry a summary whose claimed years of
+# experience disagree with the dates in their own experience section — in both
+# directions. Overstating is the one that costs the student: an employer who
+# reads "8 yil" above entries starting in 2021 stops trusting the whole page.
+#
+# We flag, we do not rewrite. Only the student knows whether the summary is
+# wrong or whether there is earlier work they did not list.
+_YEARS_CLAIMED = re.compile(
+    r"(\d{1,2})\s*\+?\s*(?:yil|yillik|йил|год|года|лет|years?)", re.I
+)
+_YEAR_IN_DATE = re.compile(r"(?:19|20)\d{2}")
+
+
+def _experience_conflict(content: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Years of experience the summary claims vs. what the dates support."""
+    summary = _resume_section(content, "summary", "professional_summary")
+    if isinstance(summary, dict):
+        summary = summary.get("text") or ""
+    if not isinstance(summary, str) or not summary.strip():
+        return None
+
+    claim = _YEARS_CLAIMED.search(summary)
+    if not claim:
+        return None
+
+    experience = _resume_section(content, "experience", "work_experience") or []
+    if isinstance(experience, dict):
+        experience = [experience]
+
+    years = []
+    for item in experience:
+        if not isinstance(item, dict):
+            continue
+        start = str(item.get("start_date") or "")
+        found = _YEAR_IN_DATE.search(start)
+        if found:
+            years.append(int(found.group(0)))
+    if not years:
+        return None
+
+    claimed = int(claim.group(1))
+    implied = datetime.now(timezone.utc).year - min(years)
+    # One year of slack: a resume written mid-year rounds either way.
+    if abs(implied - claimed) < 2:
+        return None
+
+    return {
+        "code": "experience_years",
+        "claimed_years": claimed,
+        "implied_years": implied,
+        "earliest_year": min(years),
+        "overstated": claimed > implied,
+    }
 
 
 def _get_ats_suggestions(content: Dict[str, Any], job_description: Optional[str]) -> List[str]:
+    """The highest-value fixes first, worded as actions.
+
+    This read the schema field names too, so it told a student with a perfectly
+    good summary to add a summary.
     """
-    Get suggestions for improving ATS compatibility.
-    """
-    suggestions = []
-    
-    if not content.get("professional_summary"):
-        suggestions.append("Add a professional summary to highlight your key qualifications")
-    
-    if not content.get("work_experience"):
-        suggestions.append("Add your work experience with specific achievements")
-    
-    work_exp = content.get("work_experience", [])
-    has_quantified = any(
-        exp.get("achievements") 
-        for exp in work_exp
-    )
-    if not has_quantified:
-        suggestions.append("Add quantified achievements (e.g., 'Increased sales by 25%')")
-    
-    skills = content.get("skills", {})
-    if not skills:
-        suggestions.append("Add a skills section with relevant keywords")
-    
-    if job_description:
-        suggestions.append("Review the job description and ensure key terms are included")
-    
+    missing = [i for i in _ats_breakdown(content, job_description) if not i["earned"]]
+    missing.sort(key=lambda i: i["points"], reverse=True)
+    suggestions = [i["fix_uz"] for i in missing[:3]]
+
+    if job_description and len(suggestions) < 3:
+        suggestions.append(
+            "E'lon matnidagi asosiy so'zlar rezyumengizda ham uchrashiga ishonch hosil qiling."
+        )
     return suggestions
