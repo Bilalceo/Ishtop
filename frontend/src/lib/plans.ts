@@ -72,7 +72,9 @@ export function getPlans(isRu: boolean): PlanCopy[] {
       features: [
         isRu ? "Все вакансии каталога" : "Katalogdagi barcha vakansiyalar",
         isRu ? "AI-резюме и экспорт в PDF" : "AI rezyume va PDF eksport",
-        isRu ? "Отклик напрямую работодателю" : "To'g'ridan-to'g'ri ish beruvchiga ariza",
+        isRu
+          ? "Отклики работодателю напрямую — без ограничения по количеству"
+          : "Ish beruvchiga to'g'ridan-to'g'ri ariza — soni cheklanmagan",
         isRu ? "AI-тренажёр собеседования" : "AI suhbat murabbiyi",
         isRu ? "Подбор вакансий по резюме" : "Rezyume bo'yicha ish tanlash",
       ],
@@ -90,9 +92,13 @@ export function getPlans(isRu: boolean): PlanCopy[] {
       priceUzs: { ...PLAN_PRICES_UZS.premium },
       features: [
         isRu ? "Всё из бесплатного тарифа" : "Bepul tarifdagi hamma narsa",
+        // The one enforced number on this page. It caps AUTO-apply only —
+        // applying by hand is not counted, and nothing in the backend limits
+        // it. Stated that way so the quota cannot be read as a cap on
+        // applying at all.
         isRu
-          ? `Авто-отклик: ${AUTO_APPLY_PER_MONTH.premium} откликов ${perMonth}`
-          : `Avto-ariza: ${perMonth} ${AUTO_APPLY_PER_MONTH.premium} ta`,
+          ? `Авто-отклик: ${AUTO_APPLY_PER_MONTH.premium} ${perMonth} (обычные отклики не расходуют лимит)`
+          : `Avto-ariza: ${perMonth} ${AUTO_APPLY_PER_MONTH.premium} ta (oddiy arizalar limitdan yechilmaydi)`,
         isRu ? "AI подбирает вакансии под резюме" : "AI rezyumega mos ishlarni tanlaydi",
         isRu ? "Предпросмотр перед отправкой" : "Yuborishdan oldin ko'rib chiqish",
         isRu

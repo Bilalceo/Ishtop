@@ -35,9 +35,6 @@ const LiveDemoSection = dynamic(
 const TrustScore = dynamic(() => import("./sections/TrustScore").then((m) => m.TrustScore), {
   ssr: true,
 });
-const Testimonials = dynamic(() => import("./sections/Testimonials").then((m) => m.Testimonials), {
-  ssr: true,
-});
 const FAQ = dynamic(() => import("./sections/FAQ").then((m) => m.FAQ), { ssr: true });
 const FinalCTA = dynamic(() => import("./sections/FinalCTA").then((m) => m.FinalCTA), { ssr: true });
 const SiteFooter = dynamic(() => import("./sections/SiteFooter").then((m) => m.SiteFooter), {
@@ -111,7 +108,12 @@ export default function LandingPageClient({ cmsPayload, cmsPayloads }: LandingPa
         <HowItWorks />
         <LiveDemoSection />
         <TrustScore />
-        <Testimonials />
+        {/* The testimonials section is gone, not restyled. It carried three
+            invented reviews attributed to named people at EPAM, Uzum and TBC
+            Bank, with invented metrics ("2 hafta — birinchi oferta", "Resume
+            score 62 → 94", "pass rate +38%"), presented as genuine. The
+            platform has never recorded a confirmed hire. When real students
+            give real quotes, this is where they go. */}
         <FAQ />
         <FinalCTA />
       </div>

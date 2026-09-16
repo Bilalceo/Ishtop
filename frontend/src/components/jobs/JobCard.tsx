@@ -8,6 +8,7 @@ import {
   BookmarkCheck,
   Zap,
   Target,
+  Shield,
   ShieldCheck,
   AlertTriangle,
   Briefcase,
@@ -156,10 +157,17 @@ export function JobCard({
                 )}
                 title={isRu ? "Оценка доверия" : "Ishonch bahosi"}
               >
-                {job.trust_score >= 50 ? (
+                {/* A shield with a tick reads as "verified". Most listings are
+                    imported from public channels and nobody has verified their
+                    employer, so the tick is reserved for an employer who
+                    actually passed verification; everyone else gets a plain
+                    shield next to the score. */}
+                {job.trust_score < 50 ? (
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                ) : job.verification_state === "approved" ? (
                   <ShieldCheck className="h-3.5 w-3.5" />
                 ) : (
-                  <AlertTriangle className="h-3.5 w-3.5" />
+                  <Shield className="h-3.5 w-3.5" />
                 )}
                 {Math.round(job.trust_score)}
               </span>

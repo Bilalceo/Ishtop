@@ -1034,10 +1034,17 @@ function SuccessScreen({
         <h2 className="font-display text-2xl font-bold text-surface-900 dark:text-white">
           {isRu ? "Заявка отправлена! 🎉" : "Ariza yuborildi! 🎉"}
         </h2>
+        {/* "muvaffaqiyatli yuborildi" implied confirmed delivery. The
+            application is recorded and the employer's account gets a
+            notification; nothing tells us they opened it. */}
         <p className="mt-2 text-surface-500">
-          {isRu ? "Ваша заявка на" : "Sizning"} <strong>{job.title}</strong>{" "}
-          {isRu ? "в" : "uchun"} <strong>{job.company?.name}</strong>{" "}
-          {isRu ? "успешно отправлена." : "muvaffaqiyatli yuborildi."}
+          <strong>{job.title}</strong>
+          {" — "}
+          <strong>{job.company?.name}</strong>
+          {". "}
+          {isRu
+            ? "Заявка сохранена, работодателю отправлено уведомление."
+            : "Ariza saqlandi, ish beruvchiga bildirishnoma yuborildi."}
         </p>
       </motion.div>
 
@@ -1053,34 +1060,40 @@ function SuccessScreen({
         </h3>
         <div className="space-y-3 text-left">
           {[
+            // Only the first step has happened. Step 2 used to be marked
+            // "current" the instant the form was submitted — saying the
+            // application was being reviewed when nobody had opened it — and
+            // step 4 promised a reply that many employers never send.
             {
               step: 1,
-              title: isRu ? "Заявка получена" : "Ariza qabul qilindi",
+              title: isRu ? "Заявка сохранена" : "Ariza saqlandi",
               desc: isRu
-                ? "Ish beruvchiga xabar berildi"
-                : "Ish beruvchiga xabar berildi",
+                ? "Работодателю отправлено уведомление"
+                : "Ish beruvchiga bildirishnoma yuborildi",
               status: "completed",
             },
             {
               step: 2,
-              title: isRu ? "На проверке" : "Ko'rib chiqilmoqda",
+              title: isRu ? "Работодатель открывает" : "Ish beruvchi ko'radi",
               desc: isRu
-                ? "Ваша заявка рассматривается"
-                : "Arizangiz ko'rib chiqilmoqda",
-              status: "current",
+                ? "Статус изменится, когда работодатель ответит"
+                : "Ish beruvchi javob berganda holat o'zgaradi",
+              status: "pending",
             },
             {
               step: 3,
               title: isRu ? "Собеседование" : "Intervyu",
               desc: isRu
-                ? "Вас могут пригласить на интервью"
-                : "Siz intervyuga taklif qilinishingiz mumkin",
+                ? "Если подойдёте — пригласят на интервью"
+                : "Mos kelsangiz, intervyuga taklif qilishadi",
               status: "pending",
             },
             {
               step: 4,
               title: isRu ? "Решение" : "Yakuniy qaror",
-              desc: isRu ? "Вы получите ответ" : "Sizga javob yuboriladi",
+              desc: isRu
+                ? "Ответ появится здесь. Не все работодатели отвечают."
+                : "Javob shu yerda ko'rinadi. Hamma ish beruvchi javob bermaydi.",
               status: "pending",
             },
           ].map((item) => (

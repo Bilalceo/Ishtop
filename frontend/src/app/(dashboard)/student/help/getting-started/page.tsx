@@ -56,9 +56,8 @@ const uz = (): Step[] => [
     body: [
       "Bu eng muhim qadam. IshTop vositachi emas: \"Ariza berish\" tugmasi sizga ish beruvchining telefon raqami yoki Telegram username'ini ochadi.",
       "Ya'ni siz o'zingiz yozasiz yoki qo'ng'iroq qilasiz. Tugmani bosishning o'zi hech kimga xabar yubormaydi.",
-      "Yozganingizdan keyin arizani \"Arizalarim\" sahifasida belgilab qo'ying — shunda kimga murojaat qilganingizni yo'qotmaysiz.",
+      "Kimga yozganingizni o'zingiz yozib qo'ying: bunday e'lonlar \"Arizalarim\" ro'yxatiga tushmaydi, chunki yozishma bizdan tashqarida bo'ladi.",
     ],
-    action: { href: "/student/applications", label: "Arizalarim" },
   },
   {
     icon: MessageSquare,
@@ -106,9 +105,8 @@ const ru = (): Step[] => [
     body: [
       "Это главный шаг. IshTop не посредник: кнопка «Откликнуться» открывает телефон или Telegram работодателя.",
       "То есть пишете или звоните вы сами. Само нажатие кнопки никому ничего не отправляет.",
-      "После обращения отметьте отклик на странице «Мои отклики», чтобы не потерять, кому вы уже написали.",
+      "Запишите себе, кому написали: такие объявления не попадают в «Мои отклики», потому что переписка идёт вне платформы.",
     ],
-    action: { href: "/student/applications", label: "Мои отклики" },
   },
   {
     icon: MessageSquare,

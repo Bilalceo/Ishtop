@@ -29,10 +29,32 @@ const STATS: Record<Locale, { value: string; label: string; icon: typeof Clock }
   ],
 };
 
-const LOGOS = [
-  "EPAM", "Uzum", "TBC Bank", "Click", "Payme", "Beeline",
-  "Humans", "Korzinka", "MyTaxi", "Anorbank", "Kapital",
-];
+// This was a marquee of real, named companies — EPAM, Uzum, TBC Bank, Click,
+// Payme, Beeline, Korzinka, Anorbank — under the heading "Kompaniyalar IshTop
+// orqali yollaydi". None of them hire through IshTop: the platform holds five
+// company accounts and has never recorded a confirmed hire. Naming real brands
+// to imply a relationship they have not agreed to is the most serious claim
+// the site was making, and it is not ours to make.
+//
+// Replaced with what the catalogue actually contains, which is both true and
+// more useful to a job seeker.
+const FIELDS: Record<Locale, string[]> = {
+  uz: [
+    "IT va dasturlash", "Savdo va sotuv", "Buxgalteriya", "Ta'lim",
+    "Tibbiyot", "Umumiy ovqatlanish", "Logistika", "Dizayn",
+    "Marketing", "Ishchi kasblar", "Xizmat ko'rsatish",
+  ],
+  ru: [
+    "IT и разработка", "Продажи", "Бухгалтерия", "Образование",
+    "Медицина", "Общепит", "Логистика", "Дизайн",
+    "Маркетинг", "Рабочие профессии", "Сервис",
+  ],
+  en: [
+    "IT & development", "Sales", "Accounting", "Education",
+    "Healthcare", "Food service", "Logistics", "Design",
+    "Marketing", "Skilled trades", "Services",
+  ],
+};
 
 // Pastel icon tiles cycle through the silver palette
 const TILE_STYLES = [
@@ -49,7 +71,7 @@ export function TrustLayer() {
     ? (locale as Locale)
     : "uz";
   const stats = STATS[L];
-  const logos = [...LOGOS, ...LOGOS];
+  const fields = [...FIELDS[L], ...FIELDS[L]];
 
   return (
     <section className="silver-ground section-y" aria-labelledby="trust-heading">
@@ -90,17 +112,17 @@ export function TrustLayer() {
         <Reveal className="mt-16" delay={0.1}>
           <p className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-[#8e8e96]">
             {L === "ru"
-              ? "Команды нанимают через IshTop"
+              ? "Направления в каталоге вакансий"
               : L === "en"
-              ? "Teams hire through IshTop"
-              : "Kompaniyalar IshTop orqali yollaydi"}
+              ? "Fields in the job catalogue"
+              : "Vakansiya katalogidagi sohalar"}
           </p>
           <div className="marquee mt-6 overflow-hidden">
             <div
               className="flex w-max gap-10"
               style={{ animation: reduce ? undefined : "marqueeX 36s linear infinite" }}
             >
-              {logos.map((name, i) => (
+              {fields.map((name, i) => (
                 <div
                   key={`${name}-${i}`}
                   className="grid h-12 w-32 shrink-0 place-items-center rounded-2xl bg-white px-5 text-sm font-semibold tracking-wide text-[#8e8e96] shadow-[0_2px_8px_-2px_rgba(24,24,27,0.08)]"

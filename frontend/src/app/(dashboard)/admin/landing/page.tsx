@@ -105,9 +105,10 @@ function buildDefaultPayload(locale: Locale): LandingPayload {
           notIncluded: [],
         },
       ],
-      testimonials: [
-        { name: "Aziz Karimov", role: "Software Developer", company: "EPAM", quote: "Отличная платформа!", rating: 5 },
-      ],
+      // Empty by default. This held a five-star review signed by a named
+      // person at a named company that nobody ever wrote — one Save from
+      // being published as genuine.
+      testimonials: [],
       cta: {
         title: "Готовы ускорить карьеру?",
         subtitle: "Присоединяйтесь к тысячам специалистов на IshTop.",
@@ -168,9 +169,10 @@ function buildDefaultPayload(locale: Locale): LandingPayload {
         notIncluded: [],
       },
     ],
-    testimonials: [
-      { name: "Aziz Karimov", role: "Software Developer", company: "EPAM", quote: "Ajoyib platforma!", rating: 5 },
-    ],
+    // Empty by default. This held a five-star review signed by a named
+    // person at a named company that nobody ever wrote — one Save from
+    // being published as genuine.
+    testimonials: [],
     cta: {
       title: "Karyerangizni oshirishga tayyormisiz?",
       subtitle: "IshTop bilan orzuingizdagi ishga tezroq erishing.",

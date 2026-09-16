@@ -36,7 +36,12 @@ const statusConfig: Record<string, { label: string; color: string; icon: any; de
     label: "Kutilmoqda",
     color: "bg-yellow-100 text-yellow-700",
     icon: Clock,
-    description: "Arizangiz kompaniyaga yuborildi. Javob kutilmoqda.",
+    // Said "kompaniyaga yuborildi" — a delivery claim we cannot make. What we
+    // know: the application is recorded, and a notification was created in the
+    // employer's account. Whether anyone opened it is not tracked; reviewed_at
+    // is only set when the employer changes the status themselves.
+    description:
+      "Arizangiz qayd etildi va ish beruvchiga bildirishnoma yuborildi. Ish beruvchi hali javob bermadi.",
   },
   reviewing: {
     label: "Ko'rib chiqilmoqda",

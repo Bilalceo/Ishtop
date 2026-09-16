@@ -100,7 +100,9 @@ export default function CompanyClient() {
             <Reveal className="sm:col-span-3 sm:row-span-2">
               <div className="card-silver h-full !bg-gradient-to-br !from-[#d7e7ff] !via-[#e0e2ff] !to-[#e3ddff] p-7">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#5470b8]">
-                  {ru ? "Проверенные кандидаты" : "Tasdiqlangan nomzodlar"}
+                  {/* Nothing verifies a student: the profile and resume are
+                      self-reported. */}
+                  {ru ? "Студенты на платформе" : "Platformadagi talabalar"}
                 </span>
                 {/* Was "10K+". The database holds 188 students. Telling an
                     employer we have ten thousand is the one lie they can check
@@ -109,7 +111,7 @@ export default function CompanyClient() {
                   180+
                 </p>
                 <p className="mt-4 max-w-sm text-sm text-[#4a5a85]">
-                  {ru ? "Активные студенты, навыки проверены AI. От junior до mid-level." : "Hozir faol talaba, ko'nikmalari AI tomonidan tekshirilgan. Junior'lardan mid-level'gacha."}
+                  {ru ? "Студенты и выпускники с AI-резюме. Junior и начинающие специалисты." : "AI rezyumega ega talaba va bitiruvchilar. Junior va boshlovchi mutaxassislar."}
                 </p>
                 <div className="mt-8 flex items-center gap-2" aria-hidden>
                   <div className="flex -space-x-2">

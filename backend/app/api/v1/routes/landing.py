@@ -55,16 +55,48 @@ def live_stats(db: Session, locale: Locale) -> list[Dict[str, Any]]:
 
     if locale == "ru":
         return [
-            {"value": rounded(jobs), "label": "Открытых вакансий с контактом"},
-            {"value": rounded(students), "label": "Студентов на платформе"},
-            {"value": rounded(resumes), "label": "Созданных AI-резюме"},
-            {"value": "60 сек", "label": "От AI-резюме до отклика"},
+            {
+                "value": rounded(jobs),
+                "label": "Открытых вакансий с контактом",
+                "note": "Активные объявления, у которых в тексте есть телефон или Telegram работодателя. Считается в базе при каждом запросе.",
+            },
+            {
+                "value": rounded(students),
+                "label": "Зарегистрированных студентов",
+                "note": "Аккаунты с ролью «студент». Не показатель активности и не проверенные профили.",
+            },
+            {
+                "value": rounded(resumes),
+                "label": "Созданных резюме",
+                "note": "Резюме, созданные пользователями, включая черновики.",
+            },
+            {
+                "value": "60 сек",
+                "label": "От AI-резюме до отклика",
+                "note": "Время работы AI-генератора, а не срок поиска работы.",
+            },
         ]
     return [
-        {"value": rounded(jobs), "label": "Kontakti bor ochiq vakansiya"},
-        {"value": rounded(students), "label": "Platformadagi talaba"},
-        {"value": rounded(resumes), "label": "Yaratilgan AI rezyume"},
-        {"value": "60 soniya", "label": "AI rezyumedan arizagacha"},
+        {
+            "value": rounded(jobs),
+            "label": "Kontakti bor ochiq vakansiya",
+            "note": "Matnida ish beruvchining telefoni yoki Telegram useri bor faol e'lonlar. Har so'rovda bazadan sanaladi.",
+        },
+        {
+            "value": rounded(students),
+            "label": "Ro'yxatdan o'tgan talaba",
+            "note": "Roli «talaba» bo'lgan hisoblar. Bu faollik ko'rsatkichi emas va profillar tekshirilgan degani emas.",
+        },
+        {
+            "value": rounded(resumes),
+            "label": "Yaratilgan rezyume",
+            "note": "Foydalanuvchilar yaratgan rezyumelar, qoralamalar ham kiradi.",
+        },
+        {
+            "value": "60 soniya",
+            "label": "AI rezyumedan arizagacha",
+            "note": "AI generatorining ishlash vaqti, ish topish muddati emas.",
+        },
     ]
 
 

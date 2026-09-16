@@ -201,7 +201,7 @@ export function scoreJob(job: Job, selected: string[], locale: "uz" | "ru" = "uz
       type: "trust",
       text: ru
         ? `Trust Score ${job.trustScore} — проверенная компания`
-        : `Trust Score ${job.trustScore} — tasdiqlangan kompaniya`,
+        : `Trust Score ${job.trustScore} — ishonch bahosi yuqori`,
     });
   }
 
