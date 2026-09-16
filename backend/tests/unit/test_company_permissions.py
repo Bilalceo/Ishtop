@@ -69,3 +69,33 @@ class TestOwnership:
                 continue
             body = _source(fn)
             assert "_company_scoped_applications(db, company.id" in body, fn_name
+
+
+# =============================================================================
+# ANALYTICS HONESTY
+# =============================================================================
+
+class TestResponseRate:
+    """A company's own numbers must reflect what the company actually did."""
+
+    def test_a_candidate_withdrawing_is_not_an_employer_response(self):
+        src = _source(routes.company_dashboard_analytics)
+        assert "EMPLOYER_RESPONSES" in src
+        # Withdrawn is excluded from the denominator, not counted as answered.
+        assert "ApplicationStatus.WITHDRAWN.value" in src
+        assert "answerable" in src
+
+    def test_first_response_time_does_not_fall_back_to_updated_at(self):
+        """updated_at moves on any write, including maintenance, and would
+        read as a very fast reply."""
+        src = _source(routes.company_dashboard_analytics)
+        assert "app.reviewed_at or app.interview_at or app.decided_at\n" in src
+        assert "or app.updated_at" not in src.split("first_response_hours")[1][:400]
+
+    def test_only_statuses_an_employer_sets_count_as_a_response(self):
+        src = _source(routes.company_dashboard_analytics)
+        block = src.split("EMPLOYER_RESPONSES")[1][:400]
+        for status in ("REVIEWING", "SHORTLISTED", "INTERVIEW", "ACCEPTED", "HIRED", "REJECTED"):
+            assert status in block, status
+        # Pending is not a response, and neither is withdrawn.
+        assert "PENDING" not in block

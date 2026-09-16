@@ -1778,14 +1778,34 @@ def company_dashboard_analytics(
     month_start = datetime.combine(today.replace(day=1), datetime.min.time(), tzinfo=timezone.utc)
     applications_this_month = sum(1 for app in applications_all if app.applied_at and to_aware(app.applied_at) >= month_start)
 
-    responded = [app for app in applications_in_window if app.status != ApplicationStatus.PENDING.value]
-    response_rate_pct = _safe_pct(len(responded), len(applications_in_window))
+    # "Responded" used to mean any status other than pending, so a candidate
+    # withdrawing counted as the employer answering, and the sixteen
+    # applications closed by a maintenance write counted too. Only statuses an
+    # employer sets themselves are a response, and a withdrawn application is
+    # excluded from the denominator entirely — the employer was never given
+    # the chance to answer it.
+    EMPLOYER_RESPONSES = {
+        ApplicationStatus.REVIEWING.value,
+        ApplicationStatus.SHORTLISTED.value,
+        ApplicationStatus.INTERVIEW.value,
+        ApplicationStatus.ACCEPTED.value,
+        ApplicationStatus.HIRED.value,
+        ApplicationStatus.REJECTED.value,
+    }
+    answerable = [
+        app for app in applications_in_window
+        if app.status != ApplicationStatus.WITHDRAWN.value
+    ]
+    responded = [app for app in answerable if app.status in EMPLOYER_RESPONSES]
+    response_rate_pct = _safe_pct(len(responded), len(answerable))
 
     first_response_hours: List[float] = []
-    for app in applications_in_window:
-        if app.status == ApplicationStatus.PENDING.value or not app.applied_at:
+    for app in responded:
+        if not app.applied_at:
             continue
-        first_action_at = app.reviewed_at or app.interview_at or app.decided_at or app.updated_at
+        # No updated_at fallback: it moves on every write, including
+        # maintenance, and would read as a very fast employer response.
+        first_action_at = app.reviewed_at or app.interview_at or app.decided_at
         if not first_action_at:
             continue
         delta = first_action_at - app.applied_at
