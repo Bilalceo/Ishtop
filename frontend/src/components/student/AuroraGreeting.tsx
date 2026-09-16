@@ -8,9 +8,14 @@
  */
 
 import { type ReactNode } from "react";
+import {
+  PROFILE_FIELD_LABELS,
+  type ProfileFieldKey,
+} from "@/lib/profileCompletion";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface AuroraGreetingProps {
   eyebrow: string;
@@ -18,6 +23,8 @@ interface AuroraGreetingProps {
   question: string;
   subtitle: string;
   profileCompletion: number;
+  /** Which fields are still empty, so the ring can name the next step. */
+  missingProfileFields?: ProfileFieldKey[];
   ctaHref: string;
   ctaLabel: string;
   /** Optional secondary action shown next to the CTA */
@@ -30,10 +37,13 @@ export function AuroraGreeting({
   question,
   subtitle,
   profileCompletion,
+  missingProfileFields = [],
   ctaHref,
   ctaLabel,
   secondaryAction,
 }: AuroraGreetingProps) {
+  const { locale } = useTranslation();
+  const isRu = locale === "ru";
   const reduce = useReducedMotion();
 
   const radius = 26;
@@ -158,6 +168,20 @@ export function AuroraGreeting({
             </div>
           </motion.div>
         </div>
+
+        {/* The percentage on its own is a score, not a next step. The card
+            that used to carry this line only renders when there is no top
+            match to show, so on most accounts the student saw "60%" and
+            nothing about which 40% was missing. */}
+        {missingProfileFields.length > 0 && (
+          <p className="mt-4 text-sm text-surface-600 dark:text-white/70">
+            {isRu ? "Осталось заполнить: " : "To'ldirish kerak: "}
+            {missingProfileFields
+              .slice(0, 3)
+              .map((f) => PROFILE_FIELD_LABELS[f]?.[isRu ? 1 : 0] ?? f)
+              .join(", ")}
+          </p>
+        )}
       </div>
     </div>
   );

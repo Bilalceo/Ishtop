@@ -70,6 +70,22 @@ describe("application statuses", () => {
     expect(pendingText).toMatch(/bildirishnoma yuborildi/);
   });
 
+  it("claims a review only when the employer set a status themselves", () => {
+    // reviewed_at equals updated_at to the microsecond on all 16 withdrawn
+    // applications in production: a maintenance write, not an employer.
+    const employerActed = new Set([
+      "reviewing", "shortlisted", "interview", "accepted", "hired", "rejected",
+    ]);
+    const showsReviewed = (status: string, reviewedAt: string | null) =>
+      Boolean(reviewedAt) && employerActed.has(status);
+
+    expect(showsReviewed("withdrawn", "2026-09-11T14:32:31Z")).toBe(false);
+    expect(showsReviewed("pending", "2026-09-11T14:32:31Z")).toBe(false);
+    expect(showsReviewed("reviewing", "2026-09-11T14:32:31Z")).toBe(true);
+    expect(showsReviewed("interview", "2026-09-11T14:32:31Z")).toBe(true);
+    expect(showsReviewed("reviewing", null)).toBe(false);
+  });
+
   it("shows a progress bar only while the application is moving", () => {
     const offTrack = new Set(["withdrawn", "rejected"]);
     const showsProgress = (s: string) => !offTrack.has(s);

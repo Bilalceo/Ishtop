@@ -341,6 +341,7 @@ export default function StudentDashboardPage() {
           question={isRu ? "что делаем дальше?" : "keyingi qadam tayyormi?"}
           subtitle={t("dashboard.subtitle")}
           profileCompletion={profileCompletion}
+          missingProfileFields={missingProfileFields}
           ctaHref="/student/resumes/create-ai"
           ctaLabel={t("dashboard.sidebar.createAIResume")}
         />

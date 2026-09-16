@@ -97,6 +97,16 @@ const statusConfig: Record<string, { label: string; color: string; icon: any; de
 /** Statuses that are NOT part of the pending -> hired progression. */
 const OFF_TRACK_STATUSES = new Set(["withdrawn", "rejected"]);
 
+/** Statuses that only an employer can set — the evidence that they looked. */
+const EMPLOYER_ACTED = new Set([
+  "reviewing",
+  "shortlisted",
+  "interview",
+  "accepted",
+  "hired",
+  "rejected",
+]);
+
 const statusSteps = ["pending", "reviewing", "interview", "accepted"];
 
 /** Never fall back to "pending": that invents a reply the student is owed. */
@@ -328,7 +338,12 @@ export default function ApplicationDetailPage() {
             <span className="text-surface-500">Ariza berilgan sana</span>
             <span className="font-medium">{formatDate(application.applied_at)}</span>
           </div>
-          {application.reviewed_at && (
+          {/* reviewed_at is only evidence of an employer looking when the
+              status says they acted. On all 16 withdrawn applications in
+              production it equals updated_at to the microsecond — it was set
+              by a maintenance write, and showing it told the student their
+              application had been reviewed when it had not. */}
+          {application.reviewed_at && EMPLOYER_ACTED.has(application.status) && (
             <div className="flex justify-between">
               <span className="text-surface-500">Ko'rib chiqilgan</span>
               <span className="font-medium">{formatDate(application.reviewed_at)}</span>
