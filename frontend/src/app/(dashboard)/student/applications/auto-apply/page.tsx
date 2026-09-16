@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { experienceLabel, jobTypeLabel } from "@/lib/jobLabels";
 import Link from "next/link";
 import { ArrowLeft, Briefcase, CheckCircle2, Loader2, MapPin, ShieldAlert, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,21 +18,21 @@ import { getErrorMessage } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 import type { AutoApplyResponse, ExperienceLevel, JobType, Resume } from "@/types/api";
 
-const jobTypeOptions: Array<{ value: JobType }> = [
-  { value: "full_time" },
-  { value: "part_time" },
-  { value: "remote" },
-  { value: "hybrid" },
-  { value: "contract" },
-];
+// Every member of the union, so a student cannot filter the catalogue for a
+// kind of job that auto-apply refuses to offer. "Amaliyot" was the case that
+// mattered: the catalogue has internship listings and a filter for them, and
+// this screen had no way to ask for one.
+// Every member of the union, so a student cannot filter the catalogue for a
+// kind of job that auto-apply refuses to offer. "Amaliyot" was the case that
+// mattered: the catalogue has internship listings and a filter for them, and
+// this screen had no way to ask for one.
+const jobTypeOptions: Array<{ value: JobType }> = (
+  ["full_time", "part_time", "internship", "remote", "hybrid", "contract"] as const
+).map((value) => ({ value }));
 
-const experienceOptions: Array<{ value: ExperienceLevel }> = [
-  { value: "junior" },
-  { value: "mid" },
-  { value: "senior" },
-  { value: "lead" },
-  { value: "executive" },
-];
+const experienceOptions: Array<{ value: ExperienceLevel }> = (
+  ["intern", "junior", "mid", "senior", "lead", "executive"] as const
+).map((value) => ({ value }));
 
 function toggleValue<T extends string>(values: T[], value: T) {
   return values.includes(value)
@@ -165,42 +166,13 @@ export default function AutoApplyPage() {
   const [includeCoverLetter, setIncludeCoverLetter] = useState(true);
   const [result, setResult] = useState<AutoApplyResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const getJobTypeLabel = (value: JobType) => {
-    if (isRu) {
-      return {
-        full_time: "Полная занятость",
-        part_time: "Частичная занятость",
-        remote: "Удаленно",
-        hybrid: "Гибрид",
-        contract: "Контракт",
-      }[value];
-    }
-    return {
-      full_time: "To'liq stavka",
-      part_time: "Yarim stavka",
-      remote: "Masofaviy",
-      hybrid: "Gibrid",
-      contract: "Shartnoma",
-    }[value];
-  };
-  const getExperienceLabel = (value: ExperienceLevel) => {
-    if (isRu) {
-      return {
-        junior: "Начинающий",
-        mid: "Средний",
-        senior: "Старший",
-        lead: "Руководитель",
-        executive: "Директор",
-      }[value];
-    }
-    return {
-      junior: "Boshlovchi",
-      mid: "O'rta",
-      senior: "Katta",
-      lead: "Rahbar",
-      executive: "Rahbar",
-    }[value];
-  };
+  // Labels come from the shared helper rather than a second copy kept here.
+  // The copy is what drifted: it had no "Amaliyot" at all, and it printed
+  // "Rahbar" for both lead and executive, so the list showed the same word
+  // twice and hid two real levels.
+  const getJobTypeLabel = (value: JobType) => jobTypeLabel(value, isRu);
+  const getExperienceLabel = (value: ExperienceLevel) =>
+    experienceLabel(value, isRu);
 
   useEffect(() => {
     fetchResumes();

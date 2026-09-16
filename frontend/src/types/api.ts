@@ -199,8 +199,24 @@ export interface ResumeGenerateRequest {
 // JOB TYPES
 // =============================================================================
 
-export type JobType = "full_time" | "part_time" | "remote" | "hybrid" | "contract";
-export type ExperienceLevel = "junior" | "mid" | "senior" | "lead" | "executive";
+// Mirrors JobType / ExperienceLevel in backend/app/models/job.py. Both were
+// missing a member the backend stores and the catalogue displays: an
+// internship could be filtered for in the job list but never selected in
+// auto-apply, because this union did not admit it existed.
+export type JobType =
+  | "full_time"
+  | "part_time"
+  | "remote"
+  | "hybrid"
+  | "contract"
+  | "internship";
+export type ExperienceLevel =
+  | "intern"
+  | "junior"
+  | "mid"
+  | "senior"
+  | "lead"
+  | "executive";
 export type JobStatus = "draft" | "active" | "paused" | "closed" | "filled";
 
 export interface JobRequirements {

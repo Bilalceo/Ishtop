@@ -14,8 +14,10 @@ function docsItems(isRu: boolean) {
       desc: isRu
         ? "Как создать резюме и откликнуться на вакансии."
         : "Rezyume yaratish va vakansiyaga ariza yuborish bo'yicha qisqa yo'riqnoma.",
-      href: "/student/resumes",
-      label: isRu ? "Открыть" : "Ochish",
+      // Was /student/resumes — a list of resumes, for a card describing a
+      // step-by-step guide. The guide now exists.
+      href: "/student/help/getting-started",
+      label: isRu ? "Читать" : "O'qish",
     },
     {
       icon: FileText,

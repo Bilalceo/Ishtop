@@ -489,16 +489,21 @@ export default function StudentDashboardPage() {
       </div>
 
       {/* ===== Pipeline timeline ===== */}
-      <motion.section variants={item} aria-label="Application pipeline">
+      <motion.section
+        variants={item}
+        aria-label={locale === "ru" ? "Ход ваших откликов" : "Arizalaringiz yo'li"}
+      >
         <Card className="card-aurora p-6">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-surface-900 dark:text-white">
                 <TrendingUp className="h-5 w-5 text-brand-600 dark:text-brand-300" />
-                Application pipeline
+                {locale === "ru" ? "Ход ваших откликов" : "Arizalaringiz yo'li"}
               </h2>
               <p className="text-sm text-surface-500 dark:text-white/60">
-                {pipelineTotal} ta jami ariza · realtime status
+                {locale === "ru"
+                  ? `Всего откликов: ${pipelineTotal}`
+                  : `Jami ${pipelineTotal} ta ariza`}
               </p>
             </div>
             <Link href="/student/applications" className="focus-ring rounded-full text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">
@@ -1034,7 +1039,7 @@ function RecCard({
           <div className={`shrink-0 rounded-xl px-2.5 py-1.5 text-center ${tone}`}>
             <span className="block text-base font-bold leading-none">{score}%</span>
             <span className="mt-0.5 block text-[10px] font-semibold uppercase tracking-wider opacity-80">
-              match
+              {locale === "ru" ? "совпад." : "moslik"}
             </span>
           </div>
         </div>
@@ -1063,7 +1068,7 @@ function RecCard({
           aria-controls={`rec-reasons-${rec.job.id}`}
           className="focus-ring inline-flex items-center gap-1 rounded-full text-xs font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-300 dark:hover:text-brand-200"
         >
-          Nega?
+          {locale === "ru" ? "Почему?" : "Nega?"}
           <ChevronRight
             className={`h-3 w-3 transition-transform ${expanded ? "rotate-90" : ""}`}
             aria-hidden
@@ -1086,7 +1091,8 @@ function RecCard({
                 {matches.length > 0 && (
                   <div>
                     <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-300">
-                      <CheckCircle2 className="h-3 w-3" aria-hidden /> Sizning kuchli tomonlaringiz
+                      <CheckCircle2 className="h-3 w-3" aria-hidden />{" "}
+                      {locale === "ru" ? "Ваши сильные стороны" : "Sizning kuchli tomonlaringiz"}
                     </p>
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
                       {matches.slice(0, 6).map((skill: string) => (
@@ -1111,7 +1117,8 @@ function RecCard({
                 {gaps && gaps.length > 0 && (
                   <div>
                     <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-300">
-                      <AlertCircle className="h-3 w-3" aria-hidden /> O&apos;rganish kerak
+                      <AlertCircle className="h-3 w-3" aria-hidden />{" "}
+                      {locale === "ru" ? "Нужно изучить" : "O'rganish kerak"}
                     </p>
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
                       {gaps.slice(0, 4).map((skill: string) => (
