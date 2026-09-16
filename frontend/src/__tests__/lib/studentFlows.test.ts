@@ -230,6 +230,20 @@ describe("search empty state", () => {
     expect(neither.offersClearFilters).toBe(false);
   });
 
+  it("does not call a pristine filter set active", () => {
+    // A duplicated SALARY_MAX (50M here vs the slider's real 30M) made
+    // `salaryRange[1] < SALARY_MAX` true on untouched filters, so the empty
+    // state claimed filters were selected and offered to clear them.
+    const e = emptyState("qa", noFilters, "all");
+    expect(e.offersClearFilters).toBe(false);
+    expect(e.offersClearSearch).toBe(true);
+  });
+
+  it("uses the same salary ceiling as the slider the student moves", () => {
+    expect(noFilters.salaryRange[1]).toBe(SALARY_MAX);
+    expect(narrowingOf("", noFilters).hasFilters).toBe(false);
+  });
+
   it("treats a narrowed salary range as an active filter", () => {
     const e = emptyState("", { ...noFilters, salaryRange: [5_000_000, SALARY_MAX] }, "matched");
     expect(e.blamesResume).toBe(false);

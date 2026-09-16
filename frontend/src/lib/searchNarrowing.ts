@@ -7,7 +7,13 @@
  * share one definition.
  */
 
-export const SALARY_MAX = 50_000_000;
+// Re-exported, never redeclared. A second copy of this constant is exactly
+// what broke it: the slider's real ceiling is 30_000_000, a duplicate here
+// said 50_000_000, and so `salaryRange[1] < SALARY_MAX` was true on a
+// pristine filter set — the empty state told the student filters were
+// selected when none were, and offered to clear them.
+export { SALARY_MAX } from "@/components/jobs/SalarySlider";
+import { SALARY_MAX } from "@/components/jobs/SalarySlider";
 
 export interface JobFilters {
   locations: string[];
