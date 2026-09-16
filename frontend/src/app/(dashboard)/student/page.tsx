@@ -991,6 +991,13 @@ function RecCard({
   const hasSalary = rec.job.salary_min || rec.job.salary_max;
   const matches = rec.skill_matches;
   const gaps = rec.missing_skills;
+  // How much of what the listing asks for the resume actually covers. Only
+  // meaningful when the listing states requirements at all — a job with none
+  // would otherwise read as "0 of 0 matched".
+  const coverage =
+    matches.length + gaps.length > 0
+      ? { met: matches.length, total: matches.length + gaps.length }
+      : null;
 
   return (
     <motion.li
@@ -1120,13 +1127,31 @@ function RecCard({
                   </div>
                 )}
 
-                {/* Trust signal */}
-                <div className="flex items-center gap-2 rounded-lg bg-cyan-500/10 px-2.5 py-1.5 text-xs text-cyan-700 dark:text-cyan-300">
-                  <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
-                  {locale === "ru"
-                    ? "Компания проверена · Высокий рейтинг доверия"
-                    : "Kompaniya tasdiqlangan · Ishonch reytingi yuqori"}
-                </div>
+                {/* Requirement coverage — the actual answer to "why me?".
+                    This block used to assert "company verified · high trust
+                    rating" for every listing, hardcoded: it appeared above
+                    employers scoring 71 and above employers never checked at
+                    all, and it answered a question about the candidate's fit
+                    with a claim about the company. */}
+                {coverage && (
+                  <div className="flex items-center gap-2 rounded-lg bg-brand-500/10 px-2.5 py-1.5 text-xs text-brand-700 dark:text-brand-300">
+                    <Target className="h-3.5 w-3.5" aria-hidden />
+                    {locale === "ru"
+                      ? `Совпало требований: ${coverage.met} из ${coverage.total}`
+                      : `Talablardan ${coverage.met} tasi mos keldi (jami ${coverage.total})`}
+                  </div>
+                )}
+
+                {/* Company trust, kept separate from fit and shown as the
+                    score it actually is. Absent when we have not scored it. */}
+                {typeof rec.job.trust_score === "number" && (
+                  <div className="flex items-center gap-2 rounded-lg bg-cyan-500/10 px-2.5 py-1.5 text-xs text-cyan-700 dark:text-cyan-300">
+                    <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
+                    {locale === "ru"
+                      ? `Рейтинг доверия компании: ${Math.round(rec.job.trust_score)} из 100`
+                      : `Kompaniyaning ishonch reytingi: ${Math.round(rec.job.trust_score)} / 100`}
+                  </div>
+                )}
 
                 <Link
                   href={jobUrl}
