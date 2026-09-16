@@ -11,6 +11,7 @@
  */
 
 import { create } from "zustand";
+import { rememberSessionEstablished } from "@/lib/sessionHistory";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import type { User } from "@/types/api";
@@ -127,6 +128,10 @@ function applyAuthResponse(
     state.isAuthenticated = !!user;
     state.isLoading = false;
   });
+
+  // Remembered so that an expired session can be told apart from a guest.
+  // logout() must not clear this — see src/lib/sessionHistory.ts.
+  if (user) rememberSessionEstablished();
 
   return { user: sanitizeUserForClient(user) };
 }

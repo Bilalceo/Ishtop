@@ -10,6 +10,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo } from "react";
+import { hasEverHadSession } from "@/lib/sessionHistory";
 import { useRouter } from "next/navigation";
 import type { User } from "@/types/api";
 import { useAuthStore } from "@/store/authStore";
@@ -37,17 +38,12 @@ export function useRequireAuth(requiredRole?: "student" | "company" | "admin") {
     if (!hasHydrated) return;
     if (!isAuthenticated) {
       // A guest who has never signed in is not someone whose session expired.
-      // Telling them it did makes them hunt for an account they never had.
-      // A persisted user record means this browser did have a session once.
-      let hadSession = false;
-      try {
-        hadSession = Boolean(
-          JSON.parse(window.localStorage.getItem("auth-storage") ?? "{}")?.state?.user
-        );
-      } catch {
-        hadSession = false;
-      }
-      router.replace(hadSession ? "/login?session_expired=true" : "/login");
+      // Reading the persisted user does NOT work here: logout() nulls it
+      // before this guard runs, so an expired session looked like a guest and
+      // got no explanation at all. A durable marker survives logout.
+      router.replace(
+        hasEverHadSession() ? "/login?session_expired=true" : "/login"
+      );
       return;
     }
     if (requiredRole && user?.role && user.role !== requiredRole) {
