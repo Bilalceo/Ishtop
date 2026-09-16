@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { AUTO_APPLY_PER_MONTH } from "@/lib/plans";
 import { Plus, RefreshCw, Save, Trash2 } from "lucide-react";
 import { adminApi, getErrorMessage } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -69,22 +70,26 @@ function buildDefaultPayload(locale: Locale): LandingPayload {
         { title: "Найдите вакансии", description: "Получайте релевантные предложения." },
         { title: "Устройтесь на работу", description: "Подавайте заявки уверенно." },
       ],
+      // Defaults an admin can publish straight to the public landing page, so
+      // they have to be the same tiers and the same enforced limits as
+      // /plans, /pricing and checkout. They previously offered a "Pro" tier at
+      // $4 — a fourth price for a product sold at 25 000 so'm.
       pricing: [
         {
           name: "Бесплатно",
           price: "0",
           description: "Для старта",
           cta: "Начать",
-          features: ["1 AI-резюме", "Базовый поиск", "5 откликов/мес", "Email поддержка"],
-          notIncluded: ["Безлимит AI", "Авто-отклики", "Приоритетная поддержка"],
+          features: ["Весь каталог вакансий", "AI-резюме и PDF", "Тренажёр собеседования", "Отклик работодателю напрямую"],
+          notIncluded: ["Авто-отклик"],
         },
         {
-          name: "Pro",
-          price: "4",
+          name: "Premium",
+          price: "25000",
           description: "Для активных соискателей",
-          cta: "Пробный Pro",
-          features: ["Безлимит AI", "Расширенный матчинг", "50 откликов/мес", "Авто-отклики"],
-          notIncluded: ["Кастом интеграции"],
+          cta: "Перейти на Premium",
+          features: [`Авто-отклик: ${AUTO_APPLY_PER_MONTH.premium} в месяц`, "AI подбирает вакансии под резюме", "Предпросмотр перед отправкой", "Всё из бесплатного тарифа"],
+          notIncluded: [],
           popular: true,
         },
         {
@@ -138,16 +143,16 @@ function buildDefaultPayload(locale: Locale): LandingPayload {
         price: "0",
         description: "Boshlash uchun",
         cta: "Boshlash",
-        features: ["1 ta AI rezyume", "Oddiy qidiruv", "5 ta ariza/oy", "Email yordam"],
-        notIncluded: ["Cheksiz AI", "Avto ariza", "Ustuvor yordam"],
+        features: ["Butun vakansiya katalogi", "AI rezyume va PDF", "Suhbat murabbiyi", "Ish beruvchiga to'g'ridan-to'g'ri ariza"],
+        notIncluded: ["Avto-ariza"],
       },
       {
-        name: "Pro",
-        price: "4",
+        name: "Premium",
+        price: "25000",
         description: "Faol izlovchilar uchun",
-        cta: "Pro sinov",
-        features: ["Cheksiz AI", "Kengaytirilgan moslik", "50 ta ariza/oy", "Avto ariza"],
-        notIncluded: ["Maxsus integratsiya"],
+        cta: "Premium'ga o'tish",
+        features: [`Avto-ariza: oyiga ${AUTO_APPLY_PER_MONTH.premium} ta`, "AI rezyumega mos ishlarni tanlaydi", "Yuborishdan oldin ko'rish", "Bepul tarifdagi hamma narsa"],
+        notIncluded: [],
         popular: true,
       },
       {

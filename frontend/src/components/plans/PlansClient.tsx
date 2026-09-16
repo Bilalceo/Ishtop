@@ -12,6 +12,7 @@
 
 import Link from "next/link";
 import { TelegramProCard } from "@/components/TelegramProCard";
+import { AUTO_APPLY_PER_MONTH, getPlans as getSharedPlans } from "@/lib/plans";
 import Image from "next/image";
 import { Check, X, Minus, ArrowRight, ChevronDown, HelpCircle, Sparkles } from "lucide-react";
 import { useState } from "react";
@@ -30,82 +31,58 @@ type Plan = {
   accent: boolean;
 };
 
-const getPlans = (ru: boolean): Plan[] => [
-  {
-    id: "free",
-    name: "Free",
-    price: "0 so'm",
-    priceNote: "/ oy",
-    tagline: ru ? "Для первой работы достаточно" : "Birinchi ish uchun yetarli",
+// Built from the shared plan config rather than restated here. This page used
+// to sell "Free / Pro / Team" with auto-apply at 10 and 50 per DAY, while
+// /pricing sold "Bepul / Premium / Enterprise" at 50 per MONTH and checkout
+// accepted only premium/enterprise — three different promises behind the same
+// 25 000 so'm. See src/lib/plans.ts for which of them the backend enforces.
+const getPlans = (ru: boolean): Plan[] =>
+  getSharedPlans(ru).map((plan) => ({
+    id: plan.id,
+    name: plan.name,
+    price: plan.price,
+    priceNote: plan.priceNote,
+    tagline: plan.tagline,
     features: [
-      { text: ru ? "AI-резюме — 1 шт" : "AI rezyume — 1 ta", ok: true },
-      { text: ru ? "Объяснимый подбор" : "Tushuntiriladigan moslik", ok: true },
-      { text: ru ? "100 вакансий / мес" : "100 ta vakansiya / oy", ok: true },
-      { text: ru ? "Фильтр рейтинга доверия" : "Ishonch reytingi filtri", ok: true },
-      { text: ru ? "Авто-отклик" : "Avto-ariza", ok: false },
-      { text: ru ? "AI-тренажёр собеседований" : "Suhbat murabbiyi (AI)", ok: false },
-      { text: ru ? "Приоритетная поддержка" : "Ustuvor qo'llab-quvvatlash", ok: false },
+      ...plan.features.map((text) => ({ text, ok: true as const })),
+      ...plan.notIncluded.map((text) => ({ text, ok: false as const })),
     ],
-    cta: ru ? "Начать" : "Boshlash",
-    ctaHref: "/register",
-    accent: false,
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "25 000 so'm",
-    priceNote: "/ oy",
-    tagline: ru ? "Скорость + AI Coach" : "Tezlik + AI Coach",
-    features: [
-      { text: ru ? "AI-резюме — безлимит" : "AI rezyume — cheksiz", ok: true },
-      { text: ru ? "Объяснимый подбор" : "Tushuntiriladigan moslik", ok: true },
-      { text: ru ? "Безлимит вакансий" : "Cheksiz vakansiya", ok: true },
-      { text: ru ? "Фильтр рейтинга доверия" : "Ishonch reytingi filtri", ok: true },
-      { text: ru ? "Авто-отклик (10/день)" : "Avto-ariza (10/kun)", ok: true },
-      { text: ru ? "AI-тренажёр собеседований" : "Suhbat murabbiyi (AI)", ok: true },
-      { text: ru ? "Приоритетная поддержка" : "Ustuvor qo'llab-quvvatlash", ok: "limited" },
-    ],
-    cta: ru ? "Перейти на Pro" : "Pro'ga o'tish",
-    ctaHref: "/register",
-    accent: true,
-  },
-  {
-    id: "team",
-    name: "Team",
-    price: ru ? "Инд." : "Maxsus",
-    priceNote: ru ? "по договорённости" : "kelishiladi",
-    tagline: ru ? "Для 5+ студентов · Bootcamp" : "5+ talaba uchun · Bootcamp",
-    features: [
-      { text: ru ? "Всё из Pro" : "Pro'dagi hamma imkoniyat", ok: true },
-      { text: ru ? "Командная панель" : "Jamoa paneli", ok: true },
-      { text: ru ? "Аналитика для bootcamp" : "Bootcamp analitikasi", ok: true },
-      { text: ru ? "Места менторов — 2" : "Mentor o'rni — 2 ta", ok: true },
-      { text: ru ? "Авто-отклик (50/день)" : "Avto-ariza (50/kun)", ok: true },
-      { text: ru ? "Кастомная настройка AI" : "Maxsus AI sozlamalari", ok: true },
-      { text: ru ? "Поддержка по SLA" : "SLA kafolatli yordam", ok: true },
-    ],
-    cta: ru ? "Связаться" : "Bog'lanish",
-    ctaHref: "/contact",
-    accent: false,
-  },
-];
+    cta: plan.cta,
+    ctaHref:
+      plan.id === "free"
+        ? "/register"
+        : plan.id === "premium"
+          ? "/checkout?plan=premium"
+          : "/contact",
+    accent: Boolean(plan.popular),
+  }));
 
 const getFaq = (ru: boolean): { q: string; a: string }[] => [
   {
-    q: ru ? "Нужна ли карта для Free?" : "Free plan uchun karta kerakmi?",
-    a: ru ? "Нет. Free действительно бесплатный — без карты, триала и скрытых условий." : "Yo'q. Free plan haqiqatan ham bepul — kredit karta, trial, hech narsa kerak emas.",
+    q: ru ? "Нужна ли карта для бесплатного тарифа?" : "Bepul tarif uchun karta kerakmi?",
+    a: ru
+      ? "Нет. Бесплатный тариф действительно бесплатный — без карты, триала и скрытых условий."
+      : "Yo'q. Bepul tarif haqiqatan ham bepul — kredit karta, trial, hech narsa kerak emas.",
   },
   {
-    q: ru ? "Можно отменить Pro в любой момент?" : "Pro'dan istalgan vaqtda chiqsam bo'ladimi?",
-    a: ru ? "Да. После отмены следующий период не начнётся, возможности сохраняются до конца текущего." : "Ha. Bekor qilsangiz keyingi davr boshlanmaydi. Joriy davr oxirigacha imkoniyatlar saqlanadi.",
+    q: ru ? "Можно отменить Premium в любой момент?" : "Premium'dan istalgan vaqtda chiqsam bo'ladimi?",
+    a: ru
+      ? "Да. После отмены следующий период не начнётся, возможности сохраняются до конца оплаченного."
+      : "Ha. Bekor qilsangiz keyingi davr boshlanmaydi. To'langan davr oxirigacha imkoniyatlar saqlanadi.",
   },
   {
-    q: ru ? "Есть ли скидка для студентов?" : "Talabalar uchun chegirma bormi?",
-    a: ru ? "Pro для всех .edu и студенческих ID — скидка 50%: 250 000 сум → 125 000 сум в год." : "Pro plan barcha .edu va talaba ID'lar uchun 50% chegirma — yiliga 250 000 so'm → 125 000 so'm.",
+    // The old answer promised a 50% student discount (250 000 → 125 000) that
+    // nothing in checkout or the backend applies.
+    q: ru ? "В чём разница между тарифами?" : "Tariflar orasidagi farq nima?",
+    a: ru
+      ? `Каталог, AI-резюме, тренажёр собеседования и отклик работодателю доступны бесплатно. Premium добавляет авто-отклик — ${AUTO_APPLY_PER_MONTH.premium} откликов в месяц.`
+      : `Katalog, AI rezyume, suhbat murabbiyi va ish beruvchiga ariza — bularning hammasi bepul. Premium avto-ariza qo'shadi: oyiga ${AUTO_APPLY_PER_MONTH.premium} ta.`,
   },
   {
     q: ru ? "Как работает авто-отклик?" : "Avto-ariza qanday ishlaydi?",
-    a: ru ? "AI адаптирует резюме под каждую вакансию и отправляет отклик. Лимит (10 или 50) обновляется в полночь UTC." : "AI rezyumeni har bir vakansiyaga moslab yuboradi. Limit (10 yoki 50) har kuni UTC yarim tunda yangilanadi.",
+    a: ru
+      ? `AI адаптирует резюме под каждую вакансию и показывает отклик перед отправкой. Лимит — ${AUTO_APPLY_PER_MONTH.premium} в месяц, счётчик обнуляется в начале календарного месяца.`
+      : `AI rezyumeni har bir vakansiyaga moslab, yuborishdan oldin ko'rsatadi. Limit — oyiga ${AUTO_APPLY_PER_MONTH.premium} ta, hisob har oy boshida yangilanadi.`,
   },
 ];
 
@@ -163,7 +140,7 @@ export default function PlansClient() {
               </span>
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-lg text-[#63636b]">
-              {ru ? "3 тарифа, одна цель — ваша первая работа. Free действительно бесплатный, Pro добавляет AI Coach, Team — для буткемпов." : "3 ta plan, bitta maqsad — birinchi ishingiz. Free haqiqatan bepul, Pro AI Coach qo'shadi, Team bootcamplar uchun."}
+              {ru ? "3 тарифа, одна цель — ваша первая работа. Бесплатный тариф действительно бесплатный: каталог, AI-резюме и тренажёр собеседования. Premium добавляет авто-отклик." : "3 ta tarif, bitta maqsad — birinchi ishingiz. Bepul tarif haqiqatan bepul: katalog, AI rezyume va suhbat murabbiyi. Premium avto-ariza qo'shadi."}
             </p>
           </Reveal>
         </div>

@@ -17,6 +17,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
+import { getPlans, type PlanId } from "@/lib/plans";
 
 // =============================================================================
 // TYPES
@@ -41,74 +42,27 @@ interface PricingPlan {
 // PRICING DATA
 // =============================================================================
 
-const getPricingPlans = (isRu: boolean): PricingPlan[] => [
-  {
-    id: "free",
-    name: isRu ? "Бесплатный" : "Bepul",
-    price: {
-      monthly: 0,
-      yearly: 0,
-    },
-    description: isRu ? "Идеально для знакомства со IshTop" : "IshTop ni sinab ko'rish uchun",
-    features: [
-      isRu ? "1 AI-резюме" : "1 ta AI rezyume",
-      isRu ? "5 заявок в месяц" : "Oyiga 5 ta ariza",
-      isRu ? "Базовый подбор вакансий" : "Asosiy ish moslashtirish",
-      isRu ? "Поддержка по email" : "Email qo'llab-quvvatlash",
-    ],
-    notIncluded: [
-      isRu ? "Безлимитные AI-генерации" : "Cheksiz AI yaratish",
-      isRu ? "Автоотклик" : "Avto-ariza funksiyasi",
-      isRu ? "Приоритетная поддержка" : "Ustuvor qo'llab-quvvatlash",
-      isRu ? "Панель аналитики" : "Analitika paneli",
-    ],
-    icon: Sparkles,
-    color: "bg-gray-500",
-  },
-  {
-    id: "premium",
-    name: "Premium",
-    price: {
-      monthly: 25000,
-      yearly: 250000,
-    },
-    description: isRu ? "Для активных соискателей и студентов" : "Faol ish izlovchilar va talabalar uchun",
-    features: [
-      isRu ? "Безлимитная AI генерация резюме" : "Cheksiz AI rezyume yaratish",
-      isRu ? "50 заявок в месяц" : "Oyiga 50 ta ariza",
-      isRu ? "Автоотклик на подходящие вакансии" : "Mos ishlar uchun avto-ariza",
-      isRu ? "Приоритетный подбор" : "Ustuvor ish moslashtirish",
-      isRu ? "Расширенная аналитика" : "Kengaytirilgan analitika",
-      isRu ? "Премиум шаблоны резюме" : "Premium rezyume shablonlari",
-      isRu ? "Приоритетная email поддержка" : "Ustuvor email qo'llab-quvvatlash",
-    ],
-    popular: true,
-    icon: Zap,
-    color: "bg-brand-500",
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    price: {
-      monthly: 0,  // Custom
-      yearly: 0,   // Custom
-    },
-    description: isRu ? "Для команд и организаций" : "Jamoalar va tashkilotlar uchun",
-    features: [
-      isRu ? "Все возможности Premium" : "Premium dagi hamma imkoniyat",
-      isRu ? "Безлимитные заявки" : "Cheksiz arizalar",
-      isRu ? "Управление командой (до 50 пользователей)" : "Jamoa boshqaruvi (50 foydalanuvchigacha)",
-      isRu ? "Кастомный брендинг" : "Maxsus brending",
-      isRu ? "Доступ к API" : "API kirish",
-      isRu ? "Выделенный менеджер" : "Alohida menejer",
-      isRu ? "24/7 приоритетная поддержка" : "24/7 ustuvor yordam",
-      isRu ? "SLA гарантия" : "SLA kafolati",
-      isRu ? "Кастомные интеграции" : "Maxsus integratsiyalar",
-    ],
-    icon: Crown,
-    color: "bg-brand-500",
-  },
-];
+// Built from the shared plan config: this page and /plans used to sell
+// different tier names and different limits for the same 25 000 so'm.
+// src/lib/plans.ts records which numbers the backend actually enforces.
+const PLAN_ICONS: Record<PlanId, any> = {
+  free: Sparkles,
+  premium: Zap,
+  enterprise: Crown,
+};
+
+const getPricingPlans = (isRu: boolean): PricingPlan[] =>
+  getPlans(isRu).map((plan) => ({
+    id: plan.id,
+    name: plan.name,
+    price: plan.priceUzs ?? { monthly: 0, yearly: 0 },
+    description: plan.tagline,
+    features: plan.features,
+    notIncluded: plan.notIncluded,
+    popular: plan.popular,
+    icon: PLAN_ICONS[plan.id],
+    color: plan.id === "free" ? "bg-gray-500" : "bg-brand-500",
+  }));
 
 // =============================================================================
 // COMPONENT

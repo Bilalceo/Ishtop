@@ -23,6 +23,8 @@ import { useAuthStore } from "@/store/authStore";
 import type { BillingCycle, CreatePaymentIntentRequest, PaymentIntentResponse } from "@/types/api";
 
 type PaymentStatus = "idle" | "creating_intent" | "ready" | "processing" | "succeeded" | "failed";
+import { AUTO_APPLY_PER_MONTH } from "@/lib/plans";
+
 type SubscriptionTier = CreatePaymentIntentRequest["subscription_tier"];
 
 interface PriceInfo {
@@ -237,20 +239,20 @@ export default function CheckoutPageClient() {
   const periodLabel = isRu ? `${months} ${months === 1 ? "месяц" : "месяцев"}` : `${months} oy`;
   const features = isRu
     ? [
-        "Неограниченная генерация резюме с ИИ",
-        "50 откликов на вакансии в месяц",
-        "Автоотклик на подходящие вакансии",
-        "Расширенная аналитическая панель",
-        "Премиум-шаблоны резюме",
-        "Приоритетная поддержка по email",
+        // What the buyer is actually paying for. The old list promised an
+        // analytics panel, premium templates and priority support that no
+        // tier check gates, and "50 откликов" described manual applications
+        // rather than the auto-apply quota that is the one enforced limit.
+        `Авто-отклик: ${AUTO_APPLY_PER_MONTH.premium} откликов в месяц`,
+        "AI подбирает вакансии под ваше резюме",
+        "Предпросмотр каждого отклика перед отправкой",
+        "Всё из бесплатного тарифа",
       ]
     : [
-        "Cheksiz AI rezyume yaratish",
-        "Oyiga 50 ta ishga ariza",
-        "Mos ishlar uchun avtomatik ariza",
-        "Kengaytirilgan analitika paneli",
-        "Premium rezyume shablonlari",
-        "Ustuvor email qo'llab-quvvatlash",
+        `Avto-ariza: oyiga ${AUTO_APPLY_PER_MONTH.premium} ta`,
+        "AI rezyumega mos ishlarni tanlaydi",
+        "Har bir arizani yuborishdan oldin ko'rish",
+        "Bepul tarifdagi hamma narsa",
       ];
 
   useEffect(() => {
