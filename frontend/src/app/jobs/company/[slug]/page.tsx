@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { fetchDiscoveryCompany } from "@/lib/discovery-api";
 import { stripHtmlTags } from "@/lib/utils";
+import { isPlaceholderCompany } from "@/lib/jobLabels";
 import { JsonLd, jobListJsonLd } from "@/lib/seo/jsonld";
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
@@ -23,6 +24,18 @@ export default async function CompanyDiscoveryPage({ params }: { params: { slug:
 
   const jobs = payload.jobs || [];
   const company = payload.company || {};
+
+  // The shared import account is not a company. This page was serving it as
+  // one at /jobs/company/ish-beruvchi — a public, indexable "Kompaniya
+  // profili" headed "Tasdiqlangan kompaniya · Verifikatsiya: approved · Faol
+  // vakansiyalar: 86", when those 86 listings come from 86 different
+  // employers harvested from public channels and none of them was verified.
+  // The listings stay discoverable through the catalogue and the city and
+  // profession pages; what cannot stand is presenting them as one vouched-for
+  // business.
+  if (isPlaceholderCompany(company.name, params.slug)) {
+    notFound();
+  }
   const gallery: string[] = Array.isArray(company.gallery_images) ? company.gallery_images : [];
   const jobsLd = jobListJsonLd(
     jobs.map((j: any) => ({
@@ -47,13 +60,22 @@ export default async function CompanyDiscoveryPage({ params }: { params: { slug:
         <h1 className="mt-2 text-3xl font-bold text-surface-900 dark:text-white">
           {company.name || params.slug.replace(/-/g, " ")}
         </h1>
-        {company.is_verified && (
+        {/* A verification badge only for a company that actually passed
+            verification, and never for a placeholder account. */}
+        {company.is_verified && company.verification_state === "approved" && (
           <span className="mt-3 inline-flex rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-700">
             Tasdiqlangan kompaniya
           </span>
         )}
         <p className="mt-2 text-surface-600 dark:text-surface-300">
-          Verifikatsiya: <strong>{company.verification_state || "unverified"}</strong>
+          Verifikatsiya:{" "}
+          <strong>
+            {company.verification_state === "approved"
+              ? "tasdiqlangan"
+              : company.verification_state === "pending"
+                ? "tekshirilmoqda"
+                : "tekshirilmagan"}
+          </strong>
         </p>
         <p className="mt-1 text-surface-600 dark:text-surface-300">
           Faol vakansiyalar: {payload.total || jobs.length}

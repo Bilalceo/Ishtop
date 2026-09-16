@@ -6,7 +6,13 @@
  * every card — and got it wrong in both directions before.
  */
 
-import { experienceLabel, jobDisplayIdentity, jobTypeLabel, jobTypeOptions } from "@/lib/jobLabels";
+import {
+  experienceLabel,
+  isPlaceholderCompany,
+  jobDisplayIdentity,
+  jobTypeLabel,
+  jobTypeOptions,
+} from "@/lib/jobLabels";
 import { categoryLabel, categoryStyle } from "@/lib/jobCategories";
 
 describe("jobDisplayIdentity", () => {
@@ -134,5 +140,42 @@ describe("every enum member the backend stores has a label", () => {
 
   it("offers internship among the job type options", () => {
     expect(jobTypeOptions(false).map((o) => o.value)).toContain("internship");
+  });
+});
+
+
+describe("isPlaceholderCompany", () => {
+  // /jobs/company/ish-beruvchi was a public, indexable "Kompaniya profili"
+  // headed "Tasdiqlangan kompaniya · Verifikatsiya: approved · Faol
+  // vakansiyalar: 86". Those 86 listings come from 86 different employers
+  // harvested from public channels, and none was verified.
+  it("recognises the shared import account by name", () => {
+    expect(isPlaceholderCompany("Ish beruvchi")).toBe(true);
+    expect(isPlaceholderCompany("ish beruvchi")).toBe(true);
+    expect(isPlaceholderCompany("  Ish Beruvchi  ")).toBe(true);
+    expect(isPlaceholderCompany("Работодатель")).toBe(true);
+  });
+
+  it("recognises it by slug, which is how the URL arrives", () => {
+    expect(isPlaceholderCompany(null, "ish-beruvchi")).toBe(true);
+    expect(isPlaceholderCompany(undefined, "chastnaya")).toBe(false);
+  });
+
+  it("covers the other placeholders that carry no employer", () => {
+    for (const n of ["Kompaniya", "Xususiy korxona", "Частная компания"]) {
+      expect(isPlaceholderCompany(n)).toBe(true);
+    }
+  });
+
+  it("leaves a real employer alone", () => {
+    for (const n of ["Elma", "Fayz", "ITschoolofficial", "Startup Loyiha"]) {
+      expect(isPlaceholderCompany(n)).toBe(false);
+      expect(isPlaceholderCompany(null, n.toLowerCase())).toBe(false);
+    }
+  });
+
+  it("treats nothing as not a placeholder", () => {
+    expect(isPlaceholderCompany(null)).toBe(false);
+    expect(isPlaceholderCompany("")).toBe(false);
   });
 });

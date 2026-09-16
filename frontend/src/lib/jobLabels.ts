@@ -67,6 +67,25 @@ const PLACEHOLDER_COMPANIES = new Set([
 ]);
 
 /**
+ * Is this "company" really the shared import account rather than an employer?
+ *
+ * Aggregated listings from public Telegram channels all sit under one account
+ * named "Ish beruvchi". It is a container, not a business: its listings belong
+ * to as many different employers as there are listings. Anything that presents
+ * a company — a profile page, a verification badge, a vacancy count — must
+ * refuse it.
+ */
+export function isPlaceholderCompany(
+  name: string | undefined | null,
+  slug?: string | undefined | null,
+): boolean {
+  const norm = (v: string) => v.trim().toLowerCase().replace(/[-_]+/g, " ");
+  if (name && PLACEHOLDER_COMPANIES.has(norm(name))) return true;
+  if (slug && PLACEHOLDER_COMPANIES.has(norm(slug))) return true;
+  return false;
+}
+
+/**
  * Split a listing into a clean title and a real company name.
  *
  * Aggregated vacancies are stored under one import account whose name is the
