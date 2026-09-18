@@ -249,6 +249,44 @@ async def lifespan(app: FastAPI):
         print_config_summary()
     
     digest_task: asyncio.Task | None = None
+    db_keepalive_task: asyncio.Task | None = None
+
+    async def _db_keepalive_loop() -> None:
+        """Keep the database from being put to sleep between requests.
+
+        Railway's app sleeping stops a service after roughly ten idle minutes.
+        Disabling it via `sleepApplication: false` works for this API service —
+        confirmed in the logs — but is NOT honoured for the Postgres service,
+        even after a full redeploy: Postgres restarted at 13:46 and 13:57 UTC
+        on 2026-09-18 while the flag was false.
+
+        Two things follow from that. A student arriving after a quiet spell
+        waits for Postgres to boot — the health endpoint returned 503 twice
+        while it did — and the sleep is not always a clean shutdown, so
+        Postgres comes back running crash recovery. Neither is acceptable for
+        a database holding real resumes and applications.
+
+        This API never sleeps now, so the cheapest reliable fix is for it to
+        touch the database often enough that the database never idles. One
+        `SELECT 1` every few minutes, which costs nothing measurable and
+        depends on no machine outside Railway.
+        """
+        interval = max(60, int(settings.DB_KEEPALIVE_SECONDS))
+        while True:
+            await asyncio.sleep(interval)
+            db: Session | None = None
+            try:
+                db = SessionLocal()
+                db.execute(text("SELECT 1"))
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                # Never fatal: a failed ping means the next request pays the
+                # wake-up cost, which is the behaviour we already had.
+                logger.warning("Database keep-alive ping failed: %s", exc)
+            finally:
+                if db is not None:
+                    db.close()
 
     async def _weekly_digest_loop() -> None:
         """Periodic loop that sends due Monday digests."""
@@ -284,6 +322,12 @@ async def lifespan(app: FastAPI):
         if settings.COMPANY_WEEKLY_DIGEST_ENABLED:
             digest_task = asyncio.create_task(_weekly_digest_loop())
             logger.info("📬 Company weekly digest scheduler started")
+        if settings.DB_KEEPALIVE_SECONDS > 0:
+            db_keepalive_task = asyncio.create_task(_db_keepalive_loop())
+            logger.info(
+                "💤 Database keep-alive every %ss (Railway sleeps Postgres otherwise)",
+                settings.DB_KEEPALIVE_SECONDS,
+            )
     else:
         logger.error("❌ Database connection failed!")
 
@@ -298,12 +342,13 @@ async def lifespan(app: FastAPI):
     # SHUTDOWN
     # =========================================================================
     
-    if digest_task:
-        digest_task.cancel()
-        try:
-            await digest_task
-        except asyncio.CancelledError:
-            pass
+    for task in (digest_task, db_keepalive_task):
+        if task:
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
 
     logger.info("=" * 60)
     logger.info(f"👋 Shutting down {settings.APP_NAME}...")

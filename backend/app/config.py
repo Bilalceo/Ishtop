@@ -279,6 +279,13 @@ class Settings(BaseSettings):
     COMPANY_WEEKLY_DIGEST_TIMEZONE: str = "Asia/Tashkent"
     COMPANY_WEEKLY_DIGEST_SEND_HOUR_LOCAL: int = 9
     COMPANY_WEEKLY_DIGEST_POLL_SECONDS: int = 900
+
+    # Seconds between the database keep-alive pings. Railway sleeps the
+    # Postgres service after roughly ten idle minutes and ignores
+    # `sleepApplication: false` on it, so the API keeps the connection warm
+    # itself. 240 leaves a wide margin under that window. Set to 0 to disable
+    # — appropriate anywhere the database is not put to sleep.
+    DB_KEEPALIVE_SECONDS: int = 240
     
     # =========================================================================
     # 🔐 OAUTH2 SETTINGS (Google, LinkedIn)
