@@ -12,7 +12,7 @@ forty sales-manager posts.
 
 --commit writes; otherwise prints the plan.
 """
-import sys, re, json, uuid, collections
+import sys, re, json, uuid, pathlib, collections
 import pg8000.native
 import urllib.parse as u
 from datetime import datetime, timezone, timedelta
@@ -46,6 +46,16 @@ def real_phone(raw: str) -> bool:
     return body[2:] not in ("1234567", "7654321", "0000000") and \
         not re.match(r"^(\d)(?:\1{6,})$", body[2:])
 
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
+# Discovery slugs decide whether a listing shows on the city and profession
+# pages at all. Every row imported before 2026-10-01 went in without them, so
+# the whole catalogue was invisible to those filters and absent from the
+# sitemap. Derive them with the app's own helpers so an import cannot
+# reintroduce that.
+from app.services.discovery import (  # noqa: E402
+    city_slug_from_location, profession_slug_from_title,
+)
 
 rows = json.load(open(structured, encoding="utf-8"))
 kinds = json.load(open(kinds_path, encoding="utf-8"))
@@ -165,9 +175,11 @@ for p in picked:
         (id, company_id, title, description, requirements, responsibilities, benefits,
          salary_min, salary_max, salary_currency, location, job_type, experience_level,
          is_remote_allowed, status, external_apply_url, contact_info, translations,
+         city_slug, profession_slug,
          expires_at, created_at, updated_at, views_count, applications_count, is_deleted)
         values (:id, :co, :t, :d, cast(:req as jsonb), cast(:resp as jsonb), cast(:ben as jsonb),
                 :smin, :smax, 'UZS', :loc, :jt, :exp, :rem, 'active', :src, :con, cast(:tr as jsonb),
+                :cslug, :pslug,
                 :exp_at, now(), now(), 0, 0, false)""",
         id=uuid.uuid4(), co=COMPANY_ID, t=p["title"], d=p["description"],
         req=json.dumps(p["requirements"], ensure_ascii=False),
@@ -178,6 +190,10 @@ for p in picked:
         # job because most of them are — that would be inventing the one field
         # candidates filter on hardest.
         loc=("Masofaviy" if p["is_remote"] else (p["city"] or "O'zbekiston")),
+        # a post with no city gets no city slug rather than a guessed one, so
+        # it stays off the city pages instead of landing on the wrong one
+        cslug=(city_slug_from_location(p["city"]) or None) if p.get("city") else None,
+        pslug=profession_slug_from_title(p["title"]) or None,
         jt=_job_type(p),
         exp=p["experience_level"], rem=p["is_remote"],
         # provenance only — never shown, never an apply target

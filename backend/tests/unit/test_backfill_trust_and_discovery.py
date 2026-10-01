@@ -132,3 +132,33 @@ def test_backfill_session_dry_run_does_not_mutate_entities(monkeypatch) -> None:
     assert job.city_slug is None
     assert db.rolled_back is True
     assert db.committed is False
+
+
+# --- profession slugs group by role, not by employer -------------------------
+
+def test_profession_slug_drops_the_employer_in_brackets():
+    """Imported titles carry "(Employer)"; slugging that gave every listing its
+    own profession page. 278 of 297 slugs held a single job before this."""
+    from app.services.discovery import profession_slug_from_title as slug
+
+    assert slug("Sotuv menejeri (OCARD)") == "sotuv-menejeri"
+    assert slug("Sotuv menejeri (HUNTER)") == "sotuv-menejeri"
+    assert slug("Sotuv menejeri") == "sotuv-menejeri"
+    # the three above must land on one page
+    titles = ["Sotuv menejeri (OCARD)", "Sotuv menejeri (HUNTER)", "Sotuv menejeri"]
+    assert len({slug(t) for t in titles}) == 1
+
+
+def test_profession_slug_keeps_brackets_that_are_not_at_the_end():
+    from app.services.discovery import profession_slug_from_title as slug
+
+    # "dasturchi" is aliased to "developer" by the profession token map
+    assert slug("Dasturchi (Python) backend") == "developer-python-backend"
+
+
+def test_profession_slug_handles_empty_and_bracket_only_titles():
+    from app.services.discovery import profession_slug_from_title as slug
+
+    assert slug("") == ""
+    assert slug(None) == ""
+    assert slug("(NCS)") == ""

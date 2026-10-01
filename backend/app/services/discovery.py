@@ -134,8 +134,21 @@ def city_slug_from_location(location: Optional[str]) -> str:
     return normalize_discovery_slug(city_from_location(location), kind="city")
 
 
+# Imported titles carry the employer in brackets ("Sotuv menejeri (OCARD)"),
+# and slugging that whole string gave every listing its own profession slug:
+# 284 slugs across 297 jobs, 278 of them holding a single job, so the
+# /jobs/profession pages grouped nothing. The employer already has
+# company_slug; the profession is what is left once the brackets come off.
+_TRAILING_PARENS = re.compile(r"\s*\([^)]*\)\s*$")
+
+
+def profession_title(title: Optional[str]) -> str:
+    """The role on its own, without the trailing employer or qualifier."""
+    return _TRAILING_PARENS.sub("", str(title or "")).strip()
+
+
 def profession_slug_from_title(title: Optional[str]) -> str:
-    return normalize_discovery_slug(title, kind="profession")
+    return normalize_discovery_slug(profession_title(title), kind="profession")
 
 
 def company_slug_from_name(company_name: Optional[str], fallback_full_name: Optional[str] = None) -> str:

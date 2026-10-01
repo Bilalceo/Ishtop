@@ -707,6 +707,42 @@ def _job_detail(job_id: str, back_cb: str) -> tuple[str, dict]:
 # table the site uses — Telegram is the door, the platform stays the room.
 
 
+def _record_bot_referral(source: str, chat_id: str) -> None:
+    """Note that a chat opened the bot through an ad link.
+
+    One row per chat per source: a person who taps the same ad twice is one
+    person, and a campaign that looks twice as good as it was is worse than
+    no number at all.
+    """
+    from app.models import FunnelEvent
+
+    db = SessionLocal()
+    try:
+        # Compared in Python rather than with a JSON path filter: the column is
+        # a plain JSON blob, and the SQL form silently found nothing on SQLite,
+        # so every tap looked new. The volume here is ad clicks, not traffic.
+        seen = any(
+            (row.event_metadata or {}).get("chat_id") == chat_id
+            for row in db.query(FunnelEvent)
+            .filter(FunnelEvent.event_name == "bot_start_ref",
+                    FunnelEvent.source == source)
+            .limit(500)
+        )
+        if seen:
+            return
+        db.add(FunnelEvent(
+            event_name="bot_start_ref",
+            source=source,
+            event_metadata={"chat_id": chat_id},
+        ))
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.exception("could not record bot referral for source %s", source)
+    finally:
+        db.close()
+
+
 def _linked_user(chat_id: str):
     """The platform account connected to this chat, or None."""
     db = SessionLocal()
@@ -1428,6 +1464,18 @@ async def telegram_webhook(secret: str, request: Request):
             else:
                 atext, akb = await run_in_threadpool(_alerts_view, str(chat_id))
             await _send(token, chat_id, atext, akb)
+            return {"ok": True}
+
+        # t.me/<bot>?start=ref_<manba> — an advertising link. Recorded so we can
+        # tell which channel the campaign money actually bought, then handed the
+        # ordinary welcome. Before this existed an unknown payload fell through
+        # to the account-link branch below, so a paid click was greeted with
+        # "link failed" — the worst possible first screen for bought traffic.
+        if payload.startswith("ref_"):
+            source = re.sub(r"[^a-z0-9_-]", "", payload[4:].lower())[:40] or "unknown"
+            await run_in_threadpool(_record_bot_referral, source, str(chat_id))
+            welcome_txt = await run_in_threadpool(_welcome, locale)
+            await _send(token, chat_id, welcome_txt, _main_menu_kb())
             return {"ok": True}
 
         if payload:

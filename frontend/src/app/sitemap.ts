@@ -27,27 +27,34 @@ const STATIC_PATHS: { path: string; priority: number; freq: MetadataRoute.Sitema
 async function fetchDiscoverySlugs(): Promise<{ cities: string[]; professions: string[]; companies: string[] }> {
   const empty = { cities: [], professions: [], companies: [] };
   if (!apiBase) return empty;
+  const cities = new Set<string>();
+  const professions = new Set<string>();
+  const companies = new Set<string>();
+  // The API caps limit at 100, so a single ?limit=200 call silently saw only
+  // the first page and left every slug that appears later out of the sitemap.
+  const PAGE_SIZE = 100;
+  const MAX_PAGES = 20;
   try {
-    const res = await fetch(`${apiBase}/jobs?page=1&limit=200`, { next: { revalidate: 3600 } });
-    if (!res.ok) return empty;
-    const data = await res.json();
-    const jobs: any[] = Array.isArray(data?.jobs) ? data.jobs : [];
-    const cities = new Set<string>();
-    const professions = new Set<string>();
-    const companies = new Set<string>();
-    for (const job of jobs) {
-      if (job?.city_slug) cities.add(String(job.city_slug));
-      if (job?.profession_slug) professions.add(String(job.profession_slug));
-      if (job?.company_slug) companies.add(String(job.company_slug));
+    for (let page = 1; page <= MAX_PAGES; page += 1) {
+      const res = await fetch(`${apiBase}/jobs?page=${page}&limit=${PAGE_SIZE}`, {
+        next: { revalidate: 3600 },
+      });
+      if (!res.ok) break;
+      const data = await res.json();
+      const jobs: any[] = Array.isArray(data?.jobs) ? data.jobs : [];
+      for (const job of jobs) {
+        if (job?.city_slug) cities.add(String(job.city_slug));
+        if (job?.profession_slug) professions.add(String(job.profession_slug));
+        if (job?.company_slug) companies.add(String(job.company_slug));
+      }
+      const totalPages = Number(data?.total_pages) || 0;
+      if (jobs.length < PAGE_SIZE || (totalPages && page >= totalPages)) break;
     }
-    return {
-      cities: [...cities],
-      professions: [...professions],
-      companies: [...companies],
-    };
   } catch {
-    return empty;
+    // a partial sitemap beats none; fall through with whatever was collected
   }
+  if (!cities.size && !professions.size && !companies.size) return empty;
+  return { cities: [...cities], professions: [...professions], companies: [...companies] };
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

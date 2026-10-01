@@ -256,3 +256,43 @@ def test_survey_row_disappears_when_the_survey_closes(monkeypatch):
     monkeypatch.setattr(bot, "SURVEY_KEY", None)
     labels = [b["text"] for row in bot._main_menu_kb()["inline_keyboard"] for b in row]
     assert not any("so'rovnoma" in l for l in labels)
+
+
+# --- ad referral links --------------------------------------------------------
+
+def test_ad_link_records_the_source_once_and_greets_normally(test_db, monkeypatch):
+    """t.me/<bot>?start=ref_<source> must welcome the visitor, not fail at them."""
+    from app.models import FunnelEvent
+    from app.routers import telegram_bot as bot
+
+    monkeypatch.setattr(bot, "SessionLocal", lambda: test_db)
+    monkeypatch.setattr(test_db, "close", lambda: None)
+
+    bot._record_bot_referral("kanal-a", "555")
+    bot._record_bot_referral("kanal-a", "555")   # same person taps twice
+    bot._record_bot_referral("kanal-a", "556")
+    bot._record_bot_referral("kanal-b", "555")   # same person, other campaign
+
+    rows = test_db.query(FunnelEvent).filter(FunnelEvent.event_name == "bot_start_ref").all()
+    assert sorted((r.source, r.event_metadata["chat_id"]) for r in rows) == [
+        ("kanal-a", "555"), ("kanal-a", "556"), ("kanal-b", "555"),
+    ]
+
+
+def test_ad_source_is_sanitised(test_db, monkeypatch):
+    from app.models import FunnelEvent
+    from app.routers import telegram_bot as bot
+
+    monkeypatch.setattr(bot, "SessionLocal", lambda: test_db)
+    monkeypatch.setattr(test_db, "close", lambda: None)
+
+    # the source comes straight off a ?start= payload, so it is attacker-shaped
+    import re as _re
+    dirty = "Kanal A!<script>alert(1)</script>"
+    cleaned = _re.sub(r"[^a-z0-9_-]", "", dirty.lower())[:40] or "unknown"
+    bot._record_bot_referral(cleaned, "1")
+
+    stored = test_db.query(FunnelEvent).one().source
+    assert stored == cleaned
+    assert not set(stored) & set(" <>\"'/\\;()"), stored
+    assert len(stored) <= 40
