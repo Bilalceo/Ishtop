@@ -13,7 +13,7 @@
 
 // Bump on any caching-behavior change so `activate` purges stale caches
 // (e.g. a previously cached empty jobs response).
-const VERSION = "v1.0.1";
+const VERSION = "v1.1.0";
 const SHELL_CACHE = `ishtop-shell-${VERSION}`;
 const API_CACHE = `ishtop-api-${VERSION}`;
 const RUNTIME_CACHE = `ishtop-runtime-${VERSION}`;
@@ -22,7 +22,8 @@ const SHELL_ASSETS = [
   "/",
   "/offline",
   "/manifest.json",
-  "/logo-mark.png",
+  "/icon-192.png",
+  "/icon-512.png",
   "/favicon-32x32.png",
 ];
 
@@ -144,7 +145,7 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: "/logo-mark.png",
+      icon: "/icon-192.png",
       badge: "/favicon-32x32.png",
       tag: data.tag || "ishtop-notification",
       data: { url: data.url || "/student/notifications" },

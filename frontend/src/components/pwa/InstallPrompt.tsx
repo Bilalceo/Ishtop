@@ -1,81 +1,72 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, X } from "lucide-react";
+import { Download, Share, SquarePlus, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 const DISMISS_KEY = "ishtop_pwa_install_dismissed_v1";
 const DISMISS_DAYS = 14;
-
-// Disabled for now per product decision. Flip to true to re-enable the install prompt.
-const PWA_INSTALL_ENABLED = false;
+// Chrome fires beforeinstallprompt within a second or two of load; waiting a
+// beat keeps the card from competing with the page painting.
+const SHOW_AFTER_MS = 2500;
 
 type BIPEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
+/** iOS has no beforeinstallprompt — Safari only offers Share › Add to Home
+ *  Screen, and a user who is not told that never finds it. */
+function isIOS(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return (
+    /iphone|ipad|ipod/i.test(ua) ||
+    // iPadOS reports itself as a Mac, but a Mac has no touch points
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
 export default function InstallPrompt() {
   const [deferred, setDeferred] = useState<BIPEvent | null>(null);
-  const [visible, setVisible] = useState(false);
-  const [installed, setInstalled] = useState(false);
+  const [mode, setMode] = useState<"none" | "native" | "ios">("none");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Already running as PWA
-    const isStandalone =
+    const standalone =
       window.matchMedia?.("(display-mode: standalone)").matches ||
-      // @ts-expect-error iOS
-      window.navigator.standalone === true;
-    if (isStandalone) {
-      setInstalled(true);
-      return;
-    }
+      (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+    if (standalone) return; // already installed
 
-    // Honor dismiss cooldown
     try {
-      const dismissedAt = Number(localStorage.getItem(DISMISS_KEY) || 0);
-      if (dismissedAt && Date.now() - dismissedAt < DISMISS_DAYS * 86400000) {
-        return;
-      }
+      const at = Number(localStorage.getItem(DISMISS_KEY) || 0);
+      if (at && Date.now() - at < DISMISS_DAYS * 86_400_000) return;
     } catch {
-      // ignore storage errors
+      // storage blocked — still worth offering
     }
 
     const onPrompt = (e: Event) => {
       e.preventDefault();
       setDeferred(e as BIPEvent);
-      setVisible(true);
+      setMode("native");
     };
-    const onInstalled = () => {
-      setInstalled(true);
-      setVisible(false);
-    };
-
+    const onInstalled = () => setMode("none");
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
+
+    // iOS never fires the event, so the instructions are shown on a timer
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    if (isIOS()) {
+      timer = setTimeout(() => setMode((m) => (m === "none" ? "ios" : m)), SHOW_AFTER_MS);
+    }
+
     return () => {
       window.removeEventListener("beforeinstallprompt", onPrompt);
       window.removeEventListener("appinstalled", onInstalled);
+      if (timer) clearTimeout(timer);
     };
   }, []);
-
-  if (installed) return null;
-  if (!PWA_INSTALL_ENABLED) return null;
-
-  const install = async () => {
-    if (!deferred) return;
-    try {
-      await deferred.prompt();
-      await deferred.userChoice;
-    } catch {
-      // ignore
-    } finally {
-      setDeferred(null);
-      setVisible(false);
-    }
-  };
 
   const dismiss = () => {
     try {
@@ -83,12 +74,25 @@ export default function InstallPrompt() {
     } catch {
       // ignore
     }
-    setVisible(false);
+    setMode("none");
+  };
+
+  const install = async () => {
+    if (!deferred) return;
+    try {
+      await deferred.prompt();
+      await deferred.userChoice;
+    } catch {
+      // the browser withdrew the prompt; nothing to recover
+    } finally {
+      setDeferred(null);
+      setMode("none");
+    }
   };
 
   return (
     <AnimatePresence>
-      {visible && (
+      {mode !== "none" && (
         <motion.aside
           role="dialog"
           aria-label="IshTop ilovasini o'rnatish"
@@ -100,33 +104,67 @@ export default function InstallPrompt() {
           style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 80px)" }}
         >
           <div className="flex items-start gap-3">
-            <div className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-violet-600 text-white">
+            <div className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl bg-[#5782E0] text-white">
               <Download className="h-5 w-5" />
             </div>
+
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-surface-900 dark:text-white">
                 IshTop ilovasini o&apos;rnatish
               </p>
-              <p className="mt-0.5 text-xs text-surface-500">
-                Telefoningizga qo&apos;shing — tezroq ishlaydi va oflayn ham mavjud.
-              </p>
-              <div className="mt-3 flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={install}
-                  className="rounded-lg bg-gradient-to-r from-brand-500 to-violet-600 px-3 py-1.5 text-xs font-medium text-white"
-                >
-                  O&apos;rnatish
-                </button>
-                <button
-                  type="button"
-                  onClick={dismiss}
-                  className="rounded-lg px-3 py-1.5 text-xs text-surface-600 hover:bg-surface-100 dark:text-surface-300 dark:hover:bg-surface-700"
-                >
-                  Keyinroq
-                </button>
-              </div>
+
+              {mode === "native" ? (
+                <>
+                  <p className="mt-0.5 text-xs text-surface-500">
+                    Telefoningizga qo&apos;shing — tezroq ochiladi va oflayn ham ishlaydi.
+                  </p>
+                  <div className="mt-3 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={install}
+                      className="rounded-lg bg-[#5782E0] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#4a72cc]"
+                    >
+                      O&apos;rnatish
+                    </button>
+                    <button
+                      type="button"
+                      onClick={dismiss}
+                      className="rounded-lg px-3 py-1.5 text-xs text-surface-600 hover:bg-surface-100 dark:text-surface-300 dark:hover:bg-surface-700"
+                    >
+                      Keyinroq
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="mt-0.5 text-xs text-surface-500">
+                    Ikki qadamda bosh ekraningizga qo&apos;shiladi:
+                  </p>
+                  <ol className="mt-2 space-y-1.5 text-xs text-surface-700 dark:text-surface-200">
+                    <li className="flex items-center gap-2">
+                      <Share className="h-4 w-4 flex-none text-[#5782E0]" aria-hidden />
+                      <span>
+                        Pastdagi <strong>Ulashish</strong> tugmasini bosing
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <SquarePlus className="h-4 w-4 flex-none text-[#5782E0]" aria-hidden />
+                      <span>
+                        <strong>&quot;Bosh ekranga qo&apos;shish&quot;</strong> ni tanlang
+                      </span>
+                    </li>
+                  </ol>
+                  <button
+                    type="button"
+                    onClick={dismiss}
+                    className="mt-3 rounded-lg px-3 py-1.5 text-xs text-surface-600 hover:bg-surface-100 dark:text-surface-300 dark:hover:bg-surface-700"
+                  >
+                    Tushunarli
+                  </button>
+                </>
+              )}
             </div>
+
             <button
               type="button"
               onClick={dismiss}
