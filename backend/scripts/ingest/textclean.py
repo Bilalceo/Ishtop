@@ -22,12 +22,20 @@ BOILER = [
 BOILER_RE = re.compile(r"^\s*(?:" + "|".join(BOILER) + r")$", re.I)
 INLINE_SRC = re.compile(r"(?<![\w.])@(" + "|".join(SOURCE_HANDLES) + r")\b", re.I)
 
+# An Uzbek post sometimes glosses a label in Russian — "Ish haqi: (Зарплата)".
+# The post reads as Uzbek, so it skips translation, and the gloss lands on the
+# site as the only Cyrillic on an otherwise Uzbek listing. A bracket whose
+# whole content is Cyrillic carries nothing the Uzbek label has not said.
+CYR_PARENS = re.compile(r"\s*\(\s*[А-Яа-яЁё][А-Яа-яЁё\s.,/-]*\)")
+
+
 def clean_text(t):
     if not t: return t
     out = []
     for line in t.split("\n"):
         if BOILER_RE.match(line.strip()): continue
         line = INLINE_SRC.sub("", line).rstrip()
+        line = CYR_PARENS.sub("", line).rstrip()
         out.append(line)
     s = "\n".join(out)
     s = re.sub(r"\n{3,}", "\n\n", s).strip()

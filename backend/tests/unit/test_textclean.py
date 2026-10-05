@@ -40,3 +40,16 @@ def test_transliteration_follows_uzbek_rules():
     assert tc.translit("Меҳмонхона йиғиштирувчиси") == "Mehmonxona yig'ishtiruvchisi"
     assert tc.translit("Ўзбекистон") == "O'zbekiston"
     assert tc.translit("ТОШКЕНТ") == "TOSHKENT"
+
+
+def test_a_russian_gloss_in_brackets_is_dropped():
+    """An Uzbek post that glosses a label in Russian reads as Uzbek, so it
+    skips translation and the gloss reaches the site as the only Cyrillic on
+    the listing. It carries nothing the Uzbek label has not already said."""
+    from textclean import clean_text
+
+    assert clean_text("Ish haqi: (Зарплата)") == "Ish haqi:"
+    assert clean_text("Kompaniya: (Компания) IshTop") == "Kompaniya: IshTop"
+    # a bracket that is not purely Cyrillic is content, and stays
+    assert clean_text("Dasturchi (Python)") == "Dasturchi (Python)"
+    assert clean_text("Maosh: 5 mln") == "Maosh: 5 mln"
