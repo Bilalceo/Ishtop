@@ -104,6 +104,21 @@ const nextConfig = {
           { key: "Content-Security-Policy", value: csp },
         ],
       },
+      {
+        // The service worker shipped with cache-control: max-age=14400, so an
+        // update to it reached existing installs up to four hours late. The
+        // SW is the thing that decides what everything else caches, so it is
+        // the one file that must never be served stale.
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+      {
+        source: "/manifest.json",
+        headers: [{ key: "Cache-Control", value: "public, max-age=0, must-revalidate" }],
+      },
     ];
   },
 
