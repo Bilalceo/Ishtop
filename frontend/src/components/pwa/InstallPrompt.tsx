@@ -119,7 +119,11 @@ export default function InstallPrompt() {
           /* Above the chat button (z-60), below full-screen overlays (z-100).
              It used to sit at the bottom at the same height as that button,
              which covered its right edge. */
-          className="fixed left-1/2 z-[80] w-[min(460px,calc(100vw-20px))] -translate-x-1/2 rounded-2xl border border-surface-200 bg-white p-4 shadow-[0_16px_50px_-12px_rgba(23,27,39,0.28)] dark:border-surface-700 dark:bg-surface-800"
+          /* Centred with left/right + mx-auto, not left-1/2 + -translate-x-1/2:
+             framer-motion writes `transform` inline for the slide, which wipes
+             out the Tailwind translate and left the card hanging off the right
+             edge of a phone screen with its text cut off. */
+          className="fixed inset-x-2.5 z-[80] mx-auto max-w-[460px] rounded-2xl border border-surface-200 bg-white p-4 shadow-[0_16px_50px_-12px_rgba(23,27,39,0.28)] dark:border-surface-700 dark:bg-surface-800"
           style={{ top: `calc(env(safe-area-inset-top, 0px) + ${top}px)` }}
         >
           <div className="flex items-start gap-3">
