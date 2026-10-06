@@ -10,7 +10,7 @@ from fastapi import APIRouter
 from app.api.v1.routes import (
     auth, users, resumes, jobs, applications, 
     admin, payments, landing,
-    profile, notifications, saved_searches, surveys, admin_metrics
+    profile, notifications, saved_searches, surveys, admin_metrics, pwa
 )
 from app.routers import ai  # Import AI router
 from app.routers import telegram_bot  # Telegram link/unlink endpoints
@@ -127,4 +127,11 @@ api_router.include_router(
     admin_metrics.router,
     prefix="/admin/metrics",
     tags=["Admin"]
+)
+
+# PWA install telemetry (anonymous event, admin summary)
+api_router.include_router(
+    pwa.router,
+    prefix="/pwa",
+    tags=["PWA"]
 )
